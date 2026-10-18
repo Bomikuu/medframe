@@ -71,6 +71,7 @@ type EncounterType {
   revisionId: UUID
   editable: Boolean!
   revisions: [RevisionType!]!
+  template: JSON
   patientHistoryRevisionId: UUID
 }
 
@@ -108,7 +109,7 @@ type Mutation {
   saveToothFinding(organizationId: UUID!, encounterId: UUID!, data: JSON!, expectedVersion: Int!): EncounterType!
   addProcedure(organizationId: UUID!, encounterId: UUID!, data: JSON!, expectedVersion: Int!): EncounterType!
   createTreatmentPlan(organizationId: UUID!, patientId: UUID!, data: JSON!, requestId: UUID!): JSON!
-  updateTreatmentItem(organizationId: UUID!, planId: UUID!, itemId: UUID!, status: String!, expectedVersion: Int!, completedRevisionId: UUID = null): JSON!
+  updateTreatmentItem(organizationId: UUID!, planId: UUID!, itemId: UUID!, status: String!, expectedVersion: Int!, completedRevisionId: UUID = null, requestId: UUID = null): JSON!
   beginDocumentUpload(organizationId: UUID!, purpose: String!, metadata: JSON!, patientId: UUID = null, encounterId: UUID = null): DocumentType!
   authorizeDocumentDownload(organizationId: UUID!, versionId: UUID!): String!
   retryDocumentScan(organizationId: UUID!, versionId: UUID!): DocumentType!
@@ -121,9 +122,20 @@ type Mutation {
   amendEncounter(organizationId: UUID!, encounterId: UUID!, reason: String!, expectedFinalizedVersion: Int!): EncounterType!
   addClinicalNote(organizationId: UUID!, encounterId: UUID!, section: String!, text: String!, expectedVersion: Int!): EncounterType!
   updateDentalChart(organizationId: UUID!, encounterId: UUID!, findings: JSON!, expectedVersion: Int!): EncounterType!
-  addTreatmentItem(organizationId: UUID!, planId: UUID!, data: JSON!, expectedVersion: Int!): JSON!
-  updateTreatmentStatus(organizationId: UUID!, planId: UUID!, itemId: UUID!, status: String!, expectedVersion: Int!, completedRevisionId: UUID = null): JSON!
+  addTreatmentItem(organizationId: UUID!, planId: UUID!, data: JSON!, expectedVersion: Int!, requestId: UUID = null): JSON!
+  updateTreatmentStatus(organizationId: UUID!, planId: UUID!, itemId: UUID!, status: String!, expectedVersion: Int!, completedRevisionId: UUID = null, requestId: UUID = null): JSON!
   uploadMedicalDocument(organizationId: UUID!, patientId: UUID!, metadata: JSON!, encounterId: UUID = null): DocumentType!
+  reorderTreatmentPlan(organizationId: UUID!, planId: UUID!, itemIds: [UUID!]!, expectedVersion: Int!, requestId: UUID!): JSON!
+  editTreatmentItem(organizationId: UUID!, planId: UUID!, itemId: UUID!, data: JSON!, expectedVersion: Int!, requestId: UUID!): JSON!
+  saveFollowUp(organizationId: UUID!, patientId: UUID!, data: JSON!, expectedVersion: Int!, requestId: UUID!): JSON!
+  saveConsultationTemplate(organizationId: UUID!, data: JSON!, expectedVersion: Int!, requestId: UUID!): JSON!
+  applyConsultationTemplate(organizationId: UUID!, encounterId: UUID!, templateRevisionId: UUID!, expectedVersion: Int!, requestId: UUID!): EncounterType!
+  issuePortalInvitation(organizationId: UUID!, patientId: UUID!, data: JSON!, requestId: UUID!): JSON!
+  revokePortalAccess(organizationId: UUID!, identifier: UUID!, kind: String!, reason: String!, expectedVersion: Int! = 1): Boolean!
+  previewPortalRelease(organizationId: UUID!, patientId: UUID!, selection: JSON!): JSON!
+  publishPortalRelease(organizationId: UUID!, patientId: UUID!, selection: JSON!, previewDigest: String!, requestId: UUID!): JSON!
+  withdrawPortalRelease(organizationId: UUID!, releaseId: UUID!, expectedVersion: Int!, reason: String!): JSON!
+  reviewPatientReport(organizationId: UUID!, reportId: UUID!, state: String!, expectedVersion: Int!, historyRevisionId: UUID = null): JSON!
 }
 
 type OrganizationType {
@@ -224,6 +236,21 @@ type Query {
   patient(organizationId: UUID!, patientId: UUID!): PatientDemographics!
   patientHistory(organizationId: UUID!, patientId: UUID!, first: Int! = 20, after: String = null): PatientTimelinePage!
   medicalDocuments(organizationId: UUID!, patientId: UUID!, first: Int! = 20): [DocumentType!]!
+  chartRevisions(organizationId: UUID!, patientId: UUID!, after: String = null): JSON!
+  dentalComparison(organizationId: UUID!, patientId: UUID!, leftRevisionId: UUID!, rightRevisionId: UUID = null): JSON!
+  toothEvidence(organizationId: UUID!, patientId: UUID!, tooth: String!, after: String = null): JSON!
+  recordAuthors(organizationId: UUID!, patientId: UUID = null): JSON!
+  consultationRecords(organizationId: UUID!, patientId: UUID = null, filters: JSON = null, after: String = null): JSON!
+  documentRecords(organizationId: UUID!, patientId: UUID!, filters: JSON = null, after: String = null): JSON!
+  historyRecords(organizationId: UUID!, patientId: UUID!, filters: JSON = null, after: String = null): JSON!
+  followUps(organizationId: UUID!, patientId: UUID!, after: String = null): JSON!
+  planRevisions(organizationId: UUID!, patientId: UUID!, planId: UUID!, after: String = null): JSON!
+  consultationTemplates(organizationId: UUID!, includeArchived: Boolean! = false, after: String = null): JSON!
+  patientPortalAccess(organizationId: UUID!, patientId: UUID!, after: String = null): JSON!
+  releaseSources(organizationId: UUID!, patientId: UUID!): JSON!
+  releaseSourcePage(organizationId: UUID!, patientId: UUID!, kind: String!, after: String = null): JSON!
+  patientReleases(organizationId: UUID!, patientId: UUID!, after: String = null): JSON!
+  patientReports(organizationId: UUID!, patientId: UUID!, after: String = null): JSON!
   currentUser: UserType!
   myOrganizations: [OrganizationType!]!
   clinicWorkspace(organizationId: UUID!): WorkspaceType!

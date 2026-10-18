@@ -119,7 +119,7 @@ test("walk-in SOAP, dental findings, private documents, finalization, amendment,
   await expect(page.getByLabel("Finding or condition")).toHaveValue("Synthetic recorded finding");
   const modelLoaded = page.waitForResponse(
     (response) =>
-      response.url().endsWith("/models/dental-schematic-v1.glb") && response.status() === 200,
+      response.url().endsWith("/models/dental-schematic-v2.glb") && response.status() === 200,
     { timeout: 30000 },
   );
   await page.getByRole("button", { name: "Show 3D view" }).click();
@@ -140,7 +140,7 @@ test("walk-in SOAP, dental findings, private documents, finalization, amendment,
   }
   const bounds = await canvas.boundingBox();
   expect(bounds).not.toBeNull();
-  const model = readFileSync(resolve(root, "apps/web/public/models/dental-schematic-v1.glb"));
+  const model = readFileSync(resolve(root, "apps/web/public/models/dental-schematic-v2.glb"));
   const gltf = JSON.parse(model.subarray(20, 20 + model.readUInt32LE(12)).toString()) as {
     nodes: { name: string; translation?: number[]; scale?: number[]; rotation?: number[] }[];
   };

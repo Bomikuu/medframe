@@ -1,0 +1,26 @@
+schema {
+  query: PortalQuery
+  mutation: PortalMutation
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+type PortalMutation {
+  submitPatientReport(linkId: UUID!, category: String!, text: String!, requestId: UUID!): JSON!
+  authorizePortalDownload(linkId: UUID!, releaseId: UUID!, versionId: UUID!): String!
+  savePortalPreferences(linkId: UUID!, mode: String!, density: String!, expectedVersion: Int!): JSON!
+}
+
+type PortalQuery {
+  portalSession: JSON!
+  portalLinks: JSON!
+  portalWorkspace(linkId: UUID!): JSON!
+  portalRecords(linkId: UUID!, after: String = null): JSON!
+  portalRecord(linkId: UUID!, releaseId: UUID!): JSON!
+  portalReports(linkId: UUID!, after: String = null): JSON!
+}
+
+scalar UUID

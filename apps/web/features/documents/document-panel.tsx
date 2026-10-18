@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   PatientDocumentsDocument,
+  DocumentRecordsDocument,
   DocumentDownloadDocument,
   RetryScanDocument,
 } from "@/lib/graphql/generated";
@@ -13,6 +14,15 @@ import { useRequestScope } from "@/features/patients/use-request-scope";
 import { LoadState, failureText } from "@/features/patients/feedback";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { UploadControl } from "./upload-control";
+import { useRecordAuthors } from "@/features/records/use-record-authors";
+import { z } from "zod";
+import { recordPage } from "@/features/records/schema";
+import {
+  RecordFilterForm,
+  PageControls,
+  type RecordFilters,
+} from "@/features/records/record-filters";
+import { DocumentPreview } from "./document-preview";
 import { SecureImage } from "./secure-image";
 
 export function DocumentPanel({
@@ -39,13 +49,56 @@ export function DocumentPanel({
     label: string;
     encounterId?: string;
   } | null>(null);
-  const remote = useRemote(PatientDocumentsDocument, {
-    organizationId,
-    patientId,
-    purpose,
-    before,
-    versionIds: attachedIds ?? [],
-  });
+  const archive = purpose === "clinical" && !!patientId && !encounterId;
+  const authors = useRecordAuthors(patientId, archive);
+  const [filters, setFilters] = useState<RecordFilters>({});
+  const [after, setAfter] = useState<string>();
+  const filtered = useRemote(
+    DocumentRecordsDocument,
+    { organizationId, patientId: patientId ?? "", filters, after },
+    { enabled: archive },
+  );
+  const parsed = recordPage(
+    z.object({
+      id: z.string(),
+      document_id: z.string(),
+      label: z.string(),
+      version: z.number(),
+      content_type: z.string(),
+      size: z.number(),
+      scan_state: z.string(),
+      encounter_id: z.string().nullable(),
+    }),
+  ).safeParse(filtered.data?.documentRecords);
+  const original = useRemote(
+    PatientDocumentsDocument,
+    {
+      organizationId,
+      patientId,
+      purpose,
+      before,
+      versionIds: attachedIds ?? [],
+    },
+    { enabled: !archive },
+  );
+  const remote = archive
+    ? {
+        data: parsed.success
+          ? {
+              documentVersions: [],
+              documents: parsed.data.items.map((item) => ({
+                ...item,
+                documentId: item.document_id,
+                encounterId: item.encounter_id,
+                contentType: item.content_type,
+                scanState: item.scan_state,
+              })),
+            }
+          : null,
+        error: filtered.error,
+        reload: filtered.reload,
+      }
+    : original;
   const files = remote.data
     ? Array.from(
         new Map(
@@ -143,6 +196,17 @@ export function DocumentPanel({
           </Button>
         </div>
       )}
+      {archive && (
+        <RecordFilterForm
+          authors={authors}
+          statuses={["uploading", "pending", "unavailable", "clean", "rejected"]}
+          types={["image", "pdf"]}
+          onApply={(values) => {
+            setFilters(values);
+            setAfter(undefined);
+          }}
+        />
+      )}
       {!remote.data ? (
         <LoadState error={remote.error} retry={remote.reload} />
       ) : (
@@ -194,14 +258,27 @@ export function DocumentPanel({
                           Upload new version
                         </Button>
                       )}
-                    {file.scanState === "clean" && (
+                    {file.scanState === "clean" && purpose === "clinical" && (
+                      <DocumentPreview
+                        label={file.label}
+                        contentType={file.contentType}
+                        authorize={async () => {
+                          const result = await getGraphqlClient().request(
+                            DocumentDownloadDocument,
+                            { organizationId, versionId: file.id },
+                          );
+                          return `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}`;
+                        }}
+                      />
+                    )}
+                    {file.scanState === "clean" && purpose !== "clinical" && (
                       <Button
                         type="button"
                         variant="outline"
                         disabled={busy === file.id}
                         onClick={() => void act(file.id, "download")}
                       >
-                        {purpose === "clinical" ? "Download" : "Preview image"}
+                        Preview image
                       </Button>
                     )}
                     {!readOnly && file.scanState === "unavailable" && allowUpload && (
@@ -241,6 +318,9 @@ export function DocumentPanel({
         <p role="alert" className="text-sm text-destructive">
           {failureText(failure)}
         </p>
+      )}
+      {archive && parsed.success && (
+        <PageControls after={after} next={parsed.data.end_cursor} onChange={setAfter} />
       )}
       {allowUpload && (
         <UploadControl

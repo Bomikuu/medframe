@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export function failureCode(error: unknown): string {
   if (error instanceof ClientError) {
+    if (error.response.status === 403) return "FORBIDDEN";
     if (error.response.status === 401) return "UNAUTHENTICATED";
     return String(error.response.errors?.[0]?.extensions?.code ?? "UNAVAILABLE");
   }

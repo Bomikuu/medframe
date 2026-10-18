@@ -1,0 +1,270 @@
+query ConsultationRecords(
+  $organizationId: UUID!
+  $patientId: UUID
+  $filters: JSON
+  $after: String
+) {
+  consultationRecords(
+    organizationId: $organizationId
+    patientId: $patientId
+    filters: $filters
+    after: $after
+  )
+}
+query DocumentRecords($organizationId: UUID!, $patientId: UUID!, $filters: JSON, $after: String) {
+  documentRecords(
+    organizationId: $organizationId
+    patientId: $patientId
+    filters: $filters
+    after: $after
+  )
+}
+query HistoryRecords($organizationId: UUID!, $patientId: UUID!, $filters: JSON, $after: String) {
+  historyRecords(
+    organizationId: $organizationId
+    patientId: $patientId
+    filters: $filters
+    after: $after
+  )
+}
+query ChartRevisions($organizationId: UUID!, $patientId: UUID!, $after: String) {
+  chartRevisions(organizationId: $organizationId, patientId: $patientId, after: $after)
+}
+query DentalComparison(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $leftRevisionId: UUID!
+  $rightRevisionId: UUID
+) {
+  dentalComparison(
+    organizationId: $organizationId
+    patientId: $patientId
+    leftRevisionId: $leftRevisionId
+    rightRevisionId: $rightRevisionId
+  )
+}
+query ToothEvidence($organizationId: UUID!, $patientId: UUID!, $tooth: String!, $after: String) {
+  toothEvidence(
+    organizationId: $organizationId
+    patientId: $patientId
+    tooth: $tooth
+    after: $after
+  )
+}
+query FollowUps($organizationId: UUID!, $patientId: UUID!, $after: String) {
+  followUps(organizationId: $organizationId, patientId: $patientId, after: $after)
+}
+query PlanRevisions($organizationId: UUID!, $patientId: UUID!, $planId: UUID!, $after: String) {
+  planRevisions(
+    organizationId: $organizationId
+    patientId: $patientId
+    planId: $planId
+    after: $after
+  )
+}
+mutation SaveFollowUp(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $data: JSON!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  saveFollowUp(
+    organizationId: $organizationId
+    patientId: $patientId
+    data: $data
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  )
+}
+mutation EditTreatmentItem(
+  $organizationId: UUID!
+  $planId: UUID!
+  $itemId: UUID!
+  $data: JSON!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  editTreatmentItem(
+    organizationId: $organizationId
+    planId: $planId
+    itemId: $itemId
+    data: $data
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  )
+}
+mutation ReorderTreatmentPlan(
+  $organizationId: UUID!
+  $planId: UUID!
+  $itemIds: [UUID!]!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  reorderTreatmentPlan(
+    organizationId: $organizationId
+    planId: $planId
+    itemIds: $itemIds
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  )
+}
+query ConsultationTemplates(
+  $organizationId: UUID!
+  $includeArchived: Boolean! = false
+  $after: String
+) {
+  consultationTemplates(
+    organizationId: $organizationId
+    includeArchived: $includeArchived
+    after: $after
+  )
+}
+mutation SaveConsultationTemplate(
+  $organizationId: UUID!
+  $data: JSON!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  saveConsultationTemplate(
+    organizationId: $organizationId
+    data: $data
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  )
+}
+mutation ApplyConsultationTemplate(
+  $organizationId: UUID!
+  $encounterId: UUID!
+  $templateRevisionId: UUID!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  applyConsultationTemplate(
+    organizationId: $organizationId
+    encounterId: $encounterId
+    templateRevisionId: $templateRevisionId
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  ) {
+    ...EncounterFields
+  }
+}
+query PatientPortalAccess($organizationId: UUID!, $patientId: UUID!, $after: String) {
+  patientPortalAccess(organizationId: $organizationId, patientId: $patientId, after: $after)
+}
+mutation IssuePortalInvitation(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $data: JSON!
+  $requestId: UUID!
+) {
+  issuePortalInvitation(
+    organizationId: $organizationId
+    patientId: $patientId
+    data: $data
+    requestId: $requestId
+  )
+}
+mutation RevokePortalAccess(
+  $organizationId: UUID!
+  $identifier: UUID!
+  $kind: String!
+  $reason: String!
+  $expectedVersion: Int!
+) {
+  revokePortalAccess(
+    organizationId: $organizationId
+    identifier: $identifier
+    kind: $kind
+    reason: $reason
+    expectedVersion: $expectedVersion
+  )
+}
+query ReleaseSources($organizationId: UUID!, $patientId: UUID!) {
+  releaseSources(organizationId: $organizationId, patientId: $patientId)
+}
+query PatientReleases($organizationId: UUID!, $patientId: UUID!, $after: String) {
+  patientReleases(organizationId: $organizationId, patientId: $patientId, after: $after)
+}
+query PatientReports($organizationId: UUID!, $patientId: UUID!, $after: String) {
+  patientReports(organizationId: $organizationId, patientId: $patientId, after: $after)
+}
+mutation PreviewPortalRelease($organizationId: UUID!, $patientId: UUID!, $selection: JSON!) {
+  previewPortalRelease(
+    organizationId: $organizationId
+    patientId: $patientId
+    selection: $selection
+  )
+}
+mutation PublishPortalRelease(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $selection: JSON!
+  $previewDigest: String!
+  $requestId: UUID!
+) {
+  publishPortalRelease(
+    organizationId: $organizationId
+    patientId: $patientId
+    selection: $selection
+    previewDigest: $previewDigest
+    requestId: $requestId
+  )
+}
+mutation WithdrawPortalRelease(
+  $organizationId: UUID!
+  $releaseId: UUID!
+  $expectedVersion: Int!
+  $reason: String!
+) {
+  withdrawPortalRelease(
+    organizationId: $organizationId
+    releaseId: $releaseId
+    expectedVersion: $expectedVersion
+    reason: $reason
+  )
+}
+mutation ReviewPatientReport(
+  $organizationId: UUID!
+  $reportId: UUID!
+  $state: String!
+  $expectedVersion: Int!
+  $historyRevisionId: UUID
+) {
+  reviewPatientReport(
+    organizationId: $organizationId
+    reportId: $reportId
+    state: $state
+    expectedVersion: $expectedVersion
+    historyRevisionId: $historyRevisionId
+  )
+}
+
+mutation AddPlanItem(
+  $organizationId: UUID!
+  $planId: UUID!
+  $data: JSON!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  addTreatmentItem(
+    organizationId: $organizationId
+    planId: $planId
+    data: $data
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  )
+}
+query ReleaseSourcePage($organizationId: UUID!, $patientId: UUID!, $kind: String!, $after: String) {
+  releaseSourcePage(
+    organizationId: $organizationId
+    patientId: $patientId
+    kind: $kind
+    after: $after
+  )
+}
+
+query RecordAuthors($organizationId: UUID!, $patientId: UUID) {
+  recordAuthors(organizationId: $organizationId, patientId: $patientId)
+}

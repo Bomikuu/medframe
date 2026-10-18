@@ -10,6 +10,9 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next-rehearsal/**",
+    ".next-batch2-rehearsal/**",
+    ".next-batch1-checkpoint/**",
+    "public/vendor/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

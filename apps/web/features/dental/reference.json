@@ -1,0 +1,369 @@
+{
+  "version": 1,
+  "teeth": [
+    {
+      "id": "11",
+      "label": "upper right central incisor",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "12",
+      "label": "upper right lateral incisor",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "13",
+      "label": "upper right canine",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "14",
+      "label": "upper right first premolar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "15",
+      "label": "upper right second premolar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "16",
+      "label": "upper right first molar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "17",
+      "label": "upper right second molar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "18",
+      "label": "upper right third molar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "21",
+      "label": "upper left central incisor",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "22",
+      "label": "upper left lateral incisor",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "23",
+      "label": "upper left canine",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "24",
+      "label": "upper left first premolar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "25",
+      "label": "upper left second premolar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "26",
+      "label": "upper left first molar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "27",
+      "label": "upper left second molar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "28",
+      "label": "upper left third molar",
+      "dentition": "permanent",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "31",
+      "label": "lower left central incisor",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "32",
+      "label": "lower left lateral incisor",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "33",
+      "label": "lower left canine",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "34",
+      "label": "lower left first premolar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "35",
+      "label": "lower left second premolar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "36",
+      "label": "lower left first molar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "37",
+      "label": "lower left second molar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "38",
+      "label": "lower left third molar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "41",
+      "label": "lower right central incisor",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "42",
+      "label": "lower right lateral incisor",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "43",
+      "label": "lower right canine",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "44",
+      "label": "lower right first premolar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "45",
+      "label": "lower right second premolar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "46",
+      "label": "lower right first molar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "47",
+      "label": "lower right second molar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "48",
+      "label": "lower right third molar",
+      "dentition": "permanent",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "51",
+      "label": "upper right central incisor",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "52",
+      "label": "upper right lateral incisor",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "53",
+      "label": "upper right canine",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "54",
+      "label": "upper right first molar",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "55",
+      "label": "upper right second molar",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "61",
+      "label": "upper left central incisor",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "62",
+      "label": "upper left lateral incisor",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "63",
+      "label": "upper left canine",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "incisal"]
+    },
+    {
+      "id": "64",
+      "label": "upper left first molar",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "65",
+      "label": "upper left second molar",
+      "dentition": "primary",
+      "jaw": "upper",
+      "surfaces": ["mesial", "distal", "buccal", "palatal", "occlusal"]
+    },
+    {
+      "id": "71",
+      "label": "lower left central incisor",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "72",
+      "label": "lower left lateral incisor",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "73",
+      "label": "lower left canine",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "74",
+      "label": "lower left first molar",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "75",
+      "label": "lower left second molar",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "81",
+      "label": "lower right central incisor",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "82",
+      "label": "lower right lateral incisor",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "83",
+      "label": "lower right canine",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "incisal"]
+    },
+    {
+      "id": "84",
+      "label": "lower right first molar",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    },
+    {
+      "id": "85",
+      "label": "lower right second molar",
+      "dentition": "primary",
+      "jaw": "lower",
+      "surfaces": ["mesial", "distal", "buccal", "lingual", "occlusal"]
+    }
+  ]
+}

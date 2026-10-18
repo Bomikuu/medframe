@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { FilteredConsultations } from "./filtered-consultations";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { useState } from "react";
@@ -13,17 +13,10 @@ import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useUnsavedChanges } from "@/features/workspace/safety-provider";
 import { usePatientDraft } from "@/features/patients/use-patient-draft";
 import { useRequestScope } from "@/features/patients/use-request-scope";
-import {
-  PageHeading,
-  LoadState,
-  RemoteNotice,
-  failureText,
-  timeLabel,
-} from "@/features/patients/feedback";
+import { PageHeading, LoadState, RemoteNotice, failureText } from "@/features/patients/feedback";
 import { useRemote } from "@/features/patients/use-remote";
 import { getGraphqlClient } from "@/lib/graphql/client";
 import {
-  ConsultationsDocument,
   ConsultationDocument,
   ConsultationSetupDocument,
   CreateConsultationDocument,
@@ -32,9 +25,7 @@ import {
 import { EncounterEditor } from "./encounter-editor";
 
 export function ConsultationList({ patientId }: { patientId?: string }) {
-  const { organizationId, href, can } = useWorkspace();
-  const [before, setBefore] = useState<string | undefined>();
-  const remote = useRemote(ConsultationsDocument, { organizationId, patientId, before });
+  const { href, can } = useWorkspace();
   return (
     <section>
       <PageHeading
@@ -53,57 +44,7 @@ export function ConsultationList({ patientId }: { patientId?: string }) {
           </ButtonLink>
         )}
       </PageHeading>
-      {!remote.data ? (
-        <LoadState error={remote.error} retry={remote.reload} />
-      ) : (
-        <>
-          <RemoteNotice error={remote.error} retry={remote.reload} />
-          {remote.data.encounters.length ? (
-            <ul className="grid gap-1">
-              {remote.data.encounters.map((encounter) => (
-                <li key={encounter.id}>
-                  <Link
-                    href={href(`/clinic/consultations/${encounter.id}`)}
-                    className="flex flex-wrap justify-between gap-3 border-b border-border py-5 hover:text-primary"
-                  >
-                    <div>
-                      <p className="font-medium">{encounter.patientName}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">{encounter.reason}</p>
-                    </div>
-                    <div className="text-sm">
-                      <p>
-                        {encounter.isAmendment
-                          ? "Amendment draft"
-                          : encounter.status.replaceAll("_", " ")}
-                      </p>
-                      <p className="mt-1 text-muted-foreground">{timeLabel(encounter.updatedAt)}</p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
-              No consultations found. Choose a patient to start documenting care.
-            </p>
-          )}
-          <div className="mt-5 flex gap-3">
-            {before && (
-              <Button variant="outline" onClick={() => setBefore(undefined)}>
-                Newest visits
-              </Button>
-            )}
-            {remote.data.encounters.length === 20 && (
-              <Button
-                variant="outline"
-                onClick={() => setBefore(remote.data?.encounters.at(-1)?.id)}
-              >
-                Older visits
-              </Button>
-            )}
-          </div>
-        </>
-      )}
+      <FilteredConsultations patientId={patientId} />
     </section>
   );
 }

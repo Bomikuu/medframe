@@ -6,6 +6,7 @@ Rounded patches demonstrate selection, not clinically validated anatomy.
 import argparse
 import json
 import math
+import runpy
 import struct
 from pathlib import Path
 
@@ -230,3 +231,13 @@ target = (
 target.parent.mkdir(parents=True, exist_ok=True)
 target.write_bytes(payload)
 print("Generated schematic GLB: 52 explicit teeth and 260 named surface patches.")
+
+if version == 2:
+    root = Path(__file__).resolve().parents[1]
+    reference = runpy.run_path(
+        str(root / "services/api/medframe_apps/dental/reference.py")
+    )
+    (root / "apps/web/features/dental/reference.json").write_text(
+        json.dumps({"version": 1, "teeth": list(reference["TEETH"].values())}, indent=2)
+        + "\n"
+    )

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,7 +14,7 @@ import { newPasswordSchema } from "@/lib/auth/schemas";
 
 const emailSchema = z.object({ email: z.email("Enter a valid email address.") });
 
-export function RecoveryRequestForm() {
+export function RecoveryRequestForm({ portal = false }: { portal?: boolean }) {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const {
@@ -25,7 +25,10 @@ export function RecoveryRequestForm() {
   async function submit(values: z.infer<typeof emailSchema>) {
     setError("");
     try {
-      await requestWithCsrf("auth/recovery/request", values);
+      await requestWithCsrf(
+        portal ? "portal/auth/recovery/request" : "auth/recovery/request",
+        values,
+      );
       setSent(true);
     } catch (failure) {
       setError(errorMessage(failure));
@@ -45,7 +48,11 @@ export function RecoveryRequestForm() {
         </p>
       ) : (
         <form noValidate onSubmit={handleSubmit(submit)} className="grid gap-6">
-          <FormField id="email" label="Work email" error={errors.email?.message}>
+          <FormField
+            id="email"
+            label={portal ? "Account email" : "Work email"}
+            error={errors.email?.message}
+          >
             <Input
               id="email"
               type="email"
@@ -65,15 +72,19 @@ export function RecoveryRequestForm() {
           </Button>
         </form>
       )}
-      <Link href="/login" className="text-sm font-medium text-primary hover:underline">
+      <Link
+        href={portal ? "/portal/login" : "/login"}
+        className="text-sm font-medium text-primary hover:underline"
+      >
         Back to sign in
       </Link>
     </div>
   );
 }
 
-export function PasswordResetForm() {
+export function PasswordResetForm({ portal = false }: { portal?: boolean }) {
   const [token, setToken] = useState<string | null>(null);
+  const captured = useRef<string | null>(null);
   const [complete, setComplete] = useState(false);
   const [error, setError] = useState("");
   const {
@@ -82,16 +93,19 @@ export function PasswordResetForm() {
     formState: { errors, isSubmitting },
   } = useForm<z.infer<typeof newPasswordSchema>>({ resolver: zodResolver(newPasswordSchema) });
   useEffect(() => {
-    const params = new URLSearchParams(window.location.hash.slice(1));
+    if (captured.current === null)
+      captured.current = new URLSearchParams(window.location.hash.slice(1)).get("token") ?? "";
     // The URL fragment is an external browser value unavailable during server rendering.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setToken(params.get("token") ?? "");
+    setToken(captured.current);
     window.history.replaceState(null, "", window.location.pathname);
   }, []);
   async function submit(values: z.infer<typeof newPasswordSchema>) {
     setError("");
     try {
-      await requestWithCsrf("auth/recovery/reset", { ...values, token });
+      await requestWithCsrf(portal ? "portal/auth/recovery/reset" : "auth/recovery/reset", {
+        ...values,
+        token,
+      });
       setComplete(true);
       setToken("");
     } catch (failure) {
@@ -140,12 +154,15 @@ export function PasswordResetForm() {
       ) : (
         <p role="alert" className="text-sm leading-6 text-destructive">
           This reset link is missing or expired.{" "}
-          <Link href="/auth/recover" className="underline">
+          <Link href={portal ? "/portal/recover" : "/auth/recover"} className="underline">
             Request a new link.
           </Link>
         </p>
       )}
-      <Link href="/login" className="text-sm font-medium text-primary hover:underline">
+      <Link
+        href={portal ? "/portal/login" : "/login"}
+        className="text-sm font-medium text-primary hover:underline"
+      >
         Back to sign in
       </Link>
     </div>

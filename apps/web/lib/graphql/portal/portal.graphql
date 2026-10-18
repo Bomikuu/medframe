@@ -1,0 +1,40 @@
+query PortalSession {
+  portalSession
+  portalLinks
+}
+query PortalWorkspace($linkId: UUID!) {
+  portalWorkspace(linkId: $linkId)
+}
+query PortalRecords($linkId: UUID!, $after: String) {
+  portalRecords(linkId: $linkId, after: $after)
+}
+query PortalRecord($linkId: UUID!, $releaseId: UUID!) {
+  portalRecord(linkId: $linkId, releaseId: $releaseId)
+}
+query PortalReports($linkId: UUID!, $after: String) {
+  portalReports(linkId: $linkId, after: $after)
+}
+mutation SubmitPatientReport(
+  $linkId: UUID!
+  $category: String!
+  $text: String!
+  $requestId: UUID!
+) {
+  submitPatientReport(linkId: $linkId, category: $category, text: $text, requestId: $requestId)
+}
+mutation AuthorizePortalDownload($linkId: UUID!, $releaseId: UUID!, $versionId: UUID!) {
+  authorizePortalDownload(linkId: $linkId, releaseId: $releaseId, versionId: $versionId)
+}
+mutation SavePortalPreferences(
+  $linkId: UUID!
+  $mode: String!
+  $density: String!
+  $expectedVersion: Int!
+) {
+  savePortalPreferences(
+    linkId: $linkId
+    mode: $mode
+    density: $density
+    expectedVersion: $expectedVersion
+  )
+}

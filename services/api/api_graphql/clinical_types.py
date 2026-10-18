@@ -7,7 +7,6 @@ from strawberry.scalars import JSON
 
 @strawberry.type
 class ProviderType:
-    user_id: UUID
     id: UUID
     display_name: str
     specialty: str

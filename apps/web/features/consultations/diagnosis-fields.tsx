@@ -7,7 +7,13 @@ import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
 import type { EncounterForm } from "./schema";
 
-export function DiagnosisFields({ readOnly }: { readOnly: boolean }) {
+export function DiagnosisFields({
+  readOnly,
+  observationLabels = [],
+}: {
+  readOnly: boolean;
+  observationLabels?: string[];
+}) {
   const {
     control,
     register,
@@ -114,6 +120,21 @@ export function DiagnosisFields({ readOnly }: { readOnly: boolean }) {
             </Button>
           )}
         </div>
+        {!readOnly && observationLabels.length > 0 && (
+          <div className="mb-5 flex flex-wrap gap-2" aria-label="Optional observation labels">
+            {observationLabels.map((label, index) => (
+              <Button
+                key={`${label}:${index}`}
+                type="button"
+                variant="outline"
+                disabled={observations.fields.length >= 30}
+                onClick={() => observations.append({ label, value: "", source: "observed" })}
+              >
+                Add {label} observation
+              </Button>
+            ))}
+          </div>
+        )}
         {!observations.fields.length && (
           <p className="text-sm text-muted-foreground">No structured observations recorded.</p>
         )}

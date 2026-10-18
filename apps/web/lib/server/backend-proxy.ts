@@ -1,5 +1,14 @@
 const allowedPaths = new Set([
   "graphql",
+  "portal/graphql",
+  "portal/auth/csrf",
+  "portal/auth/login",
+  "portal/auth/invitations/prepare",
+  "portal/auth/mfa/enroll",
+  "portal/auth/mfa/verify",
+  "portal/auth/logout",
+  "portal/auth/recovery/request",
+  "portal/auth/recovery/reset",
   "auth/csrf",
   "auth/login",
   "auth/mfa/enroll",
@@ -14,8 +23,8 @@ export const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 
 export async function proxyBackend(request: Request, path: string): Promise<Response> {
   const upload = /^documents\/upload\/[0-9a-f-]{36}$/.test(path);
-  const download = path === "documents/download";
-  const expectedMethod = path === "auth/csrf" || download ? "GET" : "POST";
+  const download = ["documents/download", "portal/documents/download"].includes(path);
+  const expectedMethod = path.endsWith("auth/csrf") || download ? "GET" : "POST";
   if ((!allowedPaths.has(path) && !upload && !download) || request.method !== expectedMethod) {
     return Response.json({ message: "This endpoint is unavailable." }, { status: 404 });
   }

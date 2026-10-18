@@ -4,7 +4,7 @@ from uuid import UUID
 
 from django.db import transaction
 from django.db.models import Max
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, model_validator
 
 from config.errors import DomainError
 from medframe_apps.auditing.services import audit
@@ -35,6 +35,18 @@ class ReleaseSelection(Input):
     plan_revision_ids: list[UUID] = Field(default_factory=list, max_length=5)
     follow_up_revision_ids: list[UUID] = Field(default_factory=list, max_length=10)
     document_version_ids: list[UUID] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode="after")
+    def unique_sources(self):
+        groups = [
+            [value.revision_id for value in self.encounters],
+            self.plan_revision_ids,
+            self.follow_up_revision_ids,
+            self.document_version_ids,
+        ]
+        if any(len(set(group)) != len(group) for group in groups):
+            raise ValueError("Choose each source only once")
+        return self
 
 
 def release_writer(user, org, patient_id):

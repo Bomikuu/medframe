@@ -8,8 +8,11 @@ export class ApiError extends Error {
   }
 }
 
-export async function getCsrfToken(): Promise<string> {
-  const response = await fetch("/api/backend/auth/csrf", { cache: "no-store" });
+export async function getCsrfToken(portal = false): Promise<string> {
+  const response = await fetch(
+    portal ? "/api/backend/portal/auth/csrf" : "/api/backend/auth/csrf",
+    { cache: "no-store" },
+  );
   if (!response.ok) {
     throw new ApiError("Could not connect securely. Try again.", "UNAVAILABLE", response.status);
   }
@@ -19,7 +22,7 @@ export async function getCsrfToken(): Promise<string> {
 
 export async function requestWithCsrf<T>(path: string, body: unknown): Promise<T> {
   try {
-    const csrfToken = await getCsrfToken();
+    const csrfToken = await getCsrfToken(path.startsWith("portal/"));
     const response = await fetch(`/api/backend/${path}`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken },

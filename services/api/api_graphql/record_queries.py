@@ -12,6 +12,14 @@ from medframe_apps.patients.queries import list_patient_events
 @strawberry.type
 class RecordQuery:
     @strawberry.field
+    def record_authors(
+        self, info: Info, organization_id: UUID, patient_id: UUID | None = None
+    ) -> JSON:
+        from medframe_apps.record_authors import record_authors
+
+        return record_authors(info.context.user, organization_id, patient_id)
+
+    @strawberry.field
     def consultation_records(
         self,
         info: Info,

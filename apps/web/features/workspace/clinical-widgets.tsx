@@ -10,6 +10,14 @@ import { LoadState, timeLabel } from "@/features/patients/feedback";
 import { ClinicalDashboardDocument } from "@/lib/graphql/generated";
 
 const schema = z.object({
+  follow_ups: z.array(
+    z.object({
+      id: z.string(),
+      patient_id: z.string(),
+      instructions: z.string(),
+      due_date: z.string().nullable(),
+    }),
+  ),
   patient_count: z.number(),
   draft_count: z.number(),
   pending_treatment_count: z.number(),
@@ -99,9 +107,26 @@ export function ClinicalWidgets({ recentPatients }: { recentPatients: ReactNode 
                 patient records.
               </p>
             )}
-            {widget.id === "follow_ups" && (
-              <p className="text-sm text-muted-foreground">No follow-up tasks recorded.</p>
-            )}
+            {widget.id === "follow_ups" &&
+              (data.follow_ups.length ? (
+                <ul className="grid gap-4">
+                  {data.follow_ups.map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        href={href(`/clinic/patients/${item.patient_id}`)}
+                        className="text-sm text-primary underline"
+                      >
+                        {item.instructions.slice(0, 120)}
+                      </Link>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {item.due_date ? `Review ${item.due_date}` : "No date set"}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No open follow-ups recorded.</p>
+              ))}
             {widget.id === "recent_documents" &&
               (data.recent_documents.length ? (
                 <ul className="grid gap-4">

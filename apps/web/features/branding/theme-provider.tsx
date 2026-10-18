@@ -68,6 +68,36 @@ function EffectiveTheme({ initial, children }: { initial: Appearance; children: 
   );
   const theme = previewTheme ?? appearance.organization.settings;
   const personal = previewPersonal ?? appearance.personal.settings;
+  useAppearanceTokens(theme, personal);
+  return (
+    <ThemeContext.Provider
+      value={{
+        appearance,
+        theme,
+        personal,
+        preview,
+        accept: (value) => {
+          setAppearance(appearanceSchema.parse(value));
+          setPreviewTheme(null);
+          setPreviewPersonal(null);
+        },
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const value = useContext(ThemeContext);
+  if (!value) throw new Error("ThemeProvider is required");
+  return value;
+}
+
+export function useAppearanceTokens(
+  theme: Omit<ThemeSettings, "logo_id">,
+  personal: Pick<PersonalSettings, "mode" | "density">,
+) {
   useLayoutEffect(() => {
     const root = document.documentElement;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
@@ -103,27 +133,4 @@ function EffectiveTheme({ initial, children }: { initial: Appearance; children: 
         delete root.dataset[key];
     };
   }, [theme, personal]);
-  return (
-    <ThemeContext.Provider
-      value={{
-        appearance,
-        theme,
-        personal,
-        preview,
-        accept: (value) => {
-          setAppearance(appearanceSchema.parse(value));
-          setPreviewTheme(null);
-          setPreviewPersonal(null);
-        },
-      }}
-    >
-      {children}
-    </ThemeContext.Provider>
-  );
-}
-
-export function useTheme() {
-  const value = useContext(ThemeContext);
-  if (!value) throw new Error("ThemeProvider is required");
-  return value;
 }

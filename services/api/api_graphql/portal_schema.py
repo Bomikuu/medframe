@@ -10,7 +10,7 @@ from strawberry.types import Info
 from config.errors import DomainError
 from medframe_apps.accounts.session_realms import require_session_realm
 from medframe_apps.branding.models import OrganizationBranding, UserPreferences
-from medframe_apps.branding.services import ThemeSettings
+from medframe_apps.branding.services import ThemeSettings, default_widgets
 from medframe_apps.common import advisory_lock, check_version
 from medframe_apps.portal.files import authorize_logo
 from medframe_apps.portal.models import PatientReport, PortalLink
@@ -130,6 +130,7 @@ class PortalMutation:
                 user=info.context.user,
                 organization_id=link.organization_id,
                 settings={"mode": mode, "density": density},
+                widgets=default_widgets(),
             )
         return {"mode": mode, "density": density, "version": preferences.version}
 

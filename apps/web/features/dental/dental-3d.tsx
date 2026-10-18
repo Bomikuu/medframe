@@ -57,7 +57,7 @@ function Teeth({
       onReady();
     }
   });
-  const { scene } = useGLTF("/models/dental-schematic-v1.glb");
+  const { scene } = useGLTF("/models/dental-schematic-v2.glb");
   const activeKey = findings
     .filter((finding) => finding.status === "active")
     .flatMap((finding) =>

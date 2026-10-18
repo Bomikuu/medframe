@@ -1,5 +1,6 @@
 "use client";
 
+import { HistoryRecords } from "@/features/records/history-records";
 import { ButtonLink } from "@/components/ui/button-link";
 
 import { useState } from "react";
@@ -39,7 +40,9 @@ export function PatientTimeline({ patientId }: { patientId: string }) {
           Back to patient
         </ButtonLink>
       </PageHeading>
-      {!data ? (
+      {can("patients.clinical.read") ? (
+        <HistoryRecords patientId={patientId} />
+      ) : !data ? (
         <LoadState error={error} retry={reload} />
       ) : (
         <section className="mb-10">

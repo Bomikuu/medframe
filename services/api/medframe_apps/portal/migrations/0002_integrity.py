@@ -81,8 +81,10 @@ IMMUTABLE = [
     "reportreview",
 ]
 for table in IMMUTABLE:
-    SQL += (f"CREATE TRIGGER immutable_record BEFORE UPDATE OR DELETE ON portal_{table} "
-            "FOR EACH ROW EXECUTE FUNCTION medframe_immutable();\n")
+    SQL += (
+        f"CREATE TRIGGER immutable_record BEFORE UPDATE OR DELETE ON portal_{table} "
+        "FOR EACH ROW EXECUTE FUNCTION medframe_immutable();\n"
+    )
 
 
 REVERSE = """

@@ -14,6 +14,10 @@ import { ClinicalHistorySection } from "./clinical-history-form";
 import { PatientAccess } from "./patient-access";
 import { ConsultationList } from "@/features/consultations/consultation-pages";
 import { TreatmentPlans } from "@/features/treatments/treatment-plans";
+import { ChartComparison } from "@/features/dental/chart-comparison";
+import { PatientPortalAccess } from "@/features/portal/access/patient-portal-access";
+import { StaffReleases } from "@/features/portal/staff-releases";
+import { ReportReview } from "@/features/portal/report-review";
 import { DocumentPanel } from "@/features/documents/document-panel";
 
 export function PatientOverview({
@@ -119,10 +123,14 @@ export function PatientOverview({
       {can("patients.clinical.read") && (
         <>
           <ConsultationList patientId={patientId} />
+          <ChartComparison patientId={patientId} />
           <TreatmentPlans patientId={patientId} />
+          <StaffReleases patientId={patientId} />
+          <ReportReview patientId={patientId} />
           <DocumentPanel patientId={patientId} />
         </>
       )}
+      {can("portal.manage") && <PatientPortalAccess patientId={patientId} />}
       {can("patients.access.manage") && <PatientAccess patientId={patientId} />}
     </div>
   );

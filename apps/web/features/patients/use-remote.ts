@@ -6,7 +6,13 @@ import type { Variables } from "graphql-request";
 import { failureCode } from "./feedback";
 import { getGraphqlClient } from "@/lib/graphql/client";
 
-export function useRemote<T, V extends Variables>(document: TypedDocumentNode<T, V>, variables: V) {
+export function useRemote<T, V extends Variables>(
+  document: TypedDocumentNode<T, V>,
+  variables: V,
+  options: { enabled?: boolean; client?: typeof getGraphqlClient } = {},
+) {
+  const enabled = options.enabled ?? true;
+  const client = options.client ?? getGraphqlClient;
   const serialized = JSON.stringify(variables);
   const [generation, setGeneration] = useState(0);
   const [state, setState] = useState<{
@@ -17,10 +23,11 @@ export function useRemote<T, V extends Variables>(document: TypedDocumentNode<T,
   }>({ key: "", generation: -1, data: null, error: null });
   const reload = useCallback(() => setGeneration((value) => value + 1), []);
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 20000);
-    getGraphqlClient()
+    client()
       .request<T>({ document, variables: JSON.parse(serialized) as V, signal: controller.signal })
       .then((data) => {
         if (active) setState({ key: serialized, generation, data, error: null });
@@ -44,7 +51,7 @@ export function useRemote<T, V extends Variables>(document: TypedDocumentNode<T,
       controller.abort();
       window.clearTimeout(timer);
     };
-  }, [document, serialized, generation]);
+  }, [document, serialized, generation, enabled, client]);
   useEffect(() => {
     window.addEventListener("focus", reload);
     return () => window.removeEventListener("focus", reload);

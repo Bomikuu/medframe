@@ -4,8 +4,6 @@ import strawberry
 from strawberry.scalars import JSON
 from strawberry.types import Info
 
-from medframe_apps.documents.models import DocumentVersion
-from medframe_apps.encounters.models import EncounterRevision
 from medframe_apps.patients.services import require_patient
 from medframe_apps.portal.invitations import issue_invitation, manage_patient, revoke_access
 from medframe_apps.portal.models import PatientReport, PortalInvitation, PortalLink, PortalRelease
@@ -13,7 +11,6 @@ from medframe_apps.portal.records import release_details
 from medframe_apps.portal.releases import preview_release, publish_release, withdraw_release
 from medframe_apps.portal.reports import report_details, review_report
 from medframe_apps.record_filters import page_records
-from medframe_apps.treatments.models import FollowUpRevision, TreatmentPlanRevision
 
 
 def invitation_details(item):
@@ -62,60 +59,29 @@ class PortalStaffQuery:
 
     @strawberry.field
     def release_sources(self, info: Info, organization_id: UUID, patient_id: UUID) -> JSON:
-        require_patient(info.context.user, organization_id, patient_id, "patients.clinical.write")
-        return {
-            "encounters": [
-                {
-                    "id": str(item.id),
-                    "version": item.version,
-                    "created_at": item.created_at.isoformat(),
-                    "label": item.content.get("context", {}).get(
-                        "reason", "Finalized consultation"
-                    ),
-                }
-                for item in EncounterRevision.objects.filter(
-                    organization_id=organization_id, patient_id=patient_id
-                ).order_by("-created_at")[:50]
-            ],
-            "plans": [
-                {
-                    "id": str(item.id),
-                    "version": item.version,
-                    "created_at": item.created_at.isoformat(),
-                    "label": item.snapshot["title"],
-                }
-                for item in TreatmentPlanRevision.objects.filter(
-                    plan__organization_id=organization_id, plan__patient_id=patient_id
-                ).order_by("-created_at")[:50]
-            ],
-            "follow_ups": [
-                {
-                    "id": str(item.id),
-                    "version": item.version,
-                    "created_at": item.created_at.isoformat(),
-                    "label": item.snapshot["instructions"][:120],
-                }
-                for item in FollowUpRevision.objects.filter(
-                    follow_up__organization_id=organization_id, follow_up__patient_id=patient_id
-                ).order_by("-created_at")[:50]
-            ],
-            "documents": [
-                {
-                    "id": str(item.id),
-                    "version": item.version,
-                    "created_at": item.created_at.isoformat(),
-                    "label": item.document.label,
-                }
-                for item in DocumentVersion.objects.filter(
-                    document__organization_id=organization_id,
-                    document__patient_id=patient_id,
-                    document__purpose="clinical",
-                    scan_state="clean",
-                )
-                .select_related("document")
-                .order_by("-created_at")[:50]
-            ],
+        from medframe_apps.portal.sources import release_source_page
+
+        pages = {
+            kind: release_source_page(info.context.user, organization_id, patient_id, kind)
+            for kind in ["encounters", "plans", "follow_ups", "documents"]
         }
+        return {
+            **{kind: page["items"] for kind, page in pages.items()},
+            "source_cursors": {kind: page["end_cursor"] for kind, page in pages.items()},
+        }
+
+    @strawberry.field
+    def release_source_page(
+        self,
+        info: Info,
+        organization_id: UUID,
+        patient_id: UUID,
+        kind: str,
+        after: str | None = None,
+    ) -> JSON:
+        from medframe_apps.portal.sources import release_source_page
+
+        return release_source_page(info.context.user, organization_id, patient_id, kind, after)
 
     @strawberry.field
     def patient_releases(

@@ -106,10 +106,17 @@ export function ClinicShell({ children }: { children: ReactNode }) {
               show: can("patients.clinical.read"),
             },
             {
+              path: "/clinic/settings/templates",
+              label: "Templates",
+              Icon: Stethoscope,
+              active: pathname.startsWith("/clinic/settings/templates"),
+              show: can("encounters.write"),
+            },
+            {
               path: "/clinic/settings/appearance",
               label: "Appearance",
               Icon: Settings,
-              active: settings,
+              active: settings && !pathname.startsWith("/clinic/settings/templates"),
               show: true,
             },
           ]
@@ -160,12 +167,21 @@ export function ClinicShell({ children }: { children: ReactNode }) {
                 : consultations
                   ? "Consultations"
                   : settings
-                    ? "Appearance"
+                    ? pathname.startsWith("/clinic/settings/templates")
+                      ? "Templates"
+                      : "Appearance"
                     : "Overview"}
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Notifications />
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => void guard(() => router.push("/portal/login"))}
+            >
+              Patient sign in
+            </Button>
             {personal.avatar_id && (
               <SecureImage
                 id={personal.avatar_id}

@@ -9,7 +9,7 @@ from medframe_apps.dental.reference import TEETH, validate_tooth_surfaces
 class DentalAssetContractTests(TestCase):
     def test_schematic_mesh_ids_match_the_versioned_reference(self):
         target = (
-            Path(__file__).resolve().parents[3] / "apps/web/public/models/dental-schematic-v1.glb"
+            Path(__file__).resolve().parents[3] / "apps/web/public/models/dental-schematic-v2.glb"
         )
         payload = target.read_bytes()
         magic, version, total = struct.unpack_from("<III", payload)

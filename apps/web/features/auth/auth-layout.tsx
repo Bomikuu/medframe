@@ -42,7 +42,10 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         </div>
         <div className="my-auto w-full max-w-md self-center py-8">{children}</div>
         <p className="mt-10 text-center text-xs leading-5 text-muted-foreground">
-          Staff access only. Contact your clinic administrator for an account.
+          Staff access only. Contact your clinic administrator for an account.{" "}
+          <Link href="/portal/login" className="ml-1 text-primary underline">
+            Patient portal sign in
+          </Link>
         </p>
       </main>
     </div>

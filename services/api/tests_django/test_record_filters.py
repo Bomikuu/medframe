@@ -65,3 +65,57 @@ class RecordFilterTests(ClinicalFixture):
         self.patient.access_grants.update(active=False)
         with self.assertRaises(DomainError):
             self.records()
+
+    def test_equal_timestamp_paging_and_clinic_dst_day(self):
+        from datetime import UTC, datetime
+
+        from medframe_apps.encounters.models import Encounter
+        from medframe_apps.record_filters import RecordFilter, filter_dates, page_records
+
+        encounters = [self.first, self.second]
+        timestamp = datetime(2026, 3, 8, 7, tzinfo=UTC)
+        Encounter.objects.filter(id__in=[item.id for item in encounters]).update(
+            created_at=timestamp
+        )
+        query = Encounter.objects.filter(id__in=[item.id for item in encounters])
+        seen = []
+        after = None
+        for _ in range(2):
+            page = page_records(
+                query,
+                scope="synthetic-ties",
+                after=after,
+                first=1,
+                serialize=lambda item: str(item.id),
+            )
+            seen.extend(page["items"])
+            after = page["end_cursor"]
+        self.assertEqual(len(set(seen)), 2)
+        filtered = filter_dates(
+            query, RecordFilter(date_from="2026-03-08", date_to="2026-03-08"), "America/New_York"
+        )
+        self.assertEqual(filtered.count(), 2)
+        self.assertEqual(
+            filter_dates(
+                query,
+                RecordFilter(date_from="2026-03-07", date_to="2026-03-07"),
+                "America/New_York",
+            ).count(),
+            0,
+        )
+
+    def test_author_choices_are_limited_to_authorized_records(self):
+        from medframe_apps.accounts.models import User
+        from medframe_apps.record_authors import record_authors
+
+        stranger = User.objects.create_user(
+            "unrelated-author@example.org",
+            "Synthetic unrelated password 95",
+            display_name="Unrelated author",
+        )
+        choices = record_authors(self.doctor, self.organization.id, self.patient.id)
+        self.assertIn(str(self.doctor.id), [value["value"] for value in choices])
+        self.assertNotIn(str(stranger.id), [value["value"] for value in choices])
+        self.patient.access_grants.update(active=False)
+        with self.assertRaises(DomainError):
+            record_authors(self.doctor, self.organization.id, self.patient.id)

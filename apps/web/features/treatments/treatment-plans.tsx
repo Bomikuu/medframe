@@ -1,5 +1,7 @@
 "use client";
 
+import { PlanItemWork, PlanHistory, AddPlanItem } from "./plan-work";
+import { FollowUps } from "./follow-ups";
 import { z } from "zod";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -66,6 +68,7 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
         status,
         expectedVersion,
         completedRevisionId,
+        requestId: crypto.randomUUID(),
       });
       if (isCurrent()) remote.reload();
     } catch (error) {
@@ -86,7 +89,8 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
               <h3 className="font-semibold">{plan.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {plan.items.filter((item) => item.status === "completed").length} of{" "}
-                {plan.items.length} completed
+                {plan.items.filter((item) => item.status !== "cancelled").length} active items
+                completed
               </p>
               <ol className="mt-4 grid gap-4">
                 {plan.items.map((item, index) => (
@@ -103,6 +107,15 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
                         {item.status.replaceAll("_", " ")}
                       </p>
                     </div>
+                    {can("treatments.write") && (
+                      <PlanItemWork
+                        key={item.id}
+                        plan={plan}
+                        item={item}
+                        index={index}
+                        onSaved={remote.reload}
+                      />
+                    )}
                     {can("treatments.write") && item.status !== "completed" && (
                       <fieldset disabled={busy} className="grid gap-3">
                         <FormSelect
@@ -145,6 +158,14 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
                   </li>
                 ))}
               </ol>
+              {can("treatments.write") && (
+                <AddPlanItem planId={plan.id} version={plan.version} onSaved={remote.reload} />
+              )}
+              <PlanHistory
+                key={`${plan.id}:${plan.version}`}
+                patientId={patientId}
+                planId={plan.id}
+              />
             </div>
           ))
         ) : (
@@ -162,6 +183,7 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
           {failureText(failure)}
         </p>
       )}
+      <FollowUps patientId={patientId} plans={plans.success ? plans.data : []} />
       {can("treatments.write") && <PlanForm patientId={patientId} onSaved={remote.reload} />}
     </section>
   );

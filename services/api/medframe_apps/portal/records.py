@@ -43,6 +43,7 @@ def release_details(item, *, content=False):
 
 def portal_records(request, link_id, after=None):
     link = require_portal_link(request, link_id)
+    audit(request.user, "portal.records.read", link.organization_id, link.id)
     return page_records(
         published_releases(link).select_related("author"),
         scope=f"portal-records:{request.user.id}:{link.id}",

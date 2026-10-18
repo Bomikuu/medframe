@@ -64,7 +64,6 @@ class ClinicalQuery:
         return [
             ProviderType(
                 id=profile.id,
-                user_id=profile.membership.user_id,
                 display_name=profile.membership.user.display_name,
                 specialty=profile.specialty,
                 branch_id=profile.membership.branch_id,

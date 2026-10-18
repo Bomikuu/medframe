@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
 import { ButtonLink } from "@/components/ui/button-link";
 import {
+  ApplyConsultationTemplateDocument,
   SaveConsultationDocument,
   ConsultationDocument,
   TransitionConsultationDocument,
@@ -24,6 +25,8 @@ import { useRequestScope } from "@/features/patients/use-request-scope";
 import { PageHeading, failureCode, failureText, timeLabel } from "@/features/patients/feedback";
 import { DentalEditor } from "@/features/dental/dental-editor";
 import { DocumentPanel } from "@/features/documents/document-panel";
+import { templateSchema } from "./templates/schema";
+import { TemplatePicker, TemplatePrompts } from "./templates/template-picker";
 import { SoapFields } from "./soap-fields";
 import { DiagnosisFields } from "./diagnosis-fields";
 import { ProcedureFields } from "./procedure-fields";
@@ -132,6 +135,43 @@ export function EncounterEditor({
     const timeout = window.setTimeout(() => void saveRef.current(), 1500);
     return () => window.clearTimeout(timeout);
   }, [serialized, dirty, readOnly, busy, failure, composing]);
+
+  async function applyGuidance(templateRevisionId: string) {
+    if (writing.current || composing || lifecycleBusy) return;
+    setLifecycleBusy(true);
+    const isCurrent = capture();
+    const version = await save();
+    if (version === null || !isCurrent()) {
+      if (isCurrent()) setLifecycleBusy(false);
+      return;
+    }
+    writing.current = true;
+    setBusy(true);
+    setFailure(null);
+    try {
+      const result = await getGraphqlClient().request(ApplyConsultationTemplateDocument, {
+        organizationId,
+        encounterId: encounter.id,
+        templateRevisionId,
+        expectedVersion: version,
+        requestId: crypto.randomUUID(),
+      });
+      if (!isCurrent()) return;
+      const saved = result.applyConsultationTemplate;
+      setEncounter(saved);
+      form.reset({ content: draftSchema.parse(saved.content), expectedVersion: saved.version });
+      putDraft(key, undefined);
+      setStatus("Guidance applied. Clinical content preserved.");
+    } catch (error) {
+      if (isCurrent()) setFailure(error);
+    } finally {
+      if (isCurrent()) {
+        writing.current = false;
+        setBusy(false);
+        setLifecycleBusy(false);
+      }
+    }
+  }
 
   async function transition(target: string) {
     setLifecycleBusy(true);
@@ -380,6 +420,10 @@ export function EncounterEditor({
           </div>
         </div>
       )}
+      {!readOnly && (
+        <TemplatePicker busy={busy || composing || lifecycleBusy} apply={applyGuidance} />
+      )}
+      <TemplatePrompts value={encounter.template} />
       <FormProvider {...form}>
         <form
           noValidate
@@ -394,7 +438,12 @@ export function EncounterEditor({
           <input type="hidden" {...form.register("expectedVersion", { valueAsNumber: true })} />
           <fieldset disabled={readOnly || lifecycleBusy} className="grid min-w-0 gap-10">
             <SoapFields readOnly={readOnly} />
-            <DiagnosisFields readOnly={readOnly} />
+            <DiagnosisFields
+              readOnly={readOnly}
+              observationLabels={
+                templateSchema.safeParse(encounter.template).data?.observation_labels
+              }
+            />
             <DentalEditor
               readOnly={readOnly}
               patientId={encounter.patientId}

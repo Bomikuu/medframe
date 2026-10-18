@@ -30,7 +30,9 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     ".next-rehearsal/types/**/*.ts",
-    ".next-rehearsal/dev/types/**/*.ts"
+    ".next-rehearsal/dev/types/**/*.ts",
+    ".next-batch2-rehearsal/types/**/*.ts",
+    ".next-batch2-rehearsal/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

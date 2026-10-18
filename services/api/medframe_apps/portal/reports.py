@@ -1,6 +1,7 @@
 from django.db import transaction
 
 from config.errors import DomainError
+from medframe_apps.auditing.services import audit
 from medframe_apps.common import check_version
 from medframe_apps.idempotency import record_request_result, replay_request
 from medframe_apps.patients.models import PatientClinicalRevision
@@ -55,6 +56,7 @@ def submit_report(request, link_id, category, text, request_id):
     record_request_result(
         request.user, link.organization_id, "portal.report", request_id, values, report.id
     )
+    audit(request.user, "portal.report.submitted", link.organization_id, report.id)
     return report
 
 
@@ -83,4 +85,5 @@ def review_report(user, org, report_id, state, expected_version, history_revisio
         state=state,
         history_revision_id=history_revision_id,
     )
+    audit(user, "portal.report.reviewed", org, report.id)
     return report

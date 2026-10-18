@@ -12,9 +12,11 @@ import { loginSchema, type LoginValues } from "@/lib/auth/schemas";
 export function LoginForm({
   onSubmit,
   busy,
+  portal = false,
 }: {
   onSubmit: (values: LoginValues) => Promise<void>;
   busy: boolean;
+  portal?: boolean;
 }) {
   const {
     register,
@@ -23,7 +25,11 @@ export function LoginForm({
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
-      <FormField id="email" label="Work email" error={errors.email?.message}>
+      <FormField
+        id="email"
+        label={portal ? "Account email" : "Work email"}
+        error={errors.email?.message}
+      >
         <Input
           id="email"
           type="email"
@@ -45,7 +51,7 @@ export function LoginForm({
         />
       </FormField>
       <Link
-        href="/auth/recover"
+        href={portal ? "/portal/recover" : "/auth/recover"}
         className="-mt-2 justify-self-end text-sm font-medium text-primary underline-offset-4 hover:underline"
       >
         Forgot password?

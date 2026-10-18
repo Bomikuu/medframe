@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, errorMessage, requestWithCsrf } from "@/lib/auth/client";
 import type { CodeValues, LoginValues } from "@/lib/auth/schemas";
+import { InvitationForm } from "@/features/portal/auth/invitation-form";
 import { LoginForm } from "./login-form";
 import { MfaVerificationForm } from "./mfa-form";
 import { RecoveryCodes } from "./recovery-codes";
@@ -11,7 +12,14 @@ import { Button } from "@/components/ui/button";
 
 type Step = "login" | "enroll" | "verify" | "recovery";
 
-export function AuthFlow() {
+export function AuthFlow({
+  portal = false,
+  invitation = false,
+}: {
+  portal?: boolean;
+  invitation?: boolean;
+}) {
+  const prefix = portal ? "portal/auth" : "auth";
   const router = useRouter();
   const [step, setStep] = useState<Step>("login");
   const [busy, setBusy] = useState(false);
@@ -20,7 +28,7 @@ export function AuthFlow() {
   const [codes, setCodes] = useState<string[]>([]);
   function enterWorkspace() {
     setCodes([]);
-    router.replace("/clinic");
+    router.replace(portal ? "/portal" : "/clinic");
     router.refresh();
   }
   async function run(action: () => Promise<void>) {
@@ -37,9 +45,15 @@ export function AuthFlow() {
   }
   async function login(values: LoginValues) {
     await run(async () => {
-      const result = await requestWithCsrf<{ nextStep: "enroll" | "verify" }>("auth/login", values);
+      const result = await requestWithCsrf<{ nextStep: "enroll" | "verify" }>(
+        `${prefix}/login`,
+        values,
+      );
       if (result.nextStep === "enroll") {
-        const enrollment = await requestWithCsrf<{ otpauthUri: string }>("auth/mfa/enroll", {});
+        const enrollment = await requestWithCsrf<{ otpauthUri: string }>(
+          `${prefix}/mfa/enroll`,
+          {},
+        );
         setUri(enrollment.otpauthUri);
       }
       setStep(result.nextStep);
@@ -48,7 +62,7 @@ export function AuthFlow() {
   async function verify(values: CodeValues) {
     await run(async () => {
       const result = await requestWithCsrf<{ recoveryCodes: string[] | null }>(
-        "auth/mfa/verify",
+        `${prefix}/mfa/verify`,
         values,
       );
       setUri("");
@@ -61,13 +75,15 @@ export function AuthFlow() {
     });
   }
   const heading = {
-    login: "Welcome back",
+    login: invitation ? "Accept your invitation" : portal ? "Patient sign in" : "Welcome back",
     enroll: "Protect your account",
     verify: "Verify it’s you",
     recovery: "Save your recovery codes",
   }[step];
   const description = {
-    login: "Sign in to your clinical workspace.",
+    login: portal
+      ? "Access records your clinic has shared with you."
+      : "Sign in to your clinical workspace.",
     enroll: "Scan this code with your authenticator app, then enter its six-digit code.",
     verify: "Use your authenticator to finish signing in.",
     recovery: "Your authenticator is connected. Keep a backup way to sign in.",
@@ -86,7 +102,30 @@ export function AuthFlow() {
           {error}
         </p>
       )}
-      {step === "login" && <LoginForm onSubmit={login} busy={busy} />}
+      {step === "login" &&
+        (invitation ? (
+          <InvitationForm
+            busy={busy}
+            onSubmit={async (values) => {
+              await run(async () => {
+                const result = await requestWithCsrf<{ nextStep: "enroll" | "verify" }>(
+                  "portal/auth/invitations/prepare",
+                  values,
+                );
+                if (result.nextStep === "enroll") {
+                  const enrollment = await requestWithCsrf<{ otpauthUri: string }>(
+                    "portal/auth/mfa/enroll",
+                    {},
+                  );
+                  setUri(enrollment.otpauthUri);
+                }
+                setStep(result.nextStep);
+              });
+            }}
+          />
+        ) : (
+          <LoginForm onSubmit={login} busy={busy} portal={portal} />
+        ))}
       {(step === "enroll" || step === "verify") && (
         <MfaVerificationForm
           key={step}

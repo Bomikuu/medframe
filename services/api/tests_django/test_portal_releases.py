@@ -72,3 +72,44 @@ class PortalReleaseTests(ClinicalFixture):
                 "invalid",
                 uuid4(),
             )
+
+    def test_changed_source_after_preview_conflicts_and_original_is_frozen(self):
+        from medframe_apps.encounters import services
+
+        revision = self.finalize(self.start())
+        selection = {
+            "summary": "Frozen original",
+            "encounters": [{"revision_id": str(revision.id), "soap_sections": ["objective"]}],
+        }
+        preview = preview_release(self.doctor, self.organization.id, revision.patient_id, selection)
+        original = publish_release(
+            self.doctor,
+            self.organization.id,
+            revision.patient_id,
+            selection,
+            preview["digest"],
+            uuid4(),
+        )
+        encounter = services.create_encounter_amendment(
+            self.doctor, self.organization.id, revision.encounter_id, "Synthetic correction", 1
+        )
+        services.save_encounter_draft(
+            self.doctor,
+            self.organization.id,
+            encounter.id,
+            {"soap": {"objective": "New synthetic observation"}},
+            encounter.version,
+        )
+        with self.assertRaises(DomainError):
+            publish_release(
+                self.doctor,
+                self.organization.id,
+                revision.patient_id,
+                selection,
+                preview["digest"],
+                uuid4(),
+            )
+        original.refresh_from_db()
+        self.assertEqual(
+            original.payload["encounters"][0]["soap"]["objective"], "Recorded observation"
+        )
