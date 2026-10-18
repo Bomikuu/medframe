@@ -1,0 +1,1645 @@
+# MEDFRAME — COMPLETE UI/UX REVAMP
+## Comprehensive Interface Audit, Redesign, and Component Standardization
+
+Before proceeding with the next development batch, perform a
+complete UI/UX review and improvement of the existing Medframe
+application.
+
+The current interface lacks proper structure, visual hierarchy,
+information grouping, and interactive components.
+
+Several pages simply render information sequentially without
+appropriate containers, cards, tables, tabs, or contextual actions.
+
+This needs to be corrected throughout the application.
+
+IMPORTANT:
+
+This is a FULL APPLICATION UI REFINEMENT.
+
+Do not improve only the dashboard.
+
+Inspect and improve EVERY existing page, component, form,
+modal, table, detail view, and application layout.
+
+Implement all related UI improvements together in this batch.
+
+Do not introduce unrelated major backend features.
+
+Preserve existing business logic, GraphQL integrations,
+Django models, permissions, and working functionality.
+
+==================================================
+1. DESIGN DIRECTION
+==================================================
+
+Medframe is a professional healthcare management platform.
+
+The application should feel like modern enterprise
+healthcare software.
+
+Design characteristics:
+
+- Professional
+- Minimal
+- Modern
+- Clean
+- Organized
+- Information-efficient
+- Accessible
+- Consistent
+- Interactive
+
+DEFAULT APPEARANCE:
+
+- White main background
+- White sidebar
+- White cards
+- White header
+- Subtle borders
+- Dark readable text
+- Minimal shadows
+- Restrained use of brand colors
+
+BRAND COLORS:
+
+Primary: #0F2D4A
+Secondary: #0EA5A4
+Accent: #22C1B6
+Background: #FFFFFF
+Secondary Surface: #F8FAFC
+Borders: #E2E8F0
+Primary Text: #1E293B
+Secondary Text: #475569
+
+Typography: Inter
+
+Do not rely heavily on gradients.
+
+Avoid:
+- Cartoonish UI
+- Excessively rounded components
+- Oversized elements
+- Too many colorful cards
+- Unnecessary decorative backgrounds
+- Excessive whitespace
+- Cramped components
+- Poorly aligned elements
+- Long unstructured pages
+
+IMPORTANT:
+
+Do not interpret minimalism as removing cards,
+tables, borders, containers, or useful information.
+
+The interface must have visual hierarchy and structure.
+
+==================================================
+2. UTILIZE SHADCN/UI EXTENSIVELY
+==================================================
+
+Use shadcn/ui components wherever appropriate.
+
+Inspect the existing component library and determine
+which components are already installed.
+
+Install missing shadcn components as needed.
+
+Prefer shadcn/ui over custom implementations
+for common interface patterns.
+
+Recommended components:
+
+LAYOUT:
+- Card
+- Separator
+- ScrollArea
+- Resizable
+- Sidebar
+- Breadcrumb
+- Tabs
+- Accordion
+- Collapsible
+
+DATA DISPLAY:
+- Table
+- Data Table using TanStack Table
+- Avatar
+- Badge
+- Tooltip
+- HoverCard
+- Progress
+- Skeleton
+- Chart
+
+INTERACTIONS:
+- Dialog
+- AlertDialog
+- Sheet
+- Drawer
+- Popover
+- DropdownMenu
+- ContextMenu
+- Command
+
+FORMS:
+- Input
+- Textarea
+- Select
+- Checkbox
+- RadioGroup
+- Switch
+- Calendar
+- DatePicker patterns
+- Combobox patterns
+- Field / Form components
+- Label
+
+FEEDBACK:
+- Sonner Toast
+- Alert
+- Progress
+- Spinner
+- Skeleton
+- Empty State
+
+NAVIGATION:
+- Sidebar
+- Breadcrumb
+- Tabs
+- Pagination
+- DropdownMenu
+
+Use Lucide icons consistently.
+
+Do not create custom components that duplicate
+existing shadcn functionality without a reason.
+
+However, do not force components where
+they do not improve usability.
+
+Use the appropriate component for each interaction.
+
+==================================================
+3. FIX THE DASHBOARD COMPLETELY
+==================================================
+
+The current dashboard does not adequately communicate
+important information.
+
+It needs a proper dashboard structure.
+
+Add a clear page header with:
+
+- Dashboard title
+- Short contextual description
+- Current organization
+- Relevant actions
+
+Beneath the header, introduce SUMMARY METRIC CARDS.
+
+Examples:
+
+- Total Patients
+- Active Consultations
+- Completed Consultations
+- Pending Treatments
+
+Each summary card should include:
+
+- Clear metric title
+- Large numeric value
+- Relevant Lucide icon
+- Optional supporting information
+- Appropriate interaction when applicable
+
+Example:
+
+TOTAL PATIENTS
+248
+
+ACTIVE CONSULTATIONS
+12
+
+PENDING TREATMENTS
+8
+
+COMPLETED CONSULTATIONS
+156
+
+Use actual backend data.
+
+Do not hardcode fake statistics.
+
+If a metric cannot be calculated using the
+existing backend, implement the appropriate
+authorized aggregation or display a meaningful
+unavailable state.
+
+Do not display fabricated numbers.
+
+--------------------------------------------------
+DASHBOARD SECTIONS
+--------------------------------------------------
+
+Organize the dashboard into meaningful sections.
+
+RECOMMENDED:
+
+1. Summary Metrics
+
+A responsive grid of metric cards.
+
+2. Recent Patients
+
+Display recent patients with:
+
+- Avatar
+- Name
+- Patient reference
+- Relevant date
+- Quick action
+
+3. Recent Consultations
+
+Use a structured table with:
+
+- Patient
+- Consultation date
+- Provider
+- Status
+- Action
+
+4. Pending Treatments
+
+Display actionable treatment information.
+
+5. Quick Actions
+
+Provide convenient actions such as:
+
+- Register Patient
+- Start Consultation
+- View Patients
+- Open Dental Chart
+
+6. Recent Activity
+
+Display relevant recent clinical activity
+without unnecessarily exposing sensitive information.
+
+Use appropriate grid layouts.
+
+Do not stack every section in one
+unstructured vertical column.
+
+Use responsive layouts and balanced content areas.
+
+Only display relevant sections.
+
+Avoid overcrowding the dashboard.
+
+==================================================
+4. STANDARDIZE PAGE HEADERS
+==================================================
+
+Every page should have a consistent header structure.
+
+Recommended elements:
+
+- Breadcrumb
+- Page title
+- Short description
+- Contextual metadata
+- Primary action
+- Secondary actions when appropriate
+
+Example:
+
+Patients
+
+Manage patient records and clinical information.
+
+[Register Patient]
+
+Keep page titles OUTSIDE content cards.
+
+Do not wrap every page title in a card.
+
+Use consistent spacing between:
+
+- Header
+- Toolbar
+- Main content
+- Secondary content
+
+Avoid excessive vertical spacing.
+
+==================================================
+5. PATIENT MANAGEMENT UI
+==================================================
+
+Completely improve the patient directory.
+
+The page should not simply display patient
+information as unstructured blocks.
+
+Provide TWO DISPLAY MODES:
+
+1. Table View
+2. Card View
+
+Allow switching between them.
+
+Persist the selected view preference.
+
+--------------------------------------------------
+TABLE VIEW
+--------------------------------------------------
+
+Use shadcn Data Table with TanStack Table.
+
+Recommended columns:
+
+- Patient
+- Patient Reference
+- Age
+- Last Visit
+- Status, if applicable
+- Actions
+
+PATIENT COLUMN:
+
+Display:
+
+Avatar + Full Name
+
+Include secondary information when relevant.
+
+Do not display unnecessary sensitive information
+in the patient directory.
+
+TABLE FEATURES:
+
+- Search
+- Sorting
+- Pagination
+- Filters
+- Column visibility
+- Row actions
+- Empty state
+- Loading skeletons
+
+Use appropriate column widths.
+
+Avoid overly wide or cramped columns.
+
+Use compact but readable row heights.
+
+--------------------------------------------------
+CARD VIEW
+--------------------------------------------------
+
+Use responsive patient cards.
+
+Each card can contain:
+
+- Patient avatar
+- Full name
+- Patient reference
+- Age
+- Last consultation
+- Relevant status
+- Quick actions
+
+Cards should have consistent dimensions
+where appropriate.
+
+Do not make every card unnecessarily large.
+
+Use subtle borders.
+
+Avoid excessive shadows.
+
+Clicking a patient should open their profile.
+
+--------------------------------------------------
+PATIENT AVATARS
+--------------------------------------------------
+
+Support patient profile images.
+
+Use shadcn Avatar.
+
+Support:
+
+- Uploaded patient photo, when authorized
+- Initials fallback
+- Appropriate placeholder
+
+Do not use random external profile images.
+
+Do not automatically fetch avatars from
+third-party services.
+
+Patient photographs must follow existing
+medical data access restrictions.
+
+If an upload feature is not currently available,
+use initials or local placeholder imagery.
+
+==================================================
+6. PATIENT PROFILE PAGE
+==================================================
+
+Redesign the patient profile into a structured
+medical information workspace.
+
+Do not display every patient field sequentially
+on one long page.
+
+--------------------------------------------------
+PATIENT HEADER
+--------------------------------------------------
+
+Create a patient overview area containing:
+
+- Avatar
+- Full name
+- Patient reference
+- Age
+- Relevant demographic information
+- Contextual actions
+
+Actions:
+
+- Start Consultation
+- Edit Patient
+- Add Document
+- More Actions
+
+Use appropriate grouping.
+
+--------------------------------------------------
+PATIENT SUMMARY
+--------------------------------------------------
+
+Provide summary cards or compact information panels.
+
+Examples:
+
+- Total Consultations
+- Active Treatments
+- Last Visit
+- Available Documents
+
+Use actual values.
+
+--------------------------------------------------
+PATIENT TABS
+--------------------------------------------------
+
+Organize detailed content into tabs.
+
+Recommended:
+
+Overview
+Medical History
+Consultations
+Dental Chart
+Treatments
+Documents
+
+OVERVIEW:
+
+Display important patient information
+without requiring unnecessary scrolling.
+
+MEDICAL HISTORY:
+
+Use grouped sections for:
+
+- Medical conditions
+- Allergies
+- Medications
+- Previous procedures
+
+CONSULTATIONS:
+
+Use a structured table or timeline.
+
+DENTAL CHART:
+
+Provide access to the interactive dental model.
+
+TREATMENTS:
+
+Display treatment plans and progress.
+
+DOCUMENTS:
+
+Use a structured document list or table.
+
+Do not render all tab content simultaneously.
+
+==================================================
+7. CONSULTATION WORKSPACE
+==================================================
+
+Improve the consultation interface substantially.
+
+This should be one of the most polished
+workspaces in Medframe.
+
+A doctor must be able to review patient
+information and document care efficiently.
+
+--------------------------------------------------
+LAYOUT
+--------------------------------------------------
+
+Use an intentional, information-efficient layout.
+
+Possible structure:
+
+Main content:
+
+- Consultation notes
+- Clinical findings
+- Diagnosis
+- Procedures
+- Treatment plans
+
+Supporting panel:
+
+- Patient summary
+- Allergies
+- Medical history
+- Relevant clinical context
+
+Do not force a two-column layout on small screens.
+
+Use tabs or collapsible sections when appropriate.
+
+--------------------------------------------------
+CONSULTATION HEADER
+--------------------------------------------------
+
+Display:
+
+- Patient
+- Consultation status
+- Encounter date
+- Responsible provider
+- Save status
+
+Actions:
+
+- Save Draft
+- Finalize
+- More Actions
+
+Use clear status badges.
+
+--------------------------------------------------
+SOAP NOTES
+--------------------------------------------------
+
+Group notes into:
+
+- Subjective
+- Objective
+- Assessment
+- Plan
+
+Use clearly labeled editing sections.
+
+Do not create one enormous unstructured form.
+
+Support:
+
+- Clear input grouping
+- Appropriate textarea sizes
+- Autosave feedback when supported
+- Validation messages
+- Loading states
+
+--------------------------------------------------
+DIAGNOSES
+--------------------------------------------------
+
+Display diagnoses as structured entries.
+
+Use:
+
+- Searchable selection
+- Status badges
+- Contextual actions
+- Editable forms
+
+Adding a diagnosis should use an appropriate
+dialog, sheet, or inline editor.
+
+Avoid permanently displaying large
+diagnosis forms when they are not needed.
+
+--------------------------------------------------
+PROCEDURES
+--------------------------------------------------
+
+Display procedures as:
+
+- Structured rows
+- Cards
+- Status badges
+- Relevant actions
+
+Provide an Add Procedure interaction.
+
+--------------------------------------------------
+FINALIZATION
+--------------------------------------------------
+
+Use AlertDialog for significant actions.
+
+Finalizing an encounter should require
+appropriate confirmation.
+
+Clearly explain the consequences.
+
+Do not replace or bypass backend validation.
+
+==================================================
+8. INTERACTIVE DENTAL CHART UI
+==================================================
+
+Improve the UI surrounding the dental model.
+
+The model must feel integrated into professional
+medical software.
+
+Do not simply display a 3D model followed
+by unrelated forms below it.
+
+--------------------------------------------------
+DENTAL WORKSPACE
+--------------------------------------------------
+
+Organize the interface into:
+
+1. Dental model
+2. Model controls
+3. Selected tooth information
+4. Clinical findings
+5. Treatment actions
+6. History
+
+MODEL CONTROLS:
+
+Provide accessible controls for:
+
+- Rotate
+- Zoom
+- Reset
+- Upper Jaw
+- Lower Jaw
+- Isolate Tooth
+- View Options
+
+Use appropriate icon buttons and tooltips.
+
+--------------------------------------------------
+SELECTED TOOTH PANEL
+--------------------------------------------------
+
+When a tooth is selected, display a
+contextual information panel.
+
+Example:
+
+Tooth 16
+Upper Right First Molar
+
+Current Findings:
+Dental Caries
+
+Affected Surface:
+Occlusal
+
+Severity:
+Moderate
+
+Actions:
+
+- Record Finding
+- Add Procedure
+- Add Treatment
+- View History
+
+Use cards, badges, separators, and
+appropriate input components.
+
+--------------------------------------------------
+CLINICAL INTERACTIONS
+--------------------------------------------------
+
+Use dialogs or side sheets for
+recording findings and procedures.
+
+Do not place all editing forms
+permanently on the page.
+
+Use tabs when displaying:
+
+- Findings
+- Treatments
+- History
+
+Keep important model controls visible.
+
+Ensure the model resizes correctly.
+
+Avoid clipping and overflow.
+
+Maintain the existing clinical data integration.
+
+==================================================
+9. TREATMENT MANAGEMENT UI
+==================================================
+
+Improve treatment plans and procedure views.
+
+Use structured cards and tables.
+
+TREATMENT PLAN CARD:
+
+Include:
+
+- Treatment name
+- Patient
+- Responsible provider
+- Progress
+- Current status
+- Next step
+- Relevant dates
+
+Use shadcn Progress where appropriate.
+
+Example:
+
+Root Canal Treatment
+
+Progress: 2 of 4 procedures completed
+
+[Progress Indicator]
+
+Status: In Progress
+
+Actions:
+
+- View Plan
+- Update Progress
+
+--------------------------------------------------
+TREATMENT DETAILS
+--------------------------------------------------
+
+Display treatment steps using:
+
+- Timeline
+- Step list
+- Table
+- Progress indicators
+
+Clearly distinguish:
+
+- Proposed
+- Planned
+- In Progress
+- Completed
+- Cancelled
+
+Use consistent status presentation.
+
+Avoid unnecessary colors.
+
+==================================================
+10. MEDICAL RECORDS AND DOCUMENTS
+==================================================
+
+Improve medical record presentation.
+
+Do not display documents as plain links
+in long unstructured lists.
+
+Use:
+
+- Tables
+- File cards
+- Document icons
+- File metadata
+- Preview interactions
+- Contextual menus
+
+DOCUMENT TABLE:
+
+- File
+- Type
+- Date
+- Uploaded By
+- Related Encounter
+- Actions
+
+Actions:
+
+- Preview
+- Download
+- View Details
+
+Use Dialog or Sheet for document previews
+when appropriate.
+
+Preserve secure file access.
+
+Never expose unauthorized document URLs.
+
+Use appropriate loading and error states.
+
+==================================================
+11. FORMS AND MODALS
+==================================================
+
+Review EVERY existing form.
+
+Improve:
+
+- Field grouping
+- Labels
+- Descriptions
+- Validation
+- Required indicators
+- Spacing
+- Alignment
+- Button placement
+- Error messages
+
+Use React Hook Form and Zod
+where already supported.
+
+Use shadcn form components.
+
+--------------------------------------------------
+MODAL GUIDELINES
+--------------------------------------------------
+
+Use Dialog for focused actions.
+
+Examples:
+
+- Register Patient
+- Add Diagnosis
+- Add Procedure
+- Edit Details
+- Confirm Changes
+
+Use Sheet for more complex editing
+that benefits from additional space.
+
+Use AlertDialog for destructive
+or irreversible actions.
+
+Use Popover for small contextual controls.
+
+Use DropdownMenu for secondary actions.
+
+Do not use generic modal components
+when suitable shadcn alternatives exist.
+
+Avoid overly tall or cramped dialogs.
+
+Use responsive dialog sizing.
+
+Ensure the close button remains visible.
+
+For forms with extensive content,
+use internal scrolling when appropriate.
+
+Keep important actions accessible.
+
+==================================================
+12. TOAST NOTIFICATIONS
+==================================================
+
+Implement a consistent toast system
+using shadcn Sonner.
+
+Toast notifications should provide
+clear feedback for user actions.
+
+Examples:
+
+SUCCESS:
+
+- Patient registered successfully
+- Consultation saved
+- Diagnosis added
+- Dental chart updated
+- Treatment plan created
+- Settings saved
+
+ERROR:
+
+- Unable to save changes
+- Failed to load patient information
+- Upload failed
+- Permission denied
+
+INFORMATION:
+
+- Changes saved automatically
+- Document processing
+- Consultation draft restored
+
+Use toast notifications for relevant
+non-blocking feedback.
+
+Do not use browser alert().
+
+Do not use toast notifications for
+critical actions requiring explicit confirmation.
+
+Avoid duplicate toasts.
+
+Do not trigger success toasts until
+the backend confirms the operation.
+
+Preserve meaningful error messages.
+
+Do not expose sensitive patient information
+in notifications unnecessarily.
+
+==================================================
+13. TABLES AND CARD VIEWS
+==================================================
+
+Review every page containing collections.
+
+Determine whether the information is best
+presented using:
+
+- Data Table
+- Card Grid
+- Timeline
+- Structured List
+
+For appropriate directories, allow:
+
+Table View / Card View
+
+Examples:
+
+- Patients
+- Consultations
+- Treatments
+- Documents, where useful
+
+Use TanStack Table for advanced tables.
+
+Support:
+
+- Sorting
+- Search
+- Filtering
+- Pagination
+- Row selection when needed
+- Contextual row actions
+- Empty states
+- Loading states
+
+Do not add a table/card toggle
+where only one presentation is appropriate.
+
+Keep controls consistent across pages.
+
+==================================================
+14. INFORMATION GROUPING
+==================================================
+
+One of the current problems is that information
+is placed directly on pages without structure.
+
+Fix this throughout the application.
+
+Use appropriate containers such as:
+
+- Cards
+- Tabs
+- Accordions
+- Collapsible sections
+- Tables
+- Timelines
+- Side panels
+
+GROUP RELATED INFORMATION.
+
+For example:
+
+Instead of:
+
+Patient Name
+Patient Age
+Patient Address
+Medical History
+Allergies
+Medications
+Consultations
+Treatments
+Documents
+
+All displayed sequentially...
+
+Organize into:
+
+PATIENT OVERVIEW
+
+MEDICAL INFORMATION
+
+CONSULTATION HISTORY
+
+TREATMENT PLANS
+
+DOCUMENTS
+
+Use tabs for major content categories.
+
+Use cards for meaningful summaries.
+
+Use separators for related content.
+
+Avoid nesting cards inside cards excessively.
+
+Do not wrap every individual field
+inside its own card.
+
+==================================================
+15. SPACING AND TYPOGRAPHY AUDIT
+==================================================
+
+Review spacing throughout the application.
+
+Fix:
+
+- Inconsistent margins
+- Inconsistent padding
+- Excessive whitespace
+- Cramped sections
+- Uneven gaps
+- Misaligned labels
+- Misaligned buttons
+- Oversized cards
+- Inconsistent table rows
+- Poor modal spacing
+
+Use a consistent spacing scale.
+
+Establish standards for:
+
+- Page padding
+- Section gaps
+- Card padding
+- Form field spacing
+- Table spacing
+- Header spacing
+
+TYPOGRAPHY:
+
+Use Inter.
+
+Fix:
+
+- Inconsistent font sizes
+- Poor font weights
+- Weak hierarchy
+- Oversized headings
+- Tiny metadata
+- Inconsistent labels
+- Poor line heights
+
+Page titles should be visually distinct.
+
+Section headings should be smaller.
+
+Supporting information should be readable.
+
+Avoid excessive bold text.
+
+==================================================
+16. SIDEBAR AND NAVIGATION
+==================================================
+
+Review the application navigation.
+
+Use the shadcn Sidebar component.
+
+Ensure:
+
+- Correct active states
+- Consistent icons
+- Proper navigation grouping
+- Collapsible sidebar
+- Organization switcher
+- Responsive behavior
+- Clear labels
+
+Suggested navigation:
+
+OVERVIEW
+- Dashboard
+
+CLINICAL
+- Patients
+- Consultations
+- Treatments
+- Medical Records
+
+MANAGEMENT
+- Staff
+- Settings
+
+Only display routes that currently exist
+and that the user is authorized to access.
+
+Do not add navigation links
+to unimplemented features.
+
+Use Breadcrumb consistently.
+
+Avoid duplicating navigation controls.
+
+==================================================
+17. LOADING, EMPTY, AND ERROR STATES
+==================================================
+
+Every data-driven page must handle:
+
+- Loading
+- Empty
+- Error
+- Success
+
+LOADING:
+
+Use shadcn Skeleton.
+
+Create skeleton layouts matching
+the actual page structure.
+
+EMPTY STATES:
+
+Provide meaningful empty states.
+
+Example:
+
+"No patients found."
+
+Supporting text:
+
+"Register your first patient to begin
+managing their clinical records."
+
+Action:
+
+[Register Patient]
+
+ERROR STATES:
+
+Display clear error messages
+and retry actions where appropriate.
+
+Avoid rendering blank pages.
+
+Avoid showing undefined or null values.
+
+Do not show fabricated data
+just to fill an empty layout.
+
+==================================================
+18. RESPONSIVENESS
+==================================================
+
+Review all pages at:
+
+- Mobile
+- Tablet
+- Desktop
+- Large desktop
+
+Ensure:
+
+- No horizontal page overflow
+- Tables remain usable
+- Cards reflow appropriately
+- Modals fit smaller screens
+- Sidebar collapses on mobile
+- Forms remain readable
+- Buttons remain accessible
+- Dental models resize correctly
+
+Use appropriate responsive patterns.
+
+Do not simply shrink desktop layouts.
+
+For dense tables, use horizontal scrolling,
+column prioritization, or alternative card views.
+
+==================================================
+19. ACCESSIBILITY
+==================================================
+
+Ensure:
+
+- Semantic HTML
+- Proper labels
+- Keyboard navigation
+- Visible focus states
+- Appropriate contrast
+- Accessible dialogs
+- Accessible menus
+- Clear validation messages
+- Screen-reader-friendly components
+
+Use shadcn's accessible component patterns.
+
+Do not rely on color alone
+to communicate status.
+
+Clinical information must remain readable
+and understandable.
+
+==================================================
+20. PRESERVE BRAND CUSTOMIZATION
+==================================================
+
+Medframe already supports or plans to support
+configurable themes and organization branding.
+
+Do not hardcode styling in a way that
+breaks customization.
+
+Use theme variables.
+
+Default to:
+
+- White dashboard
+- Navy primary
+- Teal accents
+- Inter typography
+
+Support organization-specific branding
+through existing configuration mechanisms.
+
+Ensure components adapt correctly
+when theme settings change.
+
+Do not introduce multiple unrelated
+styling systems.
+
+==================================================
+21. REVIEW EVERY EXISTING PAGE
+==================================================
+
+Perform a complete route and component audit.
+
+Do not assume the listed routes are exhaustive.
+
+Inspect the Next.js App Router structure.
+
+Identify every implemented page.
+
+Include:
+
+- Dashboard
+- Patient Directory
+- Patient Registration
+- Patient Profile
+- Medical History
+- Consultations
+- Consultation Details
+- Dental Chart
+- Treatment Plans
+- Medical Documents
+- Settings
+- Appearance Configuration
+- Authentication Pages
+- Any other implemented pages
+
+For each page, review:
+
+1. Layout
+2. Header
+3. Spacing
+4. Typography
+5. Information grouping
+6. Cards
+7. Tables
+8. Forms
+9. Dialogs
+10. Actions
+11. Loading states
+12. Empty states
+13. Error states
+14. Responsiveness
+15. Accessibility
+16. Component consistency
+
+Fix identified problems.
+
+Do not leave pages with inconsistent
+design patterns.
+
+==================================================
+22. REUSABLE COMPONENTS
+==================================================
+
+Create reusable application-level components
+built on shadcn primitives.
+
+Examples:
+
+PageHeader
+MetricCard
+DataTable
+ViewSwitcher
+PatientAvatar
+PatientCard
+StatusBadge
+EmptyState
+SectionHeader
+ConfirmDialog
+DetailPanel
+ActivityTimeline
+SearchToolbar
+FilterToolbar
+DocumentCard
+TreatmentProgress
+
+These are suggested abstractions.
+
+Reuse existing components when possible.
+
+Do not introduce unnecessary wrappers
+for trivial shadcn components.
+
+Use shared components where consistent
+behavior or styling provides clear value.
+
+Avoid copy-pasting UI patterns across pages.
+
+==================================================
+23. IMPLEMENTATION STRATEGY
+==================================================
+
+IMPORTANT:
+
+This is one comprehensive UI improvement batch.
+
+Do not implement only the dashboard and stop.
+
+Do not fix only typography and stop.
+
+Do not update only one page.
+
+Review and improve the complete existing application.
+
+Suggested order:
+
+PASS 1 — APPLICATION FOUNDATION
+
+- Review existing components
+- Normalize theme tokens
+- Fix typography
+- Fix spacing scale
+- Improve sidebar
+- Improve application shell
+- Configure Sonner
+- Establish reusable page components
+
+PASS 2 — DASHBOARD
+
+- Add summary metric cards
+- Add meaningful numerical values
+- Add recent activity
+- Add consultations table
+- Add quick actions
+- Improve responsive layout
+
+PASS 3 — PATIENT MANAGEMENT
+
+- Patient avatars
+- Table view
+- Card view
+- Search and filters
+- Patient summary
+- Patient profile tabs
+- Registration and edit dialogs
+
+PASS 4 — CLINICAL WORKSPACE
+
+- Consultation layout
+- SOAP note grouping
+- Diagnosis interactions
+- Procedure interactions
+- Status badges
+- Save/finalization feedback
+
+PASS 5 — DENTAL AND TREATMENTS
+
+- Dental model workspace
+- Selected tooth panel
+- Findings dialogs
+- Treatment cards
+- Progress indicators
+- Clinical history
+
+PASS 6 — DOCUMENTS AND SETTINGS
+
+- Document tables
+- Secure previews
+- Settings forms
+- Appearance settings
+- Theme previews
+
+PASS 7 — FINAL UI AUDIT
+
+- Review all existing routes
+- Check consistency
+- Check responsiveness
+- Check interactions
+- Fix remaining layout issues
+- Verify existing functionality
+
+Implement these improvements cohesively.
+
+==================================================
+24. DEVELOPMENT EFFICIENCY
+==================================================
+
+Avoid unnecessary operations.
+
+Do not repeatedly run production builds
+after minor styling changes.
+
+Do not reinstall existing dependencies.
+
+Do not refactor unrelated backend modules.
+
+Do not modify database schemas solely
+for visual changes.
+
+Use targeted validation.
+
+Run relevant lint and type checks.
+
+Use focused component and interaction tests.
+
+Use browser inspection where available
+to verify actual layouts.
+
+Do not run expensive end-to-end suites
+after every isolated UI change.
+
+However, do not skip verification
+of important user interactions.
+
+==================================================
+25. ACCEPTANCE CRITERIA
+==================================================
+
+The UI improvement batch is complete when:
+
+DASHBOARD:
+
+- Summary cards display real numerical values.
+- Metrics are clearly presented.
+- Sections are properly grouped.
+- Recent consultations use structured presentation.
+- Quick actions are accessible.
+
+PATIENTS:
+
+- Patient avatars are displayed.
+- Table view works.
+- Card view works.
+- Search works.
+- Filters work.
+- Patient profile is properly organized.
+
+CONSULTATIONS:
+
+- Clinical information is grouped.
+- Notes are readable and structured.
+- Diagnosis interactions are usable.
+- Procedures are clearly displayed.
+- Save feedback works.
+- Finalization confirmation works.
+
+DENTAL:
+
+- The 3D model fits its container.
+- Controls are accessible.
+- Selected tooth details are structured.
+- Findings can be recorded through appropriate UI.
+- Clinical history is readable.
+
+TREATMENTS:
+
+- Treatment plans use structured cards or tables.
+- Progress is understandable.
+- Statuses are consistent.
+
+DOCUMENTS:
+
+- Documents have structured presentation.
+- Preview interactions work.
+- File actions are accessible.
+
+GLOBAL:
+
+- White dashboard appearance.
+- Consistent typography.
+- Consistent spacing.
+- Consistent page headers.
+- Proper cards and containers.
+- Appropriate tables.
+- Appropriate modals.
+- Toast notifications.
+- Loading skeletons.
+- Meaningful empty states.
+- Responsive layouts.
+- Accessible interactions.
+- Consistent shadcn components.
+- Existing backend functionality preserved.
+- Organization branding remains configurable.
+
+No implemented page should remain as
+an unstructured collection of fields
+and text without appropriate layout.
+
+==================================================
+26. FINAL INSTRUCTIONS
+==================================================
+
+Inspect the current Medframe frontend.
+
+Identify all implemented routes and components.
+
+Perform a complete interface audit.
+
+Then implement the improvements across
+the entire existing application.
+
+Use shadcn/ui extensively.
+
+Prioritize:
+
+1. Professional appearance
+2. Information hierarchy
+3. Dashboard statistics
+4. Tables and cards
+5. Proper content grouping
+6. Patient avatars
+7. Consistent modals
+8. Toast notifications
+9. Typography
+10. Spacing
+11. Responsiveness
+12. Accessibility
+
+Do not add decorative components merely
+to make a page appear more complex.
+
+Every component should improve readability,
+organization, usability, or interaction.
+
+Keep the default interface white.
+
+Preserve Medframe branding.
+
+Preserve existing functionality.
+
+At completion, provide:
+
+- Pages reviewed
+- Pages improved
+- Components introduced
+- Significant UX changes
+- Tests performed
+- Remaining UI issues, if any
+
+DO NOT PROCEED TO THE NEXT FEATURE BATCH.
+
+Complete the current UI improvement batch first.
+
+The final result should feel like a polished,
+professional healthcare management application
+rather than a collection of basic forms and pages.
