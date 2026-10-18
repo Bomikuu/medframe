@@ -115,3 +115,11 @@ The anatomical replacement is active locally after the user authorized its block
 - Findings, current-visit procedures and finalized tooth history stay with their existing GraphQL/RHF/revision owners. Camera, jaw, isolation and educational reference state never write clinical records. An absent finding is not a healthy diagnosis.
 - Missing-tooth visibility reflects exact active missing/absent terms. Educational reference anatomy can reveal a hidden tooth without altering the record. Proposed/completed care retains explicit statuses.
 - Hidden encounter tabs preserve registered values but do not mount the 3D viewer. Primary dentition uses the correct 20-tooth 2D fallback until suitable anatomy is installed. Read-only clinical content retains interactive view controls without enabling writes.
+
+## Dental editor point notes (local review)
+
+- Consultations default to the viewport dental workspace. Radix Dialog owns focus/escape; Back to consultation returns to Notes without discarding RHF values. Save/version/IME/permission handling remains in EncounterEditor.
+- Comment stores a clicked mesh-local point and whitelisted asset version; it never infers a clinical surface. Drags do not create pins. Individual tooth navigation and the 2D chart remain keyboard alternatives.
+- Unposted note text is local, navigation guarded and explicitly added/cancelled before the editor save action. Added notes use existing consultation save/finalization; a preview is not saved evidence.
+- Current draft edits/resolution remain distinct from read-only historical notes. Exact JSON revisions/chart snapshots own coordinates; the normalized finding index retains clinical fields. Comparison includes anchor changes, and invalid asset/point/tooth combinations are rejected.
+- This local implementation has a logged browser coverage gap. See `docs/operations/dental-editor-verification.md` and EDITOR-001/002 before changing verification status.
