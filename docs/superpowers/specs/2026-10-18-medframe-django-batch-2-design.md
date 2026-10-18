@@ -1,6 +1,6 @@
 # Medframe Batch 2 — Advanced Clinical Experience
 
-Status: design for review. Product implementation has not started. The user requested the next phase and explicitly selected **clinic verification followed by an invitation** for linking a portal account to an existing patient. Native execution without subagents remains the selected method.
+Status: written design approved by the user with “yes” on October 18, 2026. The implementation plan is prepared for its required written review; product implementation has not started. The user requested the next phase and explicitly selected **clinic verification followed by an invitation** for linking a portal account to an existing patient. Native execution without subagents remains the selected method.
 
 ## Outcome and preserved baseline
 
@@ -146,4 +146,4 @@ Keep licensed clinical geometry/logo validation, production SMTP/network/secrets
 
 ## Review decision
 
-The invitation-linking policy is confirmed. The consequential additions proposed for this phase are clinician-controlled release of exact record versions, separate patient-reported submissions, and one native Django session realm at a time. Review this written design before its implementation plan is created. This document is a design artifact, not a claim that Batch 2 is implemented.
+The invitation-linking policy is confirmed. The consequential additions proposed for this phase are clinician-controlled release of exact record versions, separate patient-reported submissions, and one native Django session realm at a time. The user has reviewed and approved this written design. The concrete plan is `docs/superpowers/plans/2026-10-18-medframe-django-batch-2.md`; its written review precedes native implementation. This document is a design artifact, not a claim that Batch 2 is implemented.
