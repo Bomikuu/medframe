@@ -1,6 +1,6 @@
 # Medframe Batch 3 — Clinic Operations
 
-Status: proposed design for user review; no Batch 3 product code or migrations have been applied.
+Status: design approved by the user on October 19, 2026. Implementation plan prepared for review; no Batch 3 product code or migrations have been applied.
 
 ## Purpose and execution
 
