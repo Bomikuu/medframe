@@ -1,0 +1,2800 @@
+Medframe should be a medical platform first, an appointment system second, and a website builder later.
+The core product is the doctor's clinical workspace, where healthcare professionals can manage patients, examine interactive 3D medical models, document diagnoses, perform clinical procedures, manage treatments, and maintain secure longitudinal medical records.
+The website builder remains part of the long-term vision, but it should not influence our initial development priorities.
+Updated development priorities
+Phase	Module	Priority
+1	Foundation, Security & Authentication	Critical
+2	Doctor Workspace & Patient Management	Critical
+3	Clinical Consultations & Medical Records	Critical
+4	Interactive 3D Dental Chart	Critical
+5	Treatment Plans, Procedures & Clinical History	Critical
+6	Patient Portal & Medical Record Access	High
+7	Appointment Scheduling	High
+8	Live Queue & Waiting Time Predictions	High
+9	Billing, Payments & Notifications	High
+10	X-ray, Laboratory & Diagnostic Collaboration	Medium
+11	Interactive 3D Human Anatomy	Medium
+12	Personalized Clinic Websites & Website Builder	Later
+13	Advanced Analytics & Integrations	Later
+
+
+First milestone: A dentist can register a patient, open their medical record, interact with a 3D dental model, record tooth-specific diagnoses and procedures, upload supporting documents, and save a complete consultation.
+Full Copy-Paste Implementation Prompt
+# MEDFRAME
+## The Foundation of Modern Care
+### Clinical-First Healthcare Management Platform
+### Master Implementation Specification — Version 3.0
+
+# ============================================================
+# 0. PROJECT OVERVIEW
+# ============================================================
+
+Build Medframe, a secure, modern, multi-tenant healthcare
+management platform designed primarily for medical professionals
+and their patients.
+
+Project Name: Medframe
+Repository: medframe
+Tagline: The Foundation of Modern Care.
+
+Medframe is a clinical operating system that combines:
+
+- Doctor and dentist workspaces
+- Patient registration and management
+- Electronic medical records (EMR)
+- Clinical consultation management
+- Diagnosis and procedure documentation
+- Interactive 3D dental charting
+- Interactive anatomical visualization
+- Medical annotations
+- Treatment planning
+- Longitudinal patient history
+- Secure medical document storage
+- Patient portals
+- Appointment scheduling
+- Real-time queue management
+- Billing and payments
+- Diagnostic center collaboration
+- Clinic administration
+- Personalized clinic websites
+
+INITIAL FOCUS:
+
+1. Dental Clinics
+2. General Medical Practices
+
+The architecture should support future specialties without
+requiring major changes to the application.
+
+IMPORTANT:
+
+Medframe is a clinical platform first.
+
+Prioritize actual medical workflows and medical records
+before implementing appointment scheduling, public websites,
+or a website builder.
+
+The first implementation must focus on:
+
+1. Doctors and dentists
+2. Patients
+3. Medical records
+4. Consultations
+5. Diagnosis documentation
+6. Interactive 3D dental models
+7. Treatment plans
+8. Clinical history
+
+Appointment booking and queue management come AFTER the
+core clinical workflows are functional.
+
+Public clinic landing pages and website customization
+come MUCH LATER.
+
+Do not prioritize marketing pages, clinic directories,
+or website-builder functionality in the initial implementation.
+
+Build working functionality with real persistence.
+
+Avoid static demonstrations that look functional
+but do not actually save or retrieve data.
+
+# ============================================================
+# 1. TECHNOLOGY STACK
+# ============================================================
+
+FRONTEND:
+
+- Next.js with App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Hook Form
+- Zod
+- GraphQL client
+- GraphQL Code Generator
+- React Three Fiber
+- Three.js
+- GLTF / GLB anatomical assets
+
+BACKEND:
+
+- Python
+- FastAPI
+- Strawberry GraphQL
+- SQLAlchemy
+- Alembic
+- PostgreSQL
+- Redis
+- Background job processing
+- WebSockets or GraphQL subscriptions
+
+STORAGE:
+
+- PostgreSQL for structured data
+- Private S3-compatible object storage
+- Redis for caching and transient processing
+
+ARCHITECTURE:
+
+Use a modular monolith initially.
+
+Organize functionality into independent domain modules.
+
+Avoid premature microservices.
+
+Keep:
+
+- Business logic in backend services
+- Clinical data separate from visualization
+- Authentication separate from authorization
+- Financial records separate from clinical records
+- Historical records separate from current state projections
+
+Use GraphQL as the primary application API.
+
+Use FastAPI REST endpoints where more appropriate,
+such as file uploads, health checks, and integrations.
+
+Use strict TypeScript and typed GraphQL contracts.
+
+# ============================================================
+# 2. REPOSITORY STRUCTURE
+# ============================================================
+
+Repository:
+
+medframe/
+
+Recommended structure:
+
+medframe/
+├── apps/
+│   └── web/
+│       ├── app/
+│       ├── components/
+│       ├── features/
+│       │   ├── auth/
+│       │   ├── dashboard/
+│       │   ├── patients/
+│       │   ├── clinical/
+│       │   ├── dental/
+│       │   ├── anatomy/
+│       │   ├── treatments/
+│       │   ├── documents/
+│       │   ├── appointments/
+│       │   ├── queues/
+│       │   └── settings/
+│       ├── hooks/
+│       ├── lib/
+│       ├── styles/
+│       └── public/
+│
+├── services/
+│   └── api/
+│       ├── app/
+│       │   ├── core/
+│       │   ├── graphql/
+│       │   ├── modules/
+│       │   │   ├── identity/
+│       │   │   ├── organizations/
+│       │   │   ├── patients/
+│       │   │   ├── encounters/
+│       │   │   ├── clinical/
+│       │   │   ├── dental/
+│       │   │   ├── anatomy/
+│       │   │   ├── treatments/
+│       │   │   ├── documents/
+│       │   │   ├── appointments/
+│       │   │   └── queues/
+│       │   └── services/
+│       ├── migrations/
+│       └── tests/
+│
+├── packages/
+│   └── shared/
+│
+├── infrastructure/
+├── docs/
+└── README.md
+
+Start with a single Next.js application.
+
+Use route groups and role-specific layouts.
+
+Do not create several frontend applications unnecessarily.
+
+# ============================================================
+# 3. BRAND IDENTITY
+# ============================================================
+
+NAME:
+
+Medframe
+
+TAGLINE:
+
+The Foundation of Modern Care.
+
+BRAND PERSONALITY:
+
+- Professional
+- Clinical
+- Trustworthy
+- Minimal
+- Modern
+- Secure
+- Sophisticated
+- Reliable
+
+Medframe should resemble an established healthcare
+technology company.
+
+Avoid childish or overly playful design.
+
+COLORS:
+
+Primary:
+#0F2D4A — Deep Navy
+
+Secondary:
+#0EA5A4 — Medical Teal
+
+Accent:
+#22C1B6 — Soft Teal
+
+Background:
+#F8FAFC — Off White
+
+Supporting Text:
+#475569 — Slate
+
+TYPOGRAPHY:
+
+Inter
+
+LOGO:
+
+Use the selected Medframe medical symbol,
+concept #11 from the previous logo exploration.
+
+It features an abstract human-inspired medical
+symbol with medical-staff geometry.
+
+Use the approved logo reference when available.
+
+Do not replace it with an unrelated generic logo.
+
+Prefer flat colors.
+
+Avoid excessive gradients.
+
+DESIGN PRINCIPLES:
+
+- Clean
+- Professional
+- Accessible
+- Consistent
+- Information-efficient
+- Responsive
+- Subtle borders
+- Minimal shadows
+- Clear visual hierarchy
+
+Avoid:
+
+- Excessive gradients
+- Cartoonish illustrations
+- Unnecessary decorations
+- Too many cards
+- Excessive nested containers
+- Unnecessarily large UI elements
+- Crowded consultation interfaces
+
+IMPORTANT:
+
+Do not force specific layouts for all pages.
+
+The clinical workspace should prioritize efficiency,
+patient context, and medical documentation.
+
+The patient portal should prioritize clarity
+and ease of use.
+
+Use shadcn/ui and existing project conventions.
+
+# ============================================================
+# 4. INITIAL APPLICATION EXPERIENCES
+# ============================================================
+
+Initially implement:
+
+1. Doctor / Dentist Workspace
+2. Patient Management
+3. Clinical Consultation Workspace
+4. Interactive Dental Chart
+5. Medical Records
+6. Patient Portal
+
+Later introduce:
+
+7. Appointment Management
+8. Queue Management
+9. Billing and Notifications
+10. Diagnostic Collaboration
+11. General Anatomy Visualization
+12. Personalized Clinic Websites
+
+The product must be useful to a doctor
+even before appointment scheduling exists.
+
+A doctor should be able to register a patient,
+conduct a consultation, document findings,
+and manage treatment history without depending
+on the booking system.
+
+# ============================================================
+# 5. AUTHENTICATION AND AUTHORIZATION
+# ============================================================
+
+Implement secure authentication.
+
+SUPPORT:
+
+- Account registration where permitted
+- Login
+- Logout
+- Secure sessions
+- Password recovery
+- Session expiration
+- Session revocation
+- MFA for clinical and administrative staff
+
+INITIAL ROLES:
+
+- Platform Administrator
+- Clinic Administrator
+- Doctor
+- Dentist
+- Nurse
+- Receptionist
+- Patient
+
+Additional roles can be added later.
+
+Use role-based and relationship-based access control.
+
+IMPORTANT:
+
+A doctor's role alone should not automatically
+grant access to every patient's medical records.
+
+Access must depend on:
+
+- Organization membership
+- Assigned permissions
+- Clinical relationship
+- Patient record authorization
+- Relevant consent or other lawful authorization
+
+PATIENT PRIVACY:
+
+Patient A cannot access Patient B's records.
+
+Doctor A cannot access unrelated patient records.
+
+Clinic A cannot access Clinic B's private records
+without an explicitly authorized sharing process.
+
+Receptionists should not automatically have access
+to detailed clinical notes.
+
+Enforce permissions on the backend.
+
+Never trust frontend role checks.
+
+# ============================================================
+# 6. MULTI-TENANT ORGANIZATIONS
+# ============================================================
+
+Medframe must support multiple clinics.
+
+Each organization maintains its own:
+
+- Staff
+- Patients
+- Providers
+- Consultations
+- Medical records
+- Dental charts
+- Treatment plans
+- Documents
+- Services
+- Appointments
+
+An organization may contain multiple branches.
+
+A provider may work across multiple organizations.
+
+Permissions must be evaluated independently
+for every organization.
+
+CLINIC SETUP:
+
+Allow administrators to configure:
+
+- Clinic name
+- Clinic type
+- Branches
+- Contact information
+- Staff
+- Providers
+- Specialties
+
+For the initial development phase,
+keep clinic setup functional but minimal.
+
+Do not spend significant development effort
+on public-facing clinic websites yet.
+
+# ============================================================
+# 7. DOCTOR AND DENTIST DASHBOARD
+# ============================================================
+
+THIS IS ONE OF THE FIRST FEATURES TO IMPLEMENT.
+
+Create a professional clinical dashboard.
+
+The dashboard should help doctors manage
+their patients and current work.
+
+INCLUDE:
+
+PATIENTS:
+
+- Total registered patients
+- Recently accessed patients
+- Recent consultations
+- Patients with pending treatments
+- Patients requiring follow-up
+
+CLINICAL ACTIVITY:
+
+- Recent encounters
+- Draft consultations
+- Completed consultations
+- Pending clinical documentation
+- Treatment plans requiring attention
+
+QUICK ACTIONS:
+
+- Find Patient
+- Register Patient
+- Start Consultation
+- Open Dental Chart
+- Review Medical Records
+- Continue Draft Consultation
+
+PATIENT SEARCH:
+
+Doctors can search authorized patients by:
+
+- Name
+- Patient reference number
+- Other permitted identifying details
+
+Implement pagination and efficient search.
+
+Do not expose unrelated clinic records in results.
+
+Avoid unnecessary patient information
+in dashboard widgets.
+
+The dashboard must use real backend data.
+
+Do not rely on hardcoded UI arrays.
+
+# ============================================================
+# 8. PATIENT MANAGEMENT
+# ============================================================
+
+Implement comprehensive patient management.
+
+Doctors and authorized staff can:
+
+- Register patients
+- Search patients
+- Update permitted patient details
+- Review patient history
+- Start consultations
+- Upload documents
+- Review previous treatments
+
+PATIENT PROFILE:
+
+Include:
+
+PERSONAL INFORMATION:
+
+- Full name
+- Date of birth
+- Sex or other clinically relevant demographic fields
+- Contact information
+- Address where necessary
+- Emergency contact
+- Authorized guardian information where applicable
+
+MEDICAL INFORMATION:
+
+- Medical history
+- Allergies
+- Current medications
+- Past procedures
+- Relevant medical conditions
+- Previous consultations
+- Clinical notes
+- Uploaded documents
+
+DENTAL INFORMATION:
+
+- Current dental chart
+- Tooth conditions
+- Dental procedures
+- Treatment history
+- Planned procedures
+
+FINANCIAL INFORMATION:
+
+- Charges
+- Payments
+- Outstanding balances
+
+IMPORTANT:
+
+Separate patient identity from medical records.
+
+A patient may receive treatment at multiple clinics,
+but organizations must not automatically gain access
+to records belonging to other organizations.
+
+PATIENT TIMELINE:
+
+Display clinical history chronologically.
+
+Example:
+
+January 2026:
+Initial Consultation
+
+March 2026:
+Dental Caries Diagnosed
+
+April 2026:
+Filling Completed
+
+October 2026:
+Follow-Up Consultation
+
+Allow selecting an event to view its details.
+
+Use backend-authoritative timestamps.
+
+# ============================================================
+# 9. CLINICAL CONSULTATION SYSTEM
+# ============================================================
+
+THIS IS A CORE FEATURE.
+
+Doctors must be able to create and manage
+structured patient encounters.
+
+A consultation must NOT require
+an appointment to exist.
+
+Support:
+
+- Walk-in consultations
+- Unscheduled consultations
+- Appointment-linked consultations
+- Follow-up consultations
+
+Each encounter should contain:
+
+- Patient
+- Organization
+- Branch
+- Responsible provider
+- Date and time
+- Reason for visit
+- Symptoms
+- Findings
+- Diagnoses
+- Procedures
+- Treatment plan
+- Medical notes
+- Documents
+- Encounter status
+
+ENCOUNTER STATUSES:
+
+- Draft
+- In Progress
+- Completed
+- Finalized
+- Amended
+
+Use explicit valid state transitions.
+
+Avoid allowing finalized records to be
+silently overwritten.
+
+------------------------------------------------------------
+9.1 CONSULTATION WORKSPACE
+------------------------------------------------------------
+
+Create a dedicated clinical workspace.
+
+The doctor should be able to review
+patient information while documenting care.
+
+INCLUDE:
+
+PATIENT OVERVIEW:
+
+- Patient identification
+- Relevant medical history
+- Allergies
+- Current medications
+- Previous consultations
+- Current symptoms
+
+CURRENT CONSULTATION:
+
+- Reason for visit
+- Patient-reported symptoms
+- Examination findings
+- Clinical diagnosis
+- Procedures
+- Medical notes
+
+MEDICAL VISUALIZATION:
+
+- Dental chart
+- Anatomical model where applicable
+
+DOCUMENTS:
+
+- X-rays
+- Laboratory reports
+- Photographs
+- Other medical files
+
+TREATMENT:
+
+- Treatment plan
+- Current services
+- Procedures performed
+- Follow-up instructions
+
+BILLING:
+
+- Consultation charges
+- Additional services
+- Outstanding balance
+
+The consultation workspace should avoid
+unnecessary navigation between unrelated pages.
+
+Use contextual interactions where appropriate.
+
+------------------------------------------------------------
+9.2 SOAP NOTES
+------------------------------------------------------------
+
+Support structured SOAP documentation.
+
+S — Subjective
+
+Patient-reported symptoms and concerns.
+
+O — Objective
+
+Clinician-observed findings.
+
+A — Assessment
+
+Clinical assessment and diagnosis.
+
+P — Plan
+
+Treatment, procedures, medication,
+referrals, and follow-up.
+
+Support:
+
+- Draft notes
+- Editing
+- Autosave
+- Finalization
+- Authorized amendments
+
+Preserve the distinction between:
+
+- Patient-reported symptoms
+- Clinician observations
+- Confirmed diagnoses
+- Proposed treatments
+- Completed procedures
+
+Only authorized clinicians may finalize
+clinical diagnoses and treatment records.
+
+# ============================================================
+# 10. CLINICAL DIAGNOSIS AND FINDINGS
+# ============================================================
+
+Create a structured diagnosis recording system.
+
+Doctors should be able to:
+
+- Search or select diagnosis terminology
+- Add a diagnosis
+- Assign clinical status
+- Record severity where relevant
+- Add notes
+- Associate anatomical locations
+- Link findings to an encounter
+- Link findings to treatment plans
+
+Support:
+
+- Suspected conditions
+- Differential considerations
+- Confirmed diagnoses
+- Resolved conditions
+- Historical conditions
+
+Do not treat every selected symptom as a diagnosis.
+
+Keep diagnosis status explicit.
+
+SUPPORT TERMINOLOGY:
+
+Design for future interoperability with
+recognized clinical terminology systems.
+
+Do not hardcode clinical terminology directly
+into frontend components.
+
+Maintain versioned, configurable reference data.
+
+CLINICAL ACCOUNTABILITY:
+
+Medframe must not independently diagnose patients.
+
+The system records and visualizes
+clinician-confirmed information.
+
+Optional AI assistance can be added later,
+subject to clinical review and safeguards.
+
+# ============================================================
+# 11. INTERACTIVE 3D DENTAL MODEL
+# ============================================================
+
+THIS IS A PRIMARY PRODUCT DIFFERENTIATOR.
+
+Build an interactive 3D dental chart
+integrated with the patient's medical record.
+
+Use:
+
+- React Three Fiber
+- Three.js
+- GLTF / GLB dental models
+
+The model should represent a complete
+human dental arrangement.
+
+Support permanent and primary dentition.
+
+Use a standard tooth numbering system,
+such as FDI.
+
+------------------------------------------------------------
+11.1 MODEL INTERACTIONS
+------------------------------------------------------------
+
+The user should be able to:
+
+- Rotate the dental model
+- Zoom in and out
+- Pan
+- Select individual teeth
+- Highlight selected teeth
+- Isolate specific teeth
+- Show or hide upper jaw
+- Show or hide lower jaw
+- Reset camera position
+- Switch between standard viewing angles
+
+Every tooth must be independently selectable.
+
+Each tooth must have a stable clinical identifier.
+
+Support both mouse and touch interactions.
+
+Provide accessible alternatives to 3D interactions.
+
+------------------------------------------------------------
+11.2 TOOTH SELECTION
+------------------------------------------------------------
+
+When a tooth is selected, show its clinical information.
+
+Example:
+
+TOOTH 16
+
+Upper Right First Molar
+
+Condition:
+Dental Caries
+
+Severity:
+Moderate
+
+Affected Surface:
+Occlusal
+
+Recommended Treatment:
+Dental Filling
+
+Status:
+Treatment Pending
+
+Provide contextual actions:
+
+- Record Finding
+- Add Diagnosis
+- Add Procedure
+- Add Treatment
+- View History
+- Add Note
+
+------------------------------------------------------------
+11.3 TOOTH CONDITIONS
+------------------------------------------------------------
+
+Support structured tooth conditions such as:
+
+- Healthy
+- Dental caries
+- Cavity
+- Fractured tooth
+- Missing tooth
+- Existing filling
+- Existing crown
+- Dental implant
+- Root canal treatment
+- Gum inflammation
+- Other documented conditions
+
+Allow multiple findings where clinically appropriate.
+
+Do not restrict a tooth to one mutually
+exclusive condition when multiple findings can coexist.
+
+------------------------------------------------------------
+11.4 TOOTH SURFACE SELECTION
+------------------------------------------------------------
+
+Support tooth surfaces.
+
+Examples:
+
+- Mesial
+- Distal
+- Buccal / Facial
+- Lingual / Palatal
+- Occlusal / Incisal
+
+The dentist should be able to select
+a particular surface of a tooth.
+
+Example:
+
+Tooth 16
+Surface: Occlusal
+Condition: Caries
+
+The model should visually represent
+the selected condition.
+
+Do not automatically affect every tooth surface.
+
+------------------------------------------------------------
+11.5 VISUAL CONDITION RENDERING
+------------------------------------------------------------
+
+The 3D model should visually respond
+to documented clinical findings.
+
+Examples:
+
+HEALTHY:
+
+Display the standard tooth appearance.
+
+DECAY:
+
+Display a localized darkened area.
+
+MISSING TOOTH:
+
+Hide or remove the tooth from the visual model.
+
+CRACK:
+
+Display an annotated fracture or crack.
+
+FILLING:
+
+Display a restoration on the relevant surface.
+
+CROWN:
+
+Display a crown representation.
+
+IMPLANT:
+
+Display an implant representation.
+
+GUM INFLAMMATION:
+
+Display an appropriate gum-region annotation.
+
+IMPORTANT:
+
+Visual representations must be clinically appropriate.
+
+Do not imply that a decorative visual simulation
+is an exact representation of the patient's anatomy.
+
+If precise geometry is unavailable,
+use explicit visual annotations instead of
+fabricating anatomical accuracy.
+
+------------------------------------------------------------
+11.6 DENTAL CHART DATA ARCHITECTURE
+------------------------------------------------------------
+
+Do not store the 3D model as the medical record.
+
+Store structured clinical data in PostgreSQL.
+
+Example conceptual model:
+
+DentalChart
+    Patient
+    Organization
+    DentitionType
+    Teeth
+    RecordedFindings
+    Treatments
+    History
+
+Tooth
+    ToothNumber
+    DentitionType
+    PresenceStatus
+    Findings
+    SurfaceFindings
+    ExistingRestorations
+    Treatments
+
+ToothFinding
+    Tooth
+    Surface
+    Condition
+    Status
+    Severity
+    Notes
+    RecordedBy
+    RecordedAt
+    Encounter
+
+The 3D model reads these records
+and renders the appropriate visualization.
+
+Separating data from rendering allows:
+
+- 3D chart
+- 2D chart
+- Printable reports
+- Treatment history
+- Future mobile rendering
+
+All to use the same clinical data.
+
+------------------------------------------------------------
+11.7 DENTAL CHART EDITING
+------------------------------------------------------------
+
+Dentists can:
+
+- Add findings
+- Update draft findings
+- Record conditions
+- Add treatment plans
+- Document procedures
+- Review historical findings
+
+Use explicit save operations.
+
+Support draft and finalized records.
+
+Do not modify finalized clinical records
+without authorized amendments.
+
+Every significant change must be auditable.
+
+------------------------------------------------------------
+11.8 DENTAL HISTORY
+------------------------------------------------------------
+
+Maintain historical dental chart states.
+
+Example:
+
+January:
+Healthy tooth
+
+March:
+Caries recorded
+
+April:
+Filling completed
+
+October:
+Follow-up examination
+
+Provide:
+
+- Historical chart viewing
+- Timeline navigation
+- Previous vs current comparison
+- Tooth-specific treatment history
+
+Historical chart states should represent
+what was recorded at that time.
+
+Do not silently modify earlier clinical snapshots
+when later findings change.
+
+------------------------------------------------------------
+11.9 TREATMENT PREVIEW
+------------------------------------------------------------
+
+Allow dentists to demonstrate proposed treatments.
+
+Example:
+
+Current:
+Missing Tooth
+
+Proposed:
+Dental Implant
+
+Preview:
+Illustrative restored tooth
+
+Keep proposed treatments separate from
+confirmed clinical conditions and completed procedures.
+
+A treatment preview must never modify
+the patient's actual medical record.
+
+Only committed, authorized clinical actions
+may change the recorded state.
+
+------------------------------------------------------------
+11.10 2D FALLBACK
+------------------------------------------------------------
+
+Provide a conventional 2D dental chart.
+
+The clinical workflow must remain usable
+if WebGL or 3D rendering is unavailable.
+
+The 2D and 3D interfaces must share
+the same clinical records.
+
+# ============================================================
+# 12. DENTAL PROCEDURES AND TREATMENTS
+# ============================================================
+
+Dentists should be able to record
+procedures performed during consultations.
+
+Examples:
+
+- Dental examination
+- Cleaning
+- Filling
+- Extraction
+- Root canal
+- Crown placement
+- Dental implant
+- Orthodontic adjustment
+
+Each procedure may contain:
+
+- Associated tooth
+- Associated surfaces
+- Procedure name
+- Performing dentist
+- Date
+- Findings
+- Notes
+- Status
+- Linked encounter
+- Associated charges
+
+SUPPORT PROCEDURE STATES:
+
+- Proposed
+- Planned
+- In Progress
+- Completed
+- Cancelled
+
+Do not confuse proposed procedures
+with completed procedures.
+
+When a procedure is completed,
+update the corresponding current dental
+chart projection where appropriate.
+
+Preserve the full treatment history.
+
+# ============================================================
+# 13. TREATMENT PLANS
+# ============================================================
+
+Allow doctors and dentists to create
+multi-visit treatment plans.
+
+Example:
+
+ROOT CANAL TREATMENT PLAN
+
+Step 1:
+Initial Examination
+
+Step 2:
+Root Canal Procedure
+
+Step 3:
+Crown Placement
+
+Step 4:
+Follow-Up
+
+Each plan can contain:
+
+- Patient
+- Provider
+- Diagnosis or indication
+- Proposed procedures
+- Estimated cost
+- Appointment links when available
+- Status
+- Notes
+- Created date
+
+Each treatment item can have:
+
+- Planned date
+- Actual completion date
+- Procedure
+- Responsible provider
+- Estimated price
+- Status
+
+Support:
+
+- Proposed
+- Accepted
+- Scheduled
+- In Progress
+- Completed
+- Cancelled
+
+Allow doctors to update progress.
+
+Patients should later be able to
+review their authorized treatment plans.
+
+# ============================================================
+# 14. MEDICAL RECORDS AND PATIENT HISTORY
+# ============================================================
+
+Create a complete electronic medical record foundation.
+
+The system must maintain longitudinal records.
+
+Support:
+
+- Patient medical history
+- Allergies
+- Medications
+- Clinical encounters
+- Symptoms
+- Examination findings
+- Diagnoses
+- Procedures
+- Treatment plans
+- Dental charts
+- Clinical notes
+- Medical documents
+- Follow-ups
+
+Every significant clinical record should identify:
+
+- Patient
+- Organization
+- Responsible clinician
+- Encounter when applicable
+- Date recorded
+- Clinical status
+- Author
+- Relevant version information
+
+RECORD INTEGRITY:
+
+- Preserve historical information
+- Support auditable amendments
+- Prevent unauthorized deletion
+- Preserve finalized encounters
+- Track significant changes
+
+Provide:
+
+- Chronological timeline
+- Encounter history
+- Diagnosis history
+- Treatment history
+- Document history
+
+Do not automatically merge records
+from unrelated clinics.
+
+# ============================================================
+# 15. MEDICAL DOCUMENT STORAGE
+# ============================================================
+
+Doctors should be able to upload
+supporting documents.
+
+Examples:
+
+- X-rays
+- Dental photographs
+- Laboratory reports
+- Prescriptions
+- Medical certificates
+- Referral documents
+- Other medical records
+
+Support:
+
+- Secure uploads
+- Document metadata
+- Patient association
+- Encounter association
+- File previews
+- Document download
+- Version history
+
+Use private object storage.
+
+Implement:
+
+- File size restrictions
+- File type validation
+- Malware scanning
+- Access control
+- Encryption
+- Signed temporary download URLs
+- Audit logging
+
+Never store medical documents in publicly
+accessible application directories.
+
+Do not expose permanent public file URLs.
+
+Do not include sensitive filenames or content
+in public logs.
+
+# ============================================================
+# 16. PATIENT PORTAL
+# ============================================================
+
+AFTER THE CORE CLINICAL WORKSPACE,
+IMPLEMENT THE PATIENT PORTAL.
+
+The patient portal provides a secure way
+for patients to access authorized information.
+
+PATIENT DASHBOARD:
+
+- Profile
+- Medical history
+- Recent consultations
+- Available diagnoses and findings
+- Treatment plans
+- Medical documents
+- Follow-up instructions
+
+DENTAL VIEW:
+
+Patients can view their dental chart.
+
+Support:
+
+- Rotate
+- Zoom
+- Select tooth
+- View findings made available to the patient
+- View completed procedures
+- View treatment plans
+- Review tooth history
+
+PATIENT PERMISSIONS:
+
+Patients should have read-only access
+to clinician-authored clinical findings.
+
+Patients may add their own:
+
+- Symptoms
+- Concerns
+- Intake information
+- Personal notes where supported
+
+Do not allow patients to silently modify
+doctor-confirmed diagnoses.
+
+Patient-reported information must remain
+separate from clinician-confirmed records.
+
+PATIENT IDENTITY:
+
+Require appropriate verification before
+linking accounts to existing medical records.
+
+Support guardian access where authorized.
+
+# ============================================================
+# 17. GENERAL PRACTICE CLINICAL WORKSPACE
+# ============================================================
+
+Support general medical consultations
+using the shared encounter architecture.
+
+Features:
+
+- Patient medical history
+- Current symptoms
+- Vital signs
+- Examination findings
+- Clinical notes
+- Diagnoses
+- Treatment plans
+- Medical documents
+- Prescriptions
+- Follow-ups
+
+Support structured vital signs such as:
+
+- Blood pressure
+- Heart rate
+- Respiratory rate
+- Temperature
+- Oxygen saturation
+- Height
+- Weight
+
+Do not hardcode one clinical form
+for every specialty.
+
+Allow specialty-specific templates.
+
+General practice should reuse:
+
+- Patient records
+- Encounters
+- Diagnoses
+- Documents
+- Audit logging
+- Treatment plans
+
+# ============================================================
+# 18. INTERACTIVE HUMAN ANATOMY
+# ============================================================
+
+AFTER THE DENTAL WORKFLOW IS STABLE,
+INTRODUCE INTERACTIVE ANATOMICAL MODELS.
+
+Use:
+
+- React Three Fiber
+- Three.js
+- Anatomical GLTF/GLB models
+
+Support:
+
+- External body
+- Skeletal system
+- Muscular system
+- Selected internal organs
+
+Doctors can:
+
+- Rotate model
+- Zoom
+- Select body region
+- Switch anatomical layers
+- Add medical annotations
+- Highlight symptoms
+- Record findings
+- Review history
+
+Example:
+
+Region:
+Left Knee
+
+Condition:
+Suspected Knee Injury
+
+Finding:
+Pain and swelling
+
+Status:
+Under Examination
+
+VISUAL ANNOTATIONS:
+
+- Pain
+- Swelling
+- Redness
+- Injury location
+- Other documented findings
+
+The body model must not
+independently diagnose injuries.
+
+Visual states must come from
+stored clinical information.
+
+Share an underlying medical annotation
+architecture with the dental module.
+
+Implement a basic 2D anatomical region map
+before full advanced anatomical layers if necessary.
+
+# ============================================================
+# 19. CLINICAL WORKFLOW INDEPENDENCE
+# ============================================================
+
+The clinical system must work without
+appointment scheduling.
+
+Doctors should be able to:
+
+1. Search or register patient.
+2. Start consultation.
+3. Record symptoms.
+4. Review history.
+5. Examine dental or anatomical model.
+6. Record findings.
+7. Add diagnosis.
+8. Add procedures.
+9. Create treatment plan.
+10. Upload documents.
+11. Save or finalize consultation.
+12. Review historical information.
+
+Appointments should eventually connect
+to encounters.
+
+However, encounters should not require
+an appointment foreign key.
+
+This is important for:
+
+- Walk-ins
+- Emergency visits
+- Unscheduled consultations
+- Imported historical records
+- Manual record entry
+
+Keep encounters as first-class clinical entities.
+
+# ============================================================
+# 20. APPOINTMENT SCHEDULING
+# ============================================================
+
+IMPLEMENT AFTER THE CLINICAL FOUNDATION.
+
+Support:
+
+- Appointment booking
+- Provider schedules
+- Service selection
+- Availability calendar
+- Rescheduling
+- Cancellation
+- Appointment history
+
+Appointment records should link to:
+
+- Patient
+- Clinic
+- Provider
+- Service
+- Scheduled start and end
+- Status
+- Encounter when applicable
+
+An appointment represents a scheduled visit.
+
+An encounter represents actual clinical care.
+
+Do not treat them as the same entity.
+
+AVAILABILITY ENGINE:
+
+Consider:
+
+- Provider schedules
+- Service duration
+- Clinic hours
+- Breaks
+- Existing bookings
+- Rooms
+- Dental chairs
+- Required resources
+- Closures
+
+Prevent double-booking.
+
+Use database-backed concurrency controls.
+
+# ============================================================
+# 21. PUBLIC APPOINTMENT CALENDAR
+# ============================================================
+
+When public booking is introduced,
+provide a privacy-safe availability calendar.
+
+Example:
+
+OCTOBER 20
+
+10 appointments booked
+4 slots available
+
+OCTOBER 21
+
+7 appointments booked
+8 slots available
+
+OCTOBER 22
+
+Fully booked
+
+Unavailable slots display:
+
+"Taken"
+
+or
+
+"Unavailable"
+
+Never display:
+
+- Patient names
+- Diagnoses
+- Visit reasons
+- Medical notes
+- Private appointment information
+
+Counts must be privacy-safe aggregates.
+
+Support minimum aggregation thresholds
+or approximate occupancy categories
+when exact counts could reveal sensitive information.
+
+# ============================================================
+# 22. REAL-TIME QUEUE MANAGEMENT
+# ============================================================
+
+IMPLEMENT AFTER APPOINTMENTS.
+
+Queue management is one of Medframe's
+main operational features.
+
+GOAL:
+
+Patients should know how busy a clinic is
+before traveling.
+
+PUBLIC EXAMPLE:
+
+ABC Dental Clinic
+
+Status:
+Open
+
+Patients Waiting:
+5
+
+Currently Consulting:
+2
+
+Estimated Wait:
+35–50 minutes
+
+Do not expose patient identities.
+
+AUTHENTICATED PATIENT EXAMPLE:
+
+Your Appointment:
+10:30 AM
+
+Queue Number:
+A-012
+
+Patients Ahead:
+3
+
+Estimated Wait:
+25–40 minutes
+
+Actions:
+
+- Keep Appointment
+- Reschedule
+- Cancel
+
+Before check-in, distinguish scheduled
+appointment delay estimates from actual queue position.
+
+QUEUE ESTIMATION:
+
+Consider:
+
+- Number of waiting patients
+- Average consultation duration
+- Procedure duration
+- Active consultations
+- Provider availability
+- Treatment room availability
+- Late arrivals
+- No-shows
+- Cancellations
+- Emergency interruptions
+
+Support multiple providers.
+
+Display estimated ranges,
+not guaranteed waiting times.
+
+RECEPTIONIST ACTIONS:
+
+- Check in patient
+- Add walk-in
+- Call next patient
+- Mark consultation in progress
+- Complete consultation
+- Mark no-show
+- Reschedule
+- Handle delays
+
+Use authorized real-time updates.
+
+# ============================================================
+# 23. BILLING AND PAYMENTS
+# ============================================================
+
+Once clinical services and procedures work,
+introduce full billing functionality.
+
+Example:
+
+Dental Consultation:
+PHP 500
+
+Dental Cleaning:
+PHP 1,200
+
+Total:
+PHP 1,700
+
+Doctors can add appropriate services
+during consultation.
+
+Support:
+
+- Service catalog
+- Procedure charges
+- Invoice generation
+- Partial payments
+- Discounts
+- Refunds
+- Payment history
+- Outstanding balances
+
+Do not allow frontend values
+to determine authoritative prices.
+
+Use backend calculations.
+
+Financial changes must be authorized
+and auditable.
+
+Keep financial records separate
+from finalized clinical documentation.
+
+# ============================================================
+# 24. SMS AND NOTIFICATIONS
+# ============================================================
+
+Implement after appointment workflows.
+
+Support:
+
+- SMS
+- Email
+- In-app notifications
+
+EVENTS:
+
+- Appointment confirmation
+- Appointment reminder
+- Queue updates
+- Doctor delay
+- Rescheduling
+- Cancellation
+- Follow-up reminder
+- Diagnostic result availability
+
+Example:
+
+"Your appointment at ABC Dental Clinic
+is scheduled for October 20 at 10:30 AM.
+Confirm or reschedule using the secure link."
+
+Do not include detailed medical information
+in ordinary SMS notifications.
+
+Use background jobs.
+
+Track delivery status.
+
+Support safe retries and notification preferences.
+
+# ============================================================
+# 25. DIAGNOSTIC CENTER COLLABORATION
+# ============================================================
+
+Implement secure referrals and diagnostic sharing.
+
+EXAMPLE:
+
+1. Dentist creates panoramic X-ray request.
+2. Patient selects diagnostic center.
+3. Center accepts request.
+4. Examination is completed.
+5. Results are uploaded securely.
+6. Dentist receives notification.
+7. Dentist reviews results.
+8. Results become linked to clinical encounter.
+
+STATUS:
+
+- Requested
+- Accepted
+- Scheduled
+- In Progress
+- Results Available
+- Reviewed
+- Cancelled
+
+Apply strict access restrictions.
+
+Diagnostic centers should only access
+information required for authorized requests.
+
+Support consent and audit history.
+
+Prepare for future FHIR and DICOMweb integration.
+
+# ============================================================
+# 26. CLINIC ADMINISTRATION
+# ============================================================
+
+Provide administrative capabilities for:
+
+- Clinic profile
+- Branches
+- Staff
+- Providers
+- Permissions
+- Clinical services
+- Scheduling
+- Billing
+- Medical document policies
+- Notifications
+- Audit review
+
+Initially implement only what is necessary
+to support secure clinical workflows.
+
+Expand operational administration
+as later modules are introduced.
+
+# ============================================================
+# 27. PERSONALIZED CLINIC WEBSITES
+# ============================================================
+
+THIS IS A LATER DEVELOPMENT PHASE.
+
+DO NOT IMPLEMENT THE WEBSITE BUILDER
+BEFORE THE CORE CLINICAL SYSTEM.
+
+Every clinic should eventually have
+a personalized public website.
+
+Route:
+
+/clinics/[slug]
+
+This route represents the clinic's complete
+branded website, not a generic profile page.
+
+Each clinic can customize:
+
+- Logo
+- Colors
+- Typography
+- Hero content
+- Images
+- Services
+- Providers
+- Gallery
+- Testimonials
+- FAQ
+- Booking
+- Queue information
+- Contact details
+
+The website must use the clinic's own branding.
+
+Medframe provides the underlying infrastructure.
+
+------------------------------------------------------------
+27.1 FUTURE WEBSITE BUILDER
+------------------------------------------------------------
+
+Route:
+
+/clinic/website
+
+Allow clinics to:
+
+- Choose template
+- Customize branding
+- Add sections
+- Remove sections
+- Reorder sections
+- Edit content
+- Preview
+- Save drafts
+- Publish
+- Review revisions
+- Restore earlier versions
+
+Use structured, versioned page configuration.
+
+Store website metadata and configuration
+in PostgreSQL.
+
+Use JSONB for typed section configuration.
+
+Avoid arbitrary executable JavaScript.
+
+------------------------------------------------------------
+27.2 DYNAMIC CONTENT
+------------------------------------------------------------
+
+Public website components should use
+existing Medframe domain data.
+
+Examples:
+
+Services:
+Existing clinic service catalog.
+
+Providers:
+Existing provider profiles.
+
+Booking:
+Actual availability engine.
+
+Queue:
+Anonymous privacy-safe queue summary.
+
+Do not duplicate clinical or operational data
+inside website configuration.
+
+------------------------------------------------------------
+27.3 FUTURE CUSTOM DOMAINS
+------------------------------------------------------------
+
+Support verified domains later.
+
+Example:
+
+medframe.com/clinics/bright-smile-dental
+
+Custom domain:
+
+brightsmiledental.com
+
+Implement secure domain verification,
+TLS, canonical URLs, and domain mapping.
+
+Do not prioritize this during clinical development.
+
+# ============================================================
+# 28. DATABASE DESIGN
+# ============================================================
+
+Use PostgreSQL with SQLAlchemy and Alembic.
+
+PRIORITIZE CLINICAL DATA FIRST.
+
+INITIAL TABLES:
+
+IDENTITY:
+
+- users
+- sessions
+- organizations
+- branches
+- memberships
+- roles
+- permissions
+
+PATIENTS:
+
+- patients
+- patient_accounts
+- patient_guardians
+- medical_histories
+- allergies
+- medications
+
+CLINICAL:
+
+- encounters
+- clinical_notes
+- observations
+- diagnoses
+- conditions
+- procedures
+- treatment_plans
+- treatment_items
+
+DENTAL:
+
+- dental_charts
+- teeth
+- tooth_findings
+- tooth_surfaces
+- dental_treatments
+- chart_revisions
+
+ANATOMY:
+
+- anatomical_regions
+- medical_annotations
+- annotation_revisions
+
+DOCUMENTS:
+
+- medical_documents
+- document_versions
+
+SECURITY:
+
+- audit_events
+- access_logs
+- consent_events
+
+LATER TABLES:
+
+APPOINTMENTS:
+
+- appointments
+- appointment_events
+- availability_rules
+
+QUEUES:
+
+- queue_entries
+- queue_events
+- check_ins
+
+FINANCE:
+
+- invoices
+- invoice_items
+- payments
+- payment_allocations
+- refunds
+
+DIAGNOSTICS:
+
+- diagnostic_requests
+- diagnostic_results
+- referral_permissions
+
+WEBSITES:
+
+- websites
+- website_pages
+- website_drafts
+- website_revisions
+- website_publications
+- website_templates
+- website_domains
+
+DATABASE PRINCIPLES:
+
+- Normalize core medical records.
+- Use foreign keys and constraints.
+- Preserve encounter history.
+- Include organization scope.
+- Enforce permissions.
+- Use appropriate indexes.
+- Protect finalized data.
+- Use versioning where necessary.
+- Use transactions for critical changes.
+
+Do not add all future tables immediately.
+
+Design current models for extensibility,
+but create tables as corresponding modules
+are implemented.
+
+# ============================================================
+# 29. GRAPHQL ARCHITECTURE
+# ============================================================
+
+Use Strawberry GraphQL with FastAPI.
+
+INITIAL QUERIES:
+
+- currentUser
+- myOrganizations
+- clinicPatients
+- patientDetails
+- patientHistory
+- patientEncounters
+- patientMedicalRecords
+- dentalChart
+- toothHistory
+- treatmentPlans
+- medicalDocuments
+
+INITIAL MUTATIONS:
+
+- createPatient
+- updatePatient
+- createEncounter
+- updateEncounterDraft
+- addClinicalNote
+- addDiagnosis
+- addObservation
+- addProcedure
+- saveDentalFinding
+- updateDentalChartDraft
+- finalizeEncounter
+- amendClinicalRecord
+- createTreatmentPlan
+- addTreatmentItem
+- uploadMedicalDocument
+
+LATER QUERIES:
+
+- clinicAppointments
+- appointmentAvailability
+- queueSummary
+- patientQueueStatus
+- clinicWebsite
+- websiteConfiguration
+
+LATER MUTATIONS:
+
+- bookAppointment
+- rescheduleAppointment
+- cancelAppointment
+- checkInPatient
+- updateQueueStatus
+- publishWebsite
+
+SECURITY:
+
+Enforce authorization inside backend services
+and GraphQL resolvers.
+
+Apply:
+
+- Pagination
+- Query complexity limits
+- Query depth limits
+- Rate limiting
+- Input validation
+- Tenant isolation
+
+Generate frontend TypeScript types
+from the GraphQL schema.
+
+# ============================================================
+# 30. MEDICAL DATA CONFIDENTIALITY
+# ============================================================
+
+SECURITY IS NON-NEGOTIABLE.
+
+Medframe handles sensitive medical information.
+
+Implement security from the beginning.
+
+AUTHENTICATION:
+
+- Secure sessions
+- MFA for staff
+- Password protection
+- Rate limiting
+- Session revocation
+
+AUTHORIZATION:
+
+- Organization isolation
+- Patient-level access control
+- Role permissions
+- Clinical relationship validation
+- Protected GraphQL operations
+
+DATA SECURITY:
+
+- TLS
+- Encryption at rest
+- Encrypted backups
+- Secure credential handling
+- Private file storage
+- No patient information in public logs
+
+AUDIT LOGGING:
+
+Record:
+
+- Who accessed medical information
+- Who modified medical information
+- When access occurred
+- What changed
+- Which organization was involved
+
+CLINICAL INTEGRITY:
+
+- Preserve finalized records
+- Track amendments
+- Prevent unauthorized changes
+- Retain historical information
+
+PATIENT CONSENT:
+
+Support appropriate consent and
+data-sharing authorization records.
+
+Design safeguards for applicable
+Philippine privacy and healthcare requirements.
+
+Do not claim legal compliance
+without appropriate review.
+
+Use synthetic patient data in development.
+
+# ============================================================
+# 31. REQUIRED TESTING
+# ============================================================
+
+SECURITY TESTS:
+
+- Clinic A cannot access Clinic B records.
+- Patient A cannot access Patient B records.
+- Unauthorized doctors cannot access unrelated patients.
+- Receptionists cannot access restricted clinical details.
+- Unauthorized file access is rejected.
+- Audit logs record sensitive operations.
+
+PATIENT TESTS:
+
+- Create patient.
+- Search authorized patients.
+- Update permitted information.
+- Retrieve patient history.
+- Prevent cross-tenant patient disclosure.
+
+CLINICAL TESTS:
+
+- Create encounter.
+- Save draft.
+- Add clinical note.
+- Add diagnosis.
+- Record procedure.
+- Finalize encounter.
+- Reject unauthorized modification.
+- Create authorized amendment.
+- Preserve history.
+
+DENTAL TESTS:
+
+- Select correct tooth identifier.
+- Record tooth condition.
+- Record affected surface.
+- Persist dental finding.
+- Retrieve saved chart.
+- Preserve tooth history.
+- Support multiple findings.
+- Prevent unauthorized edits.
+- Keep 2D and 3D states consistent.
+
+DOCUMENT TESTS:
+
+- Upload securely.
+- Associate with correct patient.
+- Enforce access control.
+- Reject unsupported file types.
+- Prevent public document access.
+
+Later add appointment, queue, billing,
+and website-builder tests.
+
+# ============================================================
+# 32. UPDATED DEVELOPMENT ROADMAP
+# ============================================================
+
+PHASE 1 — FOUNDATION
+
+Implement:
+
+- Repository initialization
+- Next.js
+- FastAPI
+- PostgreSQL
+- GraphQL
+- Authentication
+- Organizations
+- Roles and permissions
+- Medframe branding
+- Application shell
+- Audit logging
+
+GOAL:
+
+Doctors can securely sign in
+to their organization's workspace.
+
+------------------------------------------------------------
+PHASE 2 — PATIENT MANAGEMENT
+------------------------------------------------------------
+
+Implement:
+
+- Patient registration
+- Patient search
+- Patient profiles
+- Medical history
+- Allergies
+- Medications
+- Patient timeline foundation
+- Secure record access
+
+GOAL:
+
+Doctors can create and retrieve
+authorized patient records.
+
+------------------------------------------------------------
+PHASE 3 — CLINICAL CONSULTATIONS
+------------------------------------------------------------
+
+Implement:
+
+- Clinical encounters
+- Consultation workspace
+- SOAP notes
+- Symptoms
+- Examination findings
+- Diagnosis documentation
+- Drafts
+- Finalization
+- Authorized amendments
+
+GOAL:
+
+Doctors can conduct and document
+real consultations.
+
+------------------------------------------------------------
+PHASE 4 — INTERACTIVE 3D DENTAL CHART
+------------------------------------------------------------
+
+Implement:
+
+- Dental model
+- Tooth selection
+- Tooth numbering
+- Tooth conditions
+- Surface selection
+- Clinical annotations
+- Data persistence
+- Current dental chart
+- Dental history
+- 2D fallback
+
+GOAL:
+
+Dentists can interact with the 3D model,
+record findings, and save dental chart changes.
+
+------------------------------------------------------------
+PHASE 5 — TREATMENT AND CLINICAL HISTORY
+------------------------------------------------------------
+
+Implement:
+
+- Dental procedures
+- Treatment plans
+- Treatment progress
+- Tooth treatment history
+- Medical documents
+- Clinical timeline
+- Historical chart comparisons
+
+GOAL:
+
+Dentists can manage complete
+patient treatment histories.
+
+------------------------------------------------------------
+PHASE 6 — PATIENT PORTAL
+------------------------------------------------------------
+
+Implement:
+
+- Patient authentication
+- Identity verification
+- Patient dashboard
+- Medical record access
+- Dental chart viewing
+- Treatment plan viewing
+- Documents
+- Profile management
+
+GOAL:
+
+Patients can securely access
+their own available medical information.
+
+------------------------------------------------------------
+PHASE 7 — APPOINTMENT SCHEDULING
+------------------------------------------------------------
+
+Implement:
+
+- Provider schedules
+- Availability engine
+- Booking
+- Cancellation
+- Rescheduling
+- Appointment calendar
+- Appointment history
+
+GOAL:
+
+Patients can book consultations
+with participating clinics.
+
+------------------------------------------------------------
+PHASE 8 — LIVE QUEUE
+------------------------------------------------------------
+
+Implement:
+
+- Receptionist queue
+- Check-in
+- Walk-ins
+- Queue positions
+- Waiting time estimates
+- Real-time updates
+- Delay handling
+- No-shows
+
+GOAL:
+
+Patients can monitor waiting times
+and reschedule when necessary.
+
+------------------------------------------------------------
+PHASE 9 — BILLING AND NOTIFICATIONS
+------------------------------------------------------------
+
+Implement:
+
+- Service catalog pricing
+- Invoices
+- Payments
+- Outstanding balances
+- SMS reminders
+- Follow-up notifications
+
+GOAL:
+
+Clinics can manage financial
+and patient communication workflows.
+
+------------------------------------------------------------
+PHASE 10 — DIAGNOSTIC COLLABORATION
+------------------------------------------------------------
+
+Implement:
+
+- Diagnostic requests
+- Referral management
+- Diagnostic partner access
+- X-ray uploads
+- Secure result sharing
+- Result review
+
+GOAL:
+
+Clinicians can request and review
+external diagnostic results securely.
+
+------------------------------------------------------------
+PHASE 11 — GENERAL ANATOMY
+------------------------------------------------------------
+
+Implement:
+
+- Body-region selector
+- Anatomical annotations
+- 3D skeletal visualization
+- Muscular visualization
+- Clinical history
+- Body-region findings
+
+GOAL:
+
+General practitioners can document
+findings through anatomical visualization.
+
+------------------------------------------------------------
+PHASE 12 — PERSONALIZED CLINIC WEBSITES
+------------------------------------------------------------
+
+Implement:
+
+- Clinic public websites
+- Website templates
+- Website builder
+- Branding customization
+- Reusable sections
+- Preview
+- Publishing
+- Revision history
+- SEO
+- Future custom domains
+
+GOAL:
+
+Clinics can publish personalized websites
+powered by existing Medframe clinical
+and appointment infrastructure.
+
+------------------------------------------------------------
+PHASE 13 — ADVANCED FEATURES
+------------------------------------------------------------
+
+Implement as needed:
+
+- Advanced analytics
+- Improved queue predictions
+- Additional medical specialties
+- Healthcare interoperability
+- Advanced imaging
+- Clinician-supervised AI assistance
+
+# ============================================================
+# 33. FIRST WORKING MILESTONE
+# ============================================================
+
+THE FIRST WORKING MILESTONE IS CLINICAL.
+
+Do not build appointment booking
+or website customization for this milestone.
+
+REQUIRED WORKFLOW:
+
+1. Doctor logs into Medframe.
+2. Doctor opens the clinical dashboard.
+3. Doctor searches for a patient.
+4. Doctor registers a patient if needed.
+5. Doctor opens the patient profile.
+6. Doctor reviews medical history.
+7. Doctor starts a consultation.
+8. Doctor opens the interactive dental chart.
+9. Doctor selects a tooth.
+10. Doctor records a finding or diagnosis.
+11. Doctor selects affected tooth surfaces.
+12. Dental model reflects the recorded condition.
+13. Doctor adds clinical notes.
+14. Doctor adds a procedure or treatment plan.
+15. Doctor optionally uploads a supporting document.
+16. Doctor saves the consultation.
+17. Doctor finalizes the encounter.
+18. Patient history updates.
+19. Doctor can reopen and review historical information.
+
+The records must persist in PostgreSQL.
+
+The dental chart must load from stored clinical data.
+
+The 3D model must not rely on temporary frontend-only state
+for its authoritative clinical information.
+
+A refreshed page must retrieve the saved records.
+
+Historical records must be preserved.
+
+Patient confidentiality must be enforced.
+
+This is the first meaningful Medframe release.
+
+# ============================================================
+# 34. EXECUTION INSTRUCTIONS
+# ============================================================
+
+Before writing code:
+
+1. Inspect the repository.
+2. Identify existing conventions.
+3. Define backend domain boundaries.
+4. Define clinical data models.
+5. Establish authorization rules.
+6. Plan the initial database migrations.
+7. Define GraphQL contracts.
+8. Establish frontend design tokens.
+9. Begin the first phase.
+
+If the repository is empty, initialize it.
+
+IMPLEMENT IN VERTICAL SLICES.
+
+For example:
+
+Patient Registration:
+
+- Database model
+- Backend service
+- GraphQL mutation
+- Frontend form
+- Validation
+- Authorization
+- Relevant tests
+
+Then proceed to the next workflow.
+
+Do not create every database table
+before its corresponding module is needed.
+
+Do not introduce unnecessary abstractions.
+
+Avoid unrelated refactoring.
+
+Do not repeatedly execute full production builds
+for isolated changes.
+
+Use targeted validation.
+
+Run broader tests at appropriate integration
+and release checkpoints.
+
+Do not fake working functionality.
+
+If a medical 3D asset is unavailable,
+use an explicitly labeled development asset
+while preserving the real interactive architecture.
+
+Do not claim that an inaccurate placeholder
+is a clinically validated anatomical model.
+
+Keep implementation modular and maintainable.
+
+# ============================================================
+# 35. FINAL PRODUCT OBJECTIVE
+# ============================================================
+
+Medframe should become a complete
+clinical healthcare operating system.
+
+FOR DOCTORS:
+
+- Secure patient records
+- Efficient clinical documentation
+- Interactive medical visualization
+- Diagnosis and procedure tracking
+- Treatment planning
+- Longitudinal patient history
+
+FOR DENTISTS:
+
+- Interactive 3D dental chart
+- Tooth-specific findings
+- Surface-level annotations
+- Treatment visualization
+- Dental treatment history
+
+FOR PATIENTS:
+
+- Secure medical information
+- Treatment plans
+- Clinical history
+- Dental chart viewing
+- Appointment scheduling
+- Queue monitoring
+- Follow-up information
+
+FOR CLINICS:
+
+- Patient management
+- Clinical operations
+- Appointments
+- Queues
+- Billing
+- Staff management
+- Personalized websites
+
+FOR DIAGNOSTIC PARTNERS:
+
+- Secure referrals
+- Diagnostic requests
+- Result uploads
+- Authorized clinical collaboration
+
+MOST IMPORTANT:
+
+Build the clinical foundation first.
+
+The doctor and patient record experience
+must be fully functional before expanding
+into appointment scheduling and public websites.
+
+Medframe should provide meaningful clinical value
+even when no appointment booking system
+or personalized clinic website exists.
+
+The Foundation of Modern Care.
+
+Recommended initial page structure
+I would also change the application routes to reflect the new priorities.
+Phase 1–5: Clinical platform
+Route	Purpose
+/login	Secure authentication
+/clinic	Doctor/clinic workspace dashboard
+/clinic/patients	Patient directory
+/clinic/patients/new	Register patient
+/clinic/patients/[id]	Patient overview
+/clinic/patients/[id]/history	Medical history and timeline
+/clinic/patients/[id]/records	Medical records
+/clinic/patients/[id]/dental	Interactive 3D dental chart
+/clinic/consultations	Consultations
+/clinic/consultations/new	New consultation
+/clinic/consultations/[id]	Active consultation workspace
+/clinic/treatments	Treatment management
+/clinic/documents	Medical document management
+/clinic/settings	Organization configuration
+
+
+Later: Patient and operational features
+Route	Purpose
+/patient	Patient dashboard
+/patient/records	Patient's medical records
+/patient/dental	Patient's dental chart
+/patient/treatments	Treatment plans
+/patient/appointments	Appointments
+/clinic/appointments	Appointment administration
+/clinic/queue	Queue management
+/clinic/billing	Billing and payments
+
+
+Final phases: Public clinic websites
+Route	Purpose
+/	Medframe marketing website
+/clinics	Clinic directory
+/clinics/[slug]	Personalized clinic landing page
+/clinics/[slug]/book	Public appointment booking
+/clinic/website	Clinic website builder
+/clinic/website/pages	Page management
+/clinic/website/branding	Clinic branding
+/clinic/website/settings	SEO and publishing
+
+
+The clinical routes can be built immediately without implementing the public website routes.
+What the first Medframe release should look like
+The first release should establish three connected experiences.
+1. Doctor Dashboard
+A doctor signs in and sees their clinical workspace.
+The main focus is finding patients, starting consultations, continuing draft records, and reviewing pending treatments.
+2. Patient Medical Record
+Selecting a patient opens their medical record.
+The record contains their history, allergies, medications, previous consultations, documents, treatments, and dental chart.
+3. Interactive Dental Consultation
+The doctor starts a consultation and interacts with the patient's dental model.
+For example:
+Patient: Juan Dela Cruz
+Consultation: Dental Examination
+The dentist clicks Tooth 16.
+The selected tooth opens an information panel:
+Field	Value
+Tooth	16 — Upper Right First Molar
+Condition	Dental Caries
+Affected Surface	Occlusal
+Severity	Moderate
+Proposed Treatment	Dental Filling
+Clinical Status	Active
+
+
+The dentist records the condition. The model reflects the finding, and the information is saved to the patient's clinical record.
+The dentist can then add a proposed procedure, attach an X-ray, and finalize the encounter.
+When the patient's record is opened again, the findings and historical documentation are still available.
+That is the first complete Medframe experience I would build.
+Once these clinical workflows are stable, we'll connect appointments to encounters, introduce the patient queue system, and eventually build personalized clinic websites on top of the existing infrastructure.
+This approach makes Medframe a genuine clinical management platform, rather than a booking platform that adds medical features afterward.
