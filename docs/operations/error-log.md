@@ -108,3 +108,31 @@ UI-004 (verification limitations): first captures included transient skeletons, 
 UI-005 (deferred): Django emits `StreamingHttpResponse must consume synchronous iterators ... asynchronously` during existing private PDF serving under ASGI. A scanned synthetic PDF rendered with extracted text and closed/cleaned up successfully. No transport repair attempted. Evidence: `/tmp/medframe-ui-api-review.log`.
 
 The two existing operations RHF warnings (B3-004), older operations E2E MFA selector (B3-006), additional clinical/portal/operations acceptance coverage, and remaining focused-editor refinements are documented in `ui-revamp-verification.md`. Package installation reported 12 high-severity audit findings; no unrelated forced upgrades were attempted.
+
+## Anatomical dental replacement — single pass, October 19, 2026
+
+User instruction remains: test once, log discovered issues, and do not repair them until requested. The replacement is saved on `codex/anatomical-dental` and **has not been activated**. Current UI production remains on `.next-ui-revamp`; checkpoint `checkpoint/pre-anatomical-dental-2026-10-19` preserves its source.
+
+### DENT-001 — Anatomical renderer fails React immutability lint
+
+- Severity: release gate failure.
+- Reproduction: `npm run lint`, once after implementation.
+- Actual: `react-hooks/immutability` errors in `apps/web/features/dental/anatomical-scene.tsx`: setting `mesh.visible` around line 95, `camera.near` around line 155, and `controls.current.minDistance` around line 161.
+- Impact: lint fails despite successful TypeScript and production compilation. React/Three imperative ownership needs review; no rule suppression or refactor was applied after discovery.
+- Evidence: `/tmp/medframe-anatomy-lint.log`, retained in `.impeccable/review/anatomical-dental/medframe-anatomy-lint.log`. Existing B3-004 warnings remain separate.
+
+### DENT-002 — Ready status appears while anatomical teeth are blank
+
+- Severity: blocks replacement activation and 3D selection.
+- Reproduction: isolated production web on port 3001 and review API on 8001, matching WEB_ORIGIN. Sign in as synthetic staff, open the synthetic draft consultation, choose Dental chart. The GLB request completes and the viewer reports `Anatomical model ready`; the canvas contains no visible teeth. The same blank state appears on the finalized patient chart.
+- Actual: HTML tooth labels and surrounding controls render, but the anatomical geometry does not. A geometry-derived front-view click intended for FDI 26 leaves the panel on FDI 16. No browser page error was emitted.
+- Impact: direct tooth selection, anatomical presentation, material feedback, jaw/isolation geometry and detailed-molar integration cannot be accepted. Source GLB geometry itself rendered in the earlier independent temporary inspection scene.
+- Investigation lead only, not a confirmed repair: the renderer converts every cloned material to an array. Single-material imported geometry may not have material groups required by that representation. Review this before attributing the failure to the asset or camera. No repair or retry was performed.
+- Evidence: `/tmp/medframe-anatomy-browser.json`; retained browser report and screenshots under `.impeccable/review/anatomical-dental/`. `isolated-26.png` is the harness filename, but its visible selected label is **16**, not 26. `patient-readonly.png` independently shows the blank canvas in the read-only composition.
+
+### DENT-003 — Dependent checks and mobile review remain incomplete
+
+- The single browser run recorded six groups: three passed and three failed. Successful assertions cover synthetic staff authentication, no GLB request on initial Notes, primary 20-tooth 2D fallback, and patient chart read-only controls. The read-only group's successful ready-label assertion is **not** evidence of rendered geometry.
+- The selection failure prevented the desktop/mobile arch captures, detailed FDI 26 load, and the connected finding/surface save/reload check. No new clinical finding was saved by this run. Treatments/history tabs, missing-tooth rendering, material restoration, narrow layout, historical revisions and precise camera behavior remain unverified.
+- The browser script used the existing synthetic fixture only; it did not change original records, passwords, MFA, memberships or finalize a consultation. No retry, alternate selection workaround or additional browser round was performed.
+- Native Impeccable finish review has disposition **recapture**: required desktop/mobile anatomy evidence is absent or blank. Per the user's testing limit, no recapture cycle was started. This is a self-review, not independent agent validation.

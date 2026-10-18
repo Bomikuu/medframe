@@ -1,0 +1,748 @@
+# MEDFRAME — COMPLETE 3D DENTAL MODEL REPLACEMENT
+
+## Objective
+
+Completely replace the current procedurally generated
+dental model with realistic anatomical 3D tooth models.
+
+The existing dental model looks unrealistic.
+
+Teeth currently resemble generic rounded blocks,
+with incorrect or simplified dental anatomy.
+
+This is unacceptable for the intended clinical experience.
+
+Medframe needs a professional, anatomically representative
+dental visualization system with interactive teeth.
+
+IMPORTANT:
+
+Do not attempt to fix the problem only through
+CSS, colors, shadows, lighting, or camera settings.
+
+The underlying tooth geometry must be replaced.
+
+Use actual 3D dental assets.
+
+Do not recreate teeth using primitive geometries.
+
+Do not generate all teeth from the same generic shape.
+
+---
+
+# 1. Existing Technology
+
+Frontend:
+- Next.js
+- TypeScript
+- React Three Fiber
+- Three.js
+- shadcn/ui
+- Tailwind CSS
+
+Backend:
+- Django
+- Strawberry GraphQL
+- PostgreSQL
+
+Preserve the existing clinical data architecture.
+
+Do not rebuild the medical record system.
+
+Focus on replacing and improving the dental
+visualization and its associated interactions.
+
+---
+
+# 2. Source Models
+
+Preferred source:
+
+University of Dundee — School of Dentistry
+
+Permanent Teeth Collection:
+https://sketchfab.com/DundeeDental/collections/permanent-teeth-4c0d0548c40c463c8cdceb6e0d08df7f
+
+Complete Permanent Dentition:
+https://sketchfab.com/3d-models/permanent-dentition-2f69d7b59c3e4a6a8bcae041bd8e591b
+
+Dundee Tooth Morphology:
+https://sketchfab.com/DundeeDental/collections/dundee-tooth-morphology-574c456663334fe89c78503a975dc946
+
+Use legally obtained, downloadable dental models.
+
+Before integration:
+
+1. Check model availability.
+2. Verify the license for each asset.
+3. Review commercial-use permissions.
+4. Preserve required attribution.
+5. Record the original source.
+6. Record modifications made to the model.
+
+Prefer CC BY assets where suitable.
+
+Do not bypass download restrictions.
+
+Do not scrape protected model files.
+
+If downloaded assets are unavailable locally,
+identify which assets are required and provide
+clear instructions for obtaining them.
+
+Do not substitute primitive teeth and claim
+that anatomical models have been integrated.
+
+---
+
+# 3. Asset Inspection
+
+Before replacing the current renderer,
+inspect available dental assets.
+
+Determine:
+
+- File format
+- Mesh count
+- Object hierarchy
+- Whether individual teeth are separate
+- Tooth morphology
+- Crown and root geometry
+- Mesh orientation
+- Object scale
+- Material properties
+- Polygon count
+- Available textures
+- Licensing information
+
+If using an existing complete dentition model,
+verify that individual teeth can be selected.
+
+If the model contains a single fused mesh,
+prepare a separated version.
+
+Use individual tooth models if needed.
+
+---
+
+# 4. Prepare Anatomical Models
+
+Use Blender or another appropriate
+3D asset processing tool.
+
+Prepare a complete permanent dentition.
+
+Required:
+
+- 32 permanent teeth
+- Anatomically appropriate incisors
+- Anatomically appropriate canines
+- Anatomically appropriate premolars
+- Anatomically appropriate molars
+- Realistic dental arches
+- Appropriate tooth proportions
+- Correct upper/lower placement
+- Correct left/right identification
+
+Do not create the entire dental arch
+by arranging identical tooth models.
+
+Each tooth type must retain its
+distinct anatomical morphology.
+
+Use left- and right-specific anatomical
+models where available.
+
+Mirroring representative models may be used
+only as an explicitly documented approximation
+and must be reviewed for anatomical suitability.
+
+Standardize:
+
+- Model scale
+- Coordinate system
+- Rotation
+- Orientation
+- Object origin
+- Object naming
+
+Use clinically appropriate anatomical dimensions.
+
+Do not arbitrarily stretch teeth to fit a layout.
+
+Prepare the models as reusable assets.
+
+---
+
+# 5. Complete Dental Arch
+
+Create a realistic upper and lower dental arch.
+
+The teeth should follow a natural curved arrangement.
+
+Do not place teeth in straight rows.
+
+Ensure:
+
+- Correct anterior tooth arrangement
+- Proper canine positioning
+- Correct premolar placement
+- Correct molar placement
+- Appropriate tooth angulation
+- Reasonable spacing
+- Appropriate upper/lower relationship
+
+Support 32 permanent teeth.
+
+Use FDI numbering.
+
+UPPER RIGHT:
+18, 17, 16, 15, 14, 13, 12, 11
+
+UPPER LEFT:
+21, 22, 23, 24, 25, 26, 27, 28
+
+LOWER LEFT:
+31, 32, 33, 34, 35, 36, 37, 38
+
+LOWER RIGHT:
+41, 42, 43, 44, 45, 46, 47, 48
+
+Important:
+
+Validate anatomical left and right from
+the patient's perspective.
+
+Do not confuse screen-left and screen-right
+with anatomical left and right.
+
+Ensure model selection matches the
+existing dental chart numbering.
+
+---
+
+# 6. GLB Asset Structure
+
+Prefer a single optimized GLB containing
+separately selectable tooth meshes.
+
+Suggested object hierarchy:
+
+PermanentDentition
+    UpperJaw
+        Tooth_18
+        Tooth_17
+        Tooth_16
+        ...
+        Tooth_11
+        Tooth_21
+        ...
+        Tooth_28
+
+    LowerJaw
+        Tooth_48
+        Tooth_47
+        ...
+        Tooth_41
+        Tooth_31
+        ...
+        Tooth_38
+
+    Gingiva
+
+Each tooth must have:
+
+- Stable FDI identifier
+- Anatomical type
+- Jaw designation
+- Side designation
+- Mesh reference
+- Model transformation
+- Clinical metadata mapping
+
+Do not depend on mesh array indexes
+to identify teeth.
+
+Use explicit identifiers.
+
+---
+
+# 7. Interactive Tooth Selection
+
+Every individual tooth must be clickable.
+
+When a tooth is selected:
+
+1. Identify the correct FDI tooth number.
+2. Highlight the selected tooth.
+3. Update the selected tooth state.
+4. Display the tooth information panel.
+5. Load existing findings from the backend.
+6. Allow permitted clinical interactions.
+
+Example:
+
+Selected Tooth: 16
+
+Name:
+Upper Right First Molar
+
+Existing Findings:
+Dental Caries
+
+Affected Surface:
+Occlusal
+
+Treatment:
+Filling Recommended
+
+Selected teeth should have a clear visual state.
+
+Avoid permanently changing the original
+tooth material when selection changes.
+
+Preserve original materials and restore them
+when deselected.
+
+Use raycasting or React Three Fiber
+pointer events for interaction.
+
+Prevent clicks from selecting unrelated meshes.
+
+---
+
+# 8. Tooth Surface Selection
+
+Support recording findings against:
+
+- Mesial
+- Distal
+- Buccal / Facial
+- Lingual / Palatal
+- Occlusal / Incisal
+
+IMPORTANT:
+
+Do not assume the imported meshes
+already contain surface segmentation.
+
+Inspect available geometry.
+
+If separate surface meshes or reliable
+surface mappings exist, use them.
+
+If not, provide a conventional 2D surface
+selector linked to the selected 3D tooth.
+
+Do not fabricate clinically precise surface
+selection from unreliable mesh geometry.
+
+Store tooth surface identifiers independently.
+
+---
+
+# 9. Dental Condition Visualization
+
+Support visual representations of
+clinically recorded conditions.
+
+Examples:
+
+HEALTHY
+
+Display original tooth material.
+
+MISSING TOOTH
+
+Hide the affected tooth.
+
+CARIES
+
+Highlight or annotate the affected region.
+
+FRACTURE
+
+Display a visible fracture annotation
+or a validated alternative tooth mesh.
+
+FILLING
+
+Display a restoration overlay where supported.
+
+CROWN
+
+Display a crown model or suitable
+restoration representation.
+
+IMPLANT
+
+Display an appropriate implant model.
+
+ROOT CANAL
+
+Indicate completed root canal treatment
+through appropriate clinical visualization.
+
+GUM INFLAMMATION
+
+Highlight the documented gum region.
+
+IMPORTANT:
+
+Do not automatically deform the tooth
+using arbitrary geometry.
+
+Use predefined anatomical variants,
+surface overlays, or clinical annotations.
+
+The visual representation must reflect
+stored clinical information.
+
+Distinguish:
+
+- Existing conditions
+- Proposed treatments
+- Completed treatments
+- Educational previews
+
+Do not modify the original clinical state
+when previewing proposed treatments.
+
+---
+
+# 10. Materials and Rendering
+
+Improve visual realism.
+
+Use physically based materials.
+
+Teeth should have:
+
+- Appropriate enamel coloration
+- Subtle material variation
+- Natural shading
+- Visible anatomical morphology
+- Balanced lighting
+
+Avoid:
+
+- Plastic-looking teeth
+- Excessive shininess
+- Unrealistic glow
+- Strong gradients
+- Cartoon-like appearance
+- Overly dark shadows
+
+Use a restrained clinical visualization style.
+
+The model should resemble professional
+dental education or clinical charting software.
+
+Prioritize anatomical readability
+over photorealistic decoration.
+
+---
+
+# 11. Camera and Viewer
+
+The existing model is too small
+within its available container.
+
+Improve model framing.
+
+Requirements:
+
+- Model occupies a meaningful portion of the viewer
+- Automatic camera framing
+- Responsive canvas
+- Appropriate zoom limits
+- Smooth rotation
+- Controlled panning
+- Reset camera
+- Front view
+- Upper occlusal view
+- Lower occlusal view
+- Left lateral view
+- Right lateral view
+
+Support:
+
+- Both jaws
+- Upper jaw only
+- Lower jaw only
+- Isolate selected tooth
+
+When isolating a tooth,
+frame the camera around that tooth.
+
+Use appropriate camera controls.
+
+Avoid disorienting camera movements.
+
+---
+
+# 12. Dental Workspace UI
+
+Improve the dental chart layout
+to accommodate the new model.
+
+Suggested structure:
+
+HEADER
+
+- Dental Chart
+- Patient context
+- Dentition selection
+- Relevant actions
+
+MAIN WORKSPACE
+
+Left:
+Interactive 3D dental model
+
+Right:
+Selected tooth information
+
+BOTTOM OR SECONDARY AREA
+
+- Clinical findings
+- Treatments
+- Tooth history
+
+Use existing Medframe shadcn/ui components.
+
+Keep the dashboard predominantly white.
+
+Use subtle borders and structured panels.
+
+Do not display excessively large lists
+of tooth-number buttons above the model.
+
+Prefer allowing teeth to be selected
+directly from the 3D model.
+
+Retain a compact 2D tooth selector
+as an accessible alternative.
+
+Provide clear controls for changing views.
+
+---
+
+# 13. Backend Integration
+
+Preserve existing Django dental records.
+
+The model must use the existing
+clinical data architecture.
+
+Each tooth should map to its
+corresponding FDI identifier.
+
+When selecting a tooth:
+
+- Retrieve current findings
+- Retrieve recorded conditions
+- Retrieve procedures
+- Retrieve treatment history
+
+When recording a finding:
+
+1. Validate permissions.
+2. Associate the finding with the patient.
+3. Associate it with the relevant encounter.
+4. Save it through GraphQL.
+5. Persist it in PostgreSQL.
+6. Update the dental model.
+7. Display success feedback.
+
+Do not store diagnoses inside GLB files.
+
+Do not treat frontend materials
+as authoritative clinical data.
+
+Do not silently overwrite finalized
+clinical records.
+
+---
+
+# 14. Historical Dental Charts
+
+Support longitudinal visualization.
+
+Examples:
+
+Initial Examination:
+Tooth appears healthy.
+
+Later Consultation:
+Caries documented.
+
+Following Visit:
+Filling completed.
+
+Current Record:
+Restoration remains recorded.
+
+Allow dentists to select historical dates.
+
+The model should reflect documented
+findings associated with the selected date.
+
+Historical viewing must be read-only.
+
+New clinical records must not rewrite
+previously finalized chart states.
+
+---
+
+# 15. Performance Optimization
+
+Realistic dental geometry must not
+make the application unnecessarily slow.
+
+Use:
+
+- Optimized GLB assets
+- Shared materials
+- Appropriate texture sizes
+- Mesh compression
+- Asset preloading
+- Lazy loading
+- GPU-conscious rendering
+- Geometry reuse where suitable
+
+Preserve enough geometry for tooth
+morphology to remain recognizable.
+
+Do not over-optimize until tooth
+anatomy becomes visibly inaccurate.
+
+Avoid downloading the same model repeatedly.
+
+Do not load dental assets on unrelated pages.
+
+Test on desktop and mobile devices.
+
+---
+
+# 16. Pediatric Dentition
+
+Prepare the architecture for
+primary dentition.
+
+The system should eventually support:
+
+- 20 primary teeth
+- Primary tooth numbering
+- Primary dental chart
+- Primary tooth conditions
+- Primary treatment history
+
+Do not create pediatric teeth by merely
+shrinking permanent teeth.
+
+Use appropriate primary tooth anatomy.
+
+Primary dentition may be implemented
+after permanent dentition is stable.
+
+---
+
+# 17. Missing Assets and Fallbacks
+
+If the actual dental models are unavailable:
+
+1. Inspect the repository for existing assets.
+2. Identify the missing files.
+3. Document the required format.
+4. Provide instructions for obtaining them.
+5. Prepare the asset loading architecture.
+6. Implement applicable clinical and UI integrations.
+
+Do not silently recreate procedural block teeth.
+
+Do not claim the realistic model is complete
+without loading actual anatomical assets.
+
+A temporary schematic model may remain
+only if explicitly labeled as a placeholder.
+
+Keep the existing working clinical functionality
+until the replacement is ready.
+
+---
+
+# 18. Acceptance Criteria
+
+The task is complete when:
+
+- Real anatomical tooth meshes replace primitive teeth.
+- All 32 permanent teeth are represented.
+- Incisors, canines, premolars, and molars look distinct.
+- Dental arches are naturally curved.
+- Tooth numbering is correct.
+- Teeth are individually selectable.
+- Selected tooth information is accurate.
+- Upper/lower jaw controls work.
+- Tooth isolation works.
+- Camera framing is appropriate.
+- Saved clinical conditions load correctly.
+- Missing teeth can be represented.
+- Recorded findings can be visualized.
+- Clinical edits persist in PostgreSQL.
+- Historical findings remain accessible.
+- The viewer works responsively.
+- The 2D fallback remains functional.
+- Third-party asset licenses are documented.
+- Patient confidentiality is preserved.
+
+Do not consider the task complete merely
+because the model renders.
+
+The anatomy, interactions, numbering,
+and clinical persistence must all work.
+
+---
+
+# 19. Execution Instructions
+
+Inspect the current dental viewer implementation.
+
+Identify and remove the procedural tooth
+geometry from the primary production renderer.
+
+Inspect available 3D assets.
+
+Determine whether they can be used directly
+or require preparation.
+
+Implement the complete replacement in
+one cohesive development batch.
+
+Preserve existing clinical workflows.
+
+Use actual anatomical dental models.
+
+Do not spend significant time redesigning
+unrelated application pages.
+
+Validate tooth selection, orientation,
+model loading, and clinical persistence.
+
+At completion, report:
+
+- Assets used
+- Original asset sources
+- License information
+- Model preparation performed
+- Number of independently selectable teeth
+- Completed interactions
+- Clinical integration status
+- Remaining limitations
+
+If files are missing, explicitly list
+what the user needs to provide.
+
+The intended outcome is a professional,
+anatomically representative, interactive
+3D dental chart for Medframe.

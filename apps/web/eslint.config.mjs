@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
     ".next-batch2-rehearsal/**",
     ".next-batch3-rehearsal/**",
     ".next-ui-revamp/**",
+    ".next-anatomical-dental/**",
     ".next-batch1-checkpoint/**",
     "public/vendor/**",
     "out/**",

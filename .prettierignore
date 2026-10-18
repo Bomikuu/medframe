@@ -23,3 +23,5 @@ apps/web/lib/graphql/portal/generated.ts
 apps/web/lib/graphql/portal/schema-types.ts
 
 .next-ui-revamp/
+
+.next-anatomical-dental/

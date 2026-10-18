@@ -78,6 +78,7 @@ export function EncounterEditor({
   const dirty = form.formState.isDirty;
   const readOnly = exactRevision || !encounter.editable || !can("encounters.write");
   const [review, setReview] = useState(false);
+  const [clinicalTab, setClinicalTab] = useState("notes");
   usePatientDraft(key, form);
   useUnsavedChanges(key, dirty && !readOnly, () => form.reset());
 
@@ -436,7 +437,9 @@ export function EncounterEditor({
           <TemplatePrompts value={encounter.template} />
         </div>
       </details>
-      <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+      <div
+        className={`grid min-w-0 items-start gap-6 ${clinicalTab === "dental" ? "" : "xl:grid-cols-[minmax(0,1fr)_280px]"}`}
+      >
         <div className="min-w-0">
           <FormProvider {...form}>
             <form
@@ -450,7 +453,7 @@ export function EncounterEditor({
               className="grid gap-10"
             >
               <input type="hidden" {...form.register("expectedVersion", { valueAsNumber: true })} />
-              <Tabs defaultValue="notes" className="min-w-0 gap-6">
+              <Tabs value={clinicalTab} onValueChange={setClinicalTab} className="min-w-0 gap-6">
                 <div className="overflow-x-auto border-b border-border">
                   <TabsList variant="line" className="min-w-max">
                     <TabsTrigger value="notes">Notes & diagnoses</TabsTrigger>
@@ -460,10 +463,7 @@ export function EncounterEditor({
                   </TabsList>
                 </div>
                 <TabsContent value="notes" forceMount className="data-[state=inactive]:hidden">
-                  <fieldset
-                    disabled={readOnly || lifecycleBusy}
-                    className="grid min-w-0 gap-6 rounded-lg border border-border p-4 sm:p-6"
-                  >
+                  <div className="grid min-w-0 gap-6 rounded-lg border border-border p-4 sm:p-6">
                     <SoapFields readOnly={readOnly || lifecycleBusy} />
                     <DiagnosisFields
                       readOnly={readOnly || lifecycleBusy}
@@ -471,28 +471,23 @@ export function EncounterEditor({
                         templateSchema.safeParse(encounter.template).data?.observation_labels
                       }
                     />
-                  </fieldset>
+                  </div>
                 </TabsContent>
                 <TabsContent value="dental" forceMount className="data-[state=inactive]:hidden">
-                  <fieldset
-                    disabled={readOnly || lifecycleBusy}
-                    className="min-w-0 rounded-lg border border-border p-4 sm:p-6"
-                  >
+                  <div className="min-w-0 rounded-lg border border-border p-4 sm:p-6">
                     <DentalEditor
+                      active={clinicalTab === "dental"}
                       readOnly={readOnly || lifecycleBusy}
                       patientId={encounter.patientId}
                       encounterId={encounter.id}
                       revisionId={exactRevision ? initial.revisionId : null}
                     />
-                  </fieldset>
+                  </div>
                 </TabsContent>
                 <TabsContent value="procedures" forceMount className="data-[state=inactive]:hidden">
-                  <fieldset
-                    disabled={readOnly || lifecycleBusy}
-                    className="rounded-lg border border-border p-4 sm:p-6"
-                  >
+                  <div className="rounded-lg border border-border p-4 sm:p-6">
                     <ProcedureFields readOnly={readOnly || lifecycleBusy} />
-                  </fieldset>
+                  </div>
                 </TabsContent>
                 <TabsContent value="documents" forceMount className="data-[state=inactive]:hidden">
                   {" "}
@@ -528,7 +523,7 @@ export function EncounterEditor({
             </form>
           </FormProvider>
         </div>
-        <aside className="min-w-0 xl:sticky xl:top-40">
+        <aside className={clinicalTab === "dental" ? "min-w-0" : "min-w-0 xl:sticky xl:top-40"}>
           <PatientContext
             patientId={encounter.patientId}
             revisionId={encounter.patientHistoryRevisionId}

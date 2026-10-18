@@ -1,28 +1,21 @@
 "use client";
 
-import {
-  Component,
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import { Canvas, useFrame, type ThreeEvent } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
-import { Mesh, MeshStandardMaterial } from "three";
+import { Component, Suspense, useCallback, useId, useRef, useState, type ReactNode } from "react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import type { OrbitControls as OrbitControlsInstance } from "three-stdlib";
 import { Button } from "@/components/ui/button";
+import { FormSelect } from "@/features/patients/form-controls";
 import type { Finding } from "@/features/consultations/schema";
-
-type Props = {
-  selected: string;
-  onSelect: (id: string, surface?: string) => void;
-  selectedSurface: string | null;
-  findings: Finding[];
-  dentition: "permanent" | "primary";
-};
+import { AnatomicalScene } from "./anatomical-scene";
+import {
+  MOLAR_REFERENCE_MODEL,
+  PERMANENT_MODEL,
+  VIEW_OPTIONS,
+  toothPresentation,
+  type DentalView,
+  type JawView,
+} from "./anatomy";
 
 class ModelBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -31,8 +24,8 @@ class ModelBoundary extends Component<{ children: ReactNode }, { failed: boolean
   }
   render() {
     return this.state.failed ? (
-      <p role="status" className="p-6 text-sm">
-        3D is unavailable on this device. Use the complete 2D chart above.
+      <p role="status" className="rounded-lg border border-border p-6 text-sm">
+        The anatomical model could not load. Open the 2D tooth selector to continue charting.
       </p>
     ) : (
       this.props.children
@@ -40,161 +33,227 @@ class ModelBoundary extends Component<{ children: ReactNode }, { failed: boolean
   }
 }
 
-function Teeth({
+export default function Dental3D({
   selected,
-  selectedSurface,
   onSelect,
   findings,
   dentition,
-  jaw,
-  isolate,
-  onReady,
-}: Props & { jaw: string; isolate: boolean; onReady: () => void }) {
-  const reported = useRef(false);
-  useFrame(() => {
-    if (!reported.current) {
-      reported.current = true;
-      onReady();
-    }
-  });
-  const { scene } = useGLTF("/models/dental-schematic-v2.glb");
-  const activeKey = findings
-    .filter((finding) => finding.status === "active")
-    .flatMap((finding) =>
-      (finding.surfaces.length ? finding.surfaces : ["*"]).map(
-        (surface) => `${finding.tooth}:${surface}`,
-      ),
-    )
-    .sort()
-    .join(",");
-  const activeSurfaces = useMemo(() => new Set(activeKey.split(",")), [activeKey]);
-  const clone = useMemo(() => {
-    const root = scene.clone(true);
-    root.traverse((object) => {
-      if (!(object instanceof Mesh)) return;
-      const id = String(object.userData.tooth_id ?? "");
-      const surface = String(object.userData.surface_id ?? "");
-      object.visible =
-        object.userData.dentition === dentition &&
-        (jaw === "both" || object.userData.jaw === jaw) &&
-        (!isolate || id === selected);
-      // Three's raycaster also intersects invisible meshes. Hidden dentitions
-      // and jaws must not intercept a click intended for a visible tooth.
-      if (!object.visible) object.raycast = () => {};
-      const material = (object.material as MeshStandardMaterial).clone();
-      material.color.set(
-        id === selected
-          ? selectedSurface && selectedSurface !== surface
-            ? "#B2CDD9"
-            : "#0F2D4A"
-          : activeSurfaces.has(`${id}:*`) || activeSurfaces.has(`${id}:${surface}`)
-            ? "#B86B17"
-            : "#D7E3ED",
-      );
-      object.material = material;
-    });
-    return root;
-  }, [scene, selected, selectedSurface, activeSurfaces, dentition, jaw, isolate]);
-  useEffect(
-    () => () => {
-      clone.traverse((object) => {
-        if (object instanceof Mesh && object.material instanceof MeshStandardMaterial)
-          object.material.dispose();
-      });
-    },
-    [clone],
-  );
-  function select(event: ThreeEvent<MouseEvent>) {
-    const id: unknown = event.object.userData.tooth_id;
-    if (typeof id === "string") {
-      event.stopPropagation();
-      const surface: unknown = event.object.userData.surface_id;
-      onSelect(id, typeof surface === "string" ? surface : undefined);
-    }
-  }
-  return <primitive object={clone} onClick={select} />;
-}
-
-export default function Dental3D(props: Props) {
-  const [ready, setReady] = useState(false);
-  const markReady = useCallback(() => setReady(true), []);
-  const [jaw, setJaw] = useState("both");
+}: {
+  selected: string;
+  onSelect: (id: string, surface?: string) => void;
+  selectedSurface: string | null;
+  findings: Finding[];
+  dentition: "permanent" | "primary";
+}) {
+  const cameraId = useId();
+  const [jaw, setJaw] = useState<JawView>("both");
   const [isolate, setIsolate] = useState(false);
-  const [view, setView] = useState<"front" | "upper">("front");
+  const [view, setView] = useState<DentalView>("front");
   const [reset, setReset] = useState(0);
+  const [anatomyOnly, setAnatomyOnly] = useState(false);
+  const [reference, setReference] = useState(false);
+  const [ready, setReady] = useState(false);
+  const controls = useRef<OrbitControlsInstance | null>(null);
+  const markReady = useCallback(() => setReady(true), []);
+  const condition = toothPresentation(findings, selected);
+  if (dentition === "primary")
+    return (
+      <p className="rounded-lg border border-border p-5 text-sm leading-6">
+        Primary anatomy is not installed. Use the 20-tooth 2D chart; permanent teeth are never
+        resized to represent primary teeth.
+      </p>
+    );
+  const detailed = reference && selected === "26";
+  const modelUrl = detailed ? MOLAR_REFERENCE_MODEL : PERMANENT_MODEL;
+  function changeView(next: DentalView) {
+    setView(next);
+    if (next === "upper" || next === "lower") setJaw(next);
+    setReset((value) => value + 1);
+  }
   return (
     <ModelBoundary>
-      <div className="my-4 flex flex-wrap gap-2">
-        {[
-          ["both", "Both jaws"],
-          ["upper", "Upper jaw"],
-          ["lower", "Lower jaw"],
-        ].map(([value, label]) => (
-          <Button
-            key={value}
-            type="button"
-            variant={jaw === value ? "secondary" : "outline"}
-            aria-pressed={jaw === value}
-            onClick={() => setJaw(value)}
+      <div className="grid min-w-0 gap-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="flex flex-wrap gap-1" role="group" aria-label="Visible jaws">
+            {(
+              [
+                ["both", "Both jaws"],
+                ["upper", "Upper jaw"],
+                ["lower", "Lower jaw"],
+              ] as const
+            ).map(([value, label]) => (
+              <Button
+                key={value}
+                type="button"
+                variant={jaw === value && !reference ? "secondary" : "outline"}
+                aria-pressed={jaw === value && !reference}
+                onClick={() => {
+                  setJaw(value);
+                  setReference(false);
+                }}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+          <div className="w-full min-[480px]:w-44">
+            <FormSelect
+              id={`dental-camera-${cameraId}`}
+              label="Camera view"
+              value={view}
+              onChange={(value) => changeView(value as DentalView)}
+              options={VIEW_OPTIONS}
+            />
+          </div>
+        </div>
+        <div
+          className="relative h-[360px] min-w-0 overflow-hidden rounded-lg border border-border bg-muted/40 sm:h-[480px]"
+          aria-label="Interactive anatomical dental model"
+        >
+          {!ready && (
+            <p
+              role="status"
+              className="absolute inset-x-0 top-4 z-10 text-center text-sm text-muted-foreground"
+            >
+              Loading anatomical model…
+            </p>
+          )}
+          <Canvas
+            camera={{ position: [0, 1, 6], fov: 35 }}
+            frameloop="demand"
+            dpr={[1, 1.5]}
+            gl={{ antialias: true }}
           >
-            {label}
+            <hemisphereLight args={["#ffffff", "#a7adb5", 2]} />
+            <directionalLight position={[3, 5, 5]} intensity={2.5} />
+            <directionalLight position={[-3, -3, -3]} intensity={1.2} />
+            <OrbitControls ref={controls} makeDefault enableDamping dampingFactor={0.12} />
+            <Suspense fallback={null}>
+              <AnatomicalScene
+                key={modelUrl}
+                url={modelUrl}
+                selected={selected}
+                onSelect={onSelect}
+                findings={findings}
+                jaw={jaw}
+                isolate={isolate}
+                view={view}
+                reset={reset}
+                anatomyOnly={anatomyOnly}
+                reference={detailed}
+                controls={controls}
+                onReady={markReady}
+              />
+            </Suspense>
+          </Canvas>
+          <div className="pointer-events-none absolute right-3 bottom-3 left-3 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
+            <span>
+              {detailed
+                ? "Detailed upper-left first molar · FDI 26"
+                : view === "front"
+                  ? "Patient right ← Front view → Patient left"
+                  : VIEW_OPTIONS.find((option) => option.value === view)?.label}
+            </span>
+            <span>{ready ? "Anatomical model ready" : ""}</span>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            aria-pressed={isolate}
+            disabled={reference}
+            onClick={() => setIsolate(!isolate)}
+          >
+            Isolate selected tooth
           </Button>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          aria-pressed={isolate}
-          onClick={() => setIsolate(!isolate)}
-        >
-          Isolate selected
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setView(view === "front" ? "upper" : "front");
-            setReset((value) => value + 1);
-          }}
-        >
-          Change view
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setJaw("both");
-            setIsolate(false);
-            setView("front");
-            setReset((value) => value + 1);
-          }}
-        >
-          Reset view
-        </Button>
-      </div>
-      <p className="mb-3 text-xs text-muted-foreground">
-        Schematic development model. Not anatomically validated or patient-specific. Drag to rotate,
-        scroll to zoom, right-drag to pan.
-      </p>
-      <p role="status" className="mb-3 text-xs text-muted-foreground">
-        {ready ? "Schematic model ready" : "Loading schematic model…"}
-      </p>
-      <div
-        className="h-80 overflow-hidden rounded-lg border border-border bg-muted"
-        aria-label="Interactive schematic dental model"
-      >
-        <Canvas
-          key={reset}
-          camera={{ position: view === "front" ? [0, 5, 13] : [0, 14, 2], fov: 45 }}
-          frameloop="demand"
-          dpr={[1, 1.5]}
-        >
-          <ambientLight intensity={1.5} />
-          <directionalLight position={[5, 8, 7]} intensity={2} />
-          <Suspense fallback={null}>
-            <Teeth {...props} jaw={jaw} isolate={isolate} onReady={markReady} />
-          </Suspense>
-          <OrbitControls makeDefault minDistance={3} maxDistance={25} enableDamping={false} />
-        </Canvas>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setJaw("both");
+              setIsolate(false);
+              setView("front");
+              setReset((value) => value + 1);
+              setReference(false);
+            }}
+          >
+            Reset camera
+          </Button>
+          <Button
+            type="button"
+            variant={anatomyOnly ? "secondary" : "outline"}
+            aria-pressed={anatomyOnly}
+            onClick={() => setAnatomyOnly(!anatomyOnly)}
+          >
+            Reference anatomy {anatomyOnly ? "on" : "off"}
+          </Button>
+          {selected === "26" && (
+            <Button
+              type="button"
+              variant={reference ? "secondary" : "outline"}
+              aria-pressed={reference}
+              onClick={() => {
+                setReference(!reference);
+                setIsolate(false);
+                setView("front");
+                setReset((value) => value + 1);
+              }}
+            >
+              Detailed tooth 26
+            </Button>
+          )}
+        </div>
+        {condition.missing && !anatomyOnly && (
+          <p role="status" className="text-sm leading-6">
+            Tooth {selected} is recorded missing and its mesh is hidden. Use the 2D selector to
+            select it, or enable reference anatomy for an educational view.
+          </p>
+        )}
+        {anatomyOnly && (
+          <p role="status" className="text-sm font-medium">
+            Educational reference anatomy. Recorded findings have not changed.
+          </p>
+        )}
+        <p className="text-xs leading-5 text-muted-foreground">
+          Select a tooth, drag to rotate, scroll to zoom or right-drag to pan. Highlights identify
+          whole-tooth records; select clinical surfaces in the tooth panel. No finding does not
+          establish a healthy tooth.
+        </p>
+        <p className="text-xs leading-5 text-muted-foreground">
+          Anatomical reference, not patient-specific or dimensionally calibrated. Models by{" "}
+          <a
+            href="https://sketchfab.com/DundeeDental"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4"
+          >
+            University of Dundee, School of Dentistry
+          </a>
+          ,{" "}
+          <a
+            href="https://creativecommons.org/licenses/by/4.0/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4"
+          >
+            CC BY 4.0
+          </a>
+          . Textures optimized and FDI metadata added; no tooth geometry reshaped.{" "}
+          <a
+            href={
+              detailed
+                ? "https://sketchfab.com/3d-models/maxillary-first-molar-e719a474ef7e4bd7abec508f85f1e984"
+                : "https://sketchfab.com/3d-models/permanent-dentition-2f69d7b59c3e4a6a8bcae041bd8e591b"
+            }
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-4"
+          >
+            Original asset
+          </a>
+          .
+        </p>
       </div>
     </ModelBoundary>
   );

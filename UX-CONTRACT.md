@@ -105,3 +105,13 @@ Scheduling, appointment and queue writes use version checks and request receipts
 - EntrySheet uses the existing safety confirmation. Upload closing passes only its upload draft key so it cannot discard unrelated SOAP notes. Private preview Dialog closing aborts transfers, releases bytes/object URLs and unmounts PDF rendering. Fresh authorization, scan gating and full image framing remain with the original owners.
 - Patient directory sorting/filtering is global over current demographic authority. Its new signed string cursor binds actor, organization, query, sort, branch, current membership permissions and active patient grants. The original UUID clinicPatients endpoint remains compatible. Presentation-only table/cards preference is keyed by current user and organization; patient data is never persisted in browser storage.
 - Sonner is supplemental confirmed-write feedback; errors, conflicts and save/lifecycle status stay inline. Staff and portal authentication flows and realm separation are unchanged.
+
+## Anatomical dental replacement contract (pending activation)
+
+The source replacement is recorded in `docs/operations/anatomical-dental-verification.md`; its runtime renderer has unresolved blockers and is not active locally. Preserve the existing shipped viewer until those gates pass.
+
+- The permanent model uses explicit FDI metadata for 32 distinct source tooth meshes. The optional detailed molar represents FDI 26 only. Mesh array order and screen side never establish identity.
+- The model and conventional 2D selector share selected-tooth state. Clinical surfaces are recorded through the existing labelled surface inputs; imported geometry does not supply validated clinical surface segmentation.
+- Findings, current-visit procedures and finalized tooth history stay with their existing GraphQL/RHF/revision owners. Camera, jaw, isolation and educational reference state never write clinical records. An absent finding is not a healthy diagnosis.
+- Missing-tooth visibility reflects exact active missing/absent terms. Educational reference anatomy can reveal a hidden tooth without altering the record. Proposed/completed care retains explicit statuses.
+- Hidden encounter tabs preserve registered values but do not mount the 3D viewer. Primary dentition uses the correct 20-tooth 2D fallback until suitable anatomy is installed. Read-only clinical content retains interactive view controls without enabling writes.

@@ -36,7 +36,9 @@
     ".next-batch3-rehearsal/types/**/*.ts",
     ".next-batch3-rehearsal/dev/types/**/*.ts",
     ".next-ui-revamp/types/**/*.ts",
-    ".next-ui-revamp/dev/types/**/*.ts"
+    ".next-ui-revamp/dev/types/**/*.ts",
+    ".next-anatomical-dental/types/**/*.ts",
+    ".next-anatomical-dental/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

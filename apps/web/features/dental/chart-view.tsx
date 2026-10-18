@@ -9,7 +9,7 @@ import { dentalReferenceSchema, type Finding } from "@/features/consultations/sc
 
 const Dental3D = dynamic(() => import("./dental-3d"), {
   ssr: false,
-  loading: () => <p role="status">Loading schematic model…</p>,
+  loading: () => <p role="status">Loading anatomical model…</p>,
 });
 export const schematicTeeth = dentalReferenceSchema.parse(reference).teeth;
 export function ChartView({
@@ -22,7 +22,7 @@ export function ChartView({
   const [selected, setSelected] = useState("16");
   const [surface, setSurface] = useState<string | null>(null);
   const [dentition, setDentition] = useState<"permanent" | "primary">("permanent");
-  const [show3D, setShow3D] = useState(false);
+  const [show3D, setShow3D] = useState(true);
   const current = findings.filter((item) => item.tooth === selected);
   return (
     <section aria-label={label} className="grid gap-4">
@@ -51,16 +51,6 @@ export function ChartView({
           {show3D ? "Hide 3D view" : "Show 3D view"}
         </Button>
       </div>
-      <DentalChartGrid
-        teeth={schematicTeeth.filter((item) => item.dentition === dentition)}
-        dentition={dentition}
-        selected={selected}
-        findings={findings}
-        onSelect={(id) => {
-          setSelected(id);
-          setSurface(null);
-        }}
-      />
       {show3D && (
         <Dental3D
           selected={selected}
@@ -73,12 +63,33 @@ export function ChartView({
           dentition={dentition}
         />
       )}
+      <details
+        open={!show3D || dentition === "primary"}
+        className="rounded-lg border border-border p-3"
+      >
+        <summary className="min-h-11 text-sm font-medium">
+          2D tooth selector · keyboard alternative
+        </summary>
+        <div className="mt-3">
+          {" "}
+          <DentalChartGrid
+            teeth={schematicTeeth.filter((item) => item.dentition === dentition)}
+            dentition={dentition}
+            selected={selected}
+            findings={findings}
+            onSelect={(id) => {
+              setSelected(id);
+              setSurface(null);
+            }}
+          />
+        </div>
+      </details>
       <p className="text-sm font-medium">
         Tooth {selected}
         {surface && ` · ${surface}`}
       </p>
       <p className="text-xs text-muted-foreground">
-        Schematic, unvalidated geometry. FDI notation; recorded findings are the source of truth.
+        FDI notation uses the patient’s left and right. Recorded findings are the source of truth.
       </p>
       {!current.length && (
         <p className="text-sm text-muted-foreground">
