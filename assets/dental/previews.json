@@ -1,0 +1,264 @@
+{
+  "author": "University of Dundee, School of Dentistry",
+  "source": "https://sketchfab.com/3d-models/permanent-dentition-2f69d7b59c3e4a6a8bcae041bd8e591b",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "prepared_model": "apps/web/public/models/dental-permanent-dundee-v1.glb",
+  "modifications": "Transparent PNG renders of existing mesh geometry/materials; isolated teeth and camera views only. No anatomy reshaped or invented.",
+  "limits": "Educational tooth identity previews, not clinical surface segmentation or calibrated measurements.",
+  "files": [
+    {
+      "file": "tooth-11.png",
+      "tooth": "11",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-12.png",
+      "tooth": "12",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-13.png",
+      "tooth": "13",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-14.png",
+      "tooth": "14",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-15.png",
+      "tooth": "15",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-16.png",
+      "tooth": "16",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-17.png",
+      "tooth": "17",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-18.png",
+      "tooth": "18",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-21.png",
+      "tooth": "21",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-22.png",
+      "tooth": "22",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-23.png",
+      "tooth": "23",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-24.png",
+      "tooth": "24",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-25.png",
+      "tooth": "25",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-26.png",
+      "tooth": "26",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-27.png",
+      "tooth": "27",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-28.png",
+      "tooth": "28",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-31.png",
+      "tooth": "31",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-32.png",
+      "tooth": "32",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-33.png",
+      "tooth": "33",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-34.png",
+      "tooth": "34",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-35.png",
+      "tooth": "35",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-36.png",
+      "tooth": "36",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-37.png",
+      "tooth": "37",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-38.png",
+      "tooth": "38",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-41.png",
+      "tooth": "41",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-42.png",
+      "tooth": "42",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-43.png",
+      "tooth": "43",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-44.png",
+      "tooth": "44",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-45.png",
+      "tooth": "45",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-46.png",
+      "tooth": "46",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-47.png",
+      "tooth": "47",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "tooth-48.png",
+      "tooth": "48",
+      "view": "front",
+      "width": 192,
+      "height": 224
+    },
+    {
+      "file": "view-front.png",
+      "view": "front",
+      "width": 240,
+      "height": 160
+    },
+    {
+      "file": "view-upper.png",
+      "view": "upper",
+      "width": 240,
+      "height": 160
+    },
+    {
+      "file": "view-lower.png",
+      "view": "lower",
+      "width": 240,
+      "height": 160
+    },
+    {
+      "file": "view-left.png",
+      "view": "left",
+      "width": 240,
+      "height": 160
+    },
+    {
+      "file": "view-right.png",
+      "view": "right",
+      "width": 240,
+      "height": 160
+    }
+  ]
+}

@@ -32,4 +32,10 @@ export {
   Maximize2,
   Minimize2,
   Crosshair,
+  Hand,
+  ZoomIn,
+  Rotate3d,
+  Ruler,
+  MoreHorizontal,
+  ExternalLink,
 } from "lucide-react";

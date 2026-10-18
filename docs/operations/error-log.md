@@ -167,3 +167,20 @@ DENT-003's blocked desktop/mobile and save/reload checks are now completed at th
 - Impact: default full-screen rendering, point clicks, note popovers, real-browser save/reload, rotation and mobile inspection are not accepted as browser-verified. Two focused backend tests do pass, covering bounded anchor validation, legacy records, exact finalization and amendment comparison.
 - Evidence: `/tmp/medframe-dental-editor-browser.json`, retained under `.impeccable/review/dental-editor/`. No selector/product fix or browser retry was attempted.
 - A local preview may be run with this coverage gap explicitly disclosed; it is not a full UI acceptance pass. The previous anatomical build remains the rollback artifact. Do not claim the failed browser groups passed.
+
+## Reference-guided editor — October 19, 2026
+
+### REF-001 — Missing Switch registry component blocks the build
+
+- Reproduction: the single accumulated `NEXT_DIST_DIR=.next-dental-reference npm run build`.
+- Actual: `apps/web/features/dental/canvas-tools.tsx:5` imports `@/components/ui/switch`, which is not installed in the repository. Turbopack reports module-not-found and stops before TypeScript/runtime acceptance.
+- Impact: the reference-guided editor has no production artifact; its planned browser pass is not run. Starting review web 3001 reports missing production build. Live port 3000 remains on the preserved `.next-dental-editor` artifact.
+- Evidence: `/tmp/medframe-reference-build.log`, `/tmp/medframe-reference-web.log`, retained under `.impeccable/review/reference-editor/`.
+- No repair/rebuild was performed at discovery. The user was asked whether to authorize adding the missing shadcn component and one confirmation/activation, because the saved instruction requires issues to be logged without repair until requested.
+
+### REF-002 — Small text sizes outside the design ramp (deferred advisory)
+
+- One scoped Impeccable detector pass reports three 11px font-size advisories: two camera-navigation labels in `canvas-tools.tsx` and the surface picker in `tooth-preview.tsx`.
+- No font-token rewrite or suppression was made. These advisories are distinct from the build blocker and remain deferred.
+- ESLint passes with zero errors and the same two existing operations warnings. The 37 source-derived PNG previews rendered successfully; neither result proves the application UI renders.
+- Evidence: `/tmp/medframe-reference-design.log`, `/tmp/medframe-reference-lint.log`, `/tmp/medframe-reference-previews.log`.

@@ -133,6 +133,7 @@ export function AnatomicalScene({
   controls,
   onReady,
   annotations,
+  showLabel = true,
 }: {
   url: string;
   selected: string;
@@ -147,6 +148,7 @@ export function AnatomicalScene({
   controls: RefObject<OrbitControlsInstance | null>;
   onReady: () => void;
   annotations?: AnnotationInteraction;
+  showLabel?: boolean;
 }) {
   const { scene } = useGLTF(url);
   const { camera, size, invalidate } = useThree();
@@ -267,7 +269,8 @@ export function AnatomicalScene({
         asset={reference ? "dundee-molar26-v1" : "dundee-permanent-v1"}
         interaction={annotations}
       />
-      {labelPosition &&
+      {showLabel &&
+        labelPosition &&
         (anatomyOnly || !toothPresentation(findings, selected).missing) &&
         (reference || isolate || jaw === "both" || selectedMesh?.userData.jaw === jaw) && (
           <Html position={labelPosition} center style={{ pointerEvents: "none" }}>

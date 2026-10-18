@@ -24,6 +24,7 @@ import { usePatientDraft } from "@/features/patients/use-patient-draft";
 import { useRequestScope } from "@/features/patients/use-request-scope";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/application/status-badge";
+import { FileText, Stethoscope, Crosshair, MessageSquare } from "@/components/icons";
 import { PatientAvatar } from "@/components/application/patient-avatar";
 import { PageHeading, failureCode, failureText, timeLabel } from "@/features/patients/feedback";
 import { DentalEditor } from "@/features/dental/dental-editor";
@@ -478,17 +479,119 @@ export function EncounterEditor({
                     <DentalEditor
                       active={clinicalTab === "dental"}
                       patientName={encounter.patientName}
-                      onExit={() => setClinicalTab("notes")}
-                      actions={
-                        !readOnly && (
+                      reason={encounter.reason}
+                      encounterStatus={exactRevision ? "historical" : encounter.status}
+                      onPatientRecord={() =>
+                        void guard(() =>
+                          router.push(href(`/clinic/patients/${encounter.patientId}`)),
+                        )
+                      }
+                      navigation={
+                        <>
                           <Button
                             type="button"
-                            disabled={busy || lifecycleBusy || composing}
-                            onClick={() => void save()}
+                            variant="ghost"
+                            className="h-12 shrink-0 rounded-none border-b-2 border-transparent text-muted-foreground"
+                            onClick={() => setClinicalTab("notes")}
                           >
-                            Save draft
+                            <FileText />
+                            Clinical Notes
                           </Button>
-                        )
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            aria-current="page"
+                            className="h-12 shrink-0 rounded-none border-b-2 border-primary font-semibold text-primary"
+                          >
+                            <Stethoscope />
+                            Dental Chart
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="h-12 shrink-0 rounded-none border-b-2 border-transparent text-muted-foreground"
+                            onClick={() => {
+                              setClinicalTab("notes");
+                              requestAnimationFrame(() =>
+                                document
+                                  .getElementById("diagnosesHeading")
+                                  ?.scrollIntoView({ block: "start" }),
+                              );
+                            }}
+                          >
+                            <Crosshair />
+                            Diagnoses
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="h-12 shrink-0 rounded-none border-b-2 border-transparent text-muted-foreground"
+                            onClick={() => setClinicalTab("procedures")}
+                          >
+                            <Stethoscope />
+                            Procedures
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="h-12 shrink-0 rounded-none border-b-2 border-transparent text-muted-foreground"
+                            onClick={() =>
+                              void guard(() =>
+                                router.push(
+                                  `${href(`/clinic/patients/${encounter.patientId}`)}&tab=treatments`,
+                                ),
+                              )
+                            }
+                          >
+                            <MessageSquare />
+                            Treatment Plan
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="h-12 shrink-0 rounded-none border-b-2 border-transparent text-muted-foreground"
+                            onClick={() => setClinicalTab("documents")}
+                          >
+                            <FileText />
+                            Documents
+                          </Button>
+                        </>
+                      }
+                      onExit={() => setClinicalTab("notes")}
+                      actions={
+                        <>
+                          {!readOnly && (
+                            <>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                disabled={busy || lifecycleBusy || composing}
+                                onClick={() => void save()}
+                              >
+                                Save draft
+                              </Button>
+                              <Button
+                                type="button"
+                                disabled={busy || lifecycleBusy || composing || uploadPending}
+                                onClick={() => void transition("completed")}
+                              >
+                                Mark completed
+                              </Button>
+                            </>
+                          )}
+                          {completed && !exactRevision && can("encounters.write") && (
+                            <Button
+                              type="button"
+                              disabled={busy || lifecycleBusy || uploadPending}
+                              onClick={() => {
+                                setReview(true);
+                                void finalize();
+                              }}
+                            >
+                              Review and finalize
+                            </Button>
+                          )}
+                        </>
                       }
                       feedback={
                         <>
