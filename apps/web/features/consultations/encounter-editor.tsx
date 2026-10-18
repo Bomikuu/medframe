@@ -78,7 +78,7 @@ export function EncounterEditor({
   const dirty = form.formState.isDirty;
   const readOnly = exactRevision || !encounter.editable || !can("encounters.write");
   const [review, setReview] = useState(false);
-  const [clinicalTab, setClinicalTab] = useState("notes");
+  const [clinicalTab, setClinicalTab] = useState("dental");
   usePatientDraft(key, form);
   useUnsavedChanges(key, dirty && !readOnly, () => form.reset());
 
@@ -477,6 +477,35 @@ export function EncounterEditor({
                   <div className="min-w-0 rounded-lg border border-border p-4 sm:p-6">
                     <DentalEditor
                       active={clinicalTab === "dental"}
+                      patientName={encounter.patientName}
+                      onExit={() => setClinicalTab("notes")}
+                      actions={
+                        !readOnly && (
+                          <Button
+                            type="button"
+                            disabled={busy || lifecycleBusy || composing}
+                            onClick={() => void save()}
+                          >
+                            Save draft
+                          </Button>
+                        )
+                      }
+                      feedback={
+                        <>
+                          {failure !== null ? (
+                            <span role="alert" className="text-destructive">
+                              {failureText(failure)}
+                            </span>
+                          ) : (
+                            status
+                          )}
+                          {Object.keys(form.formState.errors).length > 0 && (
+                            <span className="ml-2 text-destructive">
+                              Check required findings and the combined draft size.
+                            </span>
+                          )}
+                        </>
+                      }
                       readOnly={readOnly || lifecycleBusy}
                       patientId={encounter.patientId}
                       encounterId={encounter.id}

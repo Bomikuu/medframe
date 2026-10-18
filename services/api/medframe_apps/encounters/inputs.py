@@ -1,7 +1,7 @@
 from typing import Annotated, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, FiniteFloat, model_validator
 
 from medframe_apps.dental.reference import validate_tooth_surfaces
 
@@ -29,6 +29,14 @@ class ObservationInput(Input):
     source: Literal["reported", "observed"] = "observed"
 
 
+PointCoordinate = Annotated[FiniteFloat, Field(ge=-100000, le=100000)]
+
+
+class DentalAnchorInput(Input):
+    asset: Literal["dundee-permanent-v1", "dundee-molar26-v1"]
+    point: tuple[PointCoordinate, PointCoordinate, PointCoordinate]
+
+
 class FindingInput(Input):
     key: UUID
     tooth: str
@@ -37,10 +45,16 @@ class FindingInput(Input):
     severity: Literal["unknown", "mild", "moderate", "severe"] = "unknown"
     status: Literal["active", "resolved", "historical"] = "active"
     notes: str = Field(default="", max_length=500)
+    anchor: DentalAnchorInput | None = None
 
     @model_validator(mode="after")
     def valid_surfaces(self):
         validate_tooth_surfaces(self.tooth, self.surfaces)
+        if self.anchor:
+            if self.tooth[0] not in "1234":
+                raise ValueError("Anatomical pins require a permanent tooth")
+            if self.anchor.asset == "dundee-molar26-v1" and self.tooth != "26":
+                raise ValueError("The detailed molar asset represents tooth 26")
         return self
 
 

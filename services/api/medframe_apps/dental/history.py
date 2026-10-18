@@ -64,7 +64,7 @@ def compare_dental_charts(
     previous = {value["key"]: value for value in left["findings"]}
     current = {value["key"]: value for value in right["findings"]}
     changes = []
-    clinical_fields = ("tooth", "surfaces", "condition", "severity", "status", "notes")
+    clinical_fields = ("tooth", "surfaces", "condition", "severity", "status", "notes", "anchor")
     for key in sorted(previous.keys() | current.keys()):
         before, after = previous.get(key), current.get(key)
         if before is None:

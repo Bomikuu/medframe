@@ -27,4 +27,9 @@ export {
   ArrowUp,
   ArrowDown,
   Camera,
+  MousePointer2,
+  MessageSquare,
+  Maximize2,
+  Minimize2,
+  Crosshair,
 } from "lucide-react";

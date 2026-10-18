@@ -151,3 +151,19 @@ The first activation browser attempt's click used coordinates invalidated by scr
 - Evidence: `.impeccable/review/anatomical-dental-activation/detailed-26.png`. No further polish/retest cycle was run.
 
 DENT-003's blocked desktop/mobile and save/reload checks are now completed at the focused scope above. Exhaustive tooth-by-tooth/browser historical/missing-condition coverage remains unperformed.
+
+## Full dental editor / point notes — October 19, 2026
+
+### EDITOR-001 — Test-file import ordering (deferred)
+
+- Single targeted Ruff pass reports I001 in `services/api/tests_django/test_dental_annotations.py`: `from tests_django import test_encounters` should precede the ClinicalFixture import.
+- This is a test-source style finding, not a runtime exception. No repair or retry was performed under the user's testing preference.
+- Evidence: `/tmp/medframe-dental-editor-ruff.log` and the retained copy under `.impeccable/review/dental-editor/`.
+
+### EDITOR-002 — Browser harness cannot locate the editor dialog (deferred)
+
+- The single browser run signs in with the synthetic staff fixture, then waits for `getByRole('dialog', {name: 'Dental editor', exact: true})`. It times out. All five dependent groups fail to reach their targets; no screenshot or new note save occurs, and no browser page errors are reported.
+- Source inspection suggests an accessible-name mismatch: Radix DialogContent supplies `aria-labelledby` for the patient-name DialogTitle, which takes precedence over the supplied aria-label. This explanation is an inference; no corrected-selector run was performed.
+- Impact: default full-screen rendering, point clicks, note popovers, real-browser save/reload, rotation and mobile inspection are not accepted as browser-verified. Two focused backend tests do pass, covering bounded anchor validation, legacy records, exact finalization and amendment comparison.
+- Evidence: `/tmp/medframe-dental-editor-browser.json`, retained under `.impeccable/review/dental-editor/`. No selector/product fix or browser retry was attempted.
+- A local preview may be run with this coverage gap explicitly disclosed; it is not a full UI acceptance pass. The previous anatomical build remains the rollback artifact. Do not claim the failed browser groups passed.

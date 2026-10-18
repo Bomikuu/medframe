@@ -7,6 +7,8 @@ import type { OrbitControls as OrbitControlsInstance } from "three-stdlib";
 import { Button } from "@/components/ui/button";
 import { FormSelect } from "@/features/patients/form-controls";
 import type { Finding } from "@/features/consultations/schema";
+import type { AnnotationInteraction } from "./annotation-pins";
+import { MousePointer2, MessageSquare } from "@/components/icons";
 import { AnatomicalScene } from "./anatomical-scene";
 import {
   MOLAR_REFERENCE_MODEL,
@@ -38,7 +40,11 @@ export default function Dental3D({
   onSelect,
   findings,
   dentition,
+  editor = false,
+  annotations,
 }: {
+  editor?: boolean;
+  annotations?: AnnotationInteraction;
   selected: string;
   onSelect: (id: string, surface?: string) => void;
   selectedSurface: string | null;
@@ -54,7 +60,9 @@ export default function Dental3D({
   const [reference, setReference] = useState(false);
   const [readyUrl, setReadyUrl] = useState<string | null>(null);
   const controls = useRef<OrbitControlsInstance | null>(null);
-  const detailed = reference && selected === "26";
+  const focused = findings.find((finding) => finding.key === annotations?.activeKey)?.anchor;
+  const detailed =
+    selected === "26" && (focused ? focused.asset === "dundee-molar26-v1" : reference);
   const modelUrl = detailed ? MOLAR_REFERENCE_MODEL : PERMANENT_MODEL;
   const ready = readyUrl === modelUrl;
   const markReady = useCallback(() => setReadyUrl(modelUrl), [modelUrl]);
@@ -73,7 +81,39 @@ export default function Dental3D({
   }
   return (
     <ModelBoundary>
-      <div className="grid min-w-0 gap-4">
+      <div className={editor ? "flex h-full min-h-0 min-w-0 flex-col gap-3" : "grid min-w-0 gap-4"}>
+        {annotations && (
+          <div
+            className="flex flex-wrap items-center gap-2 border-b border-border pb-3"
+            role="toolbar"
+            aria-label="Dental tools"
+          >
+            <Button
+              type="button"
+              variant={annotations.tool === "select" ? "secondary" : "ghost"}
+              aria-pressed={annotations.tool === "select"}
+              onClick={() => annotations.onToolChange("select")}
+            >
+              <MousePointer2 />
+              Select
+            </Button>
+            <Button
+              type="button"
+              variant={annotations.tool === "comment" ? "secondary" : "ghost"}
+              disabled={!annotations.canComment}
+              aria-pressed={annotations.tool === "comment"}
+              onClick={() => annotations.onToolChange("comment")}
+            >
+              <MessageSquare />
+              Comment
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              {annotations.tool === "comment"
+                ? "Click a point on a tooth to place a note. Drag to rotate."
+                : "Select a tooth or drag to rotate. Isolate to inspect its sides."}
+            </span>
+          </div>
+        )}
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="flex flex-wrap gap-1" role="group" aria-label="Visible jaws">
             {(
@@ -91,6 +131,7 @@ export default function Dental3D({
                 onClick={() => {
                   setJaw(value);
                   setReference(false);
+                  annotations?.onOpen(null);
                 }}
               >
                 {label}
@@ -108,7 +149,11 @@ export default function Dental3D({
           </div>
         </div>
         <div
-          className="relative h-[360px] min-w-0 overflow-hidden rounded-lg border border-border bg-muted/40 sm:h-[480px]"
+          className={
+            editor
+              ? `relative min-h-[260px] flex-1 overflow-hidden rounded-lg border border-border bg-muted/40 ${annotations?.tool === "comment" ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`
+              : "relative h-[360px] min-w-0 overflow-hidden rounded-lg border border-border bg-muted/40 sm:h-[480px]"
+          }
           aria-label="Interactive anatomical dental model"
         >
           {!ready && (
@@ -144,6 +189,7 @@ export default function Dental3D({
                 reference={detailed}
                 controls={controls}
                 onReady={markReady}
+                annotations={annotations}
               />
             </Suspense>
           </Canvas>
@@ -177,6 +223,7 @@ export default function Dental3D({
               setView("front");
               setReset((value) => value + 1);
               setReference(false);
+              annotations?.onOpen(null);
             }}
           >
             Reset camera
@@ -195,6 +242,7 @@ export default function Dental3D({
               variant={reference ? "secondary" : "outline"}
               aria-pressed={reference}
               onClick={() => {
+                annotations?.onOpen(null);
                 setReference(!reference);
                 setIsolate(false);
                 setView("front");
@@ -216,45 +264,48 @@ export default function Dental3D({
             Educational reference anatomy. Recorded findings have not changed.
           </p>
         )}
-        <p className="text-xs leading-5 text-muted-foreground">
+        <p className={editor ? "sr-only" : "text-xs leading-5 text-muted-foreground"}>
           Select a tooth, drag to rotate, scroll to zoom or right-drag to pan. Highlights identify
           whole-tooth records; select clinical surfaces in the tooth panel. No finding does not
           establish a healthy tooth.
         </p>
-        <p className="text-xs leading-5 text-muted-foreground">
-          Anatomical reference, not patient-specific or dimensionally calibrated. Models by{" "}
-          <a
-            href="https://sketchfab.com/DundeeDental"
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-4"
-          >
-            University of Dundee, School of Dentistry
-          </a>
-          ,{" "}
-          <a
-            href="https://creativecommons.org/licenses/by/4.0/"
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-4"
-          >
-            CC BY 4.0
-          </a>
-          . Textures optimized and FDI metadata added; no tooth geometry reshaped.{" "}
-          <a
-            href={
-              detailed
-                ? "https://sketchfab.com/3d-models/maxillary-first-molar-e719a474ef7e4bd7abec508f85f1e984"
-                : "https://sketchfab.com/3d-models/permanent-dentition-2f69d7b59c3e4a6a8bcae041bd8e591b"
-            }
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-4"
-          >
-            Original asset
-          </a>
-          .
-        </p>
+        <details className="text-xs leading-5 text-muted-foreground">
+          <summary className="cursor-pointer">Model source & reference limits</summary>
+          <p className="mt-2">
+            Anatomical reference, not patient-specific or dimensionally calibrated. Models by{" "}
+            <a
+              href="https://sketchfab.com/DundeeDental"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4"
+            >
+              University of Dundee, School of Dentistry
+            </a>
+            ,{" "}
+            <a
+              href="https://creativecommons.org/licenses/by/4.0/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4"
+            >
+              CC BY 4.0
+            </a>
+            . Textures optimized and FDI metadata added; no tooth geometry reshaped.{" "}
+            <a
+              href={
+                detailed
+                  ? "https://sketchfab.com/3d-models/maxillary-first-molar-e719a474ef7e4bd7abec508f85f1e984"
+                  : "https://sketchfab.com/3d-models/permanent-dentition-2f69d7b59c3e4a6a8bcae041bd8e591b"
+              }
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4"
+            >
+              Original asset
+            </a>
+            .
+          </p>
+        </details>
       </div>
     </ModelBoundary>
   );

@@ -16,6 +16,7 @@ import {
 import type { OrbitControls as OrbitControlsInstance } from "three-stdlib";
 import type { Finding } from "@/features/consultations/schema";
 import { isPermanentTooth, toothPresentation, type DentalView, type JawView } from "./anatomy";
+import { AnnotationPins, type AnnotationInteraction } from "./annotation-pins";
 
 type PreparedAnatomy = {
   root: Object3D;
@@ -131,6 +132,7 @@ export function AnatomicalScene({
   reference,
   controls,
   onReady,
+  annotations,
 }: {
   url: string;
   selected: string;
@@ -144,6 +146,7 @@ export function AnatomicalScene({
   reference: boolean;
   controls: RefObject<OrbitControlsInstance | null>;
   onReady: () => void;
+  annotations?: AnnotationInteraction;
 }) {
   const { scene } = useGLTF(url);
   const { camera, size, invalidate } = useThree();
@@ -233,10 +236,23 @@ export function AnatomicalScene({
   });
   function select(event: ThreeEvent<MouseEvent>) {
     const id: unknown = event.object.userData.tooth_id;
-    if (!event.object.visible || !isPermanentTooth(id)) return;
+    if (!event.object.visible || !isPermanentTooth(id) || event.delta > 4) return;
     event.stopPropagation();
     // Source geometry has no clinically reliable surface segmentation.
     onSelect(id);
+    if (annotations?.tool === "comment") {
+      annotations.onPlace({
+        tooth: id,
+        anchor: {
+          asset: reference ? "dundee-molar26-v1" : "dundee-permanent-v1",
+          point: event.object.worldToLocal(event.point.clone()).toArray() as [
+            number,
+            number,
+            number,
+          ],
+        },
+      });
+    }
   }
   const selectedMesh = prepared.teeth.find((mesh) => mesh.userData.tooth_id === selected);
   const labelPosition = selectedMesh
@@ -245,11 +261,17 @@ export function AnatomicalScene({
   return (
     <>
       <primitive object={prepared.root} onClick={select} />
+      <AnnotationPins
+        teeth={prepared.teeth}
+        findings={findings}
+        asset={reference ? "dundee-molar26-v1" : "dundee-permanent-v1"}
+        interaction={annotations}
+      />
       {labelPosition &&
         (anatomyOnly || !toothPresentation(findings, selected).missing) &&
         (reference || isolate || jaw === "both" || selectedMesh?.userData.jaw === jaw) && (
           <Html position={labelPosition} center style={{ pointerEvents: "none" }}>
-            <span className="rounded-md border border-border bg-card px-2 py-1 text-xs font-semibold text-foreground shadow-sm">
+            <span className="rounded-md border border-border bg-card px-2 py-1 text-xs font-semibold whitespace-nowrap text-foreground shadow-sm">
               {reference ? "Reference 26" : selected}
             </span>
           </Html>

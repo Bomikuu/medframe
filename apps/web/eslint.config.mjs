@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     ".next-batch3-rehearsal/**",
     ".next-ui-revamp/**",
     ".next-anatomical-dental/**",
+    ".next-dental-editor/**",
     ".next-batch1-checkpoint/**",
     "public/vendor/**",
     "out/**",

@@ -31,7 +31,7 @@ from medframe_apps.treatments.models import Procedure
 
 def validated_draft(content):
     try:
-        return DraftInput.model_validate(content).model_dump(mode="json")
+        return DraftInput.model_validate(content).model_dump(mode="json", exclude_none=True)
     except (ValidationError, ValueError):
         raise DomainError(
             "INVALID_INPUT",
@@ -310,7 +310,9 @@ def finalize_encounter(user, organization_id, encounter_id, expected_version):
             ToothFinding(
                 revision=revision,
                 finding_key=value["key"],
-                **{key: item for key, item in value.items() if key != "key"},
+                # The normalized index owns clinical fields. Exact JSON content/chart
+                # snapshots retain optional versioned 3D presentation anchors.
+                **{key: item for key, item in value.items() if key not in {"key", "anchor"}},
             )
             for value in content["findings"]
         ]

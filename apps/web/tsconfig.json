@@ -38,7 +38,9 @@
     ".next-ui-revamp/types/**/*.ts",
     ".next-ui-revamp/dev/types/**/*.ts",
     ".next-anatomical-dental/types/**/*.ts",
-    ".next-anatomical-dental/dev/types/**/*.ts"
+    ".next-anatomical-dental/dev/types/**/*.ts",
+    ".next-dental-editor/types/**/*.ts",
+    ".next-dental-editor/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

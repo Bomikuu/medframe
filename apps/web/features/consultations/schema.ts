@@ -5,6 +5,15 @@ export const diagnosisSchema = z.object({
   certainty: z.enum(["reported", "observed", "suspected", "confirmed", "resolved"]),
   code: z.string().max(40),
 });
+export const dentalAnchorSchema = z.object({
+  asset: z.enum(["dundee-permanent-v1", "dundee-molar26-v1"]),
+  point: z.tuple([
+    z.number().finite().min(-100000).max(100000),
+    z.number().finite().min(-100000).max(100000),
+    z.number().finite().min(-100000).max(100000),
+  ]),
+});
+export type DentalAnchor = z.infer<typeof dentalAnchorSchema>;
 export const findingSchema = z.object({
   key: z.string().uuid(),
   tooth: z.string(),
@@ -13,6 +22,7 @@ export const findingSchema = z.object({
   severity: z.enum(["unknown", "mild", "moderate", "severe"]),
   status: z.enum(["active", "resolved", "historical"]),
   notes: z.string().max(500),
+  anchor: dentalAnchorSchema.optional(),
 });
 export const procedureSchema = z.object({
   description: z.string().trim().min(1).max(240),
