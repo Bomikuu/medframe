@@ -71,7 +71,7 @@ export function PatientOverview({
     ],
   ];
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-8 wrap-anywhere">
       <RemoteNotice error={error} retry={reload} />
       <div>
         <Link

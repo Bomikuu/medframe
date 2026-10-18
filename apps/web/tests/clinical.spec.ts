@@ -194,7 +194,7 @@ test("walk-in SOAP, dental findings, private documents, finalization, amendment,
   await page.getByRole("combobox", { name: "Finalized procedure evidence" }).click();
   await page.getByRole("option", { name: "Synthetic walk-in care, revision 2" }).click();
   await page.getByRole("button", { name: "Complete plan item" }).click();
-  await expect(page.getByText("1 of 1 completed", { exact: true })).toBeVisible();
+  await expect(page.getByText("1 of 1 active items completed", { exact: true })).toBeVisible();
   await page.getByRole("link", { name: "History", exact: true }).click();
   await expect(page.getByRole("link", { name: "Open preserved visit revision" })).toHaveCount(2);
 });

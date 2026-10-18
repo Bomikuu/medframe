@@ -34,6 +34,8 @@ class DentalAssetContractTests(TestCase):
                     patches += 1
             self.assertEqual(surfaces, set(TEETH[tooth]["surfaces"]))
         self.assertEqual(patches, 260)
+        shared = Path(__file__).resolve().parents[3] / "apps/web/features/dental/reference.json"
+        self.assertEqual(json.loads(shared.read_text())["teeth"], list(TEETH.values()))
 
     def test_anterior_and_posterior_surface_rules(self):
         self.assertEqual(TEETH["16"]["label"], "upper right first molar")

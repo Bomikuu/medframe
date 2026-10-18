@@ -26,7 +26,7 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run codegen
-      - run: git diff --exit-code -- apps/web/schema.graphql apps/web/lib/graphql/generated.ts apps/web/lib/graphql/schema-types.ts
+      - run: git diff --exit-code -- apps/web/schema.graphql apps/web/lib/graphql/generated.ts apps/web/lib/graphql/schema-types.ts apps/web/portal-schema.graphql apps/web/lib/graphql/portal/generated.ts apps/web/lib/graphql/portal/schema-types.ts
       - run: npm run typecheck
       - run: npm run build
       - run: npm exec --workspace apps/web playwright install --with-deps chromium
@@ -34,6 +34,7 @@ jobs:
         run: |
           uv run --project services/api uvicorn config.asgi:application --app-dir services/api --host 127.0.0.1 --port 8000 --no-access-log > /tmp/medframe-api.log 2>&1 &
           (cd services/api && uv run celery -A config.celery worker --loglevel=warning --concurrency=2 --without-gossip --without-mingle) > /tmp/medframe-worker.log 2>&1 &
+          (cd services/api && uv run celery -A config.celery beat --loglevel=warning --schedule=/tmp/medframe-ci-celerybeat) > /tmp/medframe-beat.log 2>&1 &
           npm run start --workspace apps/web > /tmp/medframe-web.log 2>&1 &
           for attempt in $(seq 1 30); do
             if curl --silent --fail http://localhost:8000/health/ready && curl --silent --fail http://localhost:3000/login > /dev/null; then break; fi

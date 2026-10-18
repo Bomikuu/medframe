@@ -191,3 +191,10 @@ body {
 h1 {
   font-size: calc(1.875rem * var(--heading-scale, 1));
 }
+
+/* Apply theme tokens together so intermediate color interpolation cannot reduce contrast. */
+:root[data-theme-changing] *,
+:root[data-theme-changing] *::before,
+:root[data-theme-changing] *::after {
+  transition: none !important;
+}

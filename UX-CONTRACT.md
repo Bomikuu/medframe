@@ -82,3 +82,14 @@ The user requires native work without subagents. No per-component approval or pa
 | Notifications       | `features/workspace/notifications.tsx`                        | Actual user/clinic-scoped records, safe labels, persisted read state.                                                             |
 
 Selected files and active uploads participate in navigation protection. Consultation completion waits for a selected file to be uploaded or cleared. Quarantined attachments cannot become finalized evidence. Historical links resolve exact encounter/chart/history/document revisions; current history remains explicitly labeled as current where no preserved context exists.
+
+## Clinical versions and patient access
+
+- `features/records/record-filters.tsx` owns clinic-local date, literal text and structured record filters. Applying/clearing filters resets a signed keyset page; form instances have unique IDs. Filter labels are distinct from clinical-entry labels.
+- `features/dental/dental-chart-grid.tsx` owns keyboard tooth selection for editor/history/portal variants. `chart-view.tsx` accepts authorized snapshots only. No missing finding implies recovery.
+- Template prompts use the existing encounter save/version/IME/request-scope owner. Dirty input must save successfully before guidance application; an error preserves it. Optional labels create an empty observation value, never a clinical fact.
+- Plan edits, ordering and follow-ups use expected versions and replay keys. Preserve user input on failures/conflicts; completed evidence is immutable. Version histories never invent pre-migration changes.
+- `features/documents/document-preview.tsx` accepts an authorization callback, fetches private bytes into memory, and destroys PDF/Blob resources on closure or scope change. A preview failure retains an independently authorized original download.
+- `features/portal/portal-provider.tsx` owns the active verified relationship, separate patient client, private scope clearing, focus/30-second authority refresh and simpler navigation. Staff and patient entry use native explicit sign-in through the shared auth owner. Unsaved forms use `SafetyProvider` before realm or relationship switching.
+- Verification/invitation controls are separate from clinician release preview/publish/withdraw controls. Only previewed selections are published; a changed source requires another preview. Record versions and published payloads remain immutable.
+- Patient reports are separate submissions with review receipts. Preference writes preserve unrelated staff data. Revocation/withdrawal denies subsequent requests and clears inaccessible UI state; previously delivered/downloaded bytes cannot be recalled.

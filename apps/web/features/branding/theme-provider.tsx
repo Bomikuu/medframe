@@ -101,9 +101,19 @@ export function useAppearanceTokens(
   useLayoutEffect(() => {
     const root = document.documentElement;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
+    let firstFrame = 0;
+    let secondFrame = 0;
     const update = () => {
+      cancelAnimationFrame(firstFrame);
+      cancelAnimationFrame(secondFrame);
+      root.dataset.themeChanging = "true";
       root.dataset.mode =
         personal.mode === "system" ? (media.matches ? "dark" : "light") : personal.mode;
+      firstFrame = requestAnimationFrame(() => {
+        secondFrame = requestAnimationFrame(() => {
+          delete root.dataset.themeChanging;
+        });
+      });
     };
     update();
     const variables: Record<string, string> = {
@@ -128,6 +138,9 @@ export function useAppearanceTokens(
     media.addEventListener("change", update);
     return () => {
       media.removeEventListener("change", update);
+      cancelAnimationFrame(firstFrame);
+      cancelAnimationFrame(secondFrame);
+      delete root.dataset.themeChanging;
       Object.keys(variables).forEach((key) => root.style.removeProperty(key));
       for (const key of ["mode", "density", "inputStyle", "buttonStyle", "cardStyle", "shadow"])
         delete root.dataset[key];

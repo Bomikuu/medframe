@@ -10,11 +10,11 @@ web
 
 Current implementation, selected in the user's Django Edition amendment: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, React Hook Form, Zod, a suitable typed GraphQL client/code generation, React Three Fiber/Three.js, and Lucide. The backend is a modular Django application using Django ORM, authentication, sessions, permissions, migrations, Admin, Strawberry, strawberry-graphql-django, and PostgreSQL. Private S3-compatible storage, ClamAV, and Celery support connected document/asset workflows; Redis supplies shared throttling and the broker.
 
-The local app has completed the Django Batch 1 cutover. The old FastAPI/SQLAlchemy/Alembic/Phosphor implementation remains saved as `77bf229` / `checkpoint/pre-django-2026-10-18`, with its source database intact. See `docs/operations/django-batch-1-verification.md` for verification and clinical/production boundaries.
+The local app has completed the Django Batch 1 cutover. Batch 2 extends it with verified patient access and explicit clinical releases; local activation and actual verification are recorded in `docs/operations/django-batch-2-verification.md`. The old FastAPI/SQLAlchemy/Alembic/Phosphor implementation remains saved as `77bf229` / `checkpoint/pre-django-2026-10-18`, with its source database intact. See `docs/operations/django-batch-1-verification.md` for verification and clinical/production boundaries.
 
 ## Users
 
-Dentists and doctors documenting real clinical care are the primary users. Clinic staff have narrowly scoped administrative permissions. Patients and authorized guardians receive access to permitted records in a later portal slice. Initial specialties are dentistry and general medical practice.
+Dentists and doctors documenting real clinical care are the primary users. Clinic staff have narrowly scoped administrative permissions. Patients and verified guardians access only the exact versions explicitly released by their clinician through the separate patient portal. Initial specialties are dentistry and general medical practice.
 
 ## Product Purpose
 
@@ -36,7 +36,7 @@ Clinicians work with patient context, medical history, allergies, findings, note
 - Finalized records are immutable; amendments preserve the original and identify author, time, and reason.
 - Keep subjective symptoms, confirmed diagnoses, proposed treatment, completed procedures, and illustrative previews distinct.
 - Use synthetic patient data during development. Do not claim regulatory compliance or anatomical validation without review.
-- Patient portal follows the complete Batch 1 clinical milestone. Scheduling/queues, financial communication, diagnostics, general anatomy, clinic websites, and expansion follow Batches 3–8 of the new roadmap.
+- The Batch 2 patient portal follows the complete Batch 1 clinical milestone. Scheduling/queues, financial communication, diagnostics, general anatomy, clinic websites, and expansion follow Batches 3–8 of the new roadmap.
 - Maintain readable source, focused modules, Prettier for supported formats, Ruff for Python, and Tailwind-first styling. Execute natively without subagents or delegated reviews, as the user instructed on October 18, 2026.
 - Group and size form inputs for their expected content. Profile-image uploads use circular avatar controls; clinical images retain complete framing.
 

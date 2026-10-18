@@ -104,3 +104,11 @@ Private upload controls report real transfer/scan state, preserve uncropped clin
 - Keep proposed treatment distinct from completed evidence and draft findings distinct from finalized history.
 - Do not invent a medical symbol, anatomical validation, diagnoses, metrics, notifications, or compliance claims.
 - Do not crop clinical imagery into avatars or expose files through public object URLs.
+
+## Clinical Batch 2 interaction owners
+
+`features/dental/dental-chart-grid.tsx` is the shared keyboard chart in the editor, comparisons and portal; `chart-view.tsx` is its read-only snapshot composition. `reference.json` is generated from Django's FDI reference. Schematic v2 keeps explicit IDs and clearer crown silhouettes; it remains unvalidated geometry, with v1 preserved.
+
+Record filters distinguish search criteria from clinical entry fields and use unique form IDs. Template guidance is visibly separate from entered facts. Plan history and patient releases show version/as-of information; patient reports remain labeled as submitted information.
+
+The simpler portal uses the same validated tokens and shadcn/Radix owners. Its display preferences expose only mode/density. Theme changes apply tokens atomically through `useAppearanceTokens`; a short `data-theme-changing` phase suppresses intermediate color interpolation. Clinical semantic colors remain fixed. Private previews share `features/documents/document-preview.tsx`, retain full image framing, render one bounded PDF page at a time and provide accessible text plus original download fallback.

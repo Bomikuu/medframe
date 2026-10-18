@@ -4,13 +4,15 @@ The Foundation of Modern Care.
 
 Medframe is a clinical workspace built with **Next.js, TypeScript, Tailwind, and Django 5.2 LTS**, backed by PostgreSQL, Strawberry GraphQL, Django authentication/sessions/permissions, and scoped operational Django Admin.
 
-The integrated Django Batch 1 includes patient management, providers, walk-in consultations, SOAP, diagnoses/observations, immutable finalization and amendments, linked 2D/3D dental findings, procedures and basic treatment plans, private scanned documents, white default branding, personal preferences, dashboard layout, and notifications. Native implementation; no subagents. The local app now runs this batch; see [verification evidence](docs/operations/django-batch-1-verification.md).
+The integrated Django Batch 1 includes patient management, providers, walk-in consultations, SOAP, diagnoses/observations, immutable finalization and amendments, linked 2D/3D dental findings, procedures and basic treatment plans, private scanned documents, white default branding, personal preferences, dashboard layout, and notifications. Native implementation; no subagents. The Batch 1 verification remains recorded [here](docs/operations/django-batch-1-verification.md).
+
+Batch 2 adds exact dental comparisons/tooth procedure history, versioned plan editing and ordering, dated follow-ups, filtered records, private image/PDF previews, reusable guidance templates, clinic-verified self/guardian invitations, explicit immutable clinical releases, and separate patient reports/review. See [Batch 2 verification and activation evidence](docs/operations/django-batch-2-verification.md).
 
 The previous implementation and database are preserved: commit `77bf229`, tag `checkpoint/pre-django-2026-10-18`, and a private encrypted backup. See [checkpoint notes](docs/operations/pre-django-checkpoint.md), [Django amendment](docs/superpowers/specs/2026-10-18-medframe-django-amendment.md), and [Batch 1 plan](docs/superpowers/plans/2026-10-18-medframe-django-batch-1.md).
 
 ## Local development
 
-Requires Node.js 22+, Python 3.12+, uv, and Docker Compose. Use synthetic data during development.
+Requires Node.js 22.13+ or a supported newer release, Python 3.12+, uv, and Docker Compose. Use synthetic data during development.
 
 ```bash
 python3 scripts/setup-local.py
@@ -44,7 +46,7 @@ cd services/api
 uv run celery -A config.celery beat --loglevel=warning --schedule=/tmp/medframe-celerybeat
 ```
 
-Open [Medframe](http://localhost:3000/login). Use `localhost` to match the configured browser origin. Local [Mailpit](http://localhost:58025) receives recovery emails. RustFS provides private S3-compatible storage; ClamAV scans files. A missing worker or unavailable scanner leaves files quarantined and unavailable for download.
+Open [Medframe](http://localhost:3000/login). Use `localhost` to match the configured browser origin. Local [Mailpit](http://localhost:58025) receives recovery and invitation emails. RustFS provides private S3-compatible storage; ClamAV scans files. A missing worker or unavailable scanner leaves files quarantined and unavailable for download.
 
 After native setup, the optional Compose `app` profile can run API/web/worker/scheduler containers. Stop native servers that use the same ports, then run `docker compose --env-file .env -f infrastructure/compose.yaml --profile app up --build -d --wait --wait-timeout 600`. Container builds are separate from the verified native workflow.
 
@@ -74,6 +76,22 @@ uv run --project services/api python services/api/manage.py check
 ```
 
 `createsuperuser` creates an operational identity. Complete MFA through the app before visiting [Django Admin](http://localhost:8000/admin/). Operational staff flags do not grant clinic membership or patient access. Admin organization/branch views are scoped and read-only; clinical writes go through domain services.
+
+## Verified patient access
+
+Patients sign in at [the patient portal](http://localhost:3000/portal/login). They receive access only after the clinic verifies identity or guardian authority and issues an invitation from the patient record. Matching contact details do not create a connection. The invitation expires after 24 hours; accept it with a native password and MFA. Existing accounts keep their credentials and staff memberships.
+
+A new connection initially shows no clinical records. A clinician with the live patient grant selects exact finalized notes/chart, plan/follow-up versions and clean file versions, previews the patient-facing payload, then publishes it. Withdrawal and connection revocation stop subsequent authorized reads/downloads. Reports submitted through the portal stay separate from confirmed history until a clinician reconciles them. Staff and patient sessions are separate realms; switching requires explicit sign-in.
+
+## Checkpoints and isolated rehearsal
+
+```bash
+uv run --project services/api python scripts/checkpoint-django.py --clone medframe_django_rehearsal_unique
+```
+
+The checkpoint helper refuses an existing clone name, verifies an encrypted PostgreSQL restore/count manifest and a Git bundle, preserves `.env` privately, and never writes a plaintext dump. Keep the encryption key. Do not replace the active database with a rehearsal clone.
+
+For isolated native rehearsal, set `DJANGO_DATABASE_NAME` to that clone on the API and jobs, `WEB_ORIGIN=http://localhost:3001`, API port 8001 and web `BACKEND_URL=http://127.0.0.1:8001`. Give its worker and beat `CELERY_BROKER_URL=redis://127.0.0.1:56379/3`; the active app retains broker DB 2. Use dedicated synthetic browser contexts because localhost cookies are shared across ports. Keep access logging disabled on private routes. Web `predev`/`prebuild` prepares the pinned matching local PDF.js assets.
 
 ## Importing the saved implementation
 

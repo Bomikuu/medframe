@@ -123,7 +123,7 @@ function PortalShell({
   const href = (path: string) => `${path}?link=${encodeURIComponent(link.id)}`;
   return (
     <PortalContext.Provider value={{ linkId: link.id, href }}>
-      <div className="min-h-dvh bg-background">
+      <div className="min-h-dvh bg-background wrap-anywhere">
         <header className="border-b border-border">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5 py-5">
             <div className="flex items-center gap-4">

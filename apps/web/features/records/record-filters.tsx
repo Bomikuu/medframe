@@ -88,7 +88,7 @@ export function RecordFilterForm({
         <Input id={`${filterId}-record-to`} type="date" {...form.register("date_to")} />
       </FormField>
       {tooth && (
-        <FormField id={`${filterId}-record-tooth`} label="FDI tooth">
+        <FormField id={`${filterId}-record-tooth`} label="Filter by FDI tooth">
           <Input
             id={`${filterId}-record-tooth`}
             className="max-w-32"

@@ -268,3 +268,19 @@ query ReleaseSourcePage($organizationId: UUID!, $patientId: UUID!, $kind: String
 query RecordAuthors($organizationId: UUID!, $patientId: UUID) {
   recordAuthors(organizationId: $organizationId, patientId: $patientId)
 }
+query ReconciliationHistory($organizationId: UUID!, $patientId: UUID!, $afterVersion: Int) {
+  patientClinicalRevisions(
+    organizationId: $organizationId
+    patientId: $patientId
+    afterVersion: $afterVersion
+  ) {
+    items {
+      id
+      version
+      authorName
+      createdAt
+    }
+    endVersion
+    hasNextPage
+  }
+}

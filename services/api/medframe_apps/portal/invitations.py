@@ -74,11 +74,12 @@ def issue_invitation(user, org, patient_id, data, request_id):
         raise DomainError("CONFLICT", "This patient already has an active self connection.", 409)
     pending = PortalInvitation.objects.select_for_update().filter(
         patient=patient,
-        email=email,
         relationship=parsed.relationship,
         consumed_at__isnull=True,
         revoked_at__isnull=True,
     )
+    if parsed.relationship == "guardian":
+        pending = pending.filter(email=email)
     for old in pending:
         old.revoked_at = timezone.now()
         old.save(update_fields=["revoked_at"])

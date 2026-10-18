@@ -86,3 +86,52 @@ class PortalReportTests(ClinicalFixture):
             HTTP_ORIGIN="http://localhost:3000",
         )
         self.assertIsNotNone(response.json()["errors"])
+
+    def test_patient_display_preferences_preserve_staff_widgets_and_private_fields(self):
+        from types import SimpleNamespace
+
+        from api_graphql.portal_schema import PortalMutation, PortalQuery
+        from medframe_apps.branding.models import UserPreferences
+
+        preferences = UserPreferences.objects.create(
+            user=self.doctor,
+            organization=self.organization,
+            settings={"mode": "light", "density": "inherit", "sidebar_collapsed": True},
+            widgets=[{"id": "recent_patients", "visible": False, "size": "wide"}],
+        )
+        PortalMutation().save_portal_preferences(
+            SimpleNamespace(context=self.request), self.link.id, "dark", "compact", 1
+        )
+        preferences.refresh_from_db()
+        self.assertEqual(
+            preferences.widgets, [{"id": "recent_patients", "visible": False, "size": "wide"}]
+        )
+        self.assertTrue(preferences.settings["sidebar_collapsed"])
+        workspace = PortalQuery().portal_workspace(
+            SimpleNamespace(context=self.request), self.link.id
+        )
+        self.assertEqual(workspace["mode"], "dark")
+        self.assertNotIn("widgets", workspace)
+        self.assertNotIn("sidebar_collapsed", workspace)
+        self.assertNotIn("avatar_id", workspace)
+
+    def test_submission_is_immutable_and_review_history_must_match_patient(self):
+        from django.db import DatabaseError, transaction
+
+        from medframe_apps.patients.inputs import SaveClinicalHistoryInput
+        from medframe_apps.patients.services import save_clinical_history
+
+        report = submit_report(
+            self.request, self.link.id, "history", "Immutable synthetic report", uuid4()
+        )
+        with self.assertRaises(DatabaseError), transaction.atomic():
+            type(report).objects.filter(id=report.id).update(text="Changed")
+        other = self.register()
+        history = save_clinical_history(
+            self.doctor,
+            self.organization.id,
+            other.id,
+            SaveClinicalHistoryInput(expected_version=0, medical_history="Other synthetic patient"),
+        )
+        with self.assertRaises(DomainError):
+            review_report(self.doctor, self.organization.id, report.id, "reviewed", 1, history.id)

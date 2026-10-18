@@ -4,6 +4,7 @@ COPY package.json package-lock.json ./
 COPY apps/web/package.json ./apps/web/package.json
 RUN npm ci
 COPY apps/web ./apps/web
+COPY scripts/prepare-pdfjs.mjs ./scripts/prepare-pdfjs.mjs
 RUN npm run build
 RUN npm prune --omit=dev --ignore-scripts --no-audit --no-fund
 

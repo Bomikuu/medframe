@@ -100,3 +100,22 @@ class InvitationSafetyTests(ClinicalFixture):
         self.assertEqual(invitation.patient_id, patient.id)
         self.assertEqual(invitation.relationship, "guardian")
         self.assertFalse(PortalLink.objects.exists())
+
+    def test_reissuing_self_invitation_to_corrected_email_revokes_previous_token(self):
+        patient, earlier, token = self.invite()
+        issue_invitation(
+            self.doctor,
+            self.organization.id,
+            patient.id,
+            {
+                "email": "corrected-portal@example.org",
+                "relationship": "self",
+                "method": "in_person",
+                "attested": True,
+            },
+            uuid4(),
+        )
+        earlier.refresh_from_db()
+        self.assertIsNotNone(earlier.revoked_at)
+        with self.assertRaises(DomainError):
+            prepare_invitation(self.request(), token, "Synthetic patient password 95!", "Synthetic")

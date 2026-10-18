@@ -1,12 +1,15 @@
 "use client";
 import { useState } from "react";
-import { PatientReportsDocument, ReviewPatientReportDocument } from "@/lib/graphql/generated";
+import {
+  PatientReportsDocument,
+  ReviewPatientReportDocument,
+  ReconciliationHistoryDocument,
+} from "@/lib/graphql/generated";
 import { getGraphqlClient } from "@/lib/graphql/client";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "@/features/patients/use-remote";
 import { useRequestScope } from "@/features/patients/use-request-scope";
-import { FormField } from "@/components/form-field";
-import { Input } from "@/components/ui/input";
+import { FormSelect } from "@/features/patients/form-controls";
 import { Button } from "@/components/ui/button";
 import { LoadState, failureText, timeLabel } from "@/features/patients/feedback";
 import { recordPage } from "@/features/records/schema";
@@ -90,20 +93,70 @@ export function ReportReview({ patientId }: { patientId: string }) {
         <p role="alert">Patient reports could not be read.</p>
       )}
       {can("patients.clinical.write") && (
-        <FormField
-          id="reconciled-history"
-          label="Reconciled history revision ID (optional)"
-          hint="After reviewing and saving history separately, paste its exact revision ID to attribute reconciliation."
-        >
-          <Input
-            id="reconciled-history"
-            value={history}
-            maxLength={36}
-            onChange={(event) => setHistory(event.target.value)}
-          />
-        </FormField>
+        <ReconciliationHistory patientId={patientId} value={history} onChange={setHistory} />
       )}
       {error !== null && <p role="alert">{failureText(error)}</p>}
     </section>
+  );
+}
+
+function ReconciliationHistory({
+  patientId,
+  value,
+  onChange,
+}: {
+  patientId: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const { organizationId } = useWorkspace();
+  const [afterVersion, setAfterVersion] = useState<number>();
+  const [selectedLabel, setSelectedLabel] = useState("");
+  const remote = useRemote(ReconciliationHistoryDocument, {
+    organizationId,
+    patientId,
+    afterVersion,
+  });
+  if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
+  const page = remote.data.patientClinicalRevisions;
+  const options = page.items.map((item) => ({
+    value: item.id,
+    label: `Version ${item.version} · ${item.authorName} · ${timeLabel(item.createdAt)}`,
+  }));
+  if (value && !options.some((item) => item.value === value))
+    options.unshift({ value, label: selectedLabel });
+  return (
+    <div className="grid max-w-2xl gap-3">
+      <FormSelect
+        id="reconciled-history"
+        label="Reconciled history version (optional)"
+        value={value || "none"}
+        onChange={(identifier) => {
+          setSelectedLabel(options.find((item) => item.value === identifier)?.label ?? "");
+          onChange(identifier === "none" ? "" : identifier);
+        }}
+        options={[{ value: "none", label: "No reconciliation selected" }, ...options]}
+      />
+      <p className="text-xs leading-6 text-muted-foreground">
+        Review and save medical history separately, then select that saved version to attribute
+        reconciliation. Reviewing a report does not change clinical history.
+      </p>
+      <div className="flex gap-3">
+        {afterVersion !== undefined && (
+          <Button type="button" variant="outline" onClick={() => setAfterVersion(undefined)}>
+            Newest history versions
+          </Button>
+        )}
+        {page.hasNextPage && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setAfterVersion(page.endVersion ?? undefined)}
+          >
+            Older history versions
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }

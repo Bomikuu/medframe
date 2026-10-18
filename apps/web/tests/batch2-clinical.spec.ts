@@ -16,7 +16,7 @@ const staff = {
 const patientEmail = `patient-batch2-${suffix}@example.org`;
 const patientPassword = randomBytes(24).toString("base64url");
 const clinic = `Synthetic Batch Two ${suffix}`;
-let staffSecret = "";
+let staffRecovery = "";
 function otp(secret: string) {
   return execFileSync(
     "uv",
@@ -51,6 +51,11 @@ async function enroll(page: Page, portal = false) {
   const secret = await page.locator("main details code").textContent();
   await page.getByLabel("Authenticator code", { exact: true }).fill(otp(secret ?? ""));
   await page.getByRole("button", { name: "Verify and continue" }).click();
+  if (!portal) {
+    await expect(page.getByRole("heading", { name: "Save your recovery codes" })).toBeVisible();
+    staffRecovery = (await page.locator("main .select-all").allTextContents())[0] ?? "";
+    if (!staffRecovery) throw new Error("Synthetic recovery credential was not issued.");
+  }
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Open workspace" }).click();
   await expect(
@@ -130,7 +135,7 @@ test("connected templates, ordered plans, verified self/guardian portal, exact r
   await page.getByLabel("Work email").fill(staff.email);
   await page.getByLabel("Password", { exact: true }).fill(staff.password);
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
-  staffSecret = await enroll(page);
+  await enroll(page);
   await page.getByRole("link", { name: "Templates", exact: true }).click();
   await page.getByLabel("Template name").fill("Synthetic dental guidance");
   await page.getByLabel("Subjective prompt").fill("Ask about the patient-reported concern.");
@@ -213,9 +218,7 @@ test("connected templates, ordered plans, verified self/guardian portal, exact r
   await guardian.getByLabel("Account password", { exact: true }).fill(staff.password);
   await guardian.getByRole("button", { name: "Continue with invitation" }).click();
   await expect(guardian.getByRole("heading", { name: "Verify it’s you" })).toBeVisible();
-  await guardian
-    .getByLabel("Authenticator or recovery code", { exact: true })
-    .fill(otp(staffSecret));
+  await guardian.getByLabel("Authenticator or recovery code", { exact: true }).fill(staffRecovery);
   await guardian.getByRole("button", { name: "Verify and continue" }).click();
   await expect(guardian.getByText("No records shared yet", { exact: true })).toBeVisible();
   await expect(guardian.getByText(/Verified guardian access/)).toBeVisible();
@@ -269,6 +272,9 @@ test("connected templates, ordered plans, verified self/guardian portal, exact r
   await expect(
     page.getByText("Synthetic patient-reported history to review", { exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("combobox", { name: "Reconciled history version (optional)", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Mark reviewed", exact: true }).click();
   await expect(page.getByRole("heading", { name: "history · reviewed" })).toBeVisible();
   const review = resolve(root, ".impeccable/review/batch2");
@@ -284,6 +290,7 @@ test("connected templates, ordered plans, verified self/guardian portal, exact r
   await choose(self, "Color mode", "Dark");
   await self.getByRole("button", { name: "Save display preferences", exact: true }).click();
   await expect(self.locator("html")).toHaveAttribute("data-mode", "dark");
+  await expect(self.locator("html")).not.toHaveAttribute("data-theme-changing");
   expect((await new AxeBuilder({ page: self }).analyze()).violations).toEqual([]);
   await self.screenshot({ path: resolve(review, "portal-dark-mobile.png"), fullPage: true });
 

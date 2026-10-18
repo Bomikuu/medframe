@@ -83,8 +83,14 @@ export function DocumentPreview({
   return (
     <div className="grid gap-3">
       <div className="flex flex-wrap gap-2">
-        <Button type="button" variant="outline" disabled={busy} onClick={() => void load()}>
-          Preview {label}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={busy}
+          aria-label={`Preview ${label}`}
+          onClick={() => void load()}
+        >
+          Preview file
         </Button>
         <Button type="button" variant="outline" disabled={busy} onClick={() => void download()}>
           Download
