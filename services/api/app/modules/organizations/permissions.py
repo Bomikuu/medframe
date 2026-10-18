@@ -11,6 +11,7 @@ from app.modules.organizations.models import (
     Organization,
     RolePermission,
 )
+from app.modules.patients.policy_defaults import PATIENT_ROLE_PERMISSIONS
 
 ROLE_PERMISSIONS = {
     "platform_administrator": {"workspace.read"},
@@ -21,6 +22,11 @@ ROLE_PERMISSIONS = {
     "receptionist": {"workspace.read"},
     "patient": set(),
 }
+
+
+for permission, roles in PATIENT_ROLE_PERMISSIONS.items():
+    for role in roles:
+        ROLE_PERMISSIONS[role].add(permission)
 
 
 async def require_permission(

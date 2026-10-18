@@ -8,6 +8,7 @@ from app.core.database import Base
 from app.modules.audit import models as audit_models  # noqa: F401
 from app.modules.identity import models as identity_models  # noqa: F401
 from app.modules.organizations import models as organization_models  # noqa: F401
+from app.modules.patients import models as patient_models  # noqa: F401
 
 target_metadata = Base.metadata
 

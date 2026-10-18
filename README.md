@@ -83,3 +83,21 @@ The database is authoritative. Cookies contain opaque tokens; the database store
 ## Deployment status
 
 This is a development foundation, not a clinically deployable release. See [production readiness](docs/operations/production-readiness.md) for required infrastructure, privacy, recovery, and operational review. Nothing in the app claims regulatory compliance. The approved logo and clinically reviewed dental asset remain pending.
+
+## Patient management
+
+Open **Patients** after signing in. Registration, authorized name/reference search, demographics, medical history, allergies, medications, revision history, and explicit clinician assignment use PostgreSQL-backed GraphQL operations. Search terms and unsaved clinical input stay out of URLs and browser storage.
+
+A clinic administrator can register patients, edit demographics, and grant access to eligible clinicians. This role has no medical-history bypass. To provision a clinician in the same clinic and branch, run the existing command and select `doctor` or `dentist`:
+
+```bash
+uv run --project services/api python -m app.modules.identity.provision
+```
+
+Use the exact clinic/branch names to reuse an existing organization. Password entry remains hidden, and the clinician must complete MFA. Registering as a clinician grants that clinician patient access atomically; patients registered by administrative staff require an explicit clinician assignment before clinical care documentation.
+
+Both demographic and medical-history edits detect stale versions and preserve entered values for review. Retrying an unchanged registration uses the same request ID to prevent duplicate records. Successful create/edit opens the saved patient profile. Changes are explicitly saved; this slice does not autosave.
+
+Schema generation writes `schema.graphql`, `lib/graphql/schema-types.ts`, and `lib/graphql/generated.ts` inside `apps/web`. Run `npm run codegen` after API contract changes. Patient browser checks are in `apps/web/tests/patients.spec.ts`; set `MEDFRAME_CAPTURE_REVIEW=1` only for a deliberate batched screenshot review.
+
+See `docs/operations/patient-management-verification.md` for evidence. Consultations, dental charts, and private scanned uploads remain later slices.

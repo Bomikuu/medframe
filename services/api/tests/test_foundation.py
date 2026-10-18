@@ -181,7 +181,7 @@ async def test_rate_limits_share_identity_and_client_counters():
     [
         "query { " + " ".join(f"a{i}: currentUser {{ id }}" for i in range(101)) + " }",
         "query { ...A } fragment A on Query { ...A }",
-        "mutation { currentUser { id } }",
+        "mutation { a: registerPatient { id } b: registerPatient { id } }",
     ],
 )
 def test_graphql_rejects_cost_cycles_and_mutations(query):

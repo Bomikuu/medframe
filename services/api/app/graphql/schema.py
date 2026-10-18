@@ -6,7 +6,10 @@ from strawberry.types import Info
 from app.core.database import session_factory
 from app.modules.audit.service import append_event
 from app.modules.identity.models import User
+from app.modules.organizations.permissions import require_permission
 from app.modules.organizations.service import get_workspace, list_my_organizations
+from app.modules.patients.graphql import PatientMutation, PatientQuery
+from app.modules.patients.policy import effective_permissions
 
 
 @strawberry.type
@@ -31,10 +34,11 @@ class BranchType:
 class WorkspaceType:
     organization: OrganizationType
     branches: list[BranchType]
+    permissions: list[str]
 
 
 @strawberry.type
-class Query:
+class Query(PatientQuery):
     @strawberry.field
     async def current_user(self, info: Info) -> UserType:
         async with session_factory() as db:
@@ -60,10 +64,21 @@ class Query:
                 "workspace.read",
                 organization_id=organization_id,
             )
+            membership = await require_permission(
+                db, info.context["principal"], organization_id, "workspace.read"
+            )
+            permissions = await effective_permissions(db, membership.id)
             return WorkspaceType(
                 organization=OrganizationType(id=organization.id, name=organization.name),
                 branches=[BranchType(id=branch.id, name=branch.name) for branch in branches],
+                permissions=sorted(permissions),
             )
 
 
-schema = strawberry.Schema(query=Query)
+class PrivateSchema(strawberry.Schema):
+    def process_errors(self, errors, execution_context=None):
+        # The HTTP boundary returns safe codes; never log resolver inputs or raw exceptions.
+        pass
+
+
+schema = PrivateSchema(query=Query, mutation=PatientMutation)

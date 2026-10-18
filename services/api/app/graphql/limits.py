@@ -3,6 +3,7 @@ from graphql.language.ast import (
     FieldNode,
     FragmentDefinitionNode,
     FragmentSpreadNode,
+    InlineFragmentNode,
     OperationDefinitionNode,
 )
 
@@ -44,9 +45,29 @@ def validate_query(query: str) -> None:
                         walk(node.selection_set, depth + 1, visited)
 
         operations = [d for d in document.definitions if isinstance(d, OperationDefinitionNode)]
-        if len(operations) != 1 or operations[0].operation.value != "query":
+        if len(operations) != 1 or operations[0].operation.value not in {"query", "mutation"}:
             raise ValueError("operation")
+
+        def root_fields(selection_set, visited=frozenset()):
+            total = 0
+            for node in selection_set.selections:
+                if isinstance(node, FieldNode):
+                    total += 1
+                elif isinstance(node, FragmentSpreadNode):
+                    name = node.name.value
+                    if name in visited or name not in fragments:
+                        raise ValueError("fragment")
+                    total += root_fields(fragments[name].selection_set, visited | {name})
+                elif isinstance(node, InlineFragmentNode):
+                    total += root_fields(node.selection_set, visited)
+            return total
+
         walk(operations[0].selection_set)
+        if (
+            operations[0].operation.value == "mutation"
+            and root_fields(operations[0].selection_set) != 1
+        ):
+            raise ValueError("mutation roots")
     except Exception:
         raise DomainError(
             "INVALID_QUERY", "This query is invalid or exceeds the allowed limits."

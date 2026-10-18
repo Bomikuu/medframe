@@ -5,7 +5,8 @@
   "canonicalMap": "UX-CONTRACT.md",
   "requiredCapabilities": ["Form", "Select/Listbox"],
   "ownership": {
-    "Select/Listbox": "authored"
+    "Select/Listbox": "authored",
+    "Date": "native"
   },
   "requiredCommands": ["e2e", "typecheck", "format", "lint"],
   "commands": {
@@ -15,7 +16,8 @@
     "lint": "npm run lint"
   },
   "evidence": {
-    "failurePaths": "apps/web/tests/foundation.spec.ts",
-    "authorization": "services/api/tests/test_security_boundaries.py"
+    "failurePaths": "apps/web/tests/patients.spec.ts",
+    "authorization": "services/api/tests/test_patients_workflow.py",
+    "crudFullFlow": "apps/web/tests/patients.spec.ts"
   }
 }

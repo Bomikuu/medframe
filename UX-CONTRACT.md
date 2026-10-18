@@ -41,3 +41,22 @@ English interface; organization timezone defaults to Asia/Manila. Use native inp
 ## Verification boundary
 
 The foundation has no patient CRUD, clinical finalization, medical uploads, or dental visualization. Their contracts belong to later slices. Current browser checks exercise successful enrollment/login, failure retry, refresh, organization switching, logout, recovery messaging, light/dark accessibility, and narrow layout.
+
+## Patient workflows
+
+Authority: the approved clinical design and `docs/superpowers/plans/2026-10-18-medframe-patient-management.md` own patient permission and lifecycle rules. The API remains authoritative.
+
+| Capability                           | Canonical owner                                                   | Behavior                                                                                                                                                                       |
+| ------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Patient directory / pagination       | `features/patients/patient-directory.tsx`                         | Server cursor pagination; explicit submitted search; clear resets query and cursor. Sensitive search text stays in memory, outside URLs/storage.                               |
+| Patient forms                        | `features/patients/patient-form.tsx`, `components/form-field.tsx` | Identity/contact/emergency/guardian groups, inline validation, input retained on error, busy submit, explicit save. Successful create/edit opens the persisted patient record. |
+| Date                                 | `components/ui/input.tsx`                                         | Native date-only input, browser-owned calendar/locale; application owns validation and calendar-date serialization.                                                            |
+| Select/Listbox                       | `features/patients/form-controls.tsx`                             | Existing authored Radix Select, shared tokens, labeled trigger, keyboard popup.                                                                                                |
+| Textarea                             | `components/ui/textarea.tsx`                                      | Nonresizable, content-sized, adequate initial height; full-width clinical text.                                                                                                |
+| Confirmation / unsaved changes       | `features/workspace/safety-provider.tsx`                          | Radix AlertDialog, app-owned text, focus restoration, least-destructive initial focus; beforeunload only on actual unload.                                                     |
+| Patient history / clinical revisions | `features/patients/patient-timeline.tsx`                          | Server timestamps with explicit timezone, immutable version detail, bounded load-more.                                                                                         |
+| Patient access                       | `features/patients/patient-access.tsx`                            | Explicit grant/revoke confirmation naming the clinician; no client-side clinical bypass.                                                                                       |
+| Async feedback                       | `features/patients/feedback.tsx`                                  | Shared loading, inline error/retry, conflict and live success; clear private data on denied request.                                                                           |
+| Scrollbar                            | `app/globals.css`                                                 | Global token colors, standards baseline plus engine fallback; forced-colors uses system defaults.                                                                              |
+
+Organization UUID is nonsecret URL context. Patient search terms, contact details, and clinical input never go into query strings or browser storage. Patient links preserve organization context; switching organizations returns to the directory. Unavailable/denied clinical data is an error, never an empty medical history. Missing review states remain "Not reviewed"; only an explicit clinician submission records none reported.

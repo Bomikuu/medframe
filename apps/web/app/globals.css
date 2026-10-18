@@ -110,3 +110,47 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+    scrollbar-color: var(--input) var(--background);
+    scrollbar-width: auto;
+  }
+  * {
+    scrollbar-color: var(--input) var(--background);
+  }
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--background);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--input);
+    border: 3px solid var(--background);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--primary);
+  }
+  button:not(:disabled),
+  a,
+  summary,
+  [role="option"] {
+    cursor: pointer;
+  }
+  textarea {
+    caret-color: var(--primary);
+  }
+}
+@media (forced-colors: active) {
+  html,
+  * {
+    scrollbar-color: auto;
+  }
+}

@@ -1,6 +1,6 @@
-# Foundation deployment boundary
+# Clinical workspace deployment boundary
 
-The foundation is for local development with synthetic data. It is not the complete clinical milestone and must not receive real medical records yet.
+The foundation and patient-management slices are for local development with synthetic data. It is not the complete clinical milestone and must not receive real medical records yet.
 
 ## Implemented controls
 
@@ -24,7 +24,13 @@ The API deliberately ignores X-Forwarded-For. Behind the Next.js proxy, clients 
 
 The mail worker uses database row locks to prevent simultaneous claims. SMTP delivery can be repeated if a process crashes after sending but before committing; reset-token consumption remains single-use. Use an idempotent provider integration before production if exactly-once delivery is required. Rows stop retrying after five attempts and need operational monitoring.
 
-Platform/clinic administrators have no universal medical-record bypass. Patient relationship policies, consent/sharing, immutable encounters/amendments, private scanned document storage, clinical asset validation, and patient identity verification must be implemented and tested in their corresponding slices before medical use.
+Platform/clinic administrators have no universal medical-record bypass. Patient relationships, branch-scoped demographics, explicit clinical grants, and immutable patient-history revisions are implemented. Consent/sharing, immutable encounters/amendments, private scanned document storage, clinical asset validation, and patient identity verification must be implemented and tested in their corresponding slices before medical use.
+
+## Patient-management boundary
+
+Registration/search/demographics and clinician-authored history, allergies, and medications now persist. A clinic administrator or receptionist can manage permitted demographics; clinical reads still require a clinical permission and active patient grant. Grant changes serialize with history writes. Review states distinguish unreviewed from explicit none reported, and historical versions retain their author and server time.
+
+These free-text histories are not encounter notes, structured diagnosis catalogs, medication reconciliation/interaction checking, or a complete clinical record. No private upload, patient account/guardian authorization, appointment, or finalization/amendment workflow is claimed by this slice. The new permission grants are additive migrations; existing staff identities, passwords, and MFA are preserved.
 
 ## Dependency evidence
 

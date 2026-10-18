@@ -8,3 +8,4 @@ apps/web/lib/graphql/generated.ts
 apps/web/schema.graphql
 test-results
 playwright-report
+apps/web/lib/graphql/schema-types.ts

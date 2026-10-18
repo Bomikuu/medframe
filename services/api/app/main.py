@@ -129,7 +129,11 @@ def create_app() -> FastAPI:
             async with session_factory.begin() as db:
                 for error in result.errors:
                     cause = error.original_error
-                    code = cause.code if isinstance(cause, DomainError) else "INVALID_QUERY"
+                    code = (
+                        cause.code
+                        if isinstance(cause, DomainError)
+                        else ("INTERNAL_ERROR" if cause else "INVALID_QUERY")
+                    )
                     message = (
                         cause.message
                         if isinstance(cause, DomainError)

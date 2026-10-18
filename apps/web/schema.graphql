@@ -1,6 +1,62 @@
+schema {
+  query: Query
+  mutation: PatientMutation
+}
+
+type Allergy {
+  substance: String!
+  reaction: String!
+  severity: String!
+}
+
+input AllergyInput {
+  substance: String!
+  reaction: String! = ""
+  severity: String! = "unknown"
+}
+
 type BranchType {
   id: UUID!
   name: String!
+}
+
+type ClinicalHistory {
+  id: UUID!
+  version: Int!
+  authorName: String!
+  createdAt: DateTime!
+  medicalHistory: String!
+  conditions: String!
+  pastProcedures: String!
+  allergyState: String!
+  allergies: [Allergy!]!
+  medicationState: String!
+  medications: [Medication!]!
+  reason: String!
+}
+
+type ClinicalRevisionPage {
+  items: [ClinicalHistory!]!
+  endVersion: Int
+  hasNextPage: Boolean!
+}
+
+"""Date (isoformat)"""
+scalar Date
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+type Medication {
+  name: String!
+  dose: String!
+  frequency: String!
+}
+
+input MedicationInput {
+  name: String!
+  dose: String! = ""
+  frequency: String! = ""
 }
 
 type OrganizationType {
@@ -8,13 +64,129 @@ type OrganizationType {
   name: String!
 }
 
+type PatientAssignee {
+  membershipId: UUID!
+  displayName: String!
+  branchLabel: String!
+  active: Boolean!
+}
+
+type PatientDemographics {
+  id: UUID!
+  reference: String!
+  fullName: String!
+  dateOfBirth: Date
+  branchId: UUID!
+  sex: String!
+  email: String
+  phone: String
+  address: String
+  emergencyContactName: String
+  emergencyContactPhone: String
+  emergencyContactRelationship: String
+  guardianName: String
+  guardianPhone: String
+  guardianRelationship: String
+  version: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PatientMutation {
+  registerPatient(organizationId: UUID!, data: RegisterPatientInput!): PatientDemographics!
+  updatePatientDemographics(organizationId: UUID!, patientId: UUID!, data: UpdateDemographicsInput!): PatientDemographics!
+  savePatientClinicalHistory(organizationId: UUID!, patientId: UUID!, data: SaveClinicalHistoryInput!): ClinicalHistory!
+  setPatientAccess(organizationId: UUID!, patientId: UUID!, membershipId: UUID!, active: Boolean!): PatientAssignee!
+}
+
+type PatientPage {
+  items: [PatientSummary!]!
+  endCursor: UUID
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
+type PatientSummary {
+  id: UUID!
+  reference: String!
+  fullName: String!
+  dateOfBirth: Date
+}
+
+type PatientTimelineEvent {
+  id: UUID!
+  action: String!
+  authorName: String!
+  createdAt: DateTime!
+  revisionId: UUID
+}
+
+type PatientTimelinePage {
+  items: [PatientTimelineEvent!]!
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
 type Query {
+  clinicPatients(organizationId: UUID!, query: String! = "", first: Int! = 20, after: UUID = null): PatientPage!
+  recentPatients(organizationId: UUID!): [PatientSummary!]!
+  patientDemographics(organizationId: UUID!, patientId: UUID!): PatientDemographics!
+  patientClinicalHistory(organizationId: UUID!, patientId: UUID!): ClinicalHistory
+  patientClinicalRevisions(organizationId: UUID!, patientId: UUID!, first: Int! = 20, afterVersion: Int = null): ClinicalRevisionPage!
+  patientTimeline(organizationId: UUID!, patientId: UUID!, first: Int! = 20, after: String = null): PatientTimelinePage!
+  patientAccessGrants(organizationId: UUID!, patientId: UUID!): [PatientAssignee!]!
+  eligiblePatientAssignees(organizationId: UUID!, patientId: UUID!, query: String! = "", first: Int! = 20): [PatientAssignee!]!
   currentUser: UserType!
   myOrganizations: [OrganizationType!]!
   clinicWorkspace(organizationId: UUID!): WorkspaceType!
 }
 
+input RegisterPatientInput {
+  fullName: String!
+  dateOfBirth: Date = null
+  sex: String! = "not_recorded"
+  email: String = null
+  phone: String = null
+  address: String = null
+  emergencyContactName: String = null
+  emergencyContactPhone: String = null
+  emergencyContactRelationship: String = null
+  guardianName: String = null
+  guardianPhone: String = null
+  guardianRelationship: String = null
+  branchId: UUID!
+  requestId: UUID!
+}
+
+input SaveClinicalHistoryInput {
+  expectedVersion: Int!
+  medicalHistory: String! = ""
+  conditions: String! = ""
+  pastProcedures: String! = ""
+  allergyState: String! = "unreviewed"
+  allergies: [AllergyInput!]! = []
+  medicationState: String! = "unreviewed"
+  medications: [MedicationInput!]! = []
+  reason: String! = ""
+}
+
 scalar UUID
+
+input UpdateDemographicsInput {
+  fullName: String!
+  dateOfBirth: Date = null
+  sex: String! = "not_recorded"
+  email: String = null
+  phone: String = null
+  address: String = null
+  emergencyContactName: String = null
+  emergencyContactPhone: String = null
+  emergencyContactRelationship: String = null
+  guardianName: String = null
+  guardianPhone: String = null
+  guardianRelationship: String = null
+  expectedVersion: Int!
+}
 
 type UserType {
   id: UUID!
@@ -24,4 +196,5 @@ type UserType {
 type WorkspaceType {
   organization: OrganizationType!
   branches: [BranchType!]!
+  permissions: [String!]!
 }

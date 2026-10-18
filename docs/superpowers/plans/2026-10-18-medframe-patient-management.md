@@ -174,4 +174,10 @@ Eligible assignees must be active organization/branch-compatible memberships wit
 - Coverage: patient registration/search/profile/demographics are Task 2; medical history/allergies/medications/revision history and timeline are Task 3; explicit record authorization is Tasks 1/4; real typed API is Task 5; grouped accessible clinical UI is Task 6; integration evidence is Task 7.
 - Review Focus items have named service/browser assertions. Clinical and demographic versions, organization context, grant eligibility, and operation names match across tasks.
 - This plan preserves the approved phase ordering. Patient identity remains tenant-local with no implicit cross-clinic merge/account linking; patient portal/guardian authorization and private profile uploads retain their later boundaries.
-- Native execution is already chosen. This plan is prepared for user review under the writing-plans handoff; implementation has not begun.
+- The user approved this plan and native execution. Implementation is in progress; measured evidence and adaptations are recorded in `docs/operations/patient-management-verification.md`.
+
+## Completed baseline checkpoint
+
+The user approved native execution. Tasks 1–7 are implemented and verified: 47 backend tests, 5 production browser journeys, migration round-trip/no-drift checks, format/lint/type checks, static UX audit, production build, and independent review. The original step checklist remains the intended sequence; grouped tests and two additive migrations are documented in the verification report.
+
+This completed FastAPI patient-management plan is historical after the user's Django Edition amendment. Its behavior and tests are migration acceptance requirements, not work to discard or restart from empty.

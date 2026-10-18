@@ -27,6 +27,7 @@ class Membership(Record, Base):
     __tablename__ = "memberships"
     __table_args__ = (
         UniqueConstraint("user_id", "organization_id"),
+        UniqueConstraint("id", "organization_id", name="uq_memberships_id_organization"),
         ForeignKeyConstraint(
             ["branch_id", "organization_id"], ["branches.id", "branches.organization_id"]
         ),

@@ -1,4 +1,4 @@
-name: Foundation checks
+name: Clinical workspace checks
 on: [push, pull_request]
 jobs:
   verify:
@@ -23,7 +23,7 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
       - run: npm run codegen
-      - run: git diff --exit-code -- apps/web/schema.graphql apps/web/lib/graphql/generated.ts
+      - run: git diff --exit-code -- apps/web/schema.graphql apps/web/lib/graphql/generated.ts apps/web/lib/graphql/schema-types.ts
       - run: npm run typecheck
       - run: npm run build
       - run: npm exec --workspace apps/web playwright install --with-deps chromium

@@ -76,13 +76,16 @@ test("real sign-in, MFA, organizations, refresh, and logout", async ({ page }) =
   await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Open workspace" }).click();
   await expect(page).toHaveURL(/\/clinic$/);
-  await expect(page.getByRole("heading", { name: "Your foundation is ready" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Patient workspace" })).toBeVisible();
   await page.reload();
   await expect(page.getByText("Dr. Althea Reyes (test)")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Your foundation is ready" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Patient workspace" })).toBeVisible();
   await page.getByRole("combobox").click();
   await page.getByRole("option", { name: "Synthetic Riverside Dental" }).click();
-  await expect(page.getByRole("heading", { name: "Synthetic Riverside Dental" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Organization" })).toContainText(
+    "Synthetic Riverside Dental",
+  );
+  await expect(page.getByRole("heading", { name: "Patients", exact: true })).toBeVisible();
 
   for (const theme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });

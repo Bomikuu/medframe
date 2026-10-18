@@ -1,0 +1,148 @@
+fragment PatientRow on PatientSummary {
+  id
+  reference
+  fullName
+  dateOfBirth
+}
+fragment PatientDetails on PatientDemographics {
+  id
+  reference
+  fullName
+  dateOfBirth
+  branchId
+  sex
+  email
+  phone
+  address
+  emergencyContactName
+  emergencyContactPhone
+  emergencyContactRelationship
+  guardianName
+  guardianPhone
+  guardianRelationship
+  version
+  createdAt
+  updatedAt
+}
+fragment ClinicalDetails on ClinicalHistory {
+  id
+  version
+  authorName
+  createdAt
+  medicalHistory
+  conditions
+  pastProcedures
+  allergyState
+  allergies {
+    substance
+    reaction
+    severity
+  }
+  medicationState
+  medications {
+    name
+    dose
+    frequency
+  }
+  reason
+}
+fragment AssigneeDetails on PatientAssignee {
+  membershipId
+  displayName
+  branchLabel
+  active
+}
+query PatientDirectory($organizationId: UUID!, $query: String!, $after: UUID) {
+  clinicPatients(organizationId: $organizationId, query: $query, first: 20, after: $after) {
+    items {
+      ...PatientRow
+    }
+    endCursor
+    hasNextPage
+    totalCount
+  }
+}
+query PatientDashboard($organizationId: UUID!) {
+  clinicPatients(organizationId: $organizationId, first: 1) {
+    totalCount
+  }
+  recentPatients(organizationId: $organizationId) {
+    ...PatientRow
+  }
+}
+query PatientRecord($organizationId: UUID!, $patientId: UUID!) {
+  patientDemographics(organizationId: $organizationId, patientId: $patientId) {
+    ...PatientDetails
+  }
+}
+query ClinicalRecord($organizationId: UUID!, $patientId: UUID!) {
+  patientClinicalHistory(organizationId: $organizationId, patientId: $patientId) {
+    ...ClinicalDetails
+  }
+}
+query PatientHistory($organizationId: UUID!, $patientId: UUID!, $after: String) {
+  patientTimeline(organizationId: $organizationId, patientId: $patientId, after: $after) {
+    items {
+      id
+      action
+      authorName
+      createdAt
+      revisionId
+    }
+    endCursor
+    hasNextPage
+  }
+}
+query ClinicalRevisions($organizationId: UUID!, $patientId: UUID!, $afterVersion: Int) {
+  patientClinicalRevisions(
+    organizationId: $organizationId
+    patientId: $patientId
+    afterVersion: $afterVersion
+  ) {
+    items {
+      ...ClinicalDetails
+    }
+    endVersion
+    hasNextPage
+  }
+}
+query PatientAccess($organizationId: UUID!, $patientId: UUID!) {
+  patientAccessGrants(organizationId: $organizationId, patientId: $patientId) {
+    ...AssigneeDetails
+  }
+}
+query EligibleAssignees($organizationId: UUID!, $patientId: UUID!, $query: String!) {
+  eligiblePatientAssignees(organizationId: $organizationId, patientId: $patientId, query: $query) {
+    ...AssigneeDetails
+  }
+}
+mutation RegisterPatient($organizationId: UUID!, $data: RegisterPatientInput!) {
+  registerPatient(organizationId: $organizationId, data: $data) {
+    id
+  }
+}
+mutation UpdatePatient($organizationId: UUID!, $patientId: UUID!, $data: UpdateDemographicsInput!) {
+  updatePatientDemographics(organizationId: $organizationId, patientId: $patientId, data: $data) {
+    ...PatientDetails
+  }
+}
+mutation SaveHistory($organizationId: UUID!, $patientId: UUID!, $data: SaveClinicalHistoryInput!) {
+  savePatientClinicalHistory(organizationId: $organizationId, patientId: $patientId, data: $data) {
+    ...ClinicalDetails
+  }
+}
+mutation ChangePatientAccess(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $membershipId: UUID!
+  $active: Boolean!
+) {
+  setPatientAccess(
+    organizationId: $organizationId
+    patientId: $patientId
+    membershipId: $membershipId
+    active: $active
+  ) {
+    ...AssigneeDetails
+  }
+}

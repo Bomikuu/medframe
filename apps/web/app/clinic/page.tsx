@@ -1,5 +1,5 @@
-import { ClinicShell } from "@/features/workspace/clinic-shell";
+import { ClinicOverview } from "@/features/workspace/clinic-overview";
 
 export default function ClinicPage() {
-  return <ClinicShell />;
+  return <ClinicOverview />;
 }

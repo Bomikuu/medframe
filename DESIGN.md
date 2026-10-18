@@ -119,3 +119,7 @@ The organization panel groups real authorized organization/branch information. L
 - **Don't** invent a substitute medical symbol or unverified product/compliance claims.
 - **Don't** expose fake working controls or patient metrics for modules not yet implemented.
 - **Don't** crop clinical imagery into profile-avatar shapes.
+
+## Patient surfaces
+
+Patient management inherits the existing Operate world. The directory uses a compact search toolbar and a read-oriented table with stacked mobile rows. Registration uses a bounded, naturally scrolling form with separated identity, contact, emergency-contact, and guardian fieldsets; short date/sex/phone controls do not stretch to the full content width. The patient overview keeps identity and reference visible before demographics, medical history, and authorized access management. Medical records use flat sections and a chronological event list rather than nested cards. Shared loading/error/status and confirmation owners are recorded in UX-CONTRACT.md.
