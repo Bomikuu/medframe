@@ -81,3 +81,16 @@ User instruction: implement natively, test once, and log discovered problems wit
 - The single production build was blocked by B3-002, so the planned `apps/web/tests/operations.spec.ts` journey was not run. No browser pass, screenshot review, accessibility runtime pass, or staff/patient integration pass is claimed.
 - The source journey covers schedule setup, booking/rescheduling, check-in/calling, clinical handoff availability, verified patient invitation, socket connection/delay refresh, and narrow layout. It does not fully exercise patient rescheduling/cancellation, service completion, every overflow/reconnect case, or the complete proposed verification matrix.
 - Broader boundary/load/real-clinical review remains unperformed. These are coverage limitations, not confirmed additional defects.
+
+## Batch 3 — authorized activation resolution, October 19, 2026
+
+The user explicitly requested activation after the failed initial pass. B3-001, B3-002 and B3-003 were repaired as necessary activation blockers, committed in `980a1c4`. The focused portal module passed all three tests, targeted Ruff passed and the production build passed. Original-data preservation checks and the native cutover succeeded. B3-004 remains a deferred nonblocking warning; B3-005 remains a coverage limitation. This resolution does not retroactively change the initial verification results.
+
+### B3-006 — Browser journey MFA selector mismatch
+
+- Severity: test-harness blocker; complete browser workflow remains unverified.
+- Reproduction: one activation attempt, `operations.spec.ts --retries=0`, using synthetic native staff profiles with existing confirmed MFA.
+- Actual: `signIn` at `apps/web/tests/operations.spec.ts:60` waits for `Authenticator code`; `apps/web/features/auth/mfa-form.tsx` labels existing-MFA verification `Authenticator or recovery code`.
+- The attempt was interrupted to avoid spending the full four-minute test timeout on the known selector mismatch. Exit 130, one interrupted test, no completed journey.
+- No selector/product repair or browser retry was performed. New issues remain deferred as requested; native Batch 3 activation itself completed.
+- Evidence: `/tmp/medframe-batch3-active-browser.log`.
