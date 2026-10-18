@@ -136,3 +136,18 @@ User instruction remains: test once, log discovered issues, and do not repair th
 - The selection failure prevented the desktop/mobile arch captures, detailed FDI 26 load, and the connected finding/surface save/reload check. No new clinical finding was saved by this run. Treatments/history tabs, missing-tooth rendering, material restoration, narrow layout, historical revisions and precise camera behavior remain unverified.
 - The browser script used the existing synthetic fixture only; it did not change original records, passwords, MFA, memberships or finalize a consultation. No retry, alternate selection workaround or additional browser round was performed.
 - Native Impeccable finish review has disposition **recapture**: required desktop/mobile anatomy evidence is absent or blank. Per the user's testing limit, no recapture cycle was started. This is a self-review, not independent agent validation.
+
+## Anatomical dental replacement — authorized activation resolution
+
+The user's subsequent “activate it” authorized repairs to DENT-001/DENT-002. Commit `ba0e45e` restores source material structure and isolates imperative scene updates. Build/TypeScript pass, lint passes with only the two pre-existing operations warnings, and the focused browser confirmation passes all six groups without page errors. Direct FDI 26 selection, detailed molar rendering, mobile layout and synthetic mesial finding save/reload are confirmed. The original failures above remain historical evidence. Anatomy is now active on local port 3000; see `anatomical-dental-verification.md` for runtime and rollback details.
+
+The first activation browser attempt's click used coordinates invalidated by screenshot scrolling and was intercepted near the sticky header. Its corrected harness recomputes coordinates below the save bar; confirmation passed. No additional product repair/rebuild was needed after that harness finding. Evidence: `.impeccable/review/anatomical-dental-activation/first-confirmation.json` and `medframe-anatomy-activation-browser.json`.
+
+### DENT-004 — Detailed reference label wraps
+
+- Severity: minor visual issue, deferred without repair.
+- Actual: the HTML `Reference 26` annotation wraps over two lines in the detailed-molar desktop capture. The tooth panel and viewer caption still identify FDI 26 correctly.
+- Impact: annotation polish only; does not block selection, reading the tooth identity or saving findings.
+- Evidence: `.impeccable/review/anatomical-dental-activation/detailed-26.png`. No further polish/retest cycle was run.
+
+DENT-003's blocked desktop/mobile and save/reload checks are now completed at the focused scope above. Exhaustive tooth-by-tooth/browser historical/missing-condition coverage remains unperformed.

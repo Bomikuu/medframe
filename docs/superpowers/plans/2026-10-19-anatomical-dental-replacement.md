@@ -25,6 +25,6 @@
 - [x] Implement model-first layout, compact 2D fallback, conventional surface inputs, selected-tooth tabs and existing historical/procedure owners. Clinical mutation owners remain unchanged; connected persistence verification was not reached.
 - [x] Format source and run the single accumulated asset/TypeScript/lint/Ruff/build/browser pass. Log failures without repairing or retrying. Desktop geometry is blank; mobile and save/reload coverage were blocked by failed selection.
 - [x] Record actual results/limitations and pending behavior contract. Preserve the incumbent design system and reviewable changes.
-- [ ] Repair logged blockers and complete the blocked acceptance checks only after a later user instruction. Activate locally only when important checks pass; preserve earlier artifacts and data.
+- [x] The user requested activation. Repair logged blockers, complete the focused blocked checks and activate locally while preserving earlier artifacts and data. Commit `ba0e45e`; all six confirmation groups passed.
 
-Actual result: `docs/operations/anatomical-dental-verification.md`. **Not activated.**
+Actual result: `docs/operations/anatomical-dental-verification.md`. **Activated locally after authorized repairs.**

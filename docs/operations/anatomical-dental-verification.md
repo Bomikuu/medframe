@@ -1,6 +1,6 @@
 # Anatomical dental replacement — October 19, 2026
 
-**Status: implementation saved; activation blocked.** The single verification pass found DENT-001 and DENT-002. See `error-log.md`. No repair/retest cycle was attempted. Existing local production on port 3000 remains unchanged.
+**Current status: activated locally after authorized blocker repairs.** Source repair commit: `ba0e45e`. The initial verification below remains an accurate historical record; the activation results at the end supersede its activation status.
 
 ## Preservation and assets
 
@@ -47,3 +47,26 @@ Impeccable review/documentation were performed inline, as the user prohibits sub
 Independent clinical validation, calibrated dimensions, gingiva, restorations/implant variants and reliable mesh surface segmentation are unavailable. The source proportions and explicit mapped identities are educational references, not patient-specific measurements. Exact stored findings and proposed/completed statuses remain authoritative; whole-tooth feedback does not establish precise disease location. Primary 3D anatomy is intentionally absent.
 
 Before activation, resolve the logged renderer/lint blockers with user authorization and perform the specifically blocked acceptance checks. Keep the prior build for rollback. Do not treat the successful build or source asset inspection as acceptance of the product renderer.
+
+## Authorized activation — October 19, 2026
+
+The user requested “activate it”, authorizing the recorded blocker repairs and focused confirmation. Commit `ba0e45e` preserves single-material versus material-array structure while cloning GLTF materials. Three.js requires geometry groups for material arrays; forcing an array on the source's single-material meshes caused blank drawing and missed raycasts. Presentation/camera updates now live in explicit imperative scene adapters; no lint rules were disabled. Ready state is tracked by model URL so switching to the detailed asset waits for its own first frame.
+
+The single repair build passed TypeScript and production compilation. Lint passed with zero errors and the same two existing operations warnings. Asset preparation and backend code were unchanged, so their already successful checks were not repeated.
+
+An initial activation browser attempt confirmed visible geometry but its synthetic click missed after locator screenshot scrolling changed the canvas position and placed the target under the sticky save bar. This was a harness coordinate issue. After recomputing coordinates with the canvas below the sticky bar, one focused confirmation passed **all six groups**, with **zero page errors**:
+
+1. Synthetic staff authentication and no GLB on initial unrelated Notes.
+2. Visible anatomical geometry (pixel-content check), direct 3D FDI 26 selection, desktop 1440px and mobile 390px captures without horizontal overflow.
+3. Upper/lower/both jaw controls, all five view presets, isolation, educational reference toggle and detailed FDI 26 loading.
+4. New synthetic FDI 26 finding with mesial surface, Treatments/History tabs, preserved SOAP, parent draft save and reload with the same tooth/surface/condition.
+5. Correct 20-tooth primary 2D fallback.
+6. Read-only finalized patient chart with rendered anatomy and no finding-edit action.
+
+Native visual self-review inspected the desktop arch, mobile arch and detailed molar captures. Actual crowns/roots and the selected label are visible. Evidence is retained in `.impeccable/review/anatomical-dental-activation/`, including the first attempt and final report. No subagent review or independent clinical validation is claimed. A minor reference-label wrap is deferred in the error log.
+
+Local web port **3000** now runs `.next-anatomical-dental`, using original API **8000**, matching `WEB_ORIGIN=http://localhost:3000` and built socket URL `ws://localhost:8000/ws/operations`. Runtime log: `/tmp/medframe-anatomical-runtime.log`; startup session 27917. Post-switch HTTP checks returned 200 for login and both GLBs, with asset checksums matching the prepared files. Original API process 3501581, database, worker/beat, existing accounts and MFA were not restarted or changed. Only the dedicated synthetic draft received the verification finding.
+
+Temporary review API 8001 and web 3001 are stopped. Prior `.next-ui-revamp` is preserved. For local rollback, stop only the anatomical web process, then start the saved artifact from `apps/web` with `NEXT_DIST_DIR=.next-ui-revamp BACKEND_URL=http://127.0.0.1:8000 WEB_ORIGIN=http://localhost:3000 npm run start -- --hostname 127.0.0.1 --port 3000`. No database rollback is needed for this frontend change.
+
+Remaining coverage limits: every mesh has verified identity metadata, but all 32 teeth were not individually clicked in a browser; exact finalized historical revisions, missing-tooth visual feedback and every material-restoration path were not exhaustively exercised. Clinical calibration, gingiva, implant/restoration variants and primary 3D remain outside available assets. No additional broad verification or polish cycle was run.

@@ -93,7 +93,7 @@ Use the existing shadcn/Radix button, field, input, Select, Checkbox, Textarea, 
 
 `features/workspace/safety-provider.tsx` owns confirmations, navigation protection, and memory-only drafts. Save feedback distinguishes unsaved, saving, saved, paused/offline, conflict, completed, and finalized. Finalization and amendments preserve attributed revisions; a preview or selected image is not saved evidence.
 
-The 2D chart is the full keyboard alternative to 3D. Both consume the same finding identifiers and surface vocabulary. The repository-owned schematic GLB contains 52 explicit tooth identifiers and 260 named surface patches; it is clearly labeled unvalidated development geometry. Views, jaw visibility, isolation, reset, pan/zoom/rotation, and selectable surfaces explain recorded data rather than diagnosing.
+The 2D chart is the full keyboard alternative to 3D. Both consume the same finding identifiers and surface vocabulary. The active permanent viewer uses Dundee anatomical GLBs with 32 explicitly mapped FDI tooth meshes and a detailed FDI 26 reference. Preserve source morphology and restrained material feedback. The model-first workspace places selected-tooth Findings/Treatments/History alongside the model on wide screens and below it on narrow screens. Surface selection remains conventional labelled controls because the assets have no validated surface segmentation. Primary dentition retains its 20-tooth 2D chart. Views, jaw visibility, isolation, reset and reference previews explain recorded data rather than diagnosing.
 
 Private upload controls report real transfer/scan state, preserve uncropped clinical files, and allow only clean authorized downloads. Exact document versions stay attached to historical encounters. Logo/avatar previews use the same protected pipeline.
 
@@ -107,7 +107,7 @@ Private upload controls report real transfer/scan state, preserve uncropped clin
 
 ## Clinical Batch 2 interaction owners
 
-`features/dental/dental-chart-grid.tsx` is the shared keyboard chart in the editor, comparisons and portal; `chart-view.tsx` is its read-only snapshot composition. `reference.json` is generated from Django's FDI reference. Schematic v2 keeps explicit IDs and clearer crown silhouettes; it remains unvalidated geometry, with v1 preserved.
+`features/dental/dental-chart-grid.tsx` is the shared keyboard chart in the editor, comparisons and portal; `chart-view.tsx` is its read-only snapshot composition. `reference.json` is generated from Django's FDI reference. The earlier schematic v1/v2 files remain preserved but are no longer the primary renderer. Anatomical asset provenance and calibration/validation limits live in `assets/dental/ATTRIBUTION.md`.
 
 Record filters distinguish search criteria from clinical entry fields and use unique form IDs. Template guidance is visibly separate from entered facts. Plan history and patient releases show version/as-of information; patient reports remain labeled as submitted information.
 

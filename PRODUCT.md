@@ -57,7 +57,7 @@ Use the approved concept-11 medical symbol when supplied. Do not invent an unrel
 - `docs/superpowers/plans/2026-10-18-medframe-django-batch-1.md`: one integrated implementation plan covering all connected Batch 1 features.
 - `docs/operations/pre-django-checkpoint.md`: source/data recovery locations and verified baseline evidence.
 - `docs/requirements/medframe-master-v3.txt` and the older foundation/patient plans: historical context and unchanged requirements, not the current stack/release authority.
-- The approved logo and licensed/clinically reviewed anatomical asset remain unavailable. No production infrastructure, clinical validation, or compliance evidence is supplied.
+- The approved logo remains unavailable. Two licensed Dundee dental assets are integrated locally with attribution; independent clinical validation and dimensional calibration remain unavailable. See `assets/dental/ATTRIBUTION.md` and `docs/operations/anatomical-dental-verification.md`. No production infrastructure, clinical validation, or compliance evidence is supplied.
 
 ## Product Principles
 
