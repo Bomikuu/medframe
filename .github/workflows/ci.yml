@@ -1,0 +1,38 @@
+name: Foundation checks
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: astral-sh/setup-uv@v6
+      - run: uv python install 3.13
+      - run: python3 scripts/setup-local.py
+      - run: docker compose --env-file .env -f infrastructure/compose.yaml up -d --wait
+      - run: uv sync --project services/api --locked --python 3.13
+      - run: npm ci
+      - run: uv run --project services/api alembic -c services/api/alembic.ini upgrade head
+      - run: uv run --project services/api python scripts/prepare-test-db.py
+      - run: uv run --project services/api pytest services/api/tests -q
+      - run: uv run --project services/api ruff check services/api scripts
+      - run: uv run --project services/api ruff format --check services/api scripts
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run codegen
+      - run: git diff --exit-code -- apps/web/schema.graphql apps/web/lib/graphql/generated.ts
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm exec --workspace apps/web playwright install --with-deps chromium
+      - name: Browser verification
+        run: |
+          uv run --project services/api uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log > /tmp/medframe-api.log 2>&1 &
+          npm run start --workspace apps/web > /tmp/medframe-web.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://localhost:8000/health/ready && curl --silent --fail http://localhost:3000/login > /dev/null; then break; fi
+            sleep 1
+          done
+          npm run test:e2e

@@ -1,0 +1,10 @@
+node_modules
+.next
+.venv
+*.lock
+package-lock.json
+docs/requirements/medframe-master-v3.txt
+apps/web/lib/graphql/generated.ts
+apps/web/schema.graphql
+test-results
+playwright-report

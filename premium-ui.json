@@ -1,0 +1,21 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["apps/web/app", "apps/web/components", "apps/web/features"],
+  "locale": "en-PH",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": ["Form", "Select/Listbox"],
+  "ownership": {
+    "Select/Listbox": "authored"
+  },
+  "requiredCommands": ["e2e", "typecheck", "format", "lint"],
+  "commands": {
+    "e2e": "npm run test:e2e",
+    "typecheck": "npm run typecheck",
+    "format": "npm run format:check",
+    "lint": "npm run lint"
+  },
+  "evidence": {
+    "failurePaths": "apps/web/tests/foundation.spec.ts",
+    "authorization": "services/api/tests/test_security_boundaries.py"
+  }
+}

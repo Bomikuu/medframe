@@ -180,4 +180,4 @@ The approved logo and a licensed, clinically reviewed dental asset remain extern
 
 ## Review boundary
 
-The user approved this architecture and the five-slice clinical milestone. The next artifact is a detailed, executable implementation plan for the foundation slice; later slice plans follow the same acceptance contract. Product and design context files capture the confirmed decisions without changing the supplied brand. The implementation plan still needs the review and execution-method choice required by the planning workflow.
+The user approved this architecture and the five-slice clinical milestone. The next artifact is a detailed, executable implementation plan for the foundation slice; later slice plans follow the same acceptance contract. Product and design context files capture the confirmed decisions without changing the supplied brand. The user reviewed the foundation plan and selected native execution. The foundation is implemented; see the verification report for results and the remaining clinical slices.

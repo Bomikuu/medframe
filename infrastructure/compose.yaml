@@ -1,0 +1,88 @@
+name: medframe
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: medframe
+      POSTGRES_USER: medframe
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/setup-local.py first}
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medframe -d medframe"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "127.0.0.1:56379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  mail:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:58025:8025"
+      - "127.0.0.1:51025:1025"
+  api:
+    profiles: [app]
+    build:
+      context: ..
+      dockerfile: services/api/Dockerfile
+    image: medframe-api:development
+    env_file: ../.env
+    environment: &api-environment
+      DATABASE_URL: postgresql+asyncpg://medframe:${POSTGRES_PASSWORD}@db:5432/medframe
+      REDIS_URL: redis://redis:6379/0
+      SMTP_HOST: mail
+      SMTP_PORT: 1025
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  worker:
+    profiles: [app]
+    image: medframe-api:development
+    env_file: ../.env
+    environment: *api-environment
+    command: ["python", "-m", "app.adapters.mail"]
+    depends_on:
+      api:
+        condition: service_healthy
+      mail:
+        condition: service_started
+  web:
+    profiles: [app]
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+    environment:
+      BACKEND_URL: http://api:8000
+      WEB_ORIGIN: http://localhost:3000
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+volumes:
+  postgres_data:

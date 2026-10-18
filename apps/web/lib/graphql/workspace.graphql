@@ -1,0 +1,22 @@
+query WorkspaceOverview {
+  currentUser {
+    id
+    displayName
+  }
+  myOrganizations {
+    id
+    name
+  }
+}
+query ClinicWorkspace($organizationId: UUID!) {
+  clinicWorkspace(organizationId: $organizationId) {
+    organization {
+      id
+      name
+    }
+    branches {
+      id
+      name
+    }
+  }
+}

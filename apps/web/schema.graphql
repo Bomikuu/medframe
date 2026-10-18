@@ -1,0 +1,27 @@
+type BranchType {
+  id: UUID!
+  name: String!
+}
+
+type OrganizationType {
+  id: UUID!
+  name: String!
+}
+
+type Query {
+  currentUser: UserType!
+  myOrganizations: [OrganizationType!]!
+  clinicWorkspace(organizationId: UUID!): WorkspaceType!
+}
+
+scalar UUID
+
+type UserType {
+  id: UUID!
+  displayName: String!
+}
+
+type WorkspaceType {
+  organization: OrganizationType!
+  branches: [BranchType!]!
+}

@@ -1,0 +1,21 @@
+{
+  "name": "medframe",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace apps/web",
+    "build": "npm run build --workspace apps/web",
+    "lint": "npm run lint --workspace apps/web",
+    "typecheck": "npm run typecheck --workspace apps/web",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "codegen": "uv run --project services/api python -m app.graphql.export_schema && npm run codegen --workspace apps/web",
+    "test:e2e": "npm run test:e2e --workspace apps/web"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.7.1"
+  }
+}

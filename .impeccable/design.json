@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-18T05:29:01.945339+00:00",
+  "title": "Design System: Medframe",
+  "extensions": {
+    "motion": [
+      {
+        "name": "state-feedback",
+        "value": "150ms ease-out",
+        "purpose": "Control feedback only; disabled under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ],
+    "shadows": [
+      {
+        "name": "popup",
+        "value": "0 4px 6px -1px rgb(15 45 74 / 0.1)",
+        "purpose": "Organization select overlay."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "description": "Primary button from the clinical foundation.",
+      "html": "<button class=\"ds-primary\">Sign in</button>",
+      "css": ".ds-primary{background:var(--primary);color:var(--primary-foreground);border:0;border-radius:8px;padding:0 20px;height:44px;font:500 14px Inter,sans-serif}.ds-primary:hover{opacity:.9}.ds-primary:focus-visible{outline:2px solid var(--ring);outline-offset:3px}"
+    },
+    {
+      "name": "Outline button",
+      "kind": "button",
+      "description": "Outline button from the clinical foundation.",
+      "html": "<button class=\"ds-outline\">Try again</button>",
+      "css": ".ds-outline{background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:8px;padding:0 16px;height:44px;font:500 14px Inter,sans-serif}.ds-outline:hover{background:var(--muted)}.ds-outline:focus-visible{outline:2px solid var(--ring);outline-offset:3px}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "description": "Input from the clinical foundation.",
+      "html": "<label for=\"ds-email\">Work email</label><input id=\"ds-email\" class=\"ds-input\" type=\"email\" placeholder=\"you@yourclinic.com\">",
+      "css": ".ds-input{display:block;margin-top:8px;background:var(--background);color:var(--foreground);border:1px solid var(--input);border-radius:8px;padding:0 12px;height:44px;font:400 14px Inter,sans-serif}.ds-input:focus-visible{outline:2px solid var(--ring);outline-offset:2px}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "Navigation from the clinical foundation.",
+      "html": "<a href=\"#overview\" class=\"ds-nav\" aria-current=\"page\">Overview</a>",
+      "css": ".ds-nav{display:block;background:var(--secondary);color:var(--secondary-foreground);border-radius:8px;padding:12px;font:500 14px Inter,sans-serif;text-decoration:none}.ds-nav:hover{filter:brightness(.97)}.ds-nav:focus-visible{outline:2px solid var(--ring)}"
+    },
+    {
+      "name": "Organization panel",
+      "kind": "card",
+      "description": "Organization panel from the clinical foundation.",
+      "html": "<section class=\"ds-panel\"><h3>Your organization</h3><p>Authorized workspace</p></section>",
+      "css": ".ds-panel{background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:12px;padding:32px;font:400 14px Inter,sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A focused clinical desk",
+    "overview": "Medframe gives clinicians a quiet, legible work surface.",
+    "keyCharacteristics": ["Self-hosted Inter", "Navy and teal", "Task-focused controls"],
+    "rules": [
+      {
+        "name": "The Context Rule",
+        "body": "Use color to convey action, selection, focus, or a semantic state, not to decorate every region.",
+        "section": "colors"
+      }
+    ],
+    "dos": ["Preserve the approved identity."],
+    "donts": ["Do not crop clinical images into avatars."]
+  }
+}
