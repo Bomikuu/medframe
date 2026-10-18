@@ -1,4 +1,4 @@
-"""Compare baseline identities and records around additive migrations, without exposing rows."""
+"""Verify Batch 1 records across the additive Batch 2 activation without exposing rows."""
 
 import argparse
 import hashlib
@@ -89,9 +89,10 @@ for model in models:
         if field.attname not in new_columns
     ]
     rows = {}
-    for row in (
-        model.objects.values(*fields).order_by(model._meta.pk.attname).iterator()
-    ):
+    queryset = model.objects.all()
+    if model == role_permissions:
+        queryset = queryset.exclude(permission__codename="portal.manage")
+    for row in queryset.values(*fields).order_by(model._meta.pk.attname).iterator():
         key = str(row[model._meta.pk.attname])
         rows[key] = hashlib.sha256(
             json.dumps(row, sort_keys=True, default=str, separators=(",", ":")).encode()
@@ -102,7 +103,38 @@ if args.mode == "capture":
         output.write(json.dumps(result, sort_keys=True) + "\n")
     args.path.chmod(0o600)
 else:
-    if json.loads(args.path.read_text()) != result:
+    eligible = set()
+    for role in apps.get_model("organizations.Role").objects.filter(
+        name__in=["clinic_administrator", "doctor", "dentist"]
+    ):
+        codes = set(role.permissions.values_list("codename", flat=True))
+        if {"workspace.read", "patients.demographics.read"} <= codes and {
+            "patients.directory.manage",
+            "patients.clinical.read",
+        } & codes:
+            eligible.add(role.name)
+    actual = set(
+        role_permissions.objects.filter(
+            permission__codename="portal.manage"
+        ).values_list("role_id", flat=True)
+    )
+    if actual != eligible:
+        raise SystemExit("Unexpected portal management grants; stop activation.")
+    expected = json.loads(args.path.read_text())
+    if expected != result:
+        changes = {
+            label: {
+                "before": len(expected.get(label, {})),
+                "after": len(rows),
+                "changed_rows": sum(
+                    expected.get(label, {}).get(key) != value
+                    for key, value in rows.items()
+                ),
+            }
+            for label, rows in result.items()
+            if expected.get(label) != rows
+        }
+        print(json.dumps({"mismatched_models": changes}))
         raise SystemExit(
             "Preservation mismatch: stop activation and investigate before accepting writes."
         )

@@ -119,3 +119,29 @@ class InvitationSafetyTests(ClinicalFixture):
         self.assertIsNotNone(earlier.revoked_at)
         with self.assertRaises(DomainError):
             prepare_invitation(self.request(), token, "Synthetic patient password 95!", "Synthetic")
+
+    def test_existing_legacy_credentials_are_unchanged_during_pending_claim(self):
+        import pyotp
+        from pwdlib import PasswordHash
+
+        from config.crypto import cipher
+        from medframe_apps.accounts.hashers import encode_legacy_password
+        from medframe_apps.accounts.models import MfaCredential
+
+        _, invitation, token = self.invite()
+        password = "Synthetic existing legacy password 94"
+        user = User.objects.create_user(invitation.email, password)
+        user.password = encode_legacy_password(PasswordHash.recommended().hash(password))
+        user.save(update_fields=["password"])
+        original_password = user.password
+        encrypted_secret = cipher().encrypt(pyotp.random_base32().encode()).decode()
+        MfaCredential.objects.create(
+            user=user, confirmed=True, encrypted_secret=encrypted_secret, last_step=17
+        )
+        self.assertEqual(prepare_invitation(self.request(), token, password), "verify")
+        user.refresh_from_db()
+        credential = MfaCredential.objects.get(user=user)
+        self.assertEqual(user.password, original_password)
+        self.assertEqual(credential.encrypted_secret, encrypted_secret)
+        self.assertEqual(credential.last_step, 17)
+        self.assertFalse(PortalLink.objects.filter(user=user).exists())

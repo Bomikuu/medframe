@@ -3,7 +3,7 @@ import secrets
 from datetime import timedelta
 from typing import Literal
 
-from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -149,8 +149,9 @@ def prepare_invitation(request, token, password, display_name=""):
     advisory_lock(f"portal-identity:{pending.email}")
     user = User.objects.select_for_update().filter(email=pending.email).first()
     if user:
-        user = authenticate(request, username=pending.email, password=password)
-        if user is None:
+        # Invitation preparation must not invoke the automatic password-upgrade setter.
+        # Django still verifies the hash; existing credentials remain intact through MFA.
+        if not user.is_active or not check_password(password, user.password):
             raise DomainError(
                 "INVALID_CREDENTIALS", "Use the existing account password for this invitation.", 401
             )
