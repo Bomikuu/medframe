@@ -75,9 +75,9 @@ Inter Variable is the default self-hosted family. Source Sans 3 Variable and Not
 
 ## Layout
 
-The desktop shell has a 248px default sidebar, adjustable between 224px and 280px; collapsed mode is 80px. Navigation remains in normal flow on narrow screens and wraps without clipping actions. Main content is contained by default, with an explicit full-width preset. Header/density presets change spacing while retaining usable controls.
+The desktop shell has a 248px default sidebar, adjustable between 224px and 280px; collapsed mode is 72px. Navigation uses the configured shadcn/Radix Sidebar: desktop icon collapse and a Sheet below 768px. Narrow screens retain a compact 64px header; navigation never wraps above the content. Main content is contained by default, with an explicit full-width preset. Header/density presets change spacing while retaining usable controls.
 
-Patient forms separate identity, contact, emergency, and guardian information. Date, phone, sex, FDI identifiers, and structured statuses occupy widths appropriate to their content. Consultations keep patient context before separate SOAP, diagnoses, observations, tooth/surface findings, procedures, and document sections. Long forms use normal document scrolling. Dashboard widget visibility, order, and widths are persisted per user and clinic.
+Patient forms separate identity, contact, emergency, and guardian information. Date, phone, sex, FDI identifiers, and structured statuses occupy widths appropriate to their content. Patient records use URL-backed permission-gated tabs. Consultations use persistent notes/diagnoses, dental, procedures and document tabs, with a patient context rail at desktop width and a disclosure below. Entry sheets preserve the single RHF aggregate; changing consultation tabs does not unmount registered sections. Long forms use normal document scrolling. Dashboard widget visibility, order, and widths are persisted per user and clinic.
 
 ## Elevation & Depth
 
@@ -116,3 +116,9 @@ The simpler portal uses the same validated tokens and shadcn/Radix owners. Its d
 ## Clinic operations
 
 The operations agenda and queue extend the focused clinical desk with divided rows and grouped forms. Appointments, Queue, and Schedules are explicit navigation destinations. Date/time controls use the established native typed Input inside FormField; single choices use the canonical Radix FormSelect. Confirmation remains owned by SafetyProvider. Queue estimates show a range, setting-based explanation, update time, and disconnected fallback. Operational actions never imply clinical finalization. Patient appointments/queue retain the separate portal identity and authorized relationship switcher.
+
+## Approved UI revamp — October 19, 2026
+
+Shared composition lives in `apps/web/components/application`. Registry primitives are generated with the existing `radix-nova` shadcn configuration, using `radix-ui`; registry virtual `cn` imports resolve to the existing `@/lib/utils`. Existing Button/Input/Select/Checkbox/Textarea remain canonical. Sonner observes the existing root data-mode instead of installing a second theme authority. TanStack owns table column visibility; the server owns directory order, filters and keyset pagination.
+
+Patient identity uses circular initials only when no authorized photograph is supplied. Clinical media keeps its full framing. Status badges always show readable text. Headers sit outside panels, page gaps are 24px, panel padding is 16–24px, corners use the existing 8–10px token family. Metric values are exact scoped query aggregates. A role without clinical read does not mount clinical widgets or patient tabs. The Dental Chart tab shows the existing finalized chart, separately from unfinalized consultation findings.

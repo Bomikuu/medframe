@@ -1,5 +1,6 @@
 "use client";
 
+import { StatusBadge } from "@/components/application/status-badge";
 import type { ReactNode } from "react";
 import { FormSelect } from "@/features/patients/form-controls";
 import { Button } from "@/components/ui/button";
@@ -51,9 +52,10 @@ export function OperationsLiveStatus({
 }) {
   return (
     <p className="text-sm text-muted-foreground" role="status">
-      {connected
-        ? "Live updates connected"
-        : "Live updates disconnected; checking every 30 seconds"}
+      <StatusBadge value={connected ? "live" : "reconnecting"} />{" "}
+      <span className="ml-2">
+        {connected ? "Live updates connected" : "Checking every 30 seconds"}
+      </span>
       {updated ? ` · Updated ${new Date(updated).toLocaleTimeString()}` : ""}. Estimates use
       configured durations and may change.
     </p>
@@ -61,7 +63,7 @@ export function OperationsLiveStatus({
 }
 export function OperationSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="grid min-w-0 gap-5 border-t border-border pt-7">
+    <section className="grid min-w-0 gap-5 rounded-lg border border-border bg-card p-4 sm:p-6">
       <h2 className="text-xl font-semibold">{title}</h2>
       {children}
     </section>

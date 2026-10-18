@@ -1,5 +1,6 @@
 "use client";
 
+import { EntrySheet } from "@/components/application/entry-sheet";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -84,6 +85,7 @@ function ScheduleEditor({ setup, reload }: { setup: OperationsSetup; reload: () 
   }, [form]);
   useUnsavedChanges(`operations-schedule:${setup.branch_id}`, form.formState.isDirty, discard);
   const current = setup.schedules.find((row) => row.id === editing);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [resource, setResource] = useState("");
   const [closureDate, setClosureDate] = useState(today);
   const save = form.handleSubmit(async (values) => {
@@ -101,12 +103,17 @@ function ScheduleEditor({ setup, reload }: { setup: OperationsSetup; reload: () 
     if (success) {
       form.reset(defaults);
       setEditing(null);
+      setSheetOpen(false);
     }
   });
   return (
     <>
       <OperationNotice message={action.message} error={action.error} />
-      <OperationSection title={editing ? "Edit availability window" : "Add availability window"}>
+      <EntrySheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        title={editing ? "Edit availability window" : "Add availability window"}
+      >
         {!setup.providers.length ? (
           <p className="text-sm">
             No active providers. Provision a Doctor or Dentist membership with a provider profile
@@ -178,7 +185,7 @@ function ScheduleEditor({ setup, reload }: { setup: OperationsSetup; reload: () 
             </div>
           </form>
         )}
-      </OperationSection>
+      </EntrySheet>
       <OperationSection title="Saved weekly windows">
         <div className="divide-y divide-border">
           {!setup.schedules.length && (
@@ -204,6 +211,7 @@ function ScheduleEditor({ setup, reload }: { setup: OperationsSetup; reload: () 
                   variant="outline"
                   onClick={() => {
                     setEditing(row.id);
+                    setSheetOpen(true);
                     form.reset({
                       provider_id: row.provider_id,
                       weekday: String(row.weekday),

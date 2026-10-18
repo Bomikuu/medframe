@@ -1,5 +1,6 @@
 "use client";
 
+import { EntrySheet } from "@/components/application/entry-sheet";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -219,7 +220,7 @@ export function DocumentPanel({
               return (
                 <div
                   key={file.id}
-                  className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-4"
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4"
                 >
                   <div className="min-w-0">
                     <p className="font-medium wrap-anywhere">{file.label}</p>
@@ -323,16 +324,30 @@ export function DocumentPanel({
         <PageControls after={after} next={parsed.data.end_cursor} onChange={setAfter} />
       )}
       {allowUpload && (
-        <UploadControl
-          key={versionTarget?.id ?? "new"}
-          patientId={patientId}
-          encounterId={versionTarget?.encounterId ?? encounterId}
-          documentId={versionTarget?.id}
-          initialLabel={versionTarget?.label}
-          onPendingChange={onUploadPending}
-          purpose={purpose}
-          onUploaded={remote.reload}
-        />
+        <EntrySheet
+          draftKeys={[
+            `${organizationId}:${patientId ?? purpose}:${versionTarget?.encounterId ?? encounterId ?? "general"}:upload`,
+          ]}
+          title={
+            purpose === "avatar"
+              ? "Update profile image"
+              : purpose === "logo"
+                ? "Update clinic logo"
+                : "Upload document"
+          }
+          description="Select a file and wait for its security scan before attaching it."
+        >
+          <UploadControl
+            key={versionTarget?.id ?? "new"}
+            patientId={patientId}
+            encounterId={versionTarget?.encounterId ?? encounterId}
+            documentId={versionTarget?.id}
+            initialLabel={versionTarget?.label}
+            onPendingChange={onUploadPending}
+            purpose={purpose}
+            onUploaded={remote.reload}
+          />
+        </EntrySheet>
       )}
       {versionTarget && (
         <Button type="button" variant="ghost" onClick={() => setVersionTarget(null)}>

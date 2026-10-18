@@ -6,6 +6,7 @@ import { useRequestScope } from "./use-request-scope";
 import { ButtonLink } from "@/components/ui/button-link";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,7 +26,13 @@ import { FormSelect } from "./form-controls";
 import { patientDefaults, patientSchema, type PatientFormValues } from "./form-schema";
 import { PageHeading, LoadState, failureCode, failureText } from "./feedback";
 
-export function PatientForm({ patient }: { patient?: PatientDetailsFragment }) {
+export function PatientForm({
+  patient,
+  embedded = false,
+}: {
+  patient?: PatientDetailsFragment;
+  embedded?: boolean;
+}) {
   const { workspace, organizationId, href, can } = useWorkspace();
   const router = useRouter();
   const captureRequest = useRequestScope();
@@ -97,6 +104,7 @@ export function PatientForm({ patient }: { patient?: PatientDetailsFragment }) {
         patient ? values : { ...patientDefaults(), branchId: workspace.branches[0]?.id ?? "" },
       );
       clearDirty();
+      toast.success("Patient details saved");
       router.push(href(`/clinic/patients/${patientId}`) + "&saved=details");
     } catch (error) {
       if (!isCurrent()) return;
@@ -136,21 +144,23 @@ export function PatientForm({ patient }: { patient?: PatientDetailsFragment }) {
     return <LoadState error={failure} retry={() => window.location.reload()} />;
   return (
     <>
-      <PageHeading
-        title={patient ? "Edit patient details" : "Register patient"}
-        description={
-          patient
-            ? patient.reference
-            : "Create a patient record for this clinic. Medical history is reviewed separately by an authorized clinician."
-        }
-      />
+      {!embedded && (
+        <PageHeading
+          title={patient ? "Edit patient details" : "Register patient"}
+          description={
+            patient
+              ? patient.reference
+              : "Create a patient record for this clinic. Medical history is reviewed separately by an authorized clinician."
+          }
+        />
+      )}
       <FormProvider {...form}>
         <form
           noValidate
           onSubmit={(event) => {
             void form.handleSubmit(submit)(event);
           }}
-          className="grid max-w-3xl gap-9"
+          className="grid max-w-3xl gap-6"
         >
           <IdentityFields />
           {!patient && (

@@ -16,12 +16,10 @@ export function PatientContext({
   const { organizationId } = useWorkspace();
   const remote = useRemote(ClinicalContextDocument, { organizationId, patientId, revisionId });
   return (
-    <details open className="rounded-lg border border-border bg-muted p-5">
+    <details open className="rounded-lg border border-border bg-card p-5">
       <summary className="min-h-11 font-medium">
         <h2 className="inline text-base font-medium">
-          {revisionId
-            ? "Patient history preserved at finalization"
-            : "Current patient history, allergies, and medications"}
+          {revisionId ? "Patient history preserved at finalization" : "Patient context"}
         </h2>
       </summary>
       <div className="mt-4">

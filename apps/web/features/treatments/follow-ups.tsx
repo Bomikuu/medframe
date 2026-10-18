@@ -1,4 +1,5 @@
 "use client";
+import { EntrySheet } from "@/components/application/entry-sheet";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -49,6 +50,7 @@ export function FollowUps({
   const watchedForm = useWatch({ control: form.control });
   const capture = useRequestScope();
   const [error, setError] = useState<unknown>(null);
+  const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   useUnsavedChanges(`followup:${organizationId}:${patientId}`, form.formState.isDirty, () =>
     form.reset(),
@@ -86,6 +88,7 @@ export function FollowUps({
                         requestId: crypto.randomUUID(),
                       });
                       setMessage("");
+                      setOpen(true);
                     }}
                   >
                     Edit follow-up
@@ -106,8 +109,7 @@ export function FollowUps({
         <p role="alert">Follow-ups could not be read.</p>
       )}
       {can("treatments.write") && (
-        <details className="rounded-lg border border-border p-5">
-          <summary className="min-h-11 font-medium">Add or edit follow-up</summary>
+        <EntrySheet title="Add or edit follow-up" open={open} onOpenChange={setOpen}>
           <form
             noValidate
             className="mt-4 grid gap-4"
@@ -194,7 +196,7 @@ export function FollowUps({
               </Button>
             </div>
           </form>
-        </details>
+        </EntrySheet>
       )}
     </section>
   );

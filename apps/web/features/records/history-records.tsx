@@ -48,9 +48,12 @@ export function HistoryRecords({ patientId }: { patientId: string }) {
         <LoadState error={remote.error} retry={remote.reload} />
       ) : parsed.success ? (
         <>
-          <ol className="divide-y divide-border">
+          <ol className="ml-2 border-l-2 border-border pl-5">
             {parsed.data.items.map((item) => (
-              <li key={item.id} className="flex flex-wrap justify-between gap-4 py-5">
+              <li
+                key={item.id}
+                className="relative flex flex-wrap justify-between gap-4 border-b border-border py-5 before:absolute before:top-6 before:-left-[27px] before:size-3 before:rounded-full before:border-2 before:border-background before:bg-primary"
+              >
                 <div>
                   <h3 className="text-sm font-medium">{item.action.replaceAll(".", " ")}</h3>
                   <p className="mt-2 text-sm text-muted-foreground">{item.author_name}</p>

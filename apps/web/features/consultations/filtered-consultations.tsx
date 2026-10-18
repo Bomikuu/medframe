@@ -1,4 +1,5 @@
 "use client";
+import { StatusBadge } from "@/components/application/status-badge";
 import Link from "next/link";
 import { useRecordAuthors } from "@/features/records/use-record-authors";
 import { useState } from "react";
@@ -45,19 +46,19 @@ export function FilteredConsultations({ patientId }: { patientId?: string }) {
               No consultations match these filters.
             </p>
           )}
-          <ul>
+          <ul className="grid gap-3">
             {parsed.data.items.map((item) => (
               <li key={item.id}>
                 <Link
                   href={href(`/clinic/consultations/${item.id}`)}
-                  className="flex flex-wrap justify-between gap-3 border-b border-border py-5 hover:text-primary"
+                  className="flex flex-wrap justify-between gap-3 rounded-lg border border-border bg-card p-5 hover:bg-muted/40"
                 >
                   <div>
                     <p className="font-medium">{item.patient_name}</p>
                     <p className="mt-1 text-sm text-muted-foreground">{item.reason}</p>
                   </div>
                   <div className="text-sm">
-                    <p>{item.status.replaceAll("_", " ")}</p>
+                    <StatusBadge value={item.status} />
                     <p className="mt-1 text-muted-foreground">{timeLabel(item.updated_at)}</p>
                   </div>
                 </Link>

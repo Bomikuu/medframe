@@ -17,7 +17,7 @@ export function ClinicalSummary({ revision }: { revision: ClinicalDetailsFragmen
           Version {revision.version} · {revision.authorName} · {timeLabel(revision.createdAt)}
         </p>
       )}
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 @lg:grid-cols-2">
         <div>
           <h3 className="font-semibold">Allergies</h3>
           <p className="mt-1 text-muted-foreground">

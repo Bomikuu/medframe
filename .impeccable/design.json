@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-18T13:24:01.598618+00:00",
+  "generatedAt": "2026-10-19T00:00:00+08:00",
   "title": "Design System: Medframe",
   "extensions": {
     "motion": [
@@ -12,8 +12,12 @@
     ],
     "breakpoints": [
       {
-        "name": "lg",
-        "value": "1024px"
+        "name": "mobile-sidebar",
+        "value": "768px"
+      },
+      {
+        "name": "clinical-context-rail",
+        "value": "1280px"
       }
     ],
     "shadows": [
@@ -68,7 +72,7 @@
   ],
   "narrative": {
     "northStar": "A focused clinical desk",
-    "overview": "A white clinical workspace with navy actions, slate text, validated clinic branding, and personal preferences.",
+    "overview": "A white clinical workspace with compact navigation, task tabs, focused entry panels, scoped metrics, navy actions and teal interaction feedback.",
     "keyCharacteristics": [
       "White default workspace",
       "Self-hosted font presets",

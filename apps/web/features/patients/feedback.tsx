@@ -1,5 +1,7 @@
 "use client";
 
+import { PageHeader } from "@/components/application/page-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { ClientError } from "graphql-request";
@@ -25,7 +27,7 @@ export function failureText(error: unknown) {
   if (code === "CONFLICT")
     return "This record changed since you opened it. Your input is still here. Load the latest version and review it before saving.";
   if (["FORBIDDEN", "NOT_FOUND"].includes(code))
-    return "This patient is unavailable or your access has changed. Return to Patients or contact your clinic administrator.";
+    return "This record is unavailable or your access has changed. Return to the collection or contact your clinic administrator.";
   if (code === "UNAUTHENTICATED") return "Your session has expired. Sign in again to continue.";
   if (code === "INVALID_INPUT") return "Check your entries and review states, then try again.";
   return "The request could not be completed. Check your connection and try again. Your entered values have been kept.";
@@ -54,9 +56,12 @@ export function LoadState({ error, retry }: { error: unknown; retry: () => void 
           )}
         </>
       ) : (
-        <p role="status" className="text-sm text-muted-foreground">
-          Loading patient information…
-        </p>
+        <div role="status" className="grid w-full gap-4">
+          <span className="sr-only">Loading workspace information…</span>
+          <Skeleton className="h-5 w-2/5" />
+          <Skeleton className="h-4 w-4/5" />
+          <Skeleton className="h-16 w-full" />
+        </div>
       )}
     </div>
   );
@@ -66,22 +71,14 @@ export function PageHeading({
   title,
   description,
   children,
+  level = 1,
 }: {
   title: string;
   description?: string;
   children?: React.ReactNode;
+  level?: 1 | 2;
 }) {
-  return (
-    <div className="mb-8 flex flex-wrap items-start justify-between gap-5">
-      <div className="min-w-0">
-        <h1 className="text-3xl font-semibold tracking-tight wrap-anywhere">{title}</h1>
-        {description && (
-          <p className="mt-3 max-w-prose text-sm leading-6 text-muted-foreground">{description}</p>
-        )}
-      </div>
-      {children}
-    </div>
-  );
+  return <PageHeader title={title} description={description} actions={children} level={level} />;
 }
 
 export function dateLabel(date: string | null | undefined) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,32 +42,43 @@ export function AppearancePage() {
   const [scope, setScope] = useState("personal");
   const [pending, setPending] = useState(false);
   return (
-    <div className="grid gap-10">
+    <div className="grid min-w-0 gap-6">
       <PageHeading
         title="Appearance"
         description="Preview changes in your workspace, then save. Personal preferences apply only to you in this clinic."
       />
-      <nav aria-label="Appearance scope" className="flex flex-wrap gap-3">
-        {[
-          ["personal", "Your preferences"],
-          ["dashboard", "Dashboard layout"],
-          ...(can("organization.manage") ? [["organization", "Clinic branding"]] : []),
-        ].map(([value, title]) => (
-          <Button
-            key={value}
-            type="button"
-            disabled={pending}
-            variant={scope === value ? "secondary" : "outline"}
-            aria-pressed={scope === value}
-            onClick={() => void guard(() => setScope(value))}
-          >
-            {title}
-          </Button>
-        ))}
-      </nav>
-      {scope === "organization" && <OrganizationAppearance setPending={setPending} />}
-      {scope === "personal" && <PersonalAppearance setPending={setPending} />}
-      {scope === "dashboard" && <DashboardLayout setPending={setPending} />}
+      <Tabs
+        value={scope}
+        onValueChange={(value) => {
+          if (!pending) void guard(() => setScope(value));
+        }}
+        className="min-w-0 gap-6"
+      >
+        <div className="overflow-x-auto border-b border-border">
+          <TabsList variant="line" aria-label="Appearance scope" className="min-w-max">
+            <TabsTrigger disabled={pending} value="personal">
+              Your preferences
+            </TabsTrigger>
+            <TabsTrigger disabled={pending} value="dashboard">
+              Dashboard layout
+            </TabsTrigger>
+            {can("organization.manage") && (
+              <TabsTrigger disabled={pending} value="organization">
+                Clinic branding
+              </TabsTrigger>
+            )}
+          </TabsList>
+        </div>
+        <TabsContent value="organization">
+          {scope === "organization" && <OrganizationAppearance setPending={setPending} />}
+        </TabsContent>
+        <TabsContent value="personal">
+          {scope === "personal" && <PersonalAppearance setPending={setPending} />}
+        </TabsContent>
+        <TabsContent value="dashboard">
+          {scope === "dashboard" && <DashboardLayout setPending={setPending} />}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -111,11 +123,11 @@ function OrganizationAppearance({ setPending }: { setPending: (value: boolean) =
     />
   );
   return (
-    <section className="grid gap-6">
+    <section className="grid min-w-0 gap-6">
       <h2 className="text-xl font-semibold">Clinic branding</h2>
       <form
         noValidate
-        className="grid gap-6"
+        className="grid min-w-0 gap-6"
         onSubmit={form.handleSubmit(async (settings) => {
           setPending(true);
           const isCurrent = capture();
@@ -139,7 +151,7 @@ function OrganizationAppearance({ setPending }: { setPending: (value: boolean) =
           }
         })}
       >
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-5 rounded-lg border border-border p-5 sm:grid-cols-2">
           <FormField
             id="theme-primary"
             label="Primary action color"
@@ -256,7 +268,7 @@ function PersonalAppearance({ setPending }: { setPending: (value: boolean) => vo
       <h2 className="text-xl font-semibold">Your preferences</h2>
       <form
         noValidate
-        className="grid gap-6"
+        className="grid min-w-0 gap-6"
         onSubmit={form.handleSubmit(async (settings) => {
           setPending(true);
           setMessage("");
@@ -280,7 +292,7 @@ function PersonalAppearance({ setPending }: { setPending: (value: boolean) => vo
           }
         })}
       >
-        <div className="grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-5 rounded-lg border border-border p-5 sm:grid-cols-2">
           <FormSelect
             id="personal-mode"
             label="Color mode"

@@ -1,178 +1,267 @@
 "use client";
-
-import { ButtonLink } from "@/components/ui/button-link";
-
-import { useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { PlusIcon, XIcon, MagnifyingGlassIcon, ArrowRightIcon } from "@/components/icons";
+import { MoreHorizontal, Search } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { EntrySheet } from "@/components/application/entry-sheet";
+import { PatientForm } from "./patient-form";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PatientDirectoryDocument } from "@/lib/graphql/generated";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { PatientAvatar } from "@/components/application/patient-avatar";
+import { DataTable } from "@/components/application/data-table";
+import { EmptyState } from "@/components/application/empty-state";
+import { ViewSwitcher } from "@/components/application/view-switcher";
+import { PatientDirectoryDocument, type PatientRowFragment } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
+import { FormSelect } from "./form-controls";
+import { useCollectionView } from "./use-collection-view";
 import { useRemote } from "./use-remote";
-import { LoadState, PageHeading, dateLabel } from "./feedback";
+import { LoadState, PageHeading, RemoteNotice, dateLabel } from "./feedback";
 
 export function PatientDirectory() {
-  const { organizationId, href, can } = useWorkspace();
+  const { organizationId, overview, workspace, href, can } = useWorkspace();
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("name_asc");
+  const [branch, setBranch] = useState("all");
   const [cursors, setCursors] = useState<(string | null)[]>([null]);
-  const input = useRef<HTMLInputElement>(null);
-  const { data, error, loading, reload } = useRemote(PatientDirectoryDocument, {
+  const [view, setView] = useCollectionView(
+    `${overview.currentUser.id}:${organizationId}:patients`,
+  );
+  const remote = useRemote(PatientDirectoryDocument, {
     organizationId,
     query,
-    after: cursors[cursors.length - 1],
+    sort,
+    branchId: branch === "all" ? null : branch,
+    after: cursors.at(-1),
   });
-  const page = data?.clinicPatients;
-  function search(value: string) {
-    setQuery(value);
+  const page = remote.data?.clinicPatients;
+  function resetPage() {
     setCursors([null]);
-    if (value === query) reload();
   }
+  const columns: ColumnDef<PatientRowFragment>[] = [
+    {
+      id: "patient",
+      header: "Patient",
+      enableHiding: false,
+      cell: ({ row: { original: patient } }) => (
+        <Link
+          href={href(`/clinic/patients/${patient.id}`)}
+          className="flex min-w-48 items-center gap-3 font-medium hover:text-primary"
+        >
+          <PatientAvatar name={patient.fullName} />
+          <span className="max-w-72 wrap-anywhere whitespace-normal">{patient.fullName}</span>
+        </Link>
+      ),
+    },
+    {
+      id: "reference",
+      accessorKey: "reference",
+      header: "Reference",
+      cell: (info) => (
+        <span className="font-mono text-xs text-muted-foreground">{String(info.getValue())}</span>
+      ),
+    },
+    {
+      id: "birth date",
+      header: "Date of birth",
+      cell: ({ row }) => dateLabel(row.original.dateOfBirth),
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      header: () => <span className="sr-only">Actions</span>,
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              className="size-11"
+              aria-label={`Actions for ${row.original.fullName}`}
+            >
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link href={href(`/clinic/patients/${row.original.id}`)}>Open patient</Link>
+            </DropdownMenuItem>
+            {can("encounters.write") && (
+              <DropdownMenuItem asChild>
+                <Link href={`${href("/clinic/consultations/new")}&patient=${row.original.id}`}>
+                  Start consultation
+                </Link>
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
   return (
     <>
       <PageHeading
         title="Patients"
-        description="Find a patient by name or reference within your authorized records."
+        description="Your authorized patient directory. Open a record to review history or begin care."
       >
         {can("patients.register") && (
-          <ButtonLink href={href("/clinic/patients/new")}>
-            <PlusIcon />
-            Register patient
-          </ButtonLink>
+          <EntrySheet
+            title="Register patient"
+            description="Create a patient record. Clinical history is reviewed separately."
+          >
+            <PatientForm embedded />
+          </EntrySheet>
         )}
       </PageHeading>
-      <form
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          search(draft);
-        }}
-        role="search"
-        className="mb-7 flex max-w-2xl flex-wrap items-end gap-3"
-      >
-        <div className="min-w-0 flex-1 basis-56">
-          <label htmlFor="patientSearch" className="mb-2 block text-sm font-medium">
-            Name or patient reference
-          </label>
-          <div className="relative">
+      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-border bg-card p-4">
+        <form
+          role="search"
+          className="flex min-w-0 flex-1 basis-64 items-end gap-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setQuery(draft);
+            resetPage();
+            if (draft === query) remote.reload();
+          }}
+        >
+          <div className="min-w-0 flex-1">
+            <label htmlFor="patientSearch" className="mb-2 block text-xs font-medium">
+              Name or reference
+            </label>
             <Input
               id="patientSearch"
               type="search"
-              ref={input}
               value={draft}
               maxLength={160}
               autoComplete="off"
+              placeholder="Search patients…"
               onChange={(event) => setDraft(event.target.value)}
-              className="pr-12"
             />
-            {draft && (
-              <Button
-                type="button"
-                variant="ghost"
-                className="absolute top-0 right-0 size-11"
-                aria-label="Clear patient search"
-                onClick={() => {
-                  setDraft("");
-                  search("");
-                  input.current?.focus();
-                }}
-              >
-                <XIcon />
-              </Button>
-            )}
           </div>
-        </div>
-        <Button type="submit" variant="outline">
-          <MagnifyingGlassIcon />
-          Search
-        </Button>
-      </form>
+          <Button type="submit" variant="outline" aria-label="Search patients">
+            <Search />
+          </Button>
+        </form>
+        <FormSelect
+          id="directory-sort"
+          label="Order"
+          value={sort}
+          onChange={(value) => {
+            setSort(value);
+            resetPage();
+          }}
+          options={[
+            { value: "name_asc", label: "Name A–Z" },
+            { value: "name_desc", label: "Name Z–A" },
+            { value: "reference", label: "Reference" },
+          ]}
+        />
+        <FormSelect
+          id="directory-branch"
+          label="Branch"
+          value={branch}
+          onChange={(value) => {
+            setBranch(value);
+            resetPage();
+          }}
+          options={[
+            { value: "all", label: "All permitted branches" },
+            ...workspace.branches.map((branch) => ({ value: branch.id, label: branch.name })),
+          ]}
+        />
+        <ViewSwitcher value={view} onChange={setView} />
+      </div>
       {!page ? (
-        <LoadState error={error} retry={reload} />
+        <LoadState error={remote.error} retry={remote.reload} />
       ) : (
-        <section aria-label="Patient results" aria-busy={loading} className="min-h-60">
+        <section aria-label="Patient results" aria-busy={remote.loading}>
+          <RemoteNotice error={remote.error} retry={remote.reload} />
           <p role="status" className="mb-4 text-sm text-muted-foreground">
             {page.totalCount.toLocaleString("en-PH")} {query ? "matching" : "available"} patients
-            {loading ? " · Updating…" : ""}
+            {remote.loading ? " · Updating…" : ""}
           </p>
           {!page.items.length ? (
-            <div className="rounded-xl border border-dashed border-border px-6 py-10">
-              <h2 className="text-lg font-semibold">
-                {query ? "No matching patients" : "No patients available yet"}
-              </h2>
-              <p className="mt-3 max-w-prose text-sm leading-6 text-muted-foreground">
-                {query
-                  ? "Check the spelling or search by the patient reference. Clear the search to see all records available to you."
-                  : "Register a patient to begin, or ask your administrator to arrange access to an existing record."}
-              </p>
-            </div>
+            <EmptyState
+              title={query ? "No matching patients" : "No patients available"}
+              description={
+                query
+                  ? "Try another name or reference, or clear the search."
+                  : "Register a patient or contact your clinic administrator to arrange access."
+              }
+            >
+              {query && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setDraft("");
+                    setQuery("");
+                    resetPage();
+                  }}
+                >
+                  Clear search
+                </Button>
+              )}
+            </EmptyState>
+          ) : view === "table" ? (
+            <DataTable columns={columns} data={page.items} caption="Authorized patient records" />
           ) : (
-            <table className="w-full border-collapse text-left text-sm">
-              <caption className="sr-only">Authorized patient records</caption>
-              <thead className="hidden border-y border-border bg-muted/50 sm:table-header-group">
-                <tr>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Patient
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Reference
-                  </th>
-                  <th scope="col" className="px-4 py-3 font-medium">
-                    Date of birth
-                  </th>
-                  <th scope="col">
-                    <span className="sr-only">Open record</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border border-y border-border">
-                {page.items.map((patient) => (
-                  <tr
-                    key={patient.id}
-                    className="relative block py-4 hover:bg-muted/40 sm:table-row sm:py-0"
-                  >
-                    <th
-                      scope="row"
-                      className="block px-2 py-1 font-medium wrap-anywhere sm:table-cell sm:px-4 sm:py-5"
-                    >
-                      <Link
-                        className="text-primary underline-offset-4 hover:underline"
-                        href={href(`/clinic/patients/${patient.id}`)}
-                      >
-                        {patient.fullName}
-                      </Link>
-                    </th>
-                    <td className="block px-2 py-1 text-xs text-muted-foreground sm:table-cell sm:px-4 sm:py-5 sm:text-sm">
-                      <span className="sm:hidden">Reference: </span>
-                      {patient.reference}
-                    </td>
-                    <td className="block px-2 py-1 text-muted-foreground sm:table-cell sm:px-4 sm:py-5">
-                      <span className="sm:hidden">Date of birth: </span>
-                      {dateLabel(patient.dateOfBirth)}
-                    </td>
-                    <td className="hidden pr-4 text-right sm:table-cell">
-                      <ArrowRightIcon aria-hidden="true" className="inline" />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {page.items.map((patient) => (
+                <Card
+                  key={patient.id}
+                  data-panel
+                  className="rounded-lg border border-border py-5 ring-0"
+                >
+                  <CardContent className="grid gap-4 px-5">
+                    <div className="flex items-center gap-3">
+                      <PatientAvatar name={patient.fullName} />
+                      <div className="min-w-0">
+                        <Link
+                          className="font-semibold wrap-anywhere hover:text-primary"
+                          href={href(`/clinic/patients/${patient.id}`)}
+                        >
+                          {patient.fullName}
+                        </Link>
+                        <p className="mt-1 font-mono text-xs text-muted-foreground">
+                          {patient.reference}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="border-t border-border pt-4 text-sm text-muted-foreground">
+                      Born {dateLabel(patient.dateOfBirth)}
+                    </p>
+                    <ButtonLink variant="outline" href={href(`/clinic/patients/${patient.id}`)}>
+                      Open patient
+                    </ButtonLink>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-5 flex items-center justify-between gap-3">
             <span className="text-sm text-muted-foreground">Page {cursors.length}</span>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button
                 variant="outline"
-                disabled={cursors.length === 1 || loading}
+                disabled={cursors.length === 1 || remote.loading}
                 onClick={() => setCursors((values) => values.slice(0, -1))}
               >
                 Previous
               </Button>
               <Button
                 variant="outline"
-                disabled={!page.hasNextPage || loading}
-                onClick={() => setCursors((values) => [...values, page.endCursor ?? null])}
+                disabled={!page.hasNextPage || remote.loading}
+                onClick={() => setCursors((values) => [...values, page.endCursor])}
               >
                 Next
               </Button>

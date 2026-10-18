@@ -1,5 +1,6 @@
 "use client";
 
+import { ClinicalEntry } from "@/components/application/clinical-entry";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,56 +52,62 @@ export function DiagnosisFields({
         )}
         <div className="grid gap-5">
           {diagnoses.fields.map((field, index) => (
-            <fieldset
+            <ClinicalEntry
               key={field.id}
-              disabled={readOnly}
-              className="grid items-end gap-4 border-b border-border pb-5 sm:grid-cols-[1fr_180px]"
+              title={`Diagnosis ${index + 1}`}
+              summary={values[index]?.description ?? ""}
+              status={values[index]?.certainty ?? "unreviewed"}
+              path={`content.diagnoses.${index}`}
+              readOnly={readOnly}
+              onRemove={() => diagnoses.remove(index)}
             >
-              <FormField
-                id={`diagnosis-${index}`}
-                label={`Diagnosis ${index + 1}`}
-                error={errors.content?.diagnoses?.[index]?.description?.message}
-              >
-                <Input
+              <div className="grid gap-4">
+                <FormField
                   id={`diagnosis-${index}`}
-                  {...register(`content.diagnoses.${index}.description`)}
-                  maxLength={240}
-                  aria-invalid={!!errors.content?.diagnoses?.[index]?.description}
-                  aria-describedby={
-                    errors.content?.diagnoses?.[index]?.description
-                      ? `diagnosis-${index}-help`
-                      : undefined
+                  label={`Diagnosis ${index + 1}`}
+                  error={errors.content?.diagnoses?.[index]?.description?.message}
+                >
+                  <Input
+                    id={`diagnosis-${index}`}
+                    {...register(`content.diagnoses.${index}.description`)}
+                    maxLength={240}
+                    aria-invalid={!!errors.content?.diagnoses?.[index]?.description}
+                    aria-describedby={
+                      errors.content?.diagnoses?.[index]?.description
+                        ? `diagnosis-${index}-help`
+                        : undefined
+                    }
+                  />
+                </FormField>
+                <FormSelect
+                  id={`certainty-${index}`}
+                  label="Certainty"
+                  value={values[index]?.certainty ?? "suspected"}
+                  onChange={(value) =>
+                    setValue(
+                      `content.diagnoses.${index}.certainty`,
+                      value as EncounterForm["content"]["diagnoses"][number]["certainty"],
+                      { shouldDirty: true },
+                    )
                   }
+                  options={["reported", "observed", "suspected", "confirmed", "resolved"].map(
+                    (value) => ({ value, label: value[0].toUpperCase() + value.slice(1) }),
+                  )}
                 />
-              </FormField>
-              <FormSelect
-                id={`certainty-${index}`}
-                label="Certainty"
-                value={values[index]?.certainty ?? "suspected"}
-                onChange={(value) =>
-                  setValue(
-                    `content.diagnoses.${index}.certainty`,
-                    value as EncounterForm["content"]["diagnoses"][number]["certainty"],
-                    { shouldDirty: true },
-                  )
-                }
-                options={["reported", "observed", "suspected", "confirmed", "resolved"].map(
-                  (value) => ({ value, label: value[0].toUpperCase() + value.slice(1) }),
+                <FormField id={`code-${index}`} label="Terminology code (optional)">
+                  <Input
+                    id={`code-${index}`}
+                    {...register(`content.diagnoses.${index}.code`)}
+                    maxLength={40}
+                  />
+                </FormField>
+                {!readOnly && (
+                  <Button type="button" variant="ghost" onClick={() => diagnoses.remove(index)}>
+                    Remove diagnosis {index + 1}
+                  </Button>
                 )}
-              />
-              <FormField id={`code-${index}`} label="Terminology code (optional)">
-                <Input
-                  id={`code-${index}`}
-                  {...register(`content.diagnoses.${index}.code`)}
-                  maxLength={40}
-                />
-              </FormField>
-              {!readOnly && (
-                <Button type="button" variant="ghost" onClick={() => diagnoses.remove(index)}>
-                  Remove diagnosis {index + 1}
-                </Button>
-              )}
-            </fieldset>
+              </div>
+            </ClinicalEntry>
           ))}
         </div>
       </section>
@@ -140,47 +147,53 @@ export function DiagnosisFields({
         )}
         <div className="grid gap-5">
           {observations.fields.map((field, index) => (
-            <fieldset
+            <ClinicalEntry
               key={field.id}
-              disabled={readOnly}
-              className="grid gap-4 border-b border-border pb-5 sm:grid-cols-2"
+              title={`Observation ${index + 1}`}
+              summary={observationValues[index]?.label ?? ""}
+              status={observationValues[index]?.source ?? "observed"}
+              path={`content.observations.${index}`}
+              readOnly={readOnly}
+              onRemove={() => observations.remove(index)}
             >
-              <FormField id={`observation-label-${index}`} label="Observation">
-                <Input
-                  id={`observation-label-${index}`}
-                  {...register(`content.observations.${index}.label`)}
-                  maxLength={120}
+              <div className="grid gap-4">
+                <FormField id={`observation-label-${index}`} label="Observation">
+                  <Input
+                    id={`observation-label-${index}`}
+                    {...register(`content.observations.${index}.label`)}
+                    maxLength={120}
+                  />
+                </FormField>
+                <FormField id={`observation-value-${index}`} label="Recorded value">
+                  <Input
+                    id={`observation-value-${index}`}
+                    {...register(`content.observations.${index}.value`)}
+                    maxLength={240}
+                  />
+                </FormField>
+                <FormSelect
+                  id={`observation-source-${index}`}
+                  label="Source"
+                  value={observationValues[index]?.source ?? "observed"}
+                  onChange={(value) =>
+                    setValue(
+                      `content.observations.${index}.source`,
+                      value as "reported" | "observed",
+                      { shouldDirty: true },
+                    )
+                  }
+                  options={[
+                    { value: "reported", label: "Patient-reported" },
+                    { value: "observed", label: "Clinician-observed" },
+                  ]}
                 />
-              </FormField>
-              <FormField id={`observation-value-${index}`} label="Recorded value">
-                <Input
-                  id={`observation-value-${index}`}
-                  {...register(`content.observations.${index}.value`)}
-                  maxLength={240}
-                />
-              </FormField>
-              <FormSelect
-                id={`observation-source-${index}`}
-                label="Source"
-                value={observationValues[index]?.source ?? "observed"}
-                onChange={(value) =>
-                  setValue(
-                    `content.observations.${index}.source`,
-                    value as "reported" | "observed",
-                    { shouldDirty: true },
-                  )
-                }
-                options={[
-                  { value: "reported", label: "Patient-reported" },
-                  { value: "observed", label: "Clinician-observed" },
-                ]}
-              />
-              {!readOnly && (
-                <Button type="button" variant="ghost" onClick={() => observations.remove(index)}>
-                  Remove observation {index + 1}
-                </Button>
-              )}
-            </fieldset>
+                {!readOnly && (
+                  <Button type="button" variant="ghost" onClick={() => observations.remove(index)}>
+                    Remove observation {index + 1}
+                  </Button>
+                )}
+              </div>
+            </ClinicalEntry>
           ))}
         </div>
       </section>

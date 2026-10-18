@@ -1,5 +1,8 @@
 "use client";
 
+import { EntrySheet } from "@/components/application/entry-sheet";
+import { Progress } from "@/components/ui/progress";
+import { StatusBadge } from "@/components/application/status-badge";
 import { PlanItemWork, PlanHistory, AddPlanItem } from "./plan-work";
 import { FollowUps } from "./follow-ups";
 import { z } from "zod";
@@ -92,6 +95,16 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
                 {plan.items.filter((item) => item.status !== "cancelled").length} active items
                 completed
               </p>
+              <Progress
+                className="mt-4 h-2"
+                aria-label="Treatment completion"
+                value={
+                  plan.items.filter((item) => item.status !== "cancelled").length
+                    ? (100 * plan.items.filter((item) => item.status === "completed").length) /
+                      plan.items.filter((item) => item.status !== "cancelled").length
+                    : 0
+                }
+              />
               <ol className="mt-4 grid gap-4">
                 {plan.items.map((item, index) => (
                   <li
@@ -104,7 +117,7 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
                       </p>
                       <p className="mt-1 text-sm text-muted-foreground">
                         {item.tooth ? `Tooth ${item.tooth} · ` : ""}
-                        {item.status.replaceAll("_", " ")}
+                        <StatusBadge value={item.status} />
                       </p>
                     </div>
                     {can("treatments.write") && (
@@ -246,8 +259,7 @@ function PlanForm({ patientId, onSaved }: { patientId: string; onSaved: () => vo
     form.reset(),
   );
   return (
-    <details className="rounded-lg border border-border p-5">
-      <summary className="min-h-11 font-medium">Create a treatment plan</summary>
+    <EntrySheet title="Create a treatment plan">
       <form
         noValidate
         className="mt-5 grid gap-5"
@@ -336,6 +348,6 @@ function PlanForm({ patientId, onSaved }: { patientId: string; onSaved: () => vo
           </Button>
         </div>
       </form>
-    </details>
+    </EntrySheet>
   );
 }

@@ -197,7 +197,7 @@ function PortalShell({
           </div>
           <nav
             aria-label="Patient navigation"
-            className="flex flex-wrap gap-6 border-b border-border pb-4 text-sm font-medium"
+            className="flex gap-1 overflow-x-auto border-b border-border pb-2 text-sm font-medium [&>a]:flex [&>a]:min-h-11 [&>a]:shrink-0 [&>a]:items-center [&>a]:rounded-md [&>a]:px-3 [&>a[aria-current=page]]:bg-secondary [&>a[aria-current=page]]:text-secondary-foreground"
           >
             <Link
               aria-current={pathname === "/portal" ? "page" : undefined}

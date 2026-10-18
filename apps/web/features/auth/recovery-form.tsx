@@ -37,7 +37,7 @@ export function RecoveryRequestForm({ portal = false }: { portal?: boolean }) {
   return (
     <div className="grid gap-7">
       <header>
-        <h2 className="text-3xl font-semibold tracking-tight">Reset your password</h2>
+        <h1 className="text-3xl font-semibold tracking-tight">Reset your password</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
           We’ll send a secure link to your work email.
         </p>
@@ -115,7 +115,7 @@ export function PasswordResetForm({ portal = false }: { portal?: boolean }) {
   return (
     <div className="grid gap-7">
       <header>
-        <h2 className="text-3xl font-semibold tracking-tight">Choose a new password</h2>
+        <h1 className="text-3xl font-semibold tracking-tight">Choose a new password</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
           Your authenticator will still be required at sign-in.
         </p>

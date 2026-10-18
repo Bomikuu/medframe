@@ -22,6 +22,9 @@ import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useSafety, useUnsavedChanges } from "@/features/workspace/safety-provider";
 import { usePatientDraft } from "@/features/patients/use-patient-draft";
 import { useRequestScope } from "@/features/patients/use-request-scope";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { StatusBadge } from "@/components/application/status-badge";
+import { PatientAvatar } from "@/components/application/patient-avatar";
 import { PageHeading, failureCode, failureText, timeLabel } from "@/features/patients/feedback";
 import { DentalEditor } from "@/features/dental/dental-editor";
 import { DocumentPanel } from "@/features/documents/document-panel";
@@ -319,16 +322,20 @@ export function EncounterEditor({
   const completed =
     encounter.status === "completed" || (encounter.isAmendment && !encounter.editable);
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-6">
+      <div className="flex items-center gap-3">
+        <PatientAvatar name={encounter.patientName} />
+        <div>
+          <p className="text-xs font-medium text-muted-foreground uppercase">Consultation</p>
+          <StatusBadge value={encounter.status} />
+        </div>
+      </div>
       <PageHeading title={encounter.patientName} description={encounter.reason}>
         <ButtonLink variant="outline" href={href(`/clinic/patients/${encounter.patientId}`)}>
           Patient record
         </ButtonLink>
       </PageHeading>
-      <PatientContext
-        patientId={encounter.patientId}
-        revisionId={encounter.patientHistoryRevisionId}
-      />
+
       {uploadPending && (
         <p role="status" className="text-sm">
           Finish uploading or clear the selected file before completing this consultation.
@@ -336,7 +343,7 @@ export function EncounterEditor({
       )}
       <div
         data-panel
-        className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-5"
+        className="sticky top-16 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4"
       >
         <div>
           <p className="font-medium">
@@ -420,67 +427,114 @@ export function EncounterEditor({
           </div>
         </div>
       )}
-      {!readOnly && (
-        <TemplatePicker busy={busy || composing || lifecycleBusy} apply={applyGuidance} />
-      )}
-      <TemplatePrompts value={encounter.template} />
-      <FormProvider {...form}>
-        <form
-          noValidate
-          onSubmit={(event) => {
-            event.preventDefault();
-            void save();
-          }}
-          onCompositionStart={() => setComposing(true)}
-          onCompositionEnd={() => setComposing(false)}
-          className="grid gap-10"
-        >
-          <input type="hidden" {...form.register("expectedVersion", { valueAsNumber: true })} />
-          <fieldset disabled={readOnly || lifecycleBusy} className="grid min-w-0 gap-10">
-            <SoapFields readOnly={readOnly} />
-            <DiagnosisFields
-              readOnly={readOnly}
-              observationLabels={
-                templateSchema.safeParse(encounter.template).data?.observation_labels
-              }
-            />
-            <DentalEditor
-              readOnly={readOnly}
-              patientId={encounter.patientId}
-              encounterId={encounter.id}
-              revisionId={exactRevision ? initial.revisionId : null}
-            />
-            <ProcedureFields readOnly={readOnly} />
-          </fieldset>
-          {Object.keys(form.formState.errors).length > 0 && (
-            <p role="alert" className="text-sm text-destructive">
-              Check required descriptions, valid tooth identifiers, note lengths, and the combined
-              48KiB draft limit.
-            </p>
-          )}
-          <DocumentPanel
-            patientId={encounter.patientId}
-            encounterId={encounter.id}
-            readOnly={readOnly || lifecycleBusy}
-            onUploadPending={setUploadPending}
-            attachedIds={watched.content?.document_ids}
-            onAttach={(id, attach) =>
-              form.setValue(
-                "content.document_ids",
-                attach
-                  ? [...form.getValues("content.document_ids"), id]
-                  : form.getValues("content.document_ids").filter((value) => value !== id),
-                { shouldDirty: true },
-              )
-            }
-          />
+      <details className="rounded-lg border border-border px-4 py-3">
+        <summary className="min-h-8 text-sm font-medium">Consultation template & prompts</summary>
+        <div className="grid gap-4 py-3">
           {!readOnly && (
-            <Button type="submit" disabled={busy} className="justify-self-start">
-              Save consultation draft
-            </Button>
+            <TemplatePicker busy={busy || composing || lifecycleBusy} apply={applyGuidance} />
           )}
-        </form>
-      </FormProvider>
+          <TemplatePrompts value={encounter.template} />
+        </div>
+      </details>
+      <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="min-w-0">
+          <FormProvider {...form}>
+            <form
+              noValidate
+              onSubmit={(event) => {
+                event.preventDefault();
+                void save();
+              }}
+              onCompositionStart={() => setComposing(true)}
+              onCompositionEnd={() => setComposing(false)}
+              className="grid gap-10"
+            >
+              <input type="hidden" {...form.register("expectedVersion", { valueAsNumber: true })} />
+              <Tabs defaultValue="notes" className="min-w-0 gap-6">
+                <div className="overflow-x-auto border-b border-border">
+                  <TabsList variant="line" className="min-w-max">
+                    <TabsTrigger value="notes">Notes & diagnoses</TabsTrigger>
+                    <TabsTrigger value="dental">Dental chart</TabsTrigger>
+                    <TabsTrigger value="procedures">Procedures</TabsTrigger>
+                    <TabsTrigger value="documents">Documents</TabsTrigger>
+                  </TabsList>
+                </div>
+                <TabsContent value="notes" forceMount className="data-[state=inactive]:hidden">
+                  <fieldset
+                    disabled={readOnly || lifecycleBusy}
+                    className="grid min-w-0 gap-6 rounded-lg border border-border p-4 sm:p-6"
+                  >
+                    <SoapFields readOnly={readOnly || lifecycleBusy} />
+                    <DiagnosisFields
+                      readOnly={readOnly || lifecycleBusy}
+                      observationLabels={
+                        templateSchema.safeParse(encounter.template).data?.observation_labels
+                      }
+                    />
+                  </fieldset>
+                </TabsContent>
+                <TabsContent value="dental" forceMount className="data-[state=inactive]:hidden">
+                  <fieldset
+                    disabled={readOnly || lifecycleBusy}
+                    className="min-w-0 rounded-lg border border-border p-4 sm:p-6"
+                  >
+                    <DentalEditor
+                      readOnly={readOnly || lifecycleBusy}
+                      patientId={encounter.patientId}
+                      encounterId={encounter.id}
+                      revisionId={exactRevision ? initial.revisionId : null}
+                    />
+                  </fieldset>
+                </TabsContent>
+                <TabsContent value="procedures" forceMount className="data-[state=inactive]:hidden">
+                  <fieldset
+                    disabled={readOnly || lifecycleBusy}
+                    className="rounded-lg border border-border p-4 sm:p-6"
+                  >
+                    <ProcedureFields readOnly={readOnly || lifecycleBusy} />
+                  </fieldset>
+                </TabsContent>
+                <TabsContent value="documents" forceMount className="data-[state=inactive]:hidden">
+                  {" "}
+                  <DocumentPanel
+                    patientId={encounter.patientId}
+                    encounterId={encounter.id}
+                    readOnly={readOnly || lifecycleBusy}
+                    onUploadPending={setUploadPending}
+                    attachedIds={watched.content?.document_ids}
+                    onAttach={(id, attach) =>
+                      form.setValue(
+                        "content.document_ids",
+                        attach
+                          ? [...form.getValues("content.document_ids"), id]
+                          : form.getValues("content.document_ids").filter((value) => value !== id),
+                        { shouldDirty: true },
+                      )
+                    }
+                  />
+                </TabsContent>
+              </Tabs>
+              {Object.keys(form.formState.errors).length > 0 && (
+                <p role="alert" className="text-sm text-destructive">
+                  Check required descriptions, valid tooth identifiers, note lengths, and the
+                  combined 48KiB draft limit.
+                </p>
+              )}
+              {!readOnly && (
+                <Button type="submit" disabled={busy} className="justify-self-start">
+                  Save consultation draft
+                </Button>
+              )}
+            </form>
+          </FormProvider>
+        </div>
+        <aside className="min-w-0 xl:sticky xl:top-40">
+          <PatientContext
+            patientId={encounter.patientId}
+            revisionId={encounter.patientHistoryRevisionId}
+          />
+        </aside>
+      </div>
       {!encounter.isAmendment &&
         ["finalized", "amended"].includes(encounter.status) &&
         can("encounters.write") && (

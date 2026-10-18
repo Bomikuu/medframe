@@ -20,7 +20,7 @@ export function SoapFields({ readOnly }: { readOnly: boolean }) {
           Keep patient reports, observations, assessment, and care plans distinct.
         </p>
       </div>
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-4 2xl:grid-cols-2">
         {(
           [
             ["subjective", "Subjective", "The patient's concerns and reported symptoms."],
@@ -47,7 +47,7 @@ export function SoapFields({ readOnly }: { readOnly: boolean }) {
               maxLength={6000}
               aria-invalid={!!errors.content?.soap?.[key]}
               aria-describedby={`soap-${key}-help`}
-              className="min-h-36 resize-none"
+              className="min-h-32 resize-y"
             />
           </FormField>
         ))}

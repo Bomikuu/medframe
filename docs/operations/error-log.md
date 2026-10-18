@@ -94,3 +94,17 @@ The user explicitly requested activation after the failed initial pass. B3-001, 
 - The attempt was interrupted to avoid spending the full four-minute test timeout on the known selector mismatch. Exit 130, one interrupted test, no completed journey.
 - No selector/product repair or browser retry was performed. New issues remain deferred as requested; native Batch 3 activation itself completed.
 - Evidence: `/tmp/medframe-batch3-active-browser.log`.
+
+## UI revamp — October 19, 2026
+
+UI-001 (resolved): account-menu JSX syntax and the new dashboard provider relation blocked the first check/build. The final build passed, and the three focused directory/dashboard authority tests passed after correction. The relation is `provider.membership.user`; no original data was changed.
+
+UI-002 (resolved): the sticky entry-Sheet header intercepted the close control. Reproduced during dirty registration; corrected its stacking position. Confirmation passed Close → Keep editing, retained input, then Close → Discard changes.
+
+UI-003 (resolved): Appearance's tab root forced 406px content at a 390px viewport. Shrinkable tab/grid containers fixed it. Confirmation passed the narrow page and dark preview/cancel.
+
+UI-004 (verification limitations): first captures included transient skeletons, and the clinical test initially selected both a labelled dialog and its textbox. Loaded captures and an explicit textbox selector were used in the focused confirmation. All six confirmation groups passed. Full-page dental screenshots have sticky-element stitching artifacts; use the normal viewport/page component evidence rather than treating them as layout goldens. No further UI polish cycle was run.
+
+UI-005 (deferred): Django emits `StreamingHttpResponse must consume synchronous iterators ... asynchronously` during existing private PDF serving under ASGI. A scanned synthetic PDF rendered with extracted text and closed/cleaned up successfully. No transport repair attempted. Evidence: `/tmp/medframe-ui-api-review.log`.
+
+The two existing operations RHF warnings (B3-004), older operations E2E MFA selector (B3-006), additional clinical/portal/operations acceptance coverage, and remaining focused-editor refinements are documented in `ui-revamp-verification.md`. Package installation reported 12 high-severity audit findings; no unrelated forced upgrades were attempted.

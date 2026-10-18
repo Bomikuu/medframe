@@ -216,3 +216,11 @@ def assignee_details(item):
         branch_label=item.branch_label,
         active=item.active,
     )
+
+
+@strawberry.type
+class PatientDirectoryPage:
+    items: list[PatientSummary]
+    end_cursor: str | None
+    has_next_page: bool
+    total_count: int

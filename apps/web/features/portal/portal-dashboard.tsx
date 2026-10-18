@@ -38,9 +38,9 @@ export function PortalDashboard() {
               </p>
             </div>
           )}
-          <ul className="grid gap-4">
+          <ul className="grid gap-4 lg:grid-cols-2">
             {parsed.data.items.map((item) => (
-              <li key={item.id} className="border-b border-border py-4">
+              <li key={item.id} className="rounded-lg border border-border bg-card p-5">
                 <Link
                   href={href(`/portal/records/${item.id}`)}
                   className="font-semibold text-primary hover:underline"

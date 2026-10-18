@@ -1,5 +1,8 @@
 "use client";
 
+import { EntrySheet } from "@/components/application/entry-sheet";
+import { StatusBadge } from "@/components/application/status-badge";
+import { MetricCard } from "@/components/application/metric-card";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -55,12 +58,11 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
         updated={parsed.success ? parsed.data.updated_at : undefined}
       />
       {can("queues.manage") && (
-        <details className="rounded-lg border border-border p-5">
-          <summary className="min-h-11 cursor-pointer font-medium">Check in a walk-in</summary>
+        <EntrySheet title="Check in a walk-in">
           <div className="pt-5">
             <BookingForm setup={setup} reload={remote.reload} walkIn />
           </div>
-        </details>
+        </EntrySheet>
       )}
       <OperationSection title="Patients in the clinic">
         <div className="max-w-sm">
@@ -83,9 +85,10 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
         ) : (
           <>
             <RemoteNotice error={remote.error} retry={remote.reload} />
-            <p className="text-sm">
-              {parsed.data.waiting} waiting · {parsed.data.in_service} consulting
-            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <MetricCard label="Waiting" value={parsed.data.waiting} />
+              <MetricCard label="In consultation" value={parsed.data.in_service} />
+            </div>
             {!parsed.data.items.length && (
               <p className="py-6 text-sm text-muted-foreground">
                 No active tickets. Check in an appointment or add a walk-in.
@@ -156,7 +159,7 @@ function QueueRow({ row, peers, reload }: { row: Ticket; peers: Ticket[]; reload
             Ticket {row.number} · {row.patient}
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            {row.reference} · {row.provider} · {row.status.replaceAll("_", " ")} · Service day{" "}
+            {row.reference} · {row.provider} · <StatusBadge value={row.status} /> · Service day{" "}
             {row.day}
           </p>
         </div>

@@ -19,7 +19,7 @@ export function DentalChartGrid({
       {(["upper", "lower"] as const).map((jaw) => (
         <div key={jaw}>
           <p className="mb-2 text-sm font-medium">{jaw === "upper" ? "Upper jaw" : "Lower jaw"}</p>
-          <div className="grid grid-cols-8 gap-2 sm:grid-cols-16">
+          <div className="grid grid-cols-4 gap-2 min-[480px]:grid-cols-8">
             {teeth
               .filter((tooth) => tooth.jaw === jaw)
               .sort((a, b) => {

@@ -198,3 +198,40 @@ h1 {
 :root[data-theme-changing] *::after {
   transition: none !important;
 }
+
+@theme inline {
+  --color-sidebar: var(--card);
+  --color-sidebar-foreground: var(--foreground);
+  --color-sidebar-primary: var(--primary);
+  --color-sidebar-primary-foreground: var(--primary-foreground);
+  --color-sidebar-accent: var(--secondary);
+  --color-sidebar-accent-foreground: var(--secondary-foreground);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-ring: var(--ring);
+}
+@layer base {
+  [data-slot="tabs-content"][hidden] {
+    display: none;
+  }
+  [data-slot="tabs-trigger"] {
+    min-height: 44px;
+    padding-inline: 14px;
+  }
+  [data-slot="tabs-list"] {
+    min-height: 48px;
+  }
+  [data-slot="card"] {
+    border-radius: var(--radius-lg);
+  }
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"] {
+    max-height: 90dvh;
+    overflow-y: auto;
+  }
+  [data-slot="sheet-content"][data-state="closed"] {
+    pointer-events: none;
+  }
+  [data-slot="sidebar-menu-button"] {
+    min-height: 44px;
+  }
+}

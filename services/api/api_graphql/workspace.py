@@ -74,8 +74,11 @@ class WorkspaceQuery:
                     "patient_name": item.patient.full_name,
                     "status": item.status,
                     "updated_at": item.updated_at.isoformat(),
+                    "provider_name": item.provider.membership.user.display_name,
                 }
-                for item in encounters.select_related("patient").order_by("-updated_at")[:5]
+                for item in encounters.select_related(
+                    "patient", "provider__membership__user"
+                ).order_by("-updated_at")[:5]
             ],
             "recent_documents": [
                 {

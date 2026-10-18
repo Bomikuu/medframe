@@ -1,4 +1,11 @@
 "use client";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -115,21 +122,42 @@ export function DocumentPreview({
           {error}
         </p>
       )}
-      {open && busy && <p role="status">Loading authorized file…</p>}
-      {open &&
-        state &&
-        (contentType === "application/pdf" ? (
-          <PdfPreview key={state.url} bytes={state.bytes} />
-        ) : (
-          <Image
-            src={state.url}
-            alt={label}
-            width={1600}
-            height={1200}
-            unoptimized
-            className="h-auto max-h-[70vh] w-auto max-w-full object-contain"
-          />
-        ))}
+      <Dialog
+        open={open}
+        onOpenChange={(next) => {
+          if (!next) {
+            transfer.current?.abort();
+            setBusy(false);
+            setState(null);
+            setOpen(false);
+          }
+        }}
+      >
+        <DialogContent className="max-h-[90dvh] w-[calc(100%-2rem)] max-w-5xl overflow-y-auto p-5 sm:max-w-5xl">
+          <DialogHeader>
+            <DialogTitle>{label}</DialogTitle>
+            <DialogDescription>
+              Authorized file preview. Download the original for its full detail.
+            </DialogDescription>
+          </DialogHeader>
+          {open && busy && <p role="status">Loading authorized file…</p>}
+          {error && <p role="alert">{error}</p>}
+          {open &&
+            state &&
+            (contentType === "application/pdf" ? (
+              <PdfPreview key={state.url} bytes={state.bytes} />
+            ) : (
+              <Image
+                src={state.url}
+                alt={label}
+                width={1600}
+                height={1200}
+                unoptimized
+                className="h-auto max-h-[70vh] w-auto max-w-full object-contain"
+              />
+            ))}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

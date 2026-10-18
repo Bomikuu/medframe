@@ -158,3 +158,7 @@ Desktop clinic                         Narrow clinic
 The user's 26 brief sections map to the foundation, dashboard, patient, clinical/dental, treatment/document, operations/settings/auth/portal and final verification tasks above. All 27 page entry points are covered by the attached audit matrix. The five high-risk cases have owning assertions. No new product domain, database schema, fictional dataset, inaccessible navigation destination, or identity rebrand is proposed. Native execution and bounded verification are preserved.
 
 Status: audit and plan prepared for user review. No application UI code, product dependency or runtime build has been changed in this planning turn.
+
+## Native implementation status — October 19, 2026
+
+The integrated UI batch is implemented and active locally on `codex/ui-revamp`, with actual shadcn/Radix source components, all 27 route entry points reviewed/reached, the main clinical save and private-file flows confirmed, and the original runtime artifact retained. This does not mark every assertion above complete: nested selected-tooth tabs, remaining inline editor conversions, calculated-age metadata and the exhaustive viewport/permission/state matrix remain refinements or coverage limits. The delivered behavior, exact check results, bounded corrections, activation and remaining work are recorded in `docs/operations/ui-revamp-verification.md`. No subagents were used.

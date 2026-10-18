@@ -1,5 +1,7 @@
 "use client";
 
+import { EntrySheet } from "@/components/application/entry-sheet";
+import { StatusBadge } from "@/components/application/status-badge";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -100,12 +102,11 @@ function AppointmentAgenda({ setup }: { setup: OperationsSetup }) {
       <OperationsLiveStatus connected={connected} />
       <OperationNotice message={action.message} error={action.error} />
       {can("appointments.manage") && (
-        <details className="rounded-lg border border-border p-5">
-          <summary className="min-h-11 cursor-pointer font-medium">Book an appointment</summary>
+        <EntrySheet title="Book an appointment">
           <div className="pt-5">
             <BookingForm setup={setup} reload={remote.reload} />
           </div>
-        </details>
+        </EntrySheet>
       )}
       <OperationSection title="Daily agenda">
         <div className="grid max-w-3xl gap-4 sm:grid-cols-3">
@@ -150,7 +151,7 @@ function AppointmentAgenda({ setup }: { setup: OperationsSetup }) {
                 </p>
               )}
               {parsed.data.items.map((row) => (
-                <article key={row.id} className="grid gap-4 py-5 md:grid-cols-[1fr_auto]">
+                <article key={row.id} className="grid gap-4 p-4 md:grid-cols-[1fr_auto]">
                   <div className="min-w-0">
                     <h3 className="font-semibold wrap-anywhere">
                       {row.patient}{" "}
@@ -161,7 +162,7 @@ function AppointmentAgenda({ setup }: { setup: OperationsSetup }) {
                       {row.resource ?? "No room reserved"}
                     </p>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      {row.status.replaceAll("_", " ")} · {row.type.replaceAll("_", " ")}
+                      <StatusBadge value={row.status} /> · {row.type.replaceAll("_", " ")}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

@@ -10,14 +10,20 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { AlertDialog } from "radix-ui";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { useHistoryGuard } from "./use-history-guard";
-import { Button } from "@/components/ui/button";
 
 type Confirmation = { title: string; description: string; action: string };
 type Safety = {
   confirm: (options: Confirmation) => Promise<boolean>;
-  guard: (action: () => void, force?: boolean) => Promise<void>;
+  guard: (action: () => void, force?: boolean, keys?: string[]) => Promise<void>;
   setDirty: (key: string, value: boolean, discard: () => void) => void;
   clearDirty: () => void;
   getDraft: <T>(key: string) => T | undefined;
@@ -50,18 +56,27 @@ export function SafetyProvider({ children }: { children: ReactNode }) {
     requestAnimationFrame(() => restoreFocus.current?.focus());
   }, []);
   const guard = useCallback(
-    async (action: () => void, force = false) => {
+    async (action: () => void, force = false, keys?: string[]) => {
+      const selected = keys
+        ? [...dirty.current].filter(([key]) => keys.includes(key))
+        : [...dirty.current];
       if (
-        (!force && !dirty.current.size) ||
+        (!force && !selected.length) ||
         (await confirm({
           title: "Discard unsaved changes?",
           description: "Your changes have not been saved. Leaving this page will discard them.",
           action: "Discard changes",
         }))
       ) {
-        for (const discard of dirty.current.values()) discard();
-        dirty.current.clear();
-        drafts.current.clear();
+        for (const [key, discard] of selected) {
+          discard();
+          dirty.current.delete(key);
+          drafts.current.delete(key);
+        }
+        if (!keys) {
+          dirty.current.clear();
+          drafts.current.clear();
+        }
         action();
       }
     },
@@ -120,32 +135,23 @@ export function SafetyProvider({ children }: { children: ReactNode }) {
   return (
     <SafetyContext.Provider value={{ confirm, guard, setDirty, clearDirty, getDraft, putDraft }}>
       {children}
-      <AlertDialog.Root
+      <AlertDialog
         open={!!dialog}
         onOpenChange={(open) => {
           if (!open) finish(false);
         }}
       >
-        <AlertDialog.Portal>
-          <AlertDialog.Overlay className="fixed inset-0 z-50 bg-foreground/30" />
-          <AlertDialog.Content className="fixed top-1/2 left-1/2 z-50 grid max-h-[85dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-lg">
-            <AlertDialog.Title className="text-xl font-semibold">{dialog?.title}</AlertDialog.Title>
-            <AlertDialog.Description className="text-sm leading-6 text-muted-foreground">
-              {dialog?.description}
-            </AlertDialog.Description>
-            <div className="flex flex-wrap justify-end gap-3">
-              <AlertDialog.Cancel asChild>
-                <Button variant="outline" onClick={() => finish(false)}>
-                  Keep editing
-                </Button>
-              </AlertDialog.Cancel>
-              <AlertDialog.Action asChild>
-                <Button onClick={() => finish(true)}>{dialog?.action}</Button>
-              </AlertDialog.Action>
-            </div>
-          </AlertDialog.Content>
-        </AlertDialog.Portal>
-      </AlertDialog.Root>
+        <AlertDialogContent className="fixed top-1/2 left-1/2 z-50 grid max-h-[85dvh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-lg">
+          <AlertDialogTitle className="text-xl font-semibold">{dialog?.title}</AlertDialogTitle>
+          <AlertDialogDescription className="text-sm leading-6 text-muted-foreground">
+            {dialog?.description}
+          </AlertDialogDescription>
+          <div className="flex flex-wrap justify-end gap-3">
+            <AlertDialogCancel onClick={() => finish(false)}>Keep editing</AlertDialogCancel>
+            <AlertDialogAction onClick={() => finish(true)}>{dialog?.action}</AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </SafetyContext.Provider>
   );
 }

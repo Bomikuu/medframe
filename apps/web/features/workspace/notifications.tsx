@@ -1,5 +1,6 @@
 "use client";
 
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { z } from "zod";
 import { useState } from "react";
 import { Bell } from "@/components/icons";
@@ -23,15 +24,19 @@ export function Notifications() {
   const [busy, setBusy] = useState(false);
   const unread = parsed.success ? parsed.data.filter((item) => !item.read) : [];
   return (
-    <details className="relative">
-      <summary
-        className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center gap-2 rounded-lg px-2 text-sm hover:bg-muted"
-        aria-label={`Notifications${unread.length ? `, ${unread.length} unread` : ""}`}
-      >
-        <Bell size={18} />
-        {unread.length > 0 && <span>{unread.length}</span>}
-      </summary>
-      <div className="absolute right-0 z-30 mt-2 w-72 max-w-[calc(100vw-3rem)] rounded-lg border border-border bg-popover p-5 text-popover-foreground shadow-lg">
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          type="button"
+          variant="ghost"
+          className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center gap-2 rounded-lg px-2 text-sm hover:bg-muted"
+          aria-label={`Notifications${unread.length ? `, ${unread.length} unread` : ""}`}
+        >
+          <Bell size={18} />
+          {unread.length > 0 && <span>{unread.length}</span>}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 max-w-[calc(100vw-2rem)] p-5">
         <h2 className="font-semibold">Notifications</h2>
         {!parsed.success ? (
           <p className="mt-3 text-sm">
@@ -80,7 +85,7 @@ export function Notifications() {
             Could not mark notifications read. Try again.
           </p>
         )}
-      </div>
-    </details>
+      </PopoverContent>
+    </Popover>
   );
 }

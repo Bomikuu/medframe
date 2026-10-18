@@ -47,51 +47,55 @@ export function TemplateEditor() {
   useUnsavedChanges(`template:${organizationId}`, form.formState.isDirty, () => form.reset());
   if (!can("encounters.write")) return <p>Template editing requires clinical authoring access.</p>;
   return (
-    <div className="grid max-w-4xl gap-6">
-      <PageHeading
-        title="Consultation templates"
-        description="Reusable prompts guide clinician-authored notes. Patient facts are never copied into templates."
-      />
-      {!remote.data ? (
-        <LoadState error={remote.error} retry={remote.reload} />
-      ) : parsed.success ? (
-        <>
-          <ul className="grid gap-3">
-            {parsed.data.items.map((item) => (
-              <li
-                key={item.revision_id}
-                className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3"
-              >
-                <span>
-                  {item.name} · v{item.version}
-                  {!item.active && " · Archived"}
-                </span>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={form.formState.isDirty}
-                  onClick={() => {
-                    form.reset({
-                      ...item,
-                      labels: item.observation_labels.join("\n"),
-                      requestId: crypto.randomUUID(),
-                    });
-                    setSaved("");
-                  }}
+    <div className="grid gap-6 xl:grid-cols-[minmax(260px,0.65fr)_minmax(0,1fr)]">
+      <div className="xl:col-span-2">
+        <PageHeading
+          title="Consultation templates"
+          description="Reusable prompts guide clinician-authored notes. Patient facts are never copied into templates."
+        />
+      </div>
+      <section aria-label="Saved templates" className="min-w-0 rounded-lg border border-border p-5">
+        {!remote.data ? (
+          <LoadState error={remote.error} retry={remote.reload} />
+        ) : parsed.success ? (
+          <>
+            <ul className="grid gap-3">
+              {parsed.data.items.map((item) => (
+                <li
+                  key={item.revision_id}
+                  className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3"
                 >
-                  Edit template
-                </Button>
-              </li>
-            ))}
-          </ul>
-          <PageControls after={after} next={parsed.data.end_cursor} onChange={setAfter} />
-        </>
-      ) : (
-        <p role="alert">Templates could not be read.</p>
-      )}
+                  <span>
+                    {item.name} · v{item.version}
+                    {!item.active && " · Archived"}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={form.formState.isDirty}
+                    onClick={() => {
+                      form.reset({
+                        ...item,
+                        labels: item.observation_labels.join("\n"),
+                        requestId: crypto.randomUUID(),
+                      });
+                      setSaved("");
+                    }}
+                  >
+                    Edit template
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            <PageControls after={after} next={parsed.data.end_cursor} onChange={setAfter} />
+          </>
+        ) : (
+          <p role="alert">Templates could not be read.</p>
+        )}
+      </section>
       <form
         noValidate
-        className="grid gap-5 border-t border-border pt-6"
+        className="grid min-w-0 gap-5 rounded-lg border border-border p-5"
         onSubmit={form.handleSubmit(async (values) => {
           const current = capture();
           setError(null);

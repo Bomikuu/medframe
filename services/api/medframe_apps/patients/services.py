@@ -7,8 +7,10 @@ from datetime import datetime
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
+from django.core import signing
 from django.db import transaction
 from django.db.models import Max, Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 
 from config.errors import DomainError
@@ -176,6 +178,80 @@ def search_patients(user, organization_id, query="", first=20, after=None):
     rows = list(queryset.order_by("id")[: first + 1])
     audit(user, "patient.directory.read", organization_id)
     return rows[:first], len(rows) > first, total
+
+
+@transaction.atomic
+def patient_directory(
+    user, organization_id, query="", first=20, after=None, sort="name_asc", branch_id=None
+):
+    """Query-bound keyset pagination over the current authorized demographic scope."""
+    check_page(first)
+    query = query.strip()
+    if len(query) > 160 or sort not in {"name_asc", "name_desc", "reference"}:
+        raise DomainError("INVALID_INPUT", "Choose a valid directory search and order.")
+    member = require_membership(user, organization_id, "patients.demographics.read")
+    grants = list(
+        PatientAccessGrant.objects.filter(membership=member, active=True)
+        .order_by("id")
+        .values_list("patient_id", flat=True)
+    )
+    scope = hashlib.sha256(
+        str(
+            (
+                str(member.id),
+                str(member.branch_id),
+                sorted(permissions_for(member)),
+                [str(value) for value in grants],
+            )
+        ).encode()
+    ).hexdigest()
+    binding = {
+        "user": str(user.id),
+        "organization": str(organization_id),
+        "query": query,
+        "sort": sort,
+        "branch": str(branch_id or ""),
+        "scope": scope,
+    }
+    queryset = scoped_patients(user, organization_id)
+    if branch_id:
+        queryset = queryset.filter(branch_id=branch_id)
+    if query:
+        queryset = queryset.filter(Q(full_name__icontains=query) | Q(reference__istartswith=query))
+    total = queryset.count()
+    field = "reference" if sort == "reference" else "full_name"
+    queryset = queryset.annotate(directory_key=Lower(field))
+    descending = sort == "name_desc"
+    if after:
+        try:
+            cursor = signing.loads(after, salt="medframe.patient-directory", max_age=3600)
+            if cursor["binding"] != binding:
+                raise ValueError("Directory scope changed")
+            identifier = UUID(cursor["id"])
+            key = cursor["key"]
+            if not isinstance(key, str):
+                raise ValueError("Invalid directory key")
+        except (signing.BadSignature, ValueError, KeyError, TypeError):
+            raise DomainError(
+                "INVALID_INPUT", "The directory changed. Return to its first page."
+            ) from None
+        comparison = "directory_key__lt" if descending else "directory_key__gt"
+        queryset = queryset.filter(Q(**{comparison: key}) | Q(directory_key=key, id__gt=identifier))
+    rows = list(
+        queryset.order_by("-directory_key" if descending else "directory_key", "id")[: first + 1]
+    )
+    items = rows[:first]
+    cursor = (
+        signing.dumps(
+            {"binding": binding, "key": items[-1].directory_key, "id": str(items[-1].id)},
+            salt="medframe.patient-directory",
+            compress=True,
+        )
+        if len(rows) > first and items
+        else None
+    )
+    audit(user, "patient.directory.read", organization_id)
+    return items, cursor, len(rows) > first, total
 
 
 @transaction.atomic

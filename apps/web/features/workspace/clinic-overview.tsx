@@ -2,6 +2,7 @@
 
 import { ButtonLink } from "@/components/ui/button-link";
 
+import { PatientAvatar } from "@/components/application/patient-avatar";
 import Link from "next/link";
 import { ArrowRightIcon, PlusIcon, MagnifyingGlassIcon } from "@/components/icons";
 import { PatientDashboardDocument, type PatientDashboardQuery } from "@/lib/graphql/generated";
@@ -15,7 +16,7 @@ export function ClinicOverview() {
   return (
     <>
       <PageHeading
-        title="Your clinic workspace"
+        title="Dashboard"
         description={`${workspace.organization.name} · ${workspace.branches.map((branch) => branch.name).join(", ")}`}
       />
       {can("patients.demographics.read") ? (
@@ -35,15 +36,12 @@ function PatientOverview() {
   const { data, error, reload } = useRemote(PatientDashboardDocument, { organizationId });
   if (!data) return <LoadState error={error} retry={reload} />;
   return (
-    <div className="grid gap-10">
-      <section className="flex flex-wrap items-center justify-between gap-6 rounded-xl border border-border bg-card p-6 sm:p-8">
-        <div>
-          <h2 className="text-xl font-semibold">Patient workspace</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {data.clinicPatients.totalCount.toLocaleString("en-PH")} patients available to you
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
+    <div className="grid gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">
+          {data.clinicPatients.totalCount.toLocaleString("en-PH")} patient records available to you
+        </p>
+        <div className="flex flex-wrap gap-2">
           <ButtonLink variant="outline" href={href("/clinic/patients")}>
             <MagnifyingGlassIcon />
             Find patient
@@ -55,7 +53,7 @@ function PatientOverview() {
             </ButtonLink>
           )}
         </div>
-      </section>
+      </div>
       <ClinicalWidgets recentPatients={<RecentPatients patients={data.recentPatients} />} />
     </div>
   );
@@ -75,13 +73,16 @@ function RecentPatients({ patients }: { patients: PatientDashboardQuery["recentP
             <li key={patient.id}>
               <Link
                 href={href(`/clinic/patients/${patient.id}`)}
-                className="flex items-center justify-between gap-4 py-5 hover:text-primary"
+                className="flex items-center justify-between gap-4 py-4 hover:text-primary"
               >
-                <div className="min-w-0">
-                  <span className="block font-medium wrap-anywhere">{patient.fullName}</span>
-                  <span className="mt-1 block text-xs text-muted-foreground">
-                    {patient.reference} · {dateLabel(patient.dateOfBirth)}
-                  </span>
+                <div className="flex min-w-0 items-center gap-3">
+                  <PatientAvatar name={patient.fullName} />
+                  <div className="min-w-0">
+                    <span className="block font-medium wrap-anywhere">{patient.fullName}</span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {patient.reference} · {dateLabel(patient.dateOfBirth)}
+                    </span>
+                  </div>
                 </div>
                 <ArrowRightIcon className="shrink-0" />
               </Link>

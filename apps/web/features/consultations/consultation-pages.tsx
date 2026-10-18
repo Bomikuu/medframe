@@ -31,6 +31,7 @@ export function ConsultationList({ patientId }: { patientId?: string }) {
     <section>
       <PageHeading
         title={patientId ? "Consultation history" : "Consultations"}
+        level={patientId ? 2 : 1}
         description="Walk-in care, saved drafts, and preserved visit revisions."
       >
         {can("encounters.write") && (

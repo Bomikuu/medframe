@@ -539,6 +539,14 @@ export type PatientDemographics = {
   version: Scalars['Int']['output'];
 };
 
+export type PatientDirectoryPage = {
+  __typename?: 'PatientDirectoryPage';
+  endCursor?: Maybe<Scalars['String']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+  items: Array<PatientSummary>;
+  totalCount: Scalars['Int']['output'];
+};
+
 export type PatientPage = {
   __typename?: 'PatientPage';
   endCursor?: Maybe<Scalars['UUID']['output']>;
@@ -616,6 +624,7 @@ export type Query = {
   patientClinicalHistory?: Maybe<ClinicalHistory>;
   patientClinicalRevisions: ClinicalRevisionPage;
   patientDemographics: PatientDemographics;
+  patientDirectory: PatientDirectoryPage;
   patientHistory: PatientTimelinePage;
   patientPortalAccess: Scalars['JSON']['output'];
   patientReleases: Scalars['JSON']['output'];
@@ -844,6 +853,16 @@ export type QueryPatientClinicalRevisionsArgs = {
 export type QueryPatientDemographicsArgs = {
   organizationId: Scalars['UUID']['input'];
   patientId: Scalars['UUID']['input'];
+};
+
+
+export type QueryPatientDirectoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  branchId?: InputMaybe<Scalars['UUID']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  query?: Scalars['String']['input'];
+  sort?: Scalars['String']['input'];
 };
 
 

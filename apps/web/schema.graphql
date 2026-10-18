@@ -172,6 +172,13 @@ type PatientDemographics {
   updatedAt: DateTime!
 }
 
+type PatientDirectoryPage {
+  items: [PatientSummary!]!
+  endCursor: String
+  hasNextPage: Boolean!
+  totalCount: Int!
+}
+
 type PatientPage {
   items: [PatientSummary!]!
   endCursor: UUID
@@ -216,6 +223,7 @@ type Query {
   branchQueue(organizationId: UUID!, branchId: UUID!, providerId: UUID = null, after: String = null): JSON!
   patientClinicalContext(organizationId: UUID!, patientId: UUID!, revisionId: UUID = null): ClinicalHistory
   clinicPatients(organizationId: UUID!, query: String! = "", first: Int! = 20, after: UUID = null): PatientPage!
+  patientDirectory(organizationId: UUID!, query: String! = "", first: Int! = 20, after: String = null, sort: String! = "name_asc", branchId: UUID = null): PatientDirectoryPage!
   recentPatients(organizationId: UUID!): [PatientSummary!]!
   patientDemographics(organizationId: UUID!, patientId: UUID!): PatientDemographics!
   patientClinicalHistory(organizationId: UUID!, patientId: UUID!): ClinicalHistory

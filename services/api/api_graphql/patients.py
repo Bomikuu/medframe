@@ -9,6 +9,7 @@ from api_graphql.patient_types import (
     ClinicalRevisionPage,
     PatientAssignee,
     PatientDemographics,
+    PatientDirectoryPage,
     PatientPage,
     PatientSummary,
     PatientTimelineEvent,
@@ -65,6 +66,27 @@ class PatientQuery:
         return PatientPage(
             items=[patient_summary(item) for item in items],
             end_cursor=items[-1].id if items else None,
+            has_next_page=more,
+            total_count=total,
+        )
+
+    @strawberry.field
+    def patient_directory(
+        self,
+        info: Info,
+        organization_id: UUID,
+        query: str = "",
+        first: int = 20,
+        after: str | None = None,
+        sort: str = "name_asc",
+        branch_id: UUID | None = None,
+    ) -> PatientDirectoryPage:
+        items, cursor, more, total = services.patient_directory(
+            info.context.user, organization_id, query, first, after, sort, branch_id
+        )
+        return PatientDirectoryPage(
+            items=[patient_summary(item) for item in items],
+            end_cursor=cursor,
             has_next_page=more,
             total_count=total,
         )
