@@ -64,6 +64,7 @@ class ClinicalQuery:
         return [
             ProviderType(
                 id=profile.id,
+                user_id=profile.membership.user_id,
                 display_name=profile.membership.user.display_name,
                 specialty=profile.specialty,
                 branch_id=profile.membership.branch_id,
@@ -437,6 +438,7 @@ class ClinicalMutation:
         status: str,
         expected_version: int,
         completed_revision_id: UUID | None = None,
+        request_id: UUID | None = None,
     ) -> JSON:
         return plan_details(
             update_treatment_item(
@@ -447,6 +449,7 @@ class ClinicalMutation:
                 status,
                 expected_version,
                 completed_revision_id,
+                request_id,
             )
         )
 

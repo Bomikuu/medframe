@@ -279,6 +279,9 @@ def finalize_encounter(user, organization_id, encounter_id, expected_version):
         "provider_id": str(encounter.provider_id),
         "branch_name": encounter.branch.name,
     }
+    snapshot["context"]["template_revision_id"] = (
+        str(draft.template_revision_id) if draft.template_revision_id else None
+    )
     revision = EncounterRevision.objects.create(
         encounter=encounter,
         organization_id=organization_id,

@@ -13,3 +13,11 @@ apps/web/lib/graphql/schema-types.ts
 docs/requirements/medframe-django-edition.txt
 
 .impeccable/review
+
+.next-batch2-rehearsal/
+.next-batch1-checkpoint/
+
+apps/web/public/vendor/
+apps/web/portal-schema.graphql
+apps/web/lib/graphql/portal/generated.ts
+apps/web/lib/graphql/portal/schema-types.ts

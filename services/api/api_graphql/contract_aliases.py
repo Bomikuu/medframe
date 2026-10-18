@@ -123,10 +123,18 @@ class ContractMutation:
 
     @strawberry.mutation
     def add_treatment_item(
-        self, info: Info, organization_id: UUID, plan_id: UUID, data: JSON, expected_version: int
+        self,
+        info: Info,
+        organization_id: UUID,
+        plan_id: UUID,
+        data: JSON,
+        expected_version: int,
+        request_id: UUID | None = None,
     ) -> JSON:
         return plan_details(
-            add_treatment_item(info.context.user, organization_id, plan_id, data, expected_version)
+            add_treatment_item(
+                info.context.user, organization_id, plan_id, data, expected_version, request_id
+            )
         )
 
     @strawberry.mutation
@@ -139,6 +147,7 @@ class ContractMutation:
         status: str,
         expected_version: int,
         completed_revision_id: UUID | None = None,
+        request_id: UUID | None = None,
     ) -> JSON:
         return plan_details(
             update_treatment_item(
@@ -149,6 +158,7 @@ class ContractMutation:
                 status,
                 expected_version,
                 completed_revision_id,
+                request_id,
             )
         )
 

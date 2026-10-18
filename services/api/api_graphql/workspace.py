@@ -11,7 +11,7 @@ from medframe_apps.documents.models import DocumentVersion
 from medframe_apps.encounters.models import Encounter
 from medframe_apps.organizations.policy import permissions_for, require_membership
 from medframe_apps.patients.services import scoped_patients
-from medframe_apps.treatments.models import TreatmentPlanItem
+from medframe_apps.treatments.models import FollowUp, TreatmentPlanItem
 
 
 @strawberry.type
@@ -86,7 +86,21 @@ class WorkspaceQuery:
                 }
                 for item in documents.select_related("document").order_by("-created_at")[:5]
             ],
-            "follow_ups": [],
+            "follow_ups": [
+                {
+                    "id": str(item.id),
+                    "patient_id": str(item.patient_id),
+                    "instructions": item.instructions,
+                    "due_date": item.due_date.isoformat() if item.due_date else None,
+                }
+                for item in FollowUp.objects.filter(
+                    organization_id=organization_id,
+                    patient_id__in=clinical.values("id"),
+                    status="open",
+                ).order_by("due_date", "created_at")[:5]
+            ]
+            if clinical is not None
+            else [],
         }
 
     @strawberry.field

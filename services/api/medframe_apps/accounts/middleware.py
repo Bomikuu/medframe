@@ -20,7 +20,11 @@ class ClinicalSessionMiddleware:
                 expires_at__gt=now,
                 last_seen_at__gt=now - timedelta(minutes=30),
             ).first()
-            if not request.session.get("mfa_verified") or session is None:
+            if (
+                not request.session.get("mfa_verified")
+                or session is None
+                or request.session.get("auth_realm", "staff") != session.realm
+            ):
                 logout(request)
             else:
                 ClinicalSession.objects.filter(id=session.id, revoked=False).update(

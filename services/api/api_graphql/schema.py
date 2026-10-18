@@ -6,8 +6,13 @@ from strawberry.types import Info
 from strawberry_django.optimizer import DjangoOptimizerExtension
 
 from api_graphql.clinical import ClinicalMutation, ClinicalQuery
+from api_graphql.consultation_templates import TemplateMutation, TemplateQuery
 from api_graphql.contract_aliases import ContractMutation, ContractQuery
+from api_graphql.dental_history import DentalHistoryQuery
 from api_graphql.patients import PatientMutation, PatientQuery
+from api_graphql.portal_staff import PortalStaffMutation, PortalStaffQuery
+from api_graphql.record_queries import RecordQuery
+from api_graphql.treatment_work import TreatmentWorkMutation, TreatmentWorkQuery
 from api_graphql.workspace import WorkspaceMutation, WorkspaceQuery
 from medframe_apps.auditing.services import audit
 from medframe_apps.organizations.models import Branch, Organization
@@ -40,7 +45,17 @@ class WorkspaceType:
 
 
 @strawberry.type
-class Query(PatientQuery, ClinicalQuery, WorkspaceQuery, ContractQuery):
+class Query(
+    PatientQuery,
+    ClinicalQuery,
+    WorkspaceQuery,
+    ContractQuery,
+    DentalHistoryQuery,
+    RecordQuery,
+    TreatmentWorkQuery,
+    TemplateQuery,
+    PortalStaffQuery,
+):
     @strawberry.field
     def current_user(self, info: Info) -> UserType:
         return UserType(id=info.context.user.id, display_name=info.context.user.display_name)
@@ -75,7 +90,15 @@ class PrivateSchema(strawberry.Schema):
 
 
 @strawberry.type
-class Mutation(PatientMutation, ClinicalMutation, WorkspaceMutation, ContractMutation):
+class Mutation(
+    PatientMutation,
+    ClinicalMutation,
+    WorkspaceMutation,
+    ContractMutation,
+    TreatmentWorkMutation,
+    TemplateMutation,
+    PortalStaffMutation,
+):
     pass
 
 

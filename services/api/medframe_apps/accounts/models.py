@@ -43,6 +43,9 @@ class RecoveryCode(Record):
 
 
 class ClinicalSession(Record):
+    realm = models.CharField(
+        max_length=12, default="staff", choices=[("staff", "Staff"), ("patient", "Patient")]
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     session_key = models.CharField(max_length=40, unique=True)
     last_seen_at = models.DateTimeField()
@@ -51,6 +54,7 @@ class ClinicalSession(Record):
 
 
 class PasswordReset(Record):
+    realm = models.CharField(max_length=12, default="staff")
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     token_hash = models.CharField(max_length=64, unique=True)
     expires_at = models.DateTimeField()
@@ -58,6 +62,7 @@ class PasswordReset(Record):
 
 
 class MailOutbox(Record):
+    kind = models.CharField(max_length=24, default="password_reset")
     encrypted_payload = models.TextField()
     attempts = models.PositiveIntegerField(default=0)
     available_at = models.DateTimeField()

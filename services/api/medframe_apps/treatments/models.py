@@ -41,7 +41,11 @@ class TreatmentPlanItem(Record):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=["plan", "position"], name="plan_item_position")
+            models.UniqueConstraint(
+                fields=["plan", "position"],
+                name="plan_item_position",
+                deferrable=models.Deferrable.DEFERRED,
+            )
         ]
 
 
@@ -51,3 +55,41 @@ class TreatmentPlanEvent(Record):
     actor = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
     status = models.CharField(max_length=20)
     version = models.PositiveIntegerField()
+
+
+class TreatmentPlanRevision(Record):
+    plan = models.ForeignKey(TreatmentPlan, on_delete=models.PROTECT, related_name="revisions")
+    version = models.PositiveIntegerField()
+    actor = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    snapshot = models.JSONField()
+    provenance = models.CharField(max_length=32, default="clinical_edit")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "version"], name="plan_revision_version")
+        ]
+
+
+class FollowUp(Record):
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT)
+    patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT)
+    plan = models.ForeignKey(TreatmentPlan, on_delete=models.PROTECT, null=True)
+    created_by = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    instructions = models.TextField()
+    due_date = models.DateField(null=True)
+    status = models.CharField(max_length=16, default="open")
+    version = models.PositiveIntegerField(default=1)
+
+
+class FollowUpRevision(Record):
+    follow_up = models.ForeignKey(FollowUp, on_delete=models.PROTECT, related_name="revisions")
+    version = models.PositiveIntegerField()
+    actor = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    snapshot = models.JSONField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["follow_up", "version"], name="follow_up_revision_version"
+            )
+        ]

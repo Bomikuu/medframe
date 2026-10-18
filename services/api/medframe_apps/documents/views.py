@@ -7,6 +7,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from config.errors import DomainError
 from config.middleware import domain_view
+from medframe_apps.accounts.session_realms import require_session_realm
 from medframe_apps.auditing.services import audit
 from medframe_apps.documents.services import complete_document_upload, require_document
 
@@ -14,8 +15,7 @@ from medframe_apps.documents.services import complete_document_upload, require_d
 @require_POST
 @domain_view
 def upload(request, version_id):
-    if not request.user.is_authenticated or not request.session.get("mfa_verified"):
-        raise DomainError("UNAUTHENTICATED", "Sign in to continue.", 401)
+    require_session_realm(request, "staff")
     try:
         organization_id = UUID(request.POST.get("organizationId", ""))
     except ValueError:
@@ -30,8 +30,7 @@ def upload(request, version_id):
 @require_GET
 @domain_view
 def download(request):
-    if not request.user.is_authenticated or not request.session.get("mfa_verified"):
-        raise DomainError("UNAUTHENTICATED", "Sign in to continue.", 401)
+    require_session_realm(request, "staff")
     try:
         ticket = signing.loads(request.GET.get("ticket", ""), salt="document-download", max_age=60)
         if ticket["user"] != str(request.user.id):

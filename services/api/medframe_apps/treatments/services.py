@@ -8,9 +8,12 @@ from medframe_apps.auditing.services import audit
 from medframe_apps.common import advisory_lock, check_version
 from medframe_apps.encounters.inputs import PlanInput, PlanItemInput
 from medframe_apps.encounters.models import EncounterRevision
+from medframe_apps.idempotency import record_request_result, replay_request
 from medframe_apps.organizations.policy import require_membership
 from medframe_apps.patients.services import require_patient
 from medframe_apps.treatments.models import TreatmentPlan, TreatmentPlanEvent, TreatmentPlanItem
+from medframe_apps.treatments.snapshots import preserve_plan
+from medframe_apps.treatments.work import edit_plan_item, reorder_plan  # noqa: F401
 
 
 @transaction.atomic
@@ -50,12 +53,20 @@ def create_treatment_plan(user, organization_id, patient_id, data, request_id):
     )
     TreatmentPlanEvent.objects.create(plan=plan, actor=user, status="created", version=1)
     audit(user, "treatment.plan.created", organization_id, plan.id)
+    preserve_plan(plan, user)
     return plan
 
 
 @transaction.atomic
 def update_treatment_item(
-    user, organization_id, plan_id, item_id, status, expected_version, completed_revision_id=None
+    user,
+    organization_id,
+    plan_id,
+    item_id,
+    status,
+    expected_version,
+    completed_revision_id=None,
+    request_id=None,
 ):
     require_membership(user, organization_id, "treatments.write")
     selector = (
@@ -69,6 +80,15 @@ def update_treatment_item(
         user, organization_id, selector["patient_id"], "patients.clinical.write", lock=True
     )
     plan = TreatmentPlan.objects.select_for_update().get(id=plan_id)
+    values = {
+        "plan": str(plan_id),
+        "item": str(item_id),
+        "status": status,
+        "version": expected_version,
+        "evidence": str(completed_revision_id) if completed_revision_id else None,
+    }
+    if request_id and replay_request(user, organization_id, "plan.status", request_id, values):
+        return plan
     check_version(plan.version, expected_version)
     item = plan.items.filter(id=item_id).first()
     if item is None or status not in {
@@ -108,11 +128,14 @@ def update_treatment_item(
         plan=plan, item=item, actor=user, status=status, version=plan.version
     )
     audit(user, "treatment.item.updated", organization_id, plan.id)
+    preserve_plan(plan, user)
+    if request_id:
+        record_request_result(user, organization_id, "plan.status", request_id, values, plan.id)
     return plan
 
 
 @transaction.atomic
-def add_treatment_item(user, organization_id, plan_id, data, expected_version):
+def add_treatment_item(user, organization_id, plan_id, data, expected_version, request_id=None):
     require_membership(user, organization_id, "treatments.write")
     selector = (
         TreatmentPlan.objects.filter(id=plan_id, organization_id=organization_id)
@@ -125,6 +148,9 @@ def add_treatment_item(user, organization_id, plan_id, data, expected_version):
         user, organization_id, selector["patient_id"], "patients.clinical.write", lock=True
     )
     plan = TreatmentPlan.objects.select_for_update().get(id=plan_id)
+    values = {"plan": str(plan_id), "data": data, "version": expected_version}
+    if request_id and replay_request(user, organization_id, "plan.add", request_id, values):
+        return plan
     check_version(plan.version, expected_version)
     try:
         item = PlanItemInput.model_validate(data)
@@ -140,4 +166,7 @@ def add_treatment_item(user, organization_id, plan_id, data, expected_version):
         plan=plan, item=created, actor=user, status="added", version=plan.version
     )
     audit(user, "treatment.item.added", organization_id, plan.id)
+    preserve_plan(plan, user)
+    if request_id:
+        record_request_result(user, organization_id, "plan.add", request_id, values, plan.id)
     return plan

@@ -1,12 +1,25 @@
 from django.urls import path
 
+from api_graphql.portal_views import graphql as portal_graphql
 from api_graphql.views import graphql
 from config import views
 from config.admin import site
 from medframe_apps.accounts import views as auth
 from medframe_apps.documents import views as documents
+from medframe_apps.portal import files as portal_files
+from medframe_apps.portal import views as portal_auth
 
 urlpatterns = [
+    path("portal/graphql", portal_graphql),
+    path("portal/documents/download", portal_files.download),
+    path("portal/auth/csrf", auth.csrf),
+    path("portal/auth/login", portal_auth.login),
+    path("portal/auth/invitations/prepare", portal_auth.prepare),
+    path("portal/auth/mfa/enroll", portal_auth.enroll),
+    path("portal/auth/mfa/verify", portal_auth.verify),
+    path("portal/auth/logout", auth.logout_view),
+    path("portal/auth/recovery/request", portal_auth.recover),
+    path("portal/auth/recovery/reset", portal_auth.reset),
     path("admin/", site.urls),
     path("graphql", graphql),
     path("health", views.health),

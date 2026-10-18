@@ -3,10 +3,15 @@
 Rounded patches demonstrate selection, not clinically validated anatomy.
 """
 
+import argparse
 import json
 import math
 import struct
 from pathlib import Path
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--version", type=int, choices=[1, 2], default=2)
+version = parser.parse_args().version
 
 positions = []
 indices = []
@@ -40,8 +45,20 @@ for offset in range(0, len(indices), 3):
     face = axis * 2 + (0 if center[axis] >= 0 else 1)
     patches[face].extend(triangle)
 
+if version == 2:
+    # A rounded box silhouette separates incisor, canine, premolar and molar crowns.
+    # This remains schematic geometry, with no anatomical/diagnostic claim.
+    positions = [math.copysign(abs(value) ** 0.5, value) for value in positions]
+normal_values = []
+for offset in range(0, len(positions), 3):
+    vector = [
+        value ** (3 if version == 2 else 1) for value in positions[offset : offset + 3]
+    ]
+    length = math.sqrt(sum(value * value for value in vector)) or 1
+    normal_values.extend(value / length for value in vector)
+normals = struct.pack(f"<{len(normal_values)}f", *normal_values)
 vertices = struct.pack(f"<{len(positions)}f", *positions)
-binary = bytearray(vertices + vertices)
+binary = bytearray(vertices + normals)
 views = [
     {"buffer": 0, "byteOffset": 0, "byteLength": len(vertices), "target": 34962},
     {
@@ -137,9 +154,31 @@ for quadrant in range(1, 9):
                 ],
                 "rotation": [0, math.sin(rotation / 2), 0, math.cos(rotation / 2)],
                 "scale": [
-                    0.35 if position <= 3 else 0.45,
-                    0.65,
-                    0.35 if position <= 3 else 0.45,
+                    (
+                        0.36
+                        if position <= 2
+                        else 0.31
+                        if position == 3
+                        else 0.4
+                        if position <= 5
+                        else 0.49
+                    )
+                    if version == 2
+                    else (0.35 if position <= 3 else 0.45),
+                    (0.56 if position <= 2 else 0.7 if position == 3 else 0.48)
+                    if version == 2
+                    else 0.65,
+                    (
+                        0.24
+                        if position <= 2
+                        else 0.31
+                        if position == 3
+                        else 0.4
+                        if position <= 5
+                        else 0.47
+                    )
+                    if version == 2
+                    else (0.35 if position <= 3 else 0.45),
                 ],
             }
         )
@@ -159,7 +198,7 @@ for quadrant in range(1, 9):
 document = {
     "asset": {
         "version": "2.0",
-        "generator": "Medframe schematic development geometry v1",
+        "generator": f"Medframe schematic development geometry v{version}",
     },
     "scene": 0,
     "scenes": [{"nodes": roots}],
@@ -186,7 +225,7 @@ payload += struct.pack("<II", len(encoded), 0x4E4F534A) + encoded
 payload += struct.pack("<II", len(binary), 0x004E4942) + binary
 target = (
     Path(__file__).resolve().parents[1]
-    / "apps/web/public/models/dental-schematic-v1.glb"
+    / f"apps/web/public/models/dental-schematic-v{version}.glb"
 )
 target.parent.mkdir(parents=True, exist_ok=True)
 target.write_bytes(payload)

@@ -20,3 +20,6 @@ graphify-out/
 *.tsbuildinfo
 
 .impeccable/review/
+
+.next-batch2-rehearsal/
+.next-batch1-checkpoint/

@@ -25,15 +25,25 @@ def deliver_recovery_mail():
             item.attempts += 1
             try:
                 payload = json.loads(cipher().decrypt(item.encrypted_payload.encode()))
+                if item.kind not in {"password_reset", "portal_invitation"}:
+                    raise ValueError("Unknown mail kind")
+                invitation = item.kind == "portal_invitation"
                 send_mail(
-                    "Reset your Medframe password",
-                    f"Use this link within 15 minutes:\n{payload['link']}\n"
-                    "If you did not request it, ignore this message.",
+                    "Your Medframe invitation" if invitation else "Reset your Medframe password",
+                    (
+                        "Accept your clinic invitation within 24 hours:\n"
+                        if invitation
+                        else "Use this link within 15 minutes:\n"
+                    )
+                    + payload["link"]
+                    + "\nIf unexpected, contact your clinic.",
                     None,
                     [payload["recipient"]],
                 )
             except Exception:
                 item.available_at = timezone.now() + timedelta(seconds=30 * 2**item.attempts)
+                if item.attempts >= 5:
+                    item.encrypted_payload = ""
             else:
                 item.sent_at = timezone.now()
                 item.encrypted_payload = ""

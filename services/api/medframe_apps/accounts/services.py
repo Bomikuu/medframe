@@ -23,11 +23,13 @@ from medframe_apps.accounts.models import (
     RecoveryCode,
     User,
 )
+from medframe_apps.accounts.session_realms import SessionActivation, SessionRealm
 from medframe_apps.auditing.services import audit
+from medframe_apps.organizations.models import Membership
 
 
 @transaction.atomic
-def begin_login(request, email, password):
+def begin_login(request, email, password, *, realm: SessionRealm = "staff", eligibility=None):
     if (
         not isinstance(email, str)
         or not isinstance(password, str)
@@ -41,19 +43,42 @@ def begin_login(request, email, password):
     user = authenticate(request, username=identity, password=password)
     if user is None:
         raise DomainError("INVALID_CREDENTIALS", "Email or password is incorrect.", 401)
-    logout(request)
-    request.session.cycle_key()
-    request.session["challenge_user"] = str(user.id)
-    request.session["challenge_epoch"] = user.auth_epoch
-    request.session["challenge_expires"] = time.time() + 300
-    request.session.set_expiry(300)
+    allowed = (
+        (
+            user.is_staff
+            or Membership.objects.filter(
+                user=user,
+                active=True,
+                organization__active=True,
+                roles__permissions__codename="workspace.read",
+            ).exists()
+        )
+        if realm == "staff"
+        else bool(eligibility and eligibility(user))
+    )
+    if realm not in {"staff", "patient"} or not allowed:
+        raise DomainError("INVALID_CREDENTIALS", "Email or password is incorrect.", 401)
+    start_challenge(request, user, realm)
     audit(user, "auth.password_verified", resource_id=user.id)
     return (
         "verify" if MfaCredential.objects.filter(user=user, confirmed=True).exists() else "enroll"
     )
 
 
-def challenge_user(request):
+def start_challenge(request, user, realm: SessionRealm):
+    ClinicalSession.objects.filter(session_key=request.session.session_key).update(revoked=True)
+    logout(request)
+    request.session.cycle_key()
+    request.session["challenge_realm"] = realm
+    request.session["challenge_user"] = str(user.id)
+    request.session["challenge_epoch"] = user.auth_epoch
+    request.session["challenge_expires"] = time.time() + 300
+    request.session.set_expiry(300)
+
+
+def challenge_user(request, *, realm: SessionRealm = "staff"):
+    if request.session.get("challenge_realm", "staff") != realm:
+        raise DomainError("FORBIDDEN", "Use the original sign-in workspace.", 403)
     identifier = request.session.get("challenge_user")
     if not identifier or request.session.get("challenge_expires", 0) <= time.time():
         raise DomainError("UNAUTHENTICATED", "Your sign-in expired. Sign in again.", 401)
@@ -64,8 +89,8 @@ def challenge_user(request):
 
 
 @transaction.atomic
-def enroll(request):
-    user = challenge_user(request)
+def enroll(request, *, realm: SessionRealm = "staff"):
+    user = challenge_user(request, realm=realm)
     credential, _ = MfaCredential.objects.get_or_create(
         user=user,
         defaults={"encrypted_secret": cipher().encrypt(pyotp.random_base32().encode()).decode()},
@@ -77,8 +102,12 @@ def enroll(request):
 
 
 @transaction.atomic
-def verify_mfa(request, code):
-    user = challenge_user(request)
+def verify_mfa(
+    request, code, *, realm: SessionRealm = "staff", activation: SessionActivation | None = None
+):
+    user = challenge_user(request, realm=realm)
+    if activation is not None:
+        activation.prepare(user, request)
     credential = MfaCredential.objects.select_for_update().filter(user=user).first()
     if credential is None or not isinstance(code, str) or len(code) > 32:
         raise DomainError("INVALID_MFA", "Set up your authenticator before continuing.", 401)
@@ -120,14 +149,18 @@ def verify_mfa(request, code):
     if step is not None:
         credential.last_step = step
     credential.save()
+    if activation is not None:
+        activation.complete(user, request)
     request.session.flush()
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session["mfa_verified"] = True
+    request.session["auth_realm"] = realm
     request.session.set_expiry(8 * 3600)
     request.session.save()
     now = timezone.now()
     ClinicalSession.objects.create(
         user=user,
+        realm=realm,
         session_key=request.session.session_key,
         expires_at=now + timedelta(hours=8),
         last_seen_at=now,
@@ -137,7 +170,7 @@ def verify_mfa(request, code):
 
 
 @transaction.atomic
-def request_password_reset(email):
+def request_password_reset(email, *, realm: SessionRealm = "staff"):
     if not get_settings().recovery_enabled:
         return
     if not isinstance(email, str) or len(email) > 320:
@@ -150,11 +183,15 @@ def request_password_reset(email):
     PasswordReset.objects.filter(user=user, consumed=False).update(consumed=True)
     token = secrets.token_urlsafe(32)
     PasswordReset.objects.create(
-        user=user, token_hash=digest(token), expires_at=timezone.now() + timedelta(minutes=15)
+        user=user,
+        realm=realm,
+        token_hash=digest(token),
+        expires_at=timezone.now() + timedelta(minutes=15),
     )
+    reset_path = "/auth/reset" if realm == "staff" else "/portal/reset"
     payload = {
         "recipient": user.email,
-        "link": f"{get_settings().web_origin}/auth/reset#token={token}",
+        "link": f"{get_settings().web_origin}{reset_path}#token={token}",
     }
     MailOutbox.objects.create(
         encrypted_payload=cipher().encrypt(json.dumps(payload).encode()).decode(),
@@ -164,7 +201,7 @@ def request_password_reset(email):
 
 
 @transaction.atomic
-def reset_password(token, password):
+def reset_password(token, password, *, realm: SessionRealm = "staff"):
     if (
         not isinstance(token, str)
         or len(token) > 128
@@ -174,7 +211,7 @@ def reset_password(token, password):
         raise DomainError(
             "INVALID_INPUT", "Use a valid reset link and a password of 15–128 characters."
         )
-    pending = PasswordReset.objects.filter(token_hash=digest(token)).first()
+    pending = PasswordReset.objects.filter(token_hash=digest(token), realm=realm).first()
     user = User.objects.select_for_update().filter(id=pending.user_id).first() if pending else None
     reset = (
         PasswordReset.objects.select_for_update().filter(id=pending.id).first() if pending else None

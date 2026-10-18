@@ -7,6 +7,7 @@ from api_graphql.limits import validate_query
 from api_graphql.schema import schema
 from config.errors import DomainError
 from config.middleware import domain_view
+from medframe_apps.accounts.session_realms import require_session_realm
 from medframe_apps.accounts.throttling import throttle
 from medframe_apps.auditing.services import audit
 
@@ -14,8 +15,7 @@ from medframe_apps.auditing.services import audit
 @require_POST
 @domain_view
 def graphql(request):
-    if not request.user.is_authenticated or not request.session.get("mfa_verified"):
-        raise DomainError("UNAUTHENTICATED", "Sign in to continue.", 401)
+    require_session_realm(request, "staff")
     data = json.loads(request.body)
     if not isinstance(data, dict) or not isinstance(data.get("query"), str):
         raise DomainError("INVALID_QUERY", "Use one GraphQL operation per request.")

@@ -14,6 +14,7 @@ class OperationsAdminSite(AdminSite):
             request.user.is_active
             and request.user.is_staff
             and request.session.get("mfa_verified", False)
+            and request.session.get("auth_realm", "staff") == "staff"
         )
 
     def login(self, request, extra_context=None):

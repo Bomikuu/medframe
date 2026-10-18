@@ -42,7 +42,7 @@ class RecoveryDeliveryTests(ClinicalFixture):
         item.refresh_from_db()
         self.assertEqual(item.attempts, 5)
         self.assertIsNone(item.sent_at)
-        self.assertTrue(item.encrypted_payload)
+        self.assertEqual(item.encrypted_payload, "")
         MailOutbox.objects.filter(id=item.id).update(available_at=timezone.now())
         deliver_recovery_mail()
         item.refresh_from_db()

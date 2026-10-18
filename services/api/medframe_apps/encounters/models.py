@@ -31,6 +31,9 @@ class Encounter(Record):
 
 
 class EncounterDraft(Record):
+    template_revision = models.ForeignKey(
+        "encounters.TemplateRevision", on_delete=models.PROTECT, null=True
+    )
     encounter = models.OneToOneField(Encounter, on_delete=models.PROTECT, related_name="draft")
     content = models.JSONField(default=dict)
     amendment_reason = models.CharField(max_length=500, default="")
@@ -81,3 +84,46 @@ class Observation(Record):
 class EncounterTimelineLink(Record):
     event = models.OneToOneField("patients.PatientEvent", on_delete=models.PROTECT)
     revision = models.ForeignKey(EncounterRevision, on_delete=models.PROTECT)
+
+
+class ConsultationTemplate(Record):
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT)
+    created_by = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    name = models.CharField(max_length=120)
+    specialty = models.CharField(max_length=32, default="other")
+    active = models.BooleanField(default=True)
+    version = models.PositiveIntegerField(default=1)
+
+
+class TemplateRevision(Record):
+    template = models.ForeignKey(
+        ConsultationTemplate, on_delete=models.PROTECT, related_name="revisions"
+    )
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT)
+    author = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    version = models.PositiveIntegerField()
+    definition = models.JSONField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["template", "version"], name="template_revision_version"
+            )
+        ]
+
+
+class TemplateApplication(Record):
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.PROTECT, related_name="template_applications"
+    )
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT)
+    revision = models.ForeignKey(TemplateRevision, on_delete=models.PROTECT)
+    author = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    encounter_version = models.PositiveIntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["encounter", "encounter_version"], name="template_application_version"
+            )
+        ]

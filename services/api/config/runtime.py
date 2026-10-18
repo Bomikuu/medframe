@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / ".env", extra="ignore")
 
     database_url: SecretStr
+    celery_broker_url: SecretStr | None = None
     redis_url: str = "redis://127.0.0.1:56379/0"
     encryption_key: SecretStr
     app_secret: SecretStr

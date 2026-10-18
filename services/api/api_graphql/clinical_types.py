@@ -7,6 +7,7 @@ from strawberry.scalars import JSON
 
 @strawberry.type
 class ProviderType:
+    user_id: UUID
     id: UUID
     display_name: str
     specialty: str
@@ -40,6 +41,7 @@ class EncounterType:
     revision_id: UUID | None
     editable: bool
     revisions: list[RevisionType]
+    template: JSON | None
     patient_history_revision_id: UUID | None
 
 
@@ -51,6 +53,23 @@ def encounter_details(encounter, exact_revision=None):
         revisions = list(encounter.revisions.select_related("author").order_by("-version")[:20])
     latest = revisions[0] if revisions else None
     draft = encounter.draft
+    template_id = (
+        exact_revision.content.get("context", {}).get("template_revision_id")
+        if exact_revision
+        else draft.template_revision_id
+    )
+    template = None
+    if template_id:
+        from medframe_apps.encounters.models import TemplateRevision
+        from medframe_apps.encounters.templates import template_details
+
+        value = (
+            TemplateRevision.objects.select_related("template")
+            .filter(id=template_id, organization_id=encounter.organization_id)
+            .first()
+        )
+        if value:
+            template = template_details(value)
     return EncounterType(
         id=encounter.id,
         patient_id=encounter.patient_id,
@@ -83,6 +102,7 @@ def encounter_details(encounter, exact_revision=None):
             )
             for item in revisions
         ],
+        template=template,
         patient_history_revision_id=(exact_revision or latest)
         .content.get("context", {})
         .get("history_revision_id")

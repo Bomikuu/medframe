@@ -20,3 +20,19 @@ class Notification(Record):
     kind = models.CharField(max_length=40)
     resource_id = models.UUIDField()
     read_at = models.DateTimeField(null=True)
+
+
+class RequestReceipt(Record):
+    actor = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT)
+    operation = models.CharField(max_length=64)
+    key = models.UUIDField()
+    digest = models.CharField(max_length=64)
+    result_id = models.UUIDField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["actor", "organization", "operation", "key"], name="request_receipt_key"
+            )
+        ]

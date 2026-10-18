@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "medframe_apps.dental",
     "medframe_apps.treatments",
     "medframe_apps.documents",
+    "medframe_apps.portal",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -120,7 +121,11 @@ EMAIL_HOST_PASSWORD = runtime.smtp_password.get_secret_value()
 EMAIL_USE_TLS = runtime.smtp_start_tls
 DEFAULT_FROM_EMAIL = runtime.mail_from
 EMAIL_TIMEOUT = 10
-CELERY_BROKER_URL = runtime.redis_url.rsplit("/", 1)[0] + "/2"
+CELERY_BROKER_URL = (
+    runtime.celery_broker_url.get_secret_value()
+    if runtime.celery_broker_url
+    else runtime.redis_url.rsplit("/", 1)[0] + "/2"
+)
 CELERY_TASK_SERIALIZER = "json"
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_IGNORE_RESULT = True
