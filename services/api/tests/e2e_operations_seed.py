@@ -24,9 +24,12 @@ from medframe_apps.patients.services import register_patient
 from medframe_apps.portal.invitations import issue_invitation
 from tests_django.browser_seed import provision
 
+allowed_databases = {"medframe_django_batch3"}
+if os.environ.get("MEDFRAME_OPERATIONS_SEED_ACTIVE") == "1":
+    allowed_databases.add("medframe_django")
 if (
     get_settings().app_env == "production"
-    or settings.DATABASES["default"]["NAME"] != "medframe_django_batch3"
+    or settings.DATABASES["default"]["NAME"] not in allowed_databases
 ):
     raise SystemExit("Operations browser seed is restricted to its synthetic rehearsal database")
 data = json.load(sys.stdin)

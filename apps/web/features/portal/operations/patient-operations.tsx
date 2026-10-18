@@ -49,7 +49,7 @@ export function PatientOperations({ queue = false }: { queue?: boolean }) {
         </p>
       </div>
       <OperationsLiveStatus connected={connected} updated={data.updated_at} />
-      {remote.error && (
+      {!!remote.error && (
         <p role="alert" className="text-sm text-destructive">
           {failureText(remote.error)}
         </p>

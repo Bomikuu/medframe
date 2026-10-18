@@ -197,7 +197,7 @@ def transition_appointment(request, appointment_id, expected_version, target, re
 def patient_appointment_action(request, link_id, appointment_id, data, request_id):
     link = require_portal_link(request, link_id, lock=True)
     row = (
-        Appointment.objects.select_for_update()
+        Appointment.objects.select_for_update(of=("self",))
         .select_related("branch__organization", "provider__membership", "patient", "resource")
         .filter(id=appointment_id, patient=link.patient, organization=link.organization)
         .first()
