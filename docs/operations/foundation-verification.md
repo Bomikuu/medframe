@@ -21,6 +21,8 @@ Verified locally on October 18, 2026. Scope: foundation only, using synthetic st
 
 The two independent-review findings were an inconsistent per-user lifecycle lock order and a numeric-only mobile keyboard for hexadecimal recovery codes. Identity operations now lock the user before session/reset rows and revalidate afterward. Deterministic PostgreSQL tests overlap reset/MFA and two reset links. Existing-account verification now uses a text keyboard and recovery-aware hint; enrollment retains numeric OTP entry.
 
+Both API and web Docker images built successfully. The API container imported the application and connected to PostgreSQL/Redis; the pruned production web container served the sign-in page successfully.
+
 ## Lighthouse measurement
 
 One mobile Lighthouse run against the production sign-in surface recorded performance 93, accessibility 100, best practices 96, FCP 1.21s, LCP 2.61s, total blocking time 204.5ms, and CLS 0.014. LCP is slightly above the 2.5s target and remains a performance follow-up. This lab run is not field INP evidence. The login is intentionally excluded from indexing; public-site SEO is outside this milestone.
