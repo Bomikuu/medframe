@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeftIcon, PencilSimpleIcon, ClockCounterClockwiseIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, PencilSimpleIcon, ClockCounterClockwiseIcon } from "@/components/icons";
 import { PatientRecordDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "./use-remote";
@@ -12,6 +12,9 @@ import { PageHeading, LoadState, RemoteNotice, dateLabel } from "./feedback";
 import { PatientForm } from "./patient-form";
 import { ClinicalHistorySection } from "./clinical-history-form";
 import { PatientAccess } from "./patient-access";
+import { ConsultationList } from "@/features/consultations/consultation-pages";
+import { TreatmentPlans } from "@/features/treatments/treatment-plans";
+import { DocumentPanel } from "@/features/documents/document-panel";
 
 export function PatientOverview({
   patientId,
@@ -113,6 +116,13 @@ export function PatientOverview({
         </dl>
       </section>
       {can("patients.clinical.read") && <ClinicalHistorySection patientId={patientId} />}
+      {can("patients.clinical.read") && (
+        <>
+          <ConsultationList patientId={patientId} />
+          <TreatmentPlans patientId={patientId} />
+          <DocumentPanel patientId={patientId} />
+        </>
+      )}
       {can("patients.access.manage") && <PatientAccess patientId={patientId} />}
     </div>
   );

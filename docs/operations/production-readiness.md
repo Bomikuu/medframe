@@ -1,41 +1,40 @@
 # Clinical workspace deployment boundary
 
-The foundation and patient-management slices are for local development with synthetic data. It is not the complete clinical milestone and must not receive real medical records yet.
+Batch 1 is a local clinical development milestone using synthetic test records. Local verification is recorded in [the batch evidence](django-batch-1-verification.md). Production deployment and real clinical use require the operational and clinical reviews below.
 
 ## Implemented controls
 
-- Argon2 password hashes; no shared account or committed credentials.
-- Password-only challenges separated from clinical sessions; mandatory staff TOTP.
-- Encrypted authenticator secrets, replay-resistant TOTP, hashed single-use recovery codes.
-- Hashed opaque session tokens, rotation, absolute/inactivity expiry, logout and reset revocation.
-- Origin and bound CSRF checks; HttpOnly cookies; production Secure/HTTPS validation.
-- Shared Redis throttling that fails closed; successful authentication refunds its reserved attempt.
-- Active organization membership, explicit role permission, branch scoping, database foreign keys.
-- Append-only audit-event trigger and transactional write/audit behavior.
-- Private/no-store API responses, generic errors, redacted validation responses, SQL parameter hiding.
-- Query cost/depth/body limits, fragment-cycle protection, no HTTP batching, production introspection disabled.
-- Encrypted password-reset outbox with bounded retries and a separate delivery worker.
+- Django owns UUID users, Argon2 passwords, database sessions, ORM persistence, permissions, migrations, and operational Admin. Legacy passwords upgrade after successful verification without a reset.
+- Password challenges are separate from clinical sessions. Staff TOTP is mandatory; encrypted secrets, replay counters, and hashed single-use recovery codes survive import. Old sessions and reset links are not imported.
+- Session rotation, eight-hour absolute and thirty-minute inactivity expiry, logout/reset revocation, native CSRF, origin checks, HttpOnly cookies, and production HTTPS/Secure validation.
+- Shared Redis throttling fails closed. Query depth/cost, request bytes, clinical input, and list pagination are bounded. Production introspection is disabled.
+- Active organization membership, role permission, branch scope, and patient grants are checked by services on every request. Superuser status does not bypass clinical policy.
+- PostgreSQL tenant constraints, row locks, expected versions, append-only history/audit triggers, and atomic finalization preserve clinical revisions. Amendments retain originals and attribution.
+- Private S3-compatible files pass signature/type/size checks and ClamAV scanning before download or finalization. Scanner outages retain quarantine. Short-lived download tickets are reauthorized against current patient access.
+- Exact document versions are preserved with finalized encounters. Logos and avatars are decoded/reencoded raster images with purpose-specific limits.
+- API/file responses use no-store. GraphQL errors are bounded and generic; access logs are disabled where signed transfer URLs could appear. Celery messages contain opaque version identifiers.
+- An encrypted password-reset outbox uses bounded retries and a Celery schedule. Patient histories, diagnoses, observations, dental findings, and procedures remain attributed clinician-entered records.
 
 ## Required before production
 
-Configure HTTPS and reverse-proxy security, authenticated TLS SMTP, per-environment secrets, key backup/rotation procedures, least-privileged database credentials, private network service access, storage encryption, encrypted backups and restore drills, audit retention/review permissions, monitoring/alerting, incident and staff recovery procedures, session administration, and deployment-specific rate-limit behavior.
+Configure HTTPS/reverse-proxy security, authenticated TLS SMTP, per-environment secrets, key backup/rotation, least-privileged database credentials, private service networks, storage encryption, encrypted backups and full restore drills, audit retention/review, monitoring/alerting, incident response, staff recovery/session administration, and deployment-specific throttling. Validate the production container build and deployment topology separately; native local runtime verification is not deployment approval.
 
-The API deliberately ignores X-Forwarded-For. Behind the Next.js proxy, clients share the proxy-address throttle in addition to independent identity limits. Before multi-clinic deployment, configure a trusted edge/address mechanism and test it; never begin trusting arbitrary forwarding headers. This foundation does not claim production perimeter readiness.
+The API ignores X-Forwarded-For. Behind Next.js, clients share the proxy-address throttle as well as identity limits. Establish and test a trusted edge/address mechanism before multi-clinic deployment; never trust arbitrary forwarded headers.
 
-The mail worker uses database row locks to prevent simultaneous claims. SMTP delivery can be repeated if a process crashes after sending but before committing; reset-token consumption remains single-use. Use an idempotent provider integration before production if exactly-once delivery is required. Rows stop retrying after five attempts and need operational monitoring.
+SMTP may repeat after a crash between delivery and database commit. Token consumption remains single-use. Use provider idempotency if exactly-once delivery is required. Outbox items stop after five failures and require operational monitoring.
 
-Platform/clinic administrators have no universal medical-record bypass. Patient relationships, branch-scoped demographics, explicit clinical grants, and immutable patient-history revisions are implemented. Consent/sharing, immutable encounters/amendments, private scanned document storage, clinical asset validation, and patient identity verification must be implemented and tested in their corresponding slices before medical use.
+Clinical review must validate the FDI reference, tooth/surface mapping, documentation workflow, record retention, consent/sharing, and applicable local requirements. The repository-owned 3D geometry is explicitly schematic, not anatomically validated or patient-specific. No diagnostic, medication-interaction, consent, or patient-identity-verification capability is claimed.
 
-## Patient-management boundary
+## Scope and assets
 
-Registration/search/demographics and clinician-authored history, allergies, and medications now persist. A clinic administrator or receptionist can manage permitted demographics; clinical reads still require a clinical permission and active patient grant. Grant changes serialize with history writes. Review states distinguish unreviewed from explicit none reported, and historical versions retain their author and server time.
+The initial workspace includes registration, search, demographics, versioned history/allergies/medications, walk-in SOAP/diagnoses/observations, dental findings, procedures/plans, finalization/amendments, private documents, and scoped branding/preferences. Patient portals, scheduling, queues, billing, public websites, and diagnostic collaboration remain later batches.
 
-These free-text histories are not encounter notes, structured diagnosis catalogs, medication reconciliation/interaction checking, or a complete clinical record. No private upload, patient account/guardian authorization, appointment, or finalization/amendment workflow is claimed by this slice. The new permission grants are additive migrations; existing staff identities, passwords, and MFA are preserved.
+The approved concept-11 Medframe logo and a licensed, clinically reviewed anatomical dental GLB/GLTF have not been supplied. The interface uses the Medframe text name and labels the development model clearly. Clinic-supplied logos and circular staff avatars use the private upload pipeline.
 
-## Dependency evidence
+## Dependencies
 
-`npm audit --omit=dev` reported zero runtime vulnerabilities during foundation verification. The full audit reports an upstream `braces <=3.0.3` stack-exhaustion advisory propagated through development-only code generation and lint tooling. The registry's current latest braces release has no patched update. Do not run those tools on untrusted patterns; recheck upstream before release. No forced major downgrade or incompatible override was applied.
+Runtime npm audit reported zero vulnerabilities during batch verification. The full audit includes the upstream braces stack-exhaustion advisory propagated through development-only code-generation/lint dependencies. Do not apply forced incompatible dependency changes or run those tools on untrusted patterns; recheck current upstream advisories before release.
 
-## External assets
+## Preservation and rollback
 
-The approved concept-11 Medframe logo and a licensed, clinically reviewed dental GLB/GLTF are not supplied. The app uses the Medframe text name. Future development models must be labeled schematic and must not imply patient-specific anatomical accuracy.
+The old implementation is retained at `checkpoint/pre-django-2026-10-18` / `77bf229`; the source PostgreSQL database and encrypted private checkpoint remain preserved. The importer uses a read-only repeatable snapshot and reconciles into a separate Django target. After new writes to Django, rollback requires reconciling those writes; switching back to the old database would lose new care records.

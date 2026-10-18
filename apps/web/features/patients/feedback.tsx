@@ -15,6 +15,12 @@ export function failureCode(error: unknown): string {
 
 export function failureText(error: unknown) {
   const code = failureCode(error);
+  if (code === "UNSAFE_DOCUMENT")
+    return "An attached file has not passed its security scan. Wait for a clean result or explicitly remove it from the draft before finalizing.";
+  if (code === "IMMUTABLE")
+    return "This consultation is preserved. Reopen a completed draft or create an amendment to change finalized care.";
+  if (code === "EVIDENCE_REQUIRED")
+    return "Complete the matching procedure in a finalized consultation before completing this plan item.";
   if (code === "CONFLICT")
     return "This record changed since you opened it. Your input is still here. Load the latest version and review it before saving.";
   if (["FORBIDDEN", "NOT_FOUND"].includes(code))

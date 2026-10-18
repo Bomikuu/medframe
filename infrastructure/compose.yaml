@@ -10,6 +10,7 @@ services:
       - "127.0.0.1:55432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres/10-django.sql:/docker-entrypoint-initdb.d/10-django.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U medframe -d medframe"]
       interval: 3s
@@ -30,6 +31,24 @@ services:
     ports:
       - "127.0.0.1:58025:8025"
       - "127.0.0.1:51025:1025"
+  storage:
+    image: rustfs/rustfs@sha256:9ca9559533b537d10482fe923288b676ad08f92a7069d9a17327fbae3cab688b
+    environment:
+      RUSTFS_ACCESS_KEY: ${STORAGE_ACCESS_KEY:?Generate storage credentials first}
+      RUSTFS_SECRET_KEY: ${STORAGE_SECRET_KEY:?Generate storage credentials first}
+      RUSTFS_VOLUMES: /data
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports:
+      - "127.0.0.1:59000:9000"
+      - "127.0.0.1:59001:9001"
+    volumes:
+      - private_objects:/data
+  scanner:
+    image: clamav/clamav@sha256:638d90201ee7ee6a82d249a2fc23b132e578673b5f1f2766852b127676ca1ef6
+    ports:
+      - "127.0.0.1:53310:3310"
+    volumes:
+      - scanner_signatures:/var/lib/clamav
   api:
     profiles: [app]
     build:
@@ -38,10 +57,15 @@ services:
     image: medframe-api:development
     env_file: ../.env
     environment: &api-environment
-      DATABASE_URL: postgresql+asyncpg://medframe:${POSTGRES_PASSWORD}@db:5432/medframe
+      DATABASE_URL: postgresql://medframe:${POSTGRES_PASSWORD}@db:5432/medframe
       REDIS_URL: redis://redis:6379/0
       SMTP_HOST: mail
       SMTP_PORT: 1025
+      DJANGO_ALLOWED_HOSTS: api,localhost,127.0.0.1
+      DJANGO_DATABASE_NAME: medframe_django
+      STORAGE_ENDPOINT: http://storage:9000
+      SCANNER_HOST: scanner
+      SCANNER_PORT: 3310
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
@@ -65,11 +89,42 @@ services:
     image: medframe-api:development
     env_file: ../.env
     environment: *api-environment
-    command: ["python", "-m", "app.adapters.mail"]
+    command:
+      [
+        "celery",
+        "-A",
+        "config.celery",
+        "worker",
+        "--loglevel=warning",
+        "--concurrency=2",
+        "--without-gossip",
+        "--without-mingle",
+      ]
     depends_on:
       api:
         condition: service_healthy
       mail:
+        condition: service_started
+      storage:
+        condition: service_started
+      scanner:
+        condition: service_healthy
+  scheduler:
+    profiles: [app]
+    image: medframe-api:development
+    env_file: ../.env
+    environment: *api-environment
+    command:
+      [
+        "celery",
+        "-A",
+        "config.celery",
+        "beat",
+        "--loglevel=warning",
+        "--schedule=/tmp/medframe-celerybeat",
+      ]
+    depends_on:
+      worker:
         condition: service_started
   web:
     profiles: [app]
@@ -86,3 +141,5 @@ services:
         condition: service_healthy
 volumes:
   postgres_data:
+  private_objects:
+  scanner_signatures:

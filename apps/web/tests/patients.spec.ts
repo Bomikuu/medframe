@@ -151,7 +151,7 @@ test("patient registration, clinical history, conflict, and persisted revisions"
   const csrf = await page.request.get("/api/backend/auth/csrf");
   const { csrfToken } = await csrf.json();
   const changed = await page.request.post("/api/backend/graphql", {
-    headers: { Origin: "http://localhost:3000", "X-CSRF-Token": csrfToken },
+    headers: { Origin: new URL(page.url()).origin, "X-CSRF-Token": csrfToken },
     data: {
       query:
         "mutation($org:UUID!,$id:UUID!,$data:SaveClinicalHistoryInput!){savePatientClinicalHistory(organizationId:$org,patientId:$id,data:$data){version}}",
@@ -181,7 +181,7 @@ test("patient registration, clinical history, conflict, and persisted revisions"
     conditions: "界".repeat(1800),
   };
   const largeSave = await page.request.post("/api/backend/graphql", {
-    headers: { Origin: "http://localhost:3000", "X-CSRF-Token": csrfToken },
+    headers: { Origin: new URL(page.url()).origin, "X-CSRF-Token": csrfToken },
     data: {
       query:
         "mutation($org:UUID!,$id:UUID!,$data:SaveClinicalHistoryInput!){savePatientClinicalHistory(organizationId:$org,patientId:$id,data:$data){version}}",
@@ -190,7 +190,7 @@ test("patient registration, clinical history, conflict, and persisted revisions"
   });
   expect((await largeSave.json()).data.savePatientClinicalHistory.version).toBe(3);
   const oversizedSave = await page.request.post("/api/backend/graphql", {
-    headers: { Origin: "http://localhost:3000", "X-CSRF-Token": csrfToken },
+    headers: { Origin: new URL(page.url()).origin, "X-CSRF-Token": csrfToken },
     data: {
       query:
         "mutation($org:UUID!,$id:UUID!,$data:SaveClinicalHistoryInput!){savePatientClinicalHistory(organizationId:$org,patientId:$id,data:$data){version}}",

@@ -3,11 +3,12 @@
 import { ButtonLink } from "@/components/ui/button-link";
 
 import Link from "next/link";
-import { ArrowRightIcon, PlusIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
-import { PatientDashboardDocument } from "@/lib/graphql/generated";
+import { ArrowRightIcon, PlusIcon, MagnifyingGlassIcon } from "@/components/icons";
+import { PatientDashboardDocument, type PatientDashboardQuery } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
 import { PageHeading, LoadState, dateLabel } from "@/features/patients/feedback";
 import { useWorkspace } from "./workspace-provider";
+import { ClinicalWidgets } from "./clinical-widgets";
 
 export function ClinicOverview() {
   const { workspace, can } = useWorkspace();
@@ -55,36 +56,43 @@ function PatientOverview() {
           )}
         </div>
       </section>
-      <section>
-        <h2 className="text-xl font-semibold">Recently opened</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Patient records you have opened and can still access.
-        </p>
-        {data.recentPatients.length ? (
-          <ul className="mt-5 divide-y divide-border border-y border-border">
-            {data.recentPatients.map((patient) => (
-              <li key={patient.id}>
-                <Link
-                  href={href(`/clinic/patients/${patient.id}`)}
-                  className="flex items-center justify-between gap-4 py-5 hover:text-primary"
-                >
-                  <div className="min-w-0">
-                    <span className="block font-medium wrap-anywhere">{patient.fullName}</span>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {patient.reference} · {dateLabel(patient.dateOfBirth)}
-                    </span>
-                  </div>
-                  <ArrowRightIcon className="shrink-0" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-5 rounded-lg border border-dashed border-border p-6 text-sm leading-6 text-muted-foreground">
-            No recently opened patients. Find or register a patient to begin.
-          </p>
-        )}
-      </section>
+      <ClinicalWidgets recentPatients={<RecentPatients patients={data.recentPatients} />} />
     </div>
+  );
+}
+
+function RecentPatients({ patients }: { patients: PatientDashboardQuery["recentPatients"] }) {
+  const { href } = useWorkspace();
+  return (
+    <section>
+      <h2 className="text-xl font-semibold">Recently opened</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Patient records you have opened and can still access.
+      </p>
+      {patients.length ? (
+        <ul className="mt-5 divide-y divide-border border-y border-border">
+          {patients.map((patient) => (
+            <li key={patient.id}>
+              <Link
+                href={href(`/clinic/patients/${patient.id}`)}
+                className="flex items-center justify-between gap-4 py-5 hover:text-primary"
+              >
+                <div className="min-w-0">
+                  <span className="block font-medium wrap-anywhere">{patient.fullName}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">
+                    {patient.reference} · {dateLabel(patient.dateOfBirth)}
+                  </span>
+                </div>
+                <ArrowRightIcon className="shrink-0" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-5 rounded-lg border border-dashed border-border p-6 text-sm leading-6 text-muted-foreground">
+          No recently opened patients. Find or register a patient to begin.
+        </p>
+      )}
+    </section>
   );
 }

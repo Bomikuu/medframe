@@ -1,5 +1,6 @@
 node_modules
 .next
+.next-rehearsal
 .venv
 *.lock
 package-lock.json
@@ -10,3 +11,5 @@ test-results
 playwright-report
 apps/web/lib/graphql/schema-types.ts
 docs/requirements/medframe-django-edition.txt
+
+.impeccable/review

@@ -1,0 +1,127 @@
+"use client";
+
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { z } from "zod";
+import { useWorkspace } from "./workspace-provider";
+import { useTheme } from "@/features/branding/theme-provider";
+import { useRemote } from "@/features/patients/use-remote";
+import { LoadState, timeLabel } from "@/features/patients/feedback";
+import { ClinicalDashboardDocument } from "@/lib/graphql/generated";
+
+const schema = z.object({
+  patient_count: z.number(),
+  draft_count: z.number(),
+  pending_treatment_count: z.number(),
+  recent_consultations: z.array(
+    z.object({
+      id: z.string(),
+      patient_name: z.string(),
+      status: z.string(),
+      updated_at: z.string(),
+    }),
+  ),
+  recent_documents: z.array(
+    z.object({ id: z.string(), patient_id: z.string(), label: z.string(), scan_state: z.string() }),
+  ),
+});
+
+export function ClinicalWidgets({ recentPatients }: { recentPatients: ReactNode }) {
+  const { organizationId, href, can } = useWorkspace();
+  const { appearance } = useTheme();
+  const remote = useRemote(ClinicalDashboardDocument, { organizationId });
+  if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
+  const parsed = schema.safeParse(remote.data.clinicDashboard);
+  if (!parsed.success) return <p role="alert">Dashboard information could not be loaded.</p>;
+  const data = parsed.data;
+  return (
+    <div className="grid gap-8 lg:grid-cols-2">
+      {appearance.personal.widgets
+        .filter((widget) => widget.visible)
+        .map((widget) => (
+          <section
+            data-widget={widget.id}
+            key={widget.id}
+            data-panel
+            className={widget.size === "wide" ? "lg:col-span-2" : ""}
+          >
+            {widget.id !== "recent_patients" && (
+              <h2 className="mb-4 text-xl font-semibold">
+                {
+                  (
+                    {
+                      recent_consultations: "Recent consultations",
+                      draft_notes: "Draft notes",
+                      pending_treatments: "Pending treatments",
+                      follow_ups: "Follow-ups",
+                      recent_documents: "Recent documents",
+                    } as Record<string, string>
+                  )[widget.id]
+                }
+              </h2>
+            )}
+            {widget.id === "recent_patients" && recentPatients}
+            {widget.id === "recent_consultations" &&
+              (data.recent_consultations.length ? (
+                <ul className="grid gap-4">
+                  {data.recent_consultations.map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        href={href(`/clinic/consultations/${item.id}`)}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {item.patient_name}
+                      </Link>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {item.status.replaceAll("_", " ")} · {timeLabel(item.updated_at)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No consultations available to you yet.
+                </p>
+              ))}
+            {widget.id === "draft_notes" && (
+              <p className="text-sm">
+                {data.draft_count} open consultation{data.draft_count === 1 ? "" : "s"}.{" "}
+                {can("patients.clinical.read") && (
+                  <Link href={href("/clinic/consultations")} className="text-primary underline">
+                    Review drafts
+                  </Link>
+                )}
+              </p>
+            )}
+            {widget.id === "pending_treatments" && (
+              <p className="text-sm">
+                {data.pending_treatment_count} proposed or ongoing plan items in your authorized
+                patient records.
+              </p>
+            )}
+            {widget.id === "follow_ups" && (
+              <p className="text-sm text-muted-foreground">No follow-up tasks recorded.</p>
+            )}
+            {widget.id === "recent_documents" &&
+              (data.recent_documents.length ? (
+                <ul className="grid gap-4">
+                  {data.recent_documents.map((item) => (
+                    <li key={item.id}>
+                      <Link
+                        href={href(`/clinic/patients/${item.patient_id}`)}
+                        className="text-sm font-medium text-primary hover:underline"
+                      >
+                        {item.label}
+                      </Link>
+                      <p className="mt-1 text-xs text-muted-foreground">{item.scan_state}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">No documents available to you yet.</p>
+              ))}
+          </section>
+        ))}
+    </div>
+  );
+}

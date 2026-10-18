@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { HouseIcon, UsersIcon, SignOutIcon, CaretRightIcon } from "@phosphor-icons/react";
+import {
+  HouseIcon,
+  UsersIcon,
+  SignOutIcon,
+  CaretRightIcon,
+  Settings,
+  Stethoscope,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "@/components/icons";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { requestWithCsrf, errorMessage } from "@/lib/auth/client";
@@ -11,6 +20,9 @@ import { cn } from "@/lib/utils";
 import { OrganizationSwitcher } from "./organization-switcher";
 import { useWorkspace } from "./workspace-provider";
 import { useSafety } from "./safety-provider";
+import { useTheme } from "@/features/branding/theme-provider";
+import { SecureImage } from "@/features/documents/secure-image";
+import { Notifications } from "./notifications";
 
 export function ClinicShell({ children }: { children: ReactNode }) {
   const { overview, organizationId, switchOrganization, href, can } = useWorkspace();
@@ -18,6 +30,11 @@ export function ClinicShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const patients = pathname.startsWith("/clinic/patients");
+  const consultations = pathname.startsWith("/clinic/consultations");
+  const settings = pathname.startsWith("/clinic/settings");
+  const { theme, personal } = useTheme();
+  const [collapsedOverride, setCollapsedOverride] = useState<boolean | null>(null);
+  const collapsed = collapsedOverride ?? personal.sidebar_collapsed;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function logout() {
@@ -33,27 +50,67 @@ export function ClinicShell({ children }: { children: ReactNode }) {
     }
   }
   return (
-    <div className="min-h-dvh lg:grid lg:grid-cols-[264px_1fr]">
+    <div
+      className={cn(
+        "min-h-dvh lg:grid",
+        collapsed ? "lg:grid-cols-[80px_1fr]" : "lg:grid-cols-[var(--sidebar-width)_1fr]",
+      )}
+    >
       <aside className="flex flex-col border-b border-border bg-card px-5 py-6 lg:sticky lg:top-0 lg:h-dvh lg:border-r lg:border-b-0">
         <div className="px-2">
-          <Brand />
+          <div className={collapsed ? "lg:hidden" : ""}>
+            {theme.logo_id ? (
+              <SecureImage id={theme.logo_id} alt="Clinic logo" className="h-12 max-w-44" />
+            ) : (
+              <Brand />
+            )}
+          </div>
         </div>
-        <div className="mt-8">
+        <Button
+          type="button"
+          variant="ghost"
+          className="mt-4 hidden self-start lg:inline-flex"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          onClick={() => setCollapsedOverride(!collapsed)}
+        >
+          {collapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
+        </Button>
+        <div className={cn("mt-8", collapsed && "lg:hidden")}>
           <OrganizationSwitcher
             organizations={overview.myOrganizations}
             value={organizationId}
             onChange={switchOrganization}
           />
         </div>
-        <nav aria-label="Clinic navigation" className="mt-7 flex gap-2 lg:flex-col">
+        <nav aria-label="Clinic navigation" className="mt-7 flex flex-wrap gap-2 lg:flex-col">
           {[
-            { path: "/clinic", label: "Overview", Icon: HouseIcon, active: !patients, show: true },
+            {
+              path: "/clinic",
+              label: "Overview",
+              Icon: HouseIcon,
+              active: pathname === "/clinic",
+              show: true,
+            },
             {
               path: "/clinic/patients",
               label: "Patients",
               Icon: UsersIcon,
               active: patients,
               show: can("patients.demographics.read"),
+            },
+            {
+              path: "/clinic/consultations",
+              label: "Consultations",
+              Icon: Stethoscope,
+              active: consultations,
+              show: can("patients.clinical.read"),
+            },
+            {
+              path: "/clinic/settings/appearance",
+              label: "Appearance",
+              Icon: Settings,
+              active: settings,
+              show: true,
             },
           ]
             .filter((item) => item.show)
@@ -62,17 +119,24 @@ export function ClinicShell({ children }: { children: ReactNode }) {
                 key={path}
                 href={href(path)}
                 aria-current={active ? "page" : undefined}
+                aria-label={label}
+                title={collapsed ? label : undefined}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors hover:bg-muted",
                   active && "bg-secondary text-secondary-foreground",
                 )}
               >
                 <Icon size={19} />
-                {label}
+                <span className={collapsed ? "lg:hidden" : ""}>{label}</span>
               </Link>
             ))}
         </nav>
-        <div className="mt-auto hidden border-t border-border px-2 pt-6 lg:block">
+        <div
+          className={cn(
+            "mt-auto hidden border-t border-border px-2 pt-6",
+            !collapsed && "lg:block",
+          )}
+        >
           <p className="text-xs leading-5 text-muted-foreground">
             The Foundation of
             <br />
@@ -81,13 +145,35 @@ export function ClinicShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
       <div className="min-w-0">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card px-6 py-5 lg:px-10">
+        <header
+          className={cn(
+            "flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card px-6 lg:px-10",
+            theme.header === "compact" ? "py-3" : "py-5",
+          )}
+        >
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Clinical workspace</span>
             <CaretRightIcon size={13} />
-            <span className="text-foreground">{patients ? "Patients" : "Overview"}</span>
+            <span className="text-foreground">
+              {patients
+                ? "Patients"
+                : consultations
+                  ? "Consultations"
+                  : settings
+                    ? "Appearance"
+                    : "Overview"}
+            </span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <Notifications />
+            {personal.avatar_id && (
+              <SecureImage
+                id={personal.avatar_id}
+                avatar
+                alt="Your profile image"
+                className="size-10"
+              />
+            )}
             <span className="text-sm font-medium">{overview.currentUser.displayName}</span>
             <Button
               variant="ghost"
@@ -104,7 +190,14 @@ export function ClinicShell({ children }: { children: ReactNode }) {
             </Button>
           </div>
         </header>
-        <main id="main" className="mx-auto max-w-6xl px-6 py-8 lg:px-10 lg:py-10">
+        <main
+          id="main"
+          data-density-region
+          className={cn(
+            "mx-auto px-6 py-8 lg:px-10 lg:py-10",
+            theme.content_width === "contained" ? "max-w-7xl" : "max-w-none",
+          )}
+        >
           {error && (
             <p role="alert" className="mb-6 text-sm text-destructive">
               {error}

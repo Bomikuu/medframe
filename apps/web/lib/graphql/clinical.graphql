@@ -1,0 +1,295 @@
+fragment EncounterFields on EncounterType {
+  id
+  patientId
+  patientName
+  branchId
+  reason
+  status
+  version
+  createdAt
+  updatedAt
+  content
+  isAmendment
+  amendmentReason
+  latestFinalizedVersion
+  revisionId
+  editable
+  patientHistoryRevisionId
+  revisions {
+    id
+    version
+    authorName
+    createdAt
+    amendmentReason
+  }
+}
+
+query Consultations($organizationId: UUID!, $patientId: UUID, $before: UUID) {
+  encounters(organizationId: $organizationId, patientId: $patientId, before: $before) {
+    ...EncounterFields
+  }
+}
+query Consultation($organizationId: UUID!, $encounterId: UUID!, $revisionId: UUID) {
+  encounter(organizationId: $organizationId, encounterId: $encounterId, revisionId: $revisionId) {
+    ...EncounterFields
+  }
+}
+query ConsultationSetup($organizationId: UUID!, $patientId: UUID!) {
+  providers(organizationId: $organizationId) {
+    id
+    displayName
+    specialty
+    branchId
+  }
+  patientDemographics(organizationId: $organizationId, patientId: $patientId) {
+    id
+    fullName
+    reference
+    branchId
+  }
+  patientClinicalHistory(organizationId: $organizationId, patientId: $patientId) {
+    allergyState
+    allergies {
+      substance
+      reaction
+      severity
+    }
+    medicationState
+    medications {
+      name
+      dose
+      frequency
+    }
+  }
+}
+mutation CreateConsultation(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $providerId: UUID!
+  $branchId: UUID!
+  $reason: String!
+  $requestId: UUID!
+) {
+  createEncounter(
+    organizationId: $organizationId
+    patientId: $patientId
+    providerId: $providerId
+    branchId: $branchId
+    reason: $reason
+    requestId: $requestId
+  ) {
+    ...EncounterFields
+  }
+}
+mutation SaveConsultation(
+  $organizationId: UUID!
+  $encounterId: UUID!
+  $content: JSON!
+  $expectedVersion: Int!
+) {
+  updateEncounterDraft(
+    organizationId: $organizationId
+    encounterId: $encounterId
+    content: $content
+    expectedVersion: $expectedVersion
+  ) {
+    ...EncounterFields
+  }
+}
+mutation TransitionConsultation(
+  $organizationId: UUID!
+  $encounterId: UUID!
+  $status: String!
+  $expectedVersion: Int!
+) {
+  transitionEncounter(
+    organizationId: $organizationId
+    encounterId: $encounterId
+    status: $status
+    expectedVersion: $expectedVersion
+  ) {
+    ...EncounterFields
+  }
+}
+mutation FinalizeConsultation($organizationId: UUID!, $encounterId: UUID!, $expectedVersion: Int!) {
+  finalizeEncounter(
+    organizationId: $organizationId
+    encounterId: $encounterId
+    expectedVersion: $expectedVersion
+  ) {
+    ...EncounterFields
+  }
+}
+mutation AmendConsultation(
+  $organizationId: UUID!
+  $encounterId: UUID!
+  $reason: String!
+  $expectedFinalizedVersion: Int!
+) {
+  createEncounterAmendment(
+    organizationId: $organizationId
+    encounterId: $encounterId
+    reason: $reason
+    expectedFinalizedVersion: $expectedFinalizedVersion
+  ) {
+    ...EncounterFields
+  }
+}
+query DentalReference($organizationId: UUID!) {
+  dentalReference(organizationId: $organizationId)
+}
+query ClinicalContext($organizationId: UUID!, $patientId: UUID!, $revisionId: UUID) {
+  patientClinicalContext(
+    organizationId: $organizationId
+    patientId: $patientId
+    revisionId: $revisionId
+  ) {
+    ...ClinicalDetails
+  }
+}
+query ToothHistory($organizationId: UUID!, $patientId: UUID!, $tooth: String!, $before: UUID) {
+  toothHistory(
+    organizationId: $organizationId
+    patientId: $patientId
+    tooth: $tooth
+    before: $before
+  )
+}
+query DentalChart(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $encounterId: UUID
+  $revisionId: UUID
+) {
+  dentalChart(
+    organizationId: $organizationId
+    patientId: $patientId
+    encounterId: $encounterId
+    revisionId: $revisionId
+  )
+}
+query TreatmentPlans($organizationId: UUID!, $patientId: UUID!) {
+  treatmentPlans(organizationId: $organizationId, patientId: $patientId)
+}
+mutation CreateTreatmentPlan(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $data: JSON!
+  $requestId: UUID!
+) {
+  createTreatmentPlan(
+    organizationId: $organizationId
+    patientId: $patientId
+    data: $data
+    requestId: $requestId
+  )
+}
+mutation UpdateTreatmentItem(
+  $organizationId: UUID!
+  $planId: UUID!
+  $itemId: UUID!
+  $status: String!
+  $expectedVersion: Int!
+  $completedRevisionId: UUID
+) {
+  updateTreatmentItem(
+    organizationId: $organizationId
+    planId: $planId
+    itemId: $itemId
+    status: $status
+    expectedVersion: $expectedVersion
+    completedRevisionId: $completedRevisionId
+  )
+}
+fragment DocumentFields on DocumentType {
+  id
+  documentId
+  label
+  version
+  contentType
+  size
+  scanState
+  createdAt
+  encounterId
+}
+query PatientDocuments(
+  $organizationId: UUID!
+  $patientId: UUID
+  $purpose: String!
+  $before: UUID
+  $versionIds: [UUID!]!
+) {
+  documents(
+    organizationId: $organizationId
+    patientId: $patientId
+    purpose: $purpose
+    before: $before
+  ) {
+    ...DocumentFields
+  }
+  documentVersions(
+    organizationId: $organizationId
+    patientId: $patientId
+    versionIds: $versionIds
+  ) {
+    ...DocumentFields
+  }
+}
+mutation BeginUpload(
+  $organizationId: UUID!
+  $patientId: UUID
+  $encounterId: UUID
+  $purpose: String!
+  $metadata: JSON!
+) {
+  beginDocumentUpload(
+    organizationId: $organizationId
+    patientId: $patientId
+    encounterId: $encounterId
+    purpose: $purpose
+    metadata: $metadata
+  ) {
+    ...DocumentFields
+  }
+}
+mutation DocumentDownload($organizationId: UUID!, $versionId: UUID!) {
+  authorizeDocumentDownload(organizationId: $organizationId, versionId: $versionId)
+}
+mutation RetryScan($organizationId: UUID!, $versionId: UUID!) {
+  retryDocumentScan(organizationId: $organizationId, versionId: $versionId) {
+    ...DocumentFields
+  }
+}
+query Appearance($organizationId: UUID!) {
+  clinicAppearance(organizationId: $organizationId)
+}
+mutation SaveBranding($organizationId: UUID!, $settings: JSON!, $expectedVersion: Int!) {
+  updateOrganizationBranding(
+    organizationId: $organizationId
+    settings: $settings
+    expectedVersion: $expectedVersion
+  )
+}
+mutation SavePreferences($organizationId: UUID!, $settings: JSON!, $expectedVersion: Int!) {
+  updateUserPreferences(
+    organizationId: $organizationId
+    settings: $settings
+    expectedVersion: $expectedVersion
+  )
+}
+mutation SaveDashboard($organizationId: UUID!, $widgets: JSON!, $expectedVersion: Int!) {
+  saveDashboardLayout(
+    organizationId: $organizationId
+    widgets: $widgets
+    expectedVersion: $expectedVersion
+  )
+}
+query ClinicalDashboard($organizationId: UUID!) {
+  clinicDashboard(organizationId: $organizationId)
+}
+query Notifications($organizationId: UUID!) {
+  notifications(organizationId: $organizationId)
+}
+mutation ReadNotifications($organizationId: UUID!, $ids: [UUID!]!) {
+  markNotificationsRead(organizationId: $organizationId, ids: $ids)
+}

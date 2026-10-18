@@ -12,12 +12,14 @@ password = secrets.token_urlsafe(24)
 key = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
 target.write_text(
     f"POSTGRES_PASSWORD={password}\n"
-    f"DATABASE_URL=postgresql+asyncpg://medframe:{password}@127.0.0.1:55432/medframe\n"
+    f"DATABASE_URL=postgresql://medframe:{password}@127.0.0.1:55432/medframe\n"
     "REDIS_URL=redis://127.0.0.1:56379/0\n"
     f"ENCRYPTION_KEY={key}\n"
     f"APP_SECRET={secrets.token_urlsafe(48)}\n"
     "APP_ENV=development\nWEB_ORIGIN=http://localhost:3000\nCOOKIE_SECURE=false\n"
     "SMTP_HOST=127.0.0.1\nSMTP_PORT=51025\nRECOVERY_ENABLED=true\n"
+    f"STORAGE_ACCESS_KEY=medframe-{secrets.token_hex(8)}\n"
+    f"STORAGE_SECRET_KEY={secrets.token_urlsafe(40)}\n"
 )
 target.chmod(0o600)
 print("Generated private .env. No staff accounts or reusable passwords were created.")

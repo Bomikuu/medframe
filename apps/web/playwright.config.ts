@@ -6,7 +6,8 @@ export default defineConfig({
   workers: 1,
   timeout: 60_000,
   use: {
-    baseURL: "http://localhost:3000",
+    launchOptions: { args: ["--enable-unsafe-swiftshader"] },
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000",
     trace: "off",
     screenshot: "off",
     video: "off",

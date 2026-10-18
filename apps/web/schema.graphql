@@ -1,8 +1,3 @@
-schema {
-  query: Query
-  mutation: PatientMutation
-}
-
 type Allergy {
   substance: String!
   reaction: String!
@@ -47,6 +42,43 @@ scalar Date
 """Date with time (isoformat)"""
 scalar DateTime
 
+type DocumentType {
+  id: UUID!
+  documentId: UUID!
+  label: String!
+  version: Int!
+  contentType: String!
+  size: Int!
+  scanState: String!
+  createdAt: DateTime!
+  encounterId: UUID
+}
+
+type EncounterType {
+  id: UUID!
+  patientId: UUID!
+  patientName: String!
+  branchId: UUID!
+  reason: String!
+  status: String!
+  version: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  content: JSON!
+  isAmendment: Boolean!
+  amendmentReason: String!
+  latestFinalizedVersion: Int!
+  revisionId: UUID
+  editable: Boolean!
+  revisions: [RevisionType!]!
+  patientHistoryRevisionId: UUID
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
 type Medication {
   name: String!
   dose: String!
@@ -57,6 +89,41 @@ input MedicationInput {
   name: String!
   dose: String! = ""
   frequency: String! = ""
+}
+
+type Mutation {
+  registerPatient(organizationId: UUID!, data: RegisterPatientInput!): PatientDemographics!
+  updatePatientDemographics(organizationId: UUID!, patientId: UUID!, data: UpdateDemographicsInput!): PatientDemographics!
+  savePatientClinicalHistory(organizationId: UUID!, patientId: UUID!, data: SaveClinicalHistoryInput!): ClinicalHistory!
+  setPatientAccess(organizationId: UUID!, patientId: UUID!, membershipId: UUID!, active: Boolean!): PatientAssignee!
+  createPatient(organizationId: UUID!, data: RegisterPatientInput!): PatientDemographics!
+  updatePatient(organizationId: UUID!, patientId: UUID!, data: UpdateDemographicsInput!): PatientDemographics!
+  createEncounter(organizationId: UUID!, patientId: UUID!, providerId: UUID!, branchId: UUID!, reason: String!, requestId: UUID!): EncounterType!
+  updateEncounterDraft(organizationId: UUID!, encounterId: UUID!, content: JSON!, expectedVersion: Int!): EncounterType!
+  transitionEncounter(organizationId: UUID!, encounterId: UUID!, status: String!, expectedVersion: Int!): EncounterType!
+  finalizeEncounter(organizationId: UUID!, encounterId: UUID!, expectedVersion: Int!): EncounterType!
+  createEncounterAmendment(organizationId: UUID!, encounterId: UUID!, reason: String!, expectedFinalizedVersion: Int!): EncounterType!
+  addDiagnosis(organizationId: UUID!, encounterId: UUID!, data: JSON!, expectedVersion: Int!): EncounterType!
+  addObservation(organizationId: UUID!, encounterId: UUID!, data: JSON!, expectedVersion: Int!): EncounterType!
+  saveToothFinding(organizationId: UUID!, encounterId: UUID!, data: JSON!, expectedVersion: Int!): EncounterType!
+  addProcedure(organizationId: UUID!, encounterId: UUID!, data: JSON!, expectedVersion: Int!): EncounterType!
+  createTreatmentPlan(organizationId: UUID!, patientId: UUID!, data: JSON!, requestId: UUID!): JSON!
+  updateTreatmentItem(organizationId: UUID!, planId: UUID!, itemId: UUID!, status: String!, expectedVersion: Int!, completedRevisionId: UUID = null): JSON!
+  beginDocumentUpload(organizationId: UUID!, purpose: String!, metadata: JSON!, patientId: UUID = null, encounterId: UUID = null): DocumentType!
+  authorizeDocumentDownload(organizationId: UUID!, versionId: UUID!): String!
+  retryDocumentScan(organizationId: UUID!, versionId: UUID!): DocumentType!
+  updateOrganizationBranding(organizationId: UUID!, settings: JSON!, expectedVersion: Int!): JSON!
+  updateUserPreferences(organizationId: UUID!, settings: JSON!, expectedVersion: Int!): JSON!
+  saveDashboardLayout(organizationId: UUID!, widgets: JSON!, expectedVersion: Int!): JSON!
+  resetOrganizationBranding(organizationId: UUID!, expectedVersion: Int!): JSON!
+  resetUserPreferences(organizationId: UUID!, expectedVersion: Int!): JSON!
+  markNotificationsRead(organizationId: UUID!, ids: [UUID!]!): Boolean!
+  amendEncounter(organizationId: UUID!, encounterId: UUID!, reason: String!, expectedFinalizedVersion: Int!): EncounterType!
+  addClinicalNote(organizationId: UUID!, encounterId: UUID!, section: String!, text: String!, expectedVersion: Int!): EncounterType!
+  updateDentalChart(organizationId: UUID!, encounterId: UUID!, findings: JSON!, expectedVersion: Int!): EncounterType!
+  addTreatmentItem(organizationId: UUID!, planId: UUID!, data: JSON!, expectedVersion: Int!): JSON!
+  updateTreatmentStatus(organizationId: UUID!, planId: UUID!, itemId: UUID!, status: String!, expectedVersion: Int!, completedRevisionId: UUID = null): JSON!
+  uploadMedicalDocument(organizationId: UUID!, patientId: UUID!, metadata: JSON!, encounterId: UUID = null): DocumentType!
 }
 
 type OrganizationType {
@@ -92,13 +159,6 @@ type PatientDemographics {
   updatedAt: DateTime!
 }
 
-type PatientMutation {
-  registerPatient(organizationId: UUID!, data: RegisterPatientInput!): PatientDemographics!
-  updatePatientDemographics(organizationId: UUID!, patientId: UUID!, data: UpdateDemographicsInput!): PatientDemographics!
-  savePatientClinicalHistory(organizationId: UUID!, patientId: UUID!, data: SaveClinicalHistoryInput!): ClinicalHistory!
-  setPatientAccess(organizationId: UUID!, patientId: UUID!, membershipId: UUID!, active: Boolean!): PatientAssignee!
-}
-
 type PatientPage {
   items: [PatientSummary!]!
   endCursor: UUID
@@ -119,6 +179,8 @@ type PatientTimelineEvent {
   authorName: String!
   createdAt: DateTime!
   revisionId: UUID
+  encounterId: UUID
+  encounterRevisionId: UUID
 }
 
 type PatientTimelinePage {
@@ -127,7 +189,15 @@ type PatientTimelinePage {
   hasNextPage: Boolean!
 }
 
+type ProviderType {
+  id: UUID!
+  displayName: String!
+  specialty: String!
+  branchId: UUID
+}
+
 type Query {
+  patientClinicalContext(organizationId: UUID!, patientId: UUID!, revisionId: UUID = null): ClinicalHistory
   clinicPatients(organizationId: UUID!, query: String! = "", first: Int! = 20, after: UUID = null): PatientPage!
   recentPatients(organizationId: UUID!): [PatientSummary!]!
   patientDemographics(organizationId: UUID!, patientId: UUID!): PatientDemographics!
@@ -136,6 +206,24 @@ type Query {
   patientTimeline(organizationId: UUID!, patientId: UUID!, first: Int! = 20, after: String = null): PatientTimelinePage!
   patientAccessGrants(organizationId: UUID!, patientId: UUID!): [PatientAssignee!]!
   eligiblePatientAssignees(organizationId: UUID!, patientId: UUID!, query: String! = "", first: Int! = 20): [PatientAssignee!]!
+  providers(organizationId: UUID!): [ProviderType!]!
+  encounters(organizationId: UUID!, patientId: UUID = null, first: Int! = 20, before: UUID = null): [EncounterType!]!
+  encounter(organizationId: UUID!, encounterId: UUID!, revisionId: UUID = null): EncounterType!
+  dentalReference(organizationId: UUID!): JSON!
+  dentalChart(organizationId: UUID!, patientId: UUID!, encounterId: UUID = null, revisionId: UUID = null): JSON!
+  toothHistory(organizationId: UUID!, patientId: UUID!, tooth: String!, first: Int! = 20, before: UUID = null): JSON!
+  treatmentPlans(organizationId: UUID!, patientId: UUID!, first: Int! = 20): JSON!
+  documents(organizationId: UUID!, patientId: UUID = null, purpose: String! = "clinical", first: Int! = 20, before: UUID = null): [DocumentType!]!
+  documentVersions(organizationId: UUID!, versionIds: [UUID!]!, patientId: UUID = null): [DocumentType!]!
+  clinicAppearance(organizationId: UUID!): JSON!
+  organizationBranding(organizationId: UUID!): JSON!
+  userPreferences(organizationId: UUID!): JSON!
+  clinicDashboard(organizationId: UUID!): JSON!
+  notifications(organizationId: UUID!): JSON!
+  patients(organizationId: UUID!, query: String! = "", first: Int! = 20, after: UUID = null): PatientPage!
+  patient(organizationId: UUID!, patientId: UUID!): PatientDemographics!
+  patientHistory(organizationId: UUID!, patientId: UUID!, first: Int! = 20, after: String = null): PatientTimelinePage!
+  medicalDocuments(organizationId: UUID!, patientId: UUID!, first: Int! = 20): [DocumentType!]!
   currentUser: UserType!
   myOrganizations: [OrganizationType!]!
   clinicWorkspace(organizationId: UUID!): WorkspaceType!
@@ -156,6 +244,14 @@ input RegisterPatientInput {
   guardianRelationship: String = null
   branchId: UUID!
   requestId: UUID!
+}
+
+type RevisionType {
+  id: UUID!
+  version: Int!
+  authorName: String!
+  createdAt: DateTime!
+  amendmentReason: String!
 }
 
 input SaveClinicalHistoryInput {

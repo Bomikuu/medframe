@@ -1,17 +1,17 @@
 ---
 name: Medframe Clinical Workspace
-description: A restrained clinical workspace built for focused patient care.
+description: A white clinical workspace built for focused patient care.
 colors:
   navy: "#0f2d4a"
-  primary: "#087e7d"
+  primary: "#0f2d4a"
   medical-teal: "#0ea5a4"
-  soft-teal: "#22c1b6"
-  background: "#f8fafc"
-  surface: "#fcfdfe"
-  muted: "#edf2f6"
+  background: "#ffffff"
+  surface: "#ffffff"
+  muted: "#f8fafc"
+  foreground: "#1e293b"
   supporting-text: "#475569"
-  border: "#d5dfe8"
-  input-border: "#a4b5c5"
+  border: "#e2e8f0"
+  input-border: "#8193a4"
   danger: "#b4233b"
   dark-background: "#101e2c"
   dark-surface: "#152637"
@@ -28,16 +28,15 @@ typography:
     fontFamily: "Inter Variable, Inter, Arial, sans-serif"
     fontSize: "14px"
     fontWeight: 400
-    lineHeight: 1.75
+    lineHeight: 1.5
     letterSpacing: "normal"
   label:
     fontFamily: "Inter Variable, Inter, Arial, sans-serif"
     fontSize: "14px"
     fontWeight: 500
-    lineHeight: 1.4
-    letterSpacing: "normal"
+    lineHeight: "20px"
 rounded:
-  control: "8px"
+  control: "10px"
   panel: "12px"
 spacing:
   compact: "8px"
@@ -51,85 +50,57 @@ components:
     rounded: "{rounded.control}"
     height: "44px"
   input:
-    textColor: "{colors.navy}"
+    textColor: "{colors.foreground}"
     rounded: "{rounded.control}"
     height: "44px"
 ---
 
-## Runtime and amendment status
-
-The frontmatter and runtime mapping below describe the preserved implementation at `77bf229`. The user's Django Edition amendment changes the target defaults to white/light, slate text, navy actions, configurable organization/user tokens, and Lucide. Those runtime changes have not yet been implemented. Follow `docs/superpowers/specs/2026-10-18-medframe-django-amendment.md` and the integrated Batch 1 plan; update the token map/sidecar together with actual CSS and components during implementation, rather than claiming target tokens are already live.
-
 ## Overview
 
-**Creative North Star: "A focused clinical desk"**
+**Creative North Star: A focused clinical desk.** Medframe is an Operate surface for clinicians documenting patient care. A predominantly white workspace, restrained navy actions, slate text, and teal interaction feedback keep clinical content prominent. The existing identity and shared primitives remain; the approved Django Edition changes defaults and adds persisted, validated customization.
 
-Medframe gives clinicians a quiet, legible work surface. Patient context and the current task will carry future screens; this foundation establishes familiar authentication and organization access. The supplied navy, teal, and Inter identity is preserved. Expression lives in precise type, restrained color, consistent controls, and careful state feedback.
-
-**Key Characteristics:** a single workhorse sans, cool neutral surfaces, a sparingly used teal action color, clear section spacing, and flat panels with subtle borders. The app is an Operate surface, not a marketing landing page. The approved medical symbol remains pending; the text name identifies the app.
+The local Django application implements these tokens; production-build, browser, visual self-review, and local cutover evidence are recorded in `docs/operations/django-batch-1-verification.md`. The concept-11 Medframe symbol is unavailable, so the product retains its text name. A saved clinic logo identifies that organization without inventing a substitute product symbol.
 
 ## Colors
 
-The frontmatter mirrors the canonical CSS variables in `apps/web/app/globals.css` (runtime ownership model B). The path is CSS primitives -> semantic custom properties -> Tailwind `@theme inline` -> shared shadcn/Radix components. No separate JavaScript theme duplicates values.
+`apps/web/app/globals.css` owns default semantic CSS properties and Tailwind mappings. Django `medframe_apps/branding/services.py` validates/persists structured organization and personal settings. `features/branding/theme-provider.tsx` applies those values to the CSS owner before displaying the loaded workspace; portalled controls share the same root variables.
 
-Navy is the light-theme foreground. The supplied medical/soft teals remain brand primitives. A deeper teal is the small-text action background in light mode so the label has sufficient contrast. Dark mode uses soft teal actions on navy foreground, with slate-blue surfaces and pale supporting text. Semantic danger is separate from branding. System preference controls one consistent theme across routes.
+Precedence is platform defaults → clinic branding → permitted personal preferences. Light is the default independent of the operating system. Dark/system mode is explicit and saved. Primary actions require readable white labels in light mode; dark mode derives a pale action color with a navy label. Accent-based selection/focus mixes retain legibility. Clinical danger and warning meaning remain independent of branding. Color always accompanies text, status, or selection state.
 
-**The Context Rule.** Use color to convey action, selection, focus, or a semantic state, not to decorate every region.
+Default page, sidebar, header, and cards are white. `muted` supplies the secondary gray surface. Shared inputs keep a stronger visible boundary than panel borders. Never introduce arbitrary CSS, scripts, external font URLs, or unvalidated property maps through settings.
 
 ## Typography
 
-Inter Variable is self-hosted through Fontsource. The same family serves headings, labels, navigation, and body text. The authentication context heading uses a larger 40/48px scale only on desktop; clinical pages use the headline token. OTP/recovery values use a monospace presentation for transcription, not as a general visual motif. Prose remains comfortably bounded and controls never use all-caps decoration.
+Inter Variable is the default self-hosted family. Source Sans 3 Variable and Noto Sans Variable are approved self-hosted alternatives. Standard body/control text is 14px; a saved large preset increases it to 16px. Page headings begin at 30px/600 with bounded heading presets; section headings use 20px/600. Clinical paragraphs and textareas use generous explicit leading and preserve whitespace. Keep long text within a readable measure and allow Unicode names and notes to wrap.
 
 ## Layout
 
-The sign-in surface pairs a muted clinic-access explanation with a bounded 448px form; below 1024px the context pane drops out and the form remains primary. The clinic uses a 264px desktop sidebar and a flexible main area capped at 1152px; mobile places organization and navigation in document flow. Forms use 24px vertical gaps and visible labels. Short codes use a compact input; email/password controls take their form width. Later patient forms group identity/contact/medical content and size fields for expected input.
+The desktop shell has a 248px default sidebar, adjustable between 224px and 280px; collapsed mode is 80px. Navigation remains in normal flow on narrow screens and wraps without clipping actions. Main content is contained by default, with an explicit full-width preset. Header/density presets change spacing while retaining usable controls.
+
+Patient forms separate identity, contact, emergency, and guardian information. Date, phone, sex, FDI identifiers, and structured statuses occupy widths appropriate to their content. Consultations keep patient context before separate SOAP, diagnoses, observations, tooth/surface findings, procedures, and document sections. Long forms use normal document scrolling. Dashboard widget visibility, order, and widths are persisted per user and clinic.
 
 ## Elevation & Depth
 
-Surfaces are flat at rest. Subtle borders distinguish organization context, panels, and form controls. The Radix select uses a small popup shadow to communicate an actual overlay. Do not build nested card stacks or glow effects. State transitions are short and reduced-motion preference suppresses them.
+Panels use restrained borders and flat white surfaces. An optional subtle shadow is `0 4px 12px rgb(15 45 74 / 0.06)`. Popups and protected-focus dialogs may use their shared elevated treatment. Do not wrap every clinical subsection in another card.
 
 ## Shapes
 
-Controls use gently rounded corners from the control token. Panels use the panel radius. Avatar/profile upload previews use circles only when that real upload feature is introduced. Medical photographs, X-rays, and document previews retain complete framing and aspect ratio.
+The default base radius is 8px; the current Tailwind mapping produces 10px `rounded-lg` controls and 12px `rounded-xl` panels. Radius presets change the central base rather than separate screen styles. Avatar controls and previews are circular. Clinic logos preserve proportions; medical images and documents preserve full framing.
 
 ## Components
 
-### Buttons
+Use the existing shadcn/Radix button, field, input, Select, Checkbox, Textarea, and AlertDialog owners. Lucide icons come only through `components/icons.ts`. Single-select popups remain authored; dates use the explicitly accepted native date input. Interactive controls retain visible keyboard focus, real labels, errors, and useful pending/disabled states.
 
-The shared Button owns primary, outline, secondary, ghost, destructive, and link variants. Primary form actions have a 44px height, a non-wrapping label, a clear busy label, and disabled duplicate submission. Visible focus is a teal outline/ring. Icon buttons have accessible labels. The same action retains its wording across screens.
+`features/workspace/safety-provider.tsx` owns confirmations, navigation protection, and memory-only drafts. Save feedback distinguishes unsaved, saving, saved, paused/offline, conflict, completed, and finalized. Finalization and amendments preserve attributed revisions; a preview or selected image is not saved evidence.
 
-### Inputs / Fields
+The 2D chart is the full keyboard alternative to 3D. Both consume the same finding identifiers and surface vocabulary. The repository-owned schematic GLB contains 52 explicit tooth identifiers and 260 named surface patches; it is clearly labeled unvalidated development geometry. Views, jaw visibility, isolation, reset, pan/zoom/rotation, and selectable surfaces explain recorded data rather than diagnosing.
 
-The shared Input and FormField own 44px controls, labels above, hints/errors below, border/focus states, and semantic types. PasswordInput adds a show/hide action. Forms disable native validation bubbles and use associated inline errors. Passwords remain masked by default and support paste/password managers.
-
-### Navigation
-
-Clinical navigation uses a muted teal selection with an icon and text. The organization chooser uses the shared Radix Select, rendered through a portal, with keyboard selection and focus restoration. The header contains context, staff identity, and sign-out. No later module is presented as a functioning navigation target.
-
-### Cards / Containers
-
-The organization panel groups real authorized organization/branch information. Loading skeletons match its proportions. Empty and denied states explain how to recover; no fake patient counts fill missing functionality.
+Private upload controls report real transfer/scan state, preserve uncropped clinical files, and allow only clean authorized downloads. Exact document versions stay attached to historical encounters. Logo/avatar previews use the same protected pipeline.
 
 ## Do's and Don'ts
 
-### Do:
-
-- **Do** preserve the approved Inter, navy, and teal identity and semantic token mapping.
-- **Do** prioritize the clinician's task and keep readable, focused components.
-- **Do** verify light/dark, keyboard, failure, and mobile states with real API data.
-
-### Don't:
-
-- **Don't** invent a substitute medical symbol or unverified product/compliance claims.
-- **Don't** expose fake working controls or patient metrics for modules not yet implemented.
-- **Don't** crop clinical imagery into profile-avatar shapes.
-
-## Patient surfaces
-
-Patient management inherits the existing Operate world. The directory uses a compact search toolbar and a read-oriented table with stacked mobile rows. Registration uses a bounded, naturally scrolling form with separated identity, contact, emergency-contact, and guardian fieldsets; short date/sex/phone controls do not stretch to the full content width. The patient overview keeps identity and reference visible before demographics, medical history, and authorized access management. Medical records use flat sections and a chronological event list rather than nested cards. Shared loading/error/status and confirmation owners are recorded in UX-CONTRACT.md.
-
-## Approved Django Batch 1 visual target
-
-The established clinical Operate language remains: readable Inter, restrained borders, clear groups, type-appropriate inputs, accessible state feedback, and focused records. The approved amendment makes white the dominant page/sidebar/header/card background, with slate text and navy primary actions; muted `#F8FAFC` is a secondary surface rather than the entire dashboard. Default mode is light, independent of the operating system. Dark and system modes are saved explicit options.
-
-One effective-theme resolver combines platform defaults, validated organization branding, and allowed user preferences. Appearance, font/radius/component/density presets, sidebar/header layout, and known dashboard widget order/sizes persist and preview without a reload. Organization administrators own clinic branding; personal preferences cannot override record permissions. Logo/profile controls become active only with the real protected asset pipeline. Lucide replaces the prior icon family coherently through a shared owner.
+- Preserve clinical readability, shared tokens, predictable navigation, and grouped expected-input fields.
+- Verify default white, explicit dark, keyboard/2D, failures/conflicts, long content, and narrow layouts with synthetic data.
+- Keep proposed treatment distinct from completed evidence and draft findings distinct from finalized history.
+- Do not invent a medical symbol, anatomical validation, diagnoses, metrics, notifications, or compliance claims.
+- Do not crop clinical imagery into avatars or expose files through public object URLs.

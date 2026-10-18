@@ -12,12 +12,15 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv python install 3.13
       - run: python3 scripts/setup-local.py
-      - run: docker compose --env-file .env -f infrastructure/compose.yaml up -d --wait
+      - run: docker compose --env-file .env -f infrastructure/compose.yaml up -d --wait --wait-timeout 600
       - run: uv sync --project services/api --locked --python 3.13
       - run: npm ci
-      - run: uv run --project services/api alembic -c services/api/alembic.ini upgrade head
-      - run: uv run --project services/api python scripts/prepare-test-db.py
-      - run: uv run --project services/api pytest services/api/tests -q
+      - run: uv run --project services/api python scripts/setup-django.py
+      - run: uv run --project services/api python services/api/manage.py migrate --noinput
+      - run: uv run --project services/api python services/api/manage.py collectstatic --noinput
+      - run: uv run --project services/api python services/api/manage.py initialize_private_storage
+      - run: uv run --project services/api python services/api/manage.py makemigrations --check --dry-run
+      - run: uv run --project services/api python services/api/manage.py test tests_django --settings=config.settings.test --noinput
       - run: uv run --project services/api ruff check services/api scripts
       - run: uv run --project services/api ruff format --check services/api scripts
       - run: npm run format:check
@@ -29,7 +32,8 @@ jobs:
       - run: npm exec --workspace apps/web playwright install --with-deps chromium
       - name: Browser verification
         run: |
-          uv run --project services/api uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-access-log > /tmp/medframe-api.log 2>&1 &
+          uv run --project services/api uvicorn config.asgi:application --app-dir services/api --host 127.0.0.1 --port 8000 --no-access-log > /tmp/medframe-api.log 2>&1 &
+          (cd services/api && uv run celery -A config.celery worker --loglevel=warning --concurrency=2 --without-gossip --without-mingle) > /tmp/medframe-worker.log 2>&1 &
           npm run start --workspace apps/web > /tmp/medframe-web.log 2>&1 &
           for attempt in $(seq 1 30); do
             if curl --silent --fail http://localhost:8000/health/ready && curl --silent --fail http://localhost:3000/login > /dev/null; then break; fi

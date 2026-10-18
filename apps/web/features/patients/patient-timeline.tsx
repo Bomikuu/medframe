@@ -16,6 +16,9 @@ const eventLabels: Record<string, string> = {
   "clinical.updated": "Medical history updated",
   "access.granted": "Clinical access granted",
   "access.revoked": "Clinical access revoked",
+  "encounter.created": "Consultation started",
+  "encounter.finalized": "Consultation finalized",
+  "encounter.amended": "Consultation amended",
 };
 
 export function PatientTimeline({ patientId }: { patientId: string }) {
@@ -49,6 +52,14 @@ export function PatientTimeline({ patientId }: { patientId: string }) {
                     {eventLabels[event.action] ?? "Record updated"}
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">{event.authorName}</p>
+                  {event.encounterId && event.encounterRevisionId && (
+                    <ButtonLink
+                      variant="link"
+                      href={`${href(`/clinic/consultations/${event.encounterId}`)}&revision=${event.encounterRevisionId}`}
+                    >
+                      Open preserved visit revision
+                    </ButtonLink>
+                  )}
                 </div>
                 <time
                   dateTime={event.createdAt}

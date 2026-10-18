@@ -4,7 +4,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { PlusIcon, XIcon, MagnifyingGlassIcon, ArrowRightIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon, MagnifyingGlassIcon, ArrowRightIcon } from "@/components/icons";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PatientDirectoryDocument } from "@/lib/graphql/generated";

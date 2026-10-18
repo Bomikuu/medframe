@@ -10,7 +10,7 @@ Saved at the user's explicit request on October 18, 2026, before amending the ar
 - Backup artifacts: Git bundle, Fernet-encrypted PostgreSQL custom-format dump, private `.env` configuration copy, and a checksum/verification manifest.
 - Permissions: backup directory 0700 and files 0600. No backup or secret is committed to Git.
 
-The Git bundle was verified. The encrypted archive was decrypted in memory and its PostgreSQL restore catalog was validated with `pg_restore --list`; no plaintext database dump was written. A complete restore drill is not claimed. Keep `configuration.env` private: it contains the deployment encryption material needed to recover the archive and MFA data.
+The Git bundle was verified. The encrypted archive was decrypted in memory and its PostgreSQL restore catalog was validated with `pg_restore --list`; no plaintext database dump was written. A later Batch 1 verification fully restored this encrypted archive into a disposable PostgreSQL source, migrated it into a separate disposable Django target, and reconciled every imported category; see `django-batch-1-verification.md`. Keep `configuration.env` private: it contains the deployment encryption material needed to recover the archive and MFA data.
 
 Baseline verification: 47 backend tests passed; all 5 browser journeys passed against the successful production build in 30.9 seconds; migration round-trip/no-drift, Prettier/Ruff, lint/type checks, deterministic schema generation, static UX audit, and the prior independent review passed. The preserved scope includes secure authentication and patient management, not encounters/dental/documents or Django.
 
@@ -23,4 +23,4 @@ git show --stat checkpoint/pre-django-2026-10-18
 git bundle verify /home/micxsz/.local/share/medframe/checkpoints/pre-django-2026-10-18-77bf229/source.bundle
 ```
 
-The current code remains on the preserved FastAPI runtime while the Django Batch 1 plan is reviewed. A Git commit does not itself migrate the running database or switch authentication frameworks.
+This checkpoint describes the saved FastAPI baseline. The Django Batch 1 cutover and active runtime are recorded separately in `django-batch-1-verification.md`; the checkpoint and source database remain preserved.

@@ -1,6 +1,6 @@
 # Medframe Django Edition amendment
 
-Status: the user supplied the new written master specification and requested amendments, preservation, native execution without subagents, and multiple features per phase. This document records the amended target and migration decisions; implementation is governed by the accompanying Batch 1 plan. Django migration and the new clinical modules are not yet implemented.
+Status: the user supplied the new written master specification and requested amendments, preservation, native execution without subagents, and multiple features per phase. This document records the amended target and migration decisions; implementation is governed by the accompanying Batch 1 plan. The user approved the plan and the connected Django Batch 1 is now implemented locally; verification and remaining clinical/production boundaries are recorded in `docs/operations/django-batch-1-verification.md`.
 
 Authoritative source: `docs/requirements/medframe-django-edition.txt`, copied byte-for-byte from the October 18, 2026 attachment. It supersedes conflicting requirements in `medframe-master-v3.txt` and the earlier foundation design. Unchanged confidentiality, clinical-integrity, readability, formatting, form, and upload requirements continue to apply.
 
@@ -120,4 +120,4 @@ Implement natively with no subagents. The user's new instruction overrides the e
 
 Batch acceptance covers: preserved identity/password/MFA/grants/history; registration/search/edit/refresh; walk-in encounter SOAP/diagnosis/dental surfaces/procedures/documents; draft reload and conflict recovery; immutable finalization/amendments; exact historical chart retrieval; branding save/cancel/reset and user preference precedence; tenant isolation and clinical denials; scanner failures/private downloads; WebGL-off/keyboard/mobile/light/dark; real dashboard values.
 
-Report actual migration IDs, completed workflows, test results, unfinished assets/infrastructure, and next-batch priorities. Neither a copied specification nor a Django scaffold is evidence of a working clinical batch. The implementation plan is the next review artifact before product code changes.
+Report actual migration IDs, completed workflows, test results, unfinished assets/infrastructure, and next-batch priorities. Neither a copied specification nor a Django scaffold is evidence of a working clinical batch. The approved implementation plan and batch evidence document the delivered local workflow.

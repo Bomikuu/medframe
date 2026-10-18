@@ -88,6 +88,8 @@ query PatientHistory($organizationId: UUID!, $patientId: UUID!, $after: String) 
       authorName
       createdAt
       revisionId
+      encounterId
+      encounterRevisionId
     }
     endCursor
     hasNextPage

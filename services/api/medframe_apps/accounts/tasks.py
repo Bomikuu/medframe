@@ -1,0 +1,40 @@
+import json
+from datetime import timedelta
+
+from celery import shared_task
+from django.core.mail import send_mail
+from django.db import transaction
+from django.utils import timezone
+
+from config.crypto import cipher
+from medframe_apps.accounts.models import MailOutbox
+
+
+@shared_task
+def deliver_recovery_mail():
+    for _ in range(20):
+        with transaction.atomic():
+            item = (
+                MailOutbox.objects.select_for_update(skip_locked=True)
+                .filter(sent_at__isnull=True, attempts__lt=5, available_at__lte=timezone.now())
+                .order_by("created_at")
+                .first()
+            )
+            if item is None:
+                return
+            item.attempts += 1
+            try:
+                payload = json.loads(cipher().decrypt(item.encrypted_payload.encode()))
+                send_mail(
+                    "Reset your Medframe password",
+                    f"Use this link within 15 minutes:\n{payload['link']}\n"
+                    "If you did not request it, ignore this message.",
+                    None,
+                    [payload["recipient"]],
+                )
+            except Exception:
+                item.available_at = timezone.now() + timedelta(seconds=30 * 2**item.attempts)
+            else:
+                item.sent_at = timezone.now()
+                item.encrypted_payload = ""
+            item.save()

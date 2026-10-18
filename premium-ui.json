@@ -17,7 +17,7 @@
   },
   "evidence": {
     "failurePaths": "apps/web/tests/patients.spec.ts",
-    "authorization": "services/api/tests/test_patients_workflow.py",
+    "authorization": "services/api/tests_django/test_patient_policy.py",
     "crudFullFlow": "apps/web/tests/patients.spec.ts"
   }
 }

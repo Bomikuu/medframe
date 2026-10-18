@@ -11,6 +11,7 @@ import {
 import { useRemote } from "@/features/patients/use-remote";
 import { LoadState, RemoteNotice } from "@/features/patients/feedback";
 import { useSafety } from "./safety-provider";
+import { ThemeProvider } from "@/features/branding/theme-provider";
 
 type Workspace = {
   organizationId: string;
@@ -109,7 +110,7 @@ function OrganizationWorkspace({
     <WorkspaceContext.Provider value={value}>
       <div key={value.workspace.permissions.join("|")}>
         <RemoteNotice error={error} retry={reload} />
-        {children}
+        <ThemeProvider organizationId={organizationId}>{children}</ThemeProvider>
       </div>
     </WorkspaceContext.Provider>
   );

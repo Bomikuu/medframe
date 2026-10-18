@@ -1,5 +1,8 @@
 node_modules/
 .next/
+.next-rehearsal/
+celerybeat-schedule*
+services/api/staticfiles/
 .venv/
 __pycache__/
 .pytest_cache/
@@ -15,3 +18,5 @@ playwright-report/
 graphify-out/
 .impeccable/hook.cache.json
 *.tsbuildinfo
+
+.impeccable/review/

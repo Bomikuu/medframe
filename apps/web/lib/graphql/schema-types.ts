@@ -11,6 +11,8 @@ export type Scalars = {
   Date: { input: string; output: string; }
   /** Date with time (isoformat) */
   DateTime: { input: string; output: string; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf). */
+  JSON: { input: unknown; output: unknown; }
   UUID: { input: string; output: string; }
 };
 
@@ -56,6 +58,40 @@ export type ClinicalRevisionPage = {
   items: Array<ClinicalHistory>;
 };
 
+export type DocumentType = {
+  __typename?: 'DocumentType';
+  contentType: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  documentId: Scalars['UUID']['output'];
+  encounterId?: Maybe<Scalars['UUID']['output']>;
+  id: Scalars['UUID']['output'];
+  label: Scalars['String']['output'];
+  scanState: Scalars['String']['output'];
+  size: Scalars['Int']['output'];
+  version: Scalars['Int']['output'];
+};
+
+export type EncounterType = {
+  __typename?: 'EncounterType';
+  amendmentReason: Scalars['String']['output'];
+  branchId: Scalars['UUID']['output'];
+  content: Scalars['JSON']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  editable: Scalars['Boolean']['output'];
+  id: Scalars['UUID']['output'];
+  isAmendment: Scalars['Boolean']['output'];
+  latestFinalizedVersion: Scalars['Int']['output'];
+  patientHistoryRevisionId?: Maybe<Scalars['UUID']['output']>;
+  patientId: Scalars['UUID']['output'];
+  patientName: Scalars['String']['output'];
+  reason: Scalars['String']['output'];
+  revisionId?: Maybe<Scalars['UUID']['output']>;
+  revisions: Array<RevisionType>;
+  status: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  version: Scalars['Int']['output'];
+};
+
 export type Medication = {
   __typename?: 'Medication';
   dose: Scalars['String']['output'];
@@ -67,6 +103,285 @@ export type MedicationInput = {
   dose?: Scalars['String']['input'];
   frequency?: Scalars['String']['input'];
   name: Scalars['String']['input'];
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  addClinicalNote: EncounterType;
+  addDiagnosis: EncounterType;
+  addObservation: EncounterType;
+  addProcedure: EncounterType;
+  addTreatmentItem: Scalars['JSON']['output'];
+  amendEncounter: EncounterType;
+  authorizeDocumentDownload: Scalars['String']['output'];
+  beginDocumentUpload: DocumentType;
+  createEncounter: EncounterType;
+  createEncounterAmendment: EncounterType;
+  createPatient: PatientDemographics;
+  createTreatmentPlan: Scalars['JSON']['output'];
+  finalizeEncounter: EncounterType;
+  markNotificationsRead: Scalars['Boolean']['output'];
+  registerPatient: PatientDemographics;
+  resetOrganizationBranding: Scalars['JSON']['output'];
+  resetUserPreferences: Scalars['JSON']['output'];
+  retryDocumentScan: DocumentType;
+  saveDashboardLayout: Scalars['JSON']['output'];
+  savePatientClinicalHistory: ClinicalHistory;
+  saveToothFinding: EncounterType;
+  setPatientAccess: PatientAssignee;
+  transitionEncounter: EncounterType;
+  updateDentalChart: EncounterType;
+  updateEncounterDraft: EncounterType;
+  updateOrganizationBranding: Scalars['JSON']['output'];
+  updatePatient: PatientDemographics;
+  updatePatientDemographics: PatientDemographics;
+  updateTreatmentItem: Scalars['JSON']['output'];
+  updateTreatmentStatus: Scalars['JSON']['output'];
+  updateUserPreferences: Scalars['JSON']['output'];
+  uploadMedicalDocument: DocumentType;
+};
+
+
+export type MutationAddClinicalNoteArgs = {
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  section: Scalars['String']['input'];
+  text: Scalars['String']['input'];
+};
+
+
+export type MutationAddDiagnosisArgs = {
+  data: Scalars['JSON']['input'];
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationAddObservationArgs = {
+  data: Scalars['JSON']['input'];
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationAddProcedureArgs = {
+  data: Scalars['JSON']['input'];
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationAddTreatmentItemArgs = {
+  data: Scalars['JSON']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  planId: Scalars['UUID']['input'];
+};
+
+
+export type MutationAmendEncounterArgs = {
+  encounterId: Scalars['UUID']['input'];
+  expectedFinalizedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  reason: Scalars['String']['input'];
+};
+
+
+export type MutationAuthorizeDocumentDownloadArgs = {
+  organizationId: Scalars['UUID']['input'];
+  versionId: Scalars['UUID']['input'];
+};
+
+
+export type MutationBeginDocumentUploadArgs = {
+  encounterId?: InputMaybe<Scalars['UUID']['input']>;
+  metadata: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId?: InputMaybe<Scalars['UUID']['input']>;
+  purpose: Scalars['String']['input'];
+};
+
+
+export type MutationCreateEncounterArgs = {
+  branchId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+  providerId: Scalars['UUID']['input'];
+  reason: Scalars['String']['input'];
+  requestId: Scalars['UUID']['input'];
+};
+
+
+export type MutationCreateEncounterAmendmentArgs = {
+  encounterId: Scalars['UUID']['input'];
+  expectedFinalizedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  reason: Scalars['String']['input'];
+};
+
+
+export type MutationCreatePatientArgs = {
+  data: RegisterPatientInput;
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationCreateTreatmentPlanArgs = {
+  data: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
+};
+
+
+export type MutationFinalizeEncounterArgs = {
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationMarkNotificationsReadArgs = {
+  ids: Array<Scalars['UUID']['input']>;
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationRegisterPatientArgs = {
+  data: RegisterPatientInput;
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationResetOrganizationBrandingArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationResetUserPreferencesArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationRetryDocumentScanArgs = {
+  organizationId: Scalars['UUID']['input'];
+  versionId: Scalars['UUID']['input'];
+};
+
+
+export type MutationSaveDashboardLayoutArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  widgets: Scalars['JSON']['input'];
+};
+
+
+export type MutationSavePatientClinicalHistoryArgs = {
+  data: SaveClinicalHistoryInput;
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
+export type MutationSaveToothFindingArgs = {
+  data: Scalars['JSON']['input'];
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationSetPatientAccessArgs = {
+  active: Scalars['Boolean']['input'];
+  membershipId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
+export type MutationTransitionEncounterArgs = {
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  status: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateDentalChartArgs = {
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  findings: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationUpdateEncounterDraftArgs = {
+  content: Scalars['JSON']['input'];
+  encounterId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationUpdateOrganizationBrandingArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  settings: Scalars['JSON']['input'];
+};
+
+
+export type MutationUpdatePatientArgs = {
+  data: UpdateDemographicsInput;
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
+export type MutationUpdatePatientDemographicsArgs = {
+  data: UpdateDemographicsInput;
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
+export type MutationUpdateTreatmentItemArgs = {
+  completedRevisionId?: InputMaybe<Scalars['UUID']['input']>;
+  expectedVersion: Scalars['Int']['input'];
+  itemId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  planId: Scalars['UUID']['input'];
+  status: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateTreatmentStatusArgs = {
+  completedRevisionId?: InputMaybe<Scalars['UUID']['input']>;
+  expectedVersion: Scalars['Int']['input'];
+  itemId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  planId: Scalars['UUID']['input'];
+  status: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateUserPreferencesArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  settings: Scalars['JSON']['input'];
+};
+
+
+export type MutationUploadMedicalDocumentArgs = {
+  encounterId?: InputMaybe<Scalars['UUID']['input']>;
+  metadata: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
 };
 
 export type OrganizationType = {
@@ -105,42 +420,6 @@ export type PatientDemographics = {
   version: Scalars['Int']['output'];
 };
 
-export type PatientMutation = {
-  __typename?: 'PatientMutation';
-  registerPatient: PatientDemographics;
-  savePatientClinicalHistory: ClinicalHistory;
-  setPatientAccess: PatientAssignee;
-  updatePatientDemographics: PatientDemographics;
-};
-
-
-export type PatientMutationRegisterPatientArgs = {
-  data: RegisterPatientInput;
-  organizationId: Scalars['UUID']['input'];
-};
-
-
-export type PatientMutationSavePatientClinicalHistoryArgs = {
-  data: SaveClinicalHistoryInput;
-  organizationId: Scalars['UUID']['input'];
-  patientId: Scalars['UUID']['input'];
-};
-
-
-export type PatientMutationSetPatientAccessArgs = {
-  active: Scalars['Boolean']['input'];
-  membershipId: Scalars['UUID']['input'];
-  organizationId: Scalars['UUID']['input'];
-  patientId: Scalars['UUID']['input'];
-};
-
-
-export type PatientMutationUpdatePatientDemographicsArgs = {
-  data: UpdateDemographicsInput;
-  organizationId: Scalars['UUID']['input'];
-  patientId: Scalars['UUID']['input'];
-};
-
 export type PatientPage = {
   __typename?: 'PatientPage';
   endCursor?: Maybe<Scalars['UUID']['output']>;
@@ -162,6 +441,8 @@ export type PatientTimelineEvent = {
   action: Scalars['String']['output'];
   authorName: Scalars['String']['output'];
   createdAt: Scalars['DateTime']['output'];
+  encounterId?: Maybe<Scalars['UUID']['output']>;
+  encounterRevisionId?: Maybe<Scalars['UUID']['output']>;
   id: Scalars['UUID']['output'];
   revisionId?: Maybe<Scalars['UUID']['output']>;
 };
@@ -173,19 +454,56 @@ export type PatientTimelinePage = {
   items: Array<PatientTimelineEvent>;
 };
 
+export type ProviderType = {
+  __typename?: 'ProviderType';
+  branchId?: Maybe<Scalars['UUID']['output']>;
+  displayName: Scalars['String']['output'];
+  id: Scalars['UUID']['output'];
+  specialty: Scalars['String']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
+  clinicAppearance: Scalars['JSON']['output'];
+  clinicDashboard: Scalars['JSON']['output'];
   clinicPatients: PatientPage;
   clinicWorkspace: WorkspaceType;
   currentUser: UserType;
+  dentalChart: Scalars['JSON']['output'];
+  dentalReference: Scalars['JSON']['output'];
+  documentVersions: Array<DocumentType>;
+  documents: Array<DocumentType>;
   eligiblePatientAssignees: Array<PatientAssignee>;
+  encounter: EncounterType;
+  encounters: Array<EncounterType>;
+  medicalDocuments: Array<DocumentType>;
   myOrganizations: Array<OrganizationType>;
+  notifications: Scalars['JSON']['output'];
+  organizationBranding: Scalars['JSON']['output'];
+  patient: PatientDemographics;
   patientAccessGrants: Array<PatientAssignee>;
+  patientClinicalContext?: Maybe<ClinicalHistory>;
   patientClinicalHistory?: Maybe<ClinicalHistory>;
   patientClinicalRevisions: ClinicalRevisionPage;
   patientDemographics: PatientDemographics;
+  patientHistory: PatientTimelinePage;
   patientTimeline: PatientTimelinePage;
+  patients: PatientPage;
+  providers: Array<ProviderType>;
   recentPatients: Array<PatientSummary>;
+  toothHistory: Scalars['JSON']['output'];
+  treatmentPlans: Scalars['JSON']['output'];
+  userPreferences: Scalars['JSON']['output'];
+};
+
+
+export type QueryClinicAppearanceArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryClinicDashboardArgs = {
+  organizationId: Scalars['UUID']['input'];
 };
 
 
@@ -202,6 +520,35 @@ export type QueryClinicWorkspaceArgs = {
 };
 
 
+export type QueryDentalChartArgs = {
+  encounterId?: InputMaybe<Scalars['UUID']['input']>;
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+  revisionId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+
+export type QueryDentalReferenceArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryDocumentVersionsArgs = {
+  organizationId: Scalars['UUID']['input'];
+  patientId?: InputMaybe<Scalars['UUID']['input']>;
+  versionIds: Array<Scalars['UUID']['input']>;
+};
+
+
+export type QueryDocumentsArgs = {
+  before?: InputMaybe<Scalars['UUID']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId?: InputMaybe<Scalars['UUID']['input']>;
+  purpose?: Scalars['String']['input'];
+};
+
+
 export type QueryEligiblePatientAssigneesArgs = {
   first?: Scalars['Int']['input'];
   organizationId: Scalars['UUID']['input'];
@@ -210,9 +557,54 @@ export type QueryEligiblePatientAssigneesArgs = {
 };
 
 
+export type QueryEncounterArgs = {
+  encounterId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  revisionId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+
+export type QueryEncountersArgs = {
+  before?: InputMaybe<Scalars['UUID']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+
+export type QueryMedicalDocumentsArgs = {
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
+export type QueryNotificationsArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryOrganizationBrandingArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryPatientArgs = {
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
 export type QueryPatientAccessGrantsArgs = {
   organizationId: Scalars['UUID']['input'];
   patientId: Scalars['UUID']['input'];
+};
+
+
+export type QueryPatientClinicalContextArgs = {
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+  revisionId?: InputMaybe<Scalars['UUID']['input']>;
 };
 
 
@@ -236,6 +628,14 @@ export type QueryPatientDemographicsArgs = {
 };
 
 
+export type QueryPatientHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
 export type QueryPatientTimelineArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   first?: Scalars['Int']['input'];
@@ -244,7 +644,41 @@ export type QueryPatientTimelineArgs = {
 };
 
 
+export type QueryPatientsArgs = {
+  after?: InputMaybe<Scalars['UUID']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  query?: Scalars['String']['input'];
+};
+
+
+export type QueryProvidersArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
 export type QueryRecentPatientsArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryToothHistoryArgs = {
+  before?: InputMaybe<Scalars['UUID']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+  tooth: Scalars['String']['input'];
+};
+
+
+export type QueryTreatmentPlansArgs = {
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
+export type QueryUserPreferencesArgs = {
   organizationId: Scalars['UUID']['input'];
 };
 
@@ -263,6 +697,15 @@ export type RegisterPatientInput = {
   phone?: InputMaybe<Scalars['String']['input']>;
   requestId: Scalars['UUID']['input'];
   sex?: Scalars['String']['input'];
+};
+
+export type RevisionType = {
+  __typename?: 'RevisionType';
+  amendmentReason: Scalars['String']['output'];
+  authorName: Scalars['String']['output'];
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['UUID']['output'];
+  version: Scalars['Int']['output'];
 };
 
 export type SaveClinicalHistoryInput = {

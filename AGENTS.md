@@ -8,7 +8,7 @@ The user's latest instructions, supplied October 18, 2026:
 - Use readable, focused code. Use Prettier for supported files, Ruff for Python, and Tailwind for UI styling. Group fields by purpose and size them for expected input.
 - Profile-image controls/previews are circular. Clinical images and documents retain their full framing; clinic logos retain their intended proportions.
 
-The current target specification is `docs/requirements/medframe-django-edition.txt`. It supersedes conflicting stack, theme-default, icon-family, and release-grouping requirements in the earlier master brief. Read `PRODUCT.md` and `docs/superpowers/specs/2026-10-18-medframe-django-amendment.md` before implementation. The preserved runtime still uses FastAPI until the Django migration is implemented and verified; do not describe the target stack as already running.
+The current target specification is `docs/requirements/medframe-django-edition.txt`. It supersedes conflicting stack, theme-default, icon-family, and release-grouping requirements in the earlier master brief. Read `PRODUCT.md` and `docs/superpowers/specs/2026-10-18-medframe-django-amendment.md` before implementation. The local runtime now uses Django after the verified Batch 1 cutover. The preserved FastAPI baseline remains available at the checkpoint; see `docs/operations/django-batch-1-verification.md` for evidence and rollback boundaries.
 
 Django must own backend persistence, authentication, permissions, migrations, and operational administration after cutover. Preserve tenant/patient authorization, MFA, record integrity, audit behavior, and the existing patient workflows. A Django superuser is not a clinical authorization bypass.
 

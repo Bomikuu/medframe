@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-18T05:29:01.945339+00:00",
+  "generatedAt": "2026-10-18T13:24:01.598618+00:00",
   "title": "Design System: Medframe",
   "extensions": {
     "motion": [
@@ -21,6 +21,11 @@
         "name": "popup",
         "value": "0 4px 6px -1px rgb(15 45 74 / 0.1)",
         "purpose": "Organization select overlay."
+      },
+      {
+        "name": "optional-panel",
+        "value": "0 4px 12px rgb(15 45 74 / 0.06)",
+        "purpose": "Explicit subtle panel preset."
       }
     ]
   },
@@ -28,43 +33,49 @@
     {
       "name": "Primary button",
       "kind": "button",
-      "description": "Primary button from the clinical foundation.",
+      "description": "Primary button from the Django clinical workspace.",
       "html": "<button class=\"ds-primary\">Sign in</button>",
-      "css": ".ds-primary{background:var(--primary);color:var(--primary-foreground);border:0;border-radius:8px;padding:0 20px;height:44px;font:500 14px Inter,sans-serif}.ds-primary:hover{opacity:.9}.ds-primary:focus-visible{outline:2px solid var(--ring);outline-offset:3px}"
+      "css": ".ds-primary{background:var(--primary);color:var(--primary-foreground);border:0;border-radius:var(--radius-lg,10px);padding:0 20px;height:44px;font:500 14px Inter,sans-serif}.ds-primary:hover{opacity:.9}.ds-primary:focus-visible{outline:2px solid var(--ring);outline-offset:3px}"
     },
     {
       "name": "Outline button",
       "kind": "button",
-      "description": "Outline button from the clinical foundation.",
+      "description": "Outline button from the Django clinical workspace.",
       "html": "<button class=\"ds-outline\">Try again</button>",
-      "css": ".ds-outline{background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:8px;padding:0 16px;height:44px;font:500 14px Inter,sans-serif}.ds-outline:hover{background:var(--muted)}.ds-outline:focus-visible{outline:2px solid var(--ring);outline-offset:3px}"
+      "css": ".ds-outline{background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:var(--radius-lg,10px);padding:0 16px;height:44px;font:500 14px Inter,sans-serif}.ds-outline:hover{background:var(--muted)}.ds-outline:focus-visible{outline:2px solid var(--ring);outline-offset:3px}"
     },
     {
       "name": "Input",
       "kind": "input",
-      "description": "Input from the clinical foundation.",
+      "description": "Input from the Django clinical workspace.",
       "html": "<label for=\"ds-email\">Work email</label><input id=\"ds-email\" class=\"ds-input\" type=\"email\" placeholder=\"you@yourclinic.com\">",
-      "css": ".ds-input{display:block;margin-top:8px;background:var(--background);color:var(--foreground);border:1px solid var(--input);border-radius:8px;padding:0 12px;height:44px;font:400 14px Inter,sans-serif}.ds-input:focus-visible{outline:2px solid var(--ring);outline-offset:2px}"
+      "css": ".ds-input{display:block;margin-top:8px;background:var(--background);color:var(--foreground);border:1px solid var(--input);border-radius:var(--radius-lg,10px);padding:0 12px;height:44px;font:400 14px Inter,sans-serif}.ds-input:focus-visible{outline:2px solid var(--ring);outline-offset:2px}"
     },
     {
       "name": "Navigation",
       "kind": "nav",
-      "description": "Navigation from the clinical foundation.",
+      "description": "Navigation from the Django clinical workspace.",
       "html": "<a href=\"#overview\" class=\"ds-nav\" aria-current=\"page\">Overview</a>",
-      "css": ".ds-nav{display:block;background:var(--secondary);color:var(--secondary-foreground);border-radius:8px;padding:12px;font:500 14px Inter,sans-serif;text-decoration:none}.ds-nav:hover{filter:brightness(.97)}.ds-nav:focus-visible{outline:2px solid var(--ring)}"
+      "css": ".ds-nav{display:block;background:var(--secondary);color:var(--secondary-foreground);border-radius:var(--radius-lg,10px);padding:12px;font:500 14px Inter,sans-serif;text-decoration:none}.ds-nav:hover{filter:brightness(.97)}.ds-nav:focus-visible{outline:2px solid var(--ring)}"
     },
     {
       "name": "Organization panel",
       "kind": "card",
-      "description": "Organization panel from the clinical foundation.",
+      "description": "Organization panel from the Django clinical workspace.",
       "html": "<section class=\"ds-panel\"><h3>Your organization</h3><p>Authorized workspace</p></section>",
       "css": ".ds-panel{background:var(--card);color:var(--foreground);border:1px solid var(--border);border-radius:12px;padding:32px;font:400 14px Inter,sans-serif}"
     }
   ],
   "narrative": {
     "northStar": "A focused clinical desk",
-    "overview": "Medframe gives clinicians a quiet, legible work surface.",
-    "keyCharacteristics": ["Self-hosted Inter", "Navy and teal", "Task-focused controls"],
+    "overview": "A white clinical workspace with navy actions, slate text, validated clinic branding, and personal preferences.",
+    "keyCharacteristics": [
+      "White default workspace",
+      "Self-hosted font presets",
+      "Scoped customization",
+      "Explicit clinical state and version feedback",
+      "Lucide icons"
+    ],
     "rules": [
       {
         "name": "The Context Rule",

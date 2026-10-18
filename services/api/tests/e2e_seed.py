@@ -1,32 +1,25 @@
-"""Seed synthetic browser-test staff. Credentials arrive on stdin, never as arguments."""
+"""Synthetic Django browser-test staff; credentials arrive on stdin."""
 
-import asyncio
 import json
+import os
 import sys
+from pathlib import Path
 
-from app.adapters.rate_limit import redis
-from app.core.config import get_settings
-from app.core.security import digest
-from app.modules.identity.provision import provision_staff
+import django
 
 
-async def main():
-    if get_settings().app_env == "production":
-        raise RuntimeError("Synthetic browser fixtures must never run in production")
-    for bucket in ("login", "mfa", "recovery", "graphql"):
-        await redis.delete(f"medframe:{bucket}:{digest('client:127.0.0.1')}")
-    await redis.delete(f"medframe:recovery:{digest('identity:not-registered@example.org')}")
+def main():
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
+    django.setup()
+
+    from tests_django.browser_seed import clear_browser_throttle, provision
+
     data = json.load(sys.stdin)
-    for clinic in ("Synthetic Harbor Dental", "Synthetic Riverside Dental"):
-        await provision_staff(
-            data["email"],
-            "Dr. Althea Reyes (test)",
-            clinic,
-            "Main branch",
-            "dentist",
-            data["password"],
-        )
+    clear_browser_throttle([data["email"], "not-registered@example.org"])
+    for clinic in ["Synthetic Harbor Dental", "Synthetic Riverside Dental"]:
+        provision({**data, "name": "Dr. Althea Reyes (test)", "role": "dentist"}, clinic)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

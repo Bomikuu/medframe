@@ -8,9 +8,9 @@ web
 
 ## Stack
 
-Current target, selected in the user's Django Edition amendment: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, React Hook Form, Zod, a suitable typed GraphQL client/code generation, React Three Fiber/Three.js, and Lucide. The backend target is a modular Django application using Django ORM, authentication, sessions, permissions, migrations, Admin, Strawberry, strawberry-graphql-django, and PostgreSQL. Private S3-compatible storage/scanning and Celery support the connected document/asset workflows; Redis already supports shared throttling and can also provide the broker.
+Current implementation, selected in the user's Django Edition amendment: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, React Hook Form, Zod, a suitable typed GraphQL client/code generation, React Three Fiber/Three.js, and Lucide. The backend is a modular Django application using Django ORM, authentication, sessions, permissions, migrations, Admin, Strawberry, strawberry-graphql-django, and PostgreSQL. Private S3-compatible storage, ClamAV, and Celery support connected document/asset workflows; Redis supplies shared throttling and the broker.
 
-The currently runnable, verified baseline still uses FastAPI/SQLAlchemy/Alembic and Phosphor. It is saved as `77bf229` / `checkpoint/pre-django-2026-10-18`. Do not describe Django or the target theme as already implemented before migration verification.
+The local app has completed the Django Batch 1 cutover. The old FastAPI/SQLAlchemy/Alembic/Phosphor implementation remains saved as `77bf229` / `checkpoint/pre-django-2026-10-18`, with its source database intact. See `docs/operations/django-batch-1-verification.md` for verification and clinical/production boundaries.
 
 ## Users
 

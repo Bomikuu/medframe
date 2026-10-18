@@ -6,13 +6,13 @@ const config: CodegenConfig = {
   generates: {
     "lib/graphql/schema-types.ts": {
       plugins: ["typescript"],
-      config: { scalars: { UUID: "string", Date: "string", DateTime: "string" } },
+      config: { scalars: { UUID: "string", Date: "string", DateTime: "string", JSON: "unknown" } },
     },
     "lib/graphql/generated.ts": {
       plugins: ["typescript-operations", "typed-document-node"],
       config: {
         importSchemaTypesFrom: "lib/graphql/schema-types",
-        scalars: { UUID: "string", Date: "string", DateTime: "string" },
+        scalars: { UUID: "string", Date: "string", DateTime: "string", JSON: "unknown" },
       },
     },
   },

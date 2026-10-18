@@ -13,8 +13,10 @@ export const backendUrl = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
 export const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 
 export async function proxyBackend(request: Request, path: string): Promise<Response> {
-  const expectedMethod = path === "auth/csrf" ? "GET" : "POST";
-  if (!allowedPaths.has(path) || request.method !== expectedMethod) {
+  const upload = /^documents\/upload\/[0-9a-f-]{36}$/.test(path);
+  const download = path === "documents/download";
+  const expectedMethod = path === "auth/csrf" || download ? "GET" : "POST";
+  if ((!allowedPaths.has(path) && !upload && !download) || request.method !== expectedMethod) {
     return Response.json({ message: "This endpoint is unavailable." }, { status: 404 });
   }
   if (request.method === "POST" && request.headers.get("origin") !== webOrigin) {
@@ -22,7 +24,10 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
   }
   const headers = new Headers({ origin: webOrigin });
   headers.set("cookie", request.headers.get("cookie") ?? "");
-  headers.set("content-type", "application/json");
+  headers.set(
+    "content-type",
+    upload ? (request.headers.get("content-type") ?? "") : "application/json",
+  );
   headers.set("x-csrf-token", request.headers.get("x-csrf-token") ?? "");
   let body: Uint8Array | undefined;
   if (request.method === "POST") {
@@ -34,7 +39,7 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
         const { done, value } = await reader.read();
         if (done) break;
         size += value.byteLength;
-        if (size > 16_384) {
+        if (size > (upload ? 21 * 1024 * 1024 : 65_536)) {
           await reader.cancel();
           return Response.json({ message: "The request is too large." }, { status: 413 });
         }
@@ -49,16 +54,17 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
     }
   }
   try {
-    const upstream = await fetch(`${backendUrl}/${path}`, {
+    const search = download ? new URL(request.url).search : "";
+    const upstream = await fetch(`${backendUrl}/${path}${search}`, {
       method: request.method,
       headers,
       body: body as BodyInit | undefined,
       redirect: "manual",
       cache: "no-store",
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(upload || download ? 60_000 : 15_000),
     });
     const responseHeaders = new Headers({
-      "Content-Type": "application/json",
+      "Content-Type": upstream.headers.get("content-type") ?? "application/json",
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff",
     });
@@ -67,6 +73,12 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
     }
     const retry = upstream.headers.get("retry-after");
     if (retry) responseHeaders.set("Retry-After", retry);
+    if (download) {
+      for (const name of ["content-disposition", "content-security-policy", "referrer-policy"]) {
+        const value = upstream.headers.get(name);
+        if (value) responseHeaders.set(name, value);
+      }
+    }
     return new Response(upstream.body, { status: upstream.status, headers: responseHeaders });
   } catch {
     return Response.json(

@@ -11,7 +11,7 @@
     "typecheck": "npm run typecheck --workspace apps/web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "codegen": "uv run --project services/api python -m app.graphql.export_schema && npm run codegen --workspace apps/web",
+    "codegen": "uv run --project services/api python services/api/manage.py export_graphql_schema && npm run codegen --workspace apps/web",
     "test:e2e": "npm run test:e2e --workspace apps/web"
   },
   "devDependencies": {
