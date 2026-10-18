@@ -52,9 +52,12 @@ export default function Dental3D({
   const [reset, setReset] = useState(0);
   const [anatomyOnly, setAnatomyOnly] = useState(false);
   const [reference, setReference] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [readyUrl, setReadyUrl] = useState<string | null>(null);
   const controls = useRef<OrbitControlsInstance | null>(null);
-  const markReady = useCallback(() => setReady(true), []);
+  const detailed = reference && selected === "26";
+  const modelUrl = detailed ? MOLAR_REFERENCE_MODEL : PERMANENT_MODEL;
+  const ready = readyUrl === modelUrl;
+  const markReady = useCallback(() => setReadyUrl(modelUrl), [modelUrl]);
   const condition = toothPresentation(findings, selected);
   if (dentition === "primary")
     return (
@@ -63,8 +66,6 @@ export default function Dental3D({
         resized to represent primary teeth.
       </p>
     );
-  const detailed = reference && selected === "26";
-  const modelUrl = detailed ? MOLAR_REFERENCE_MODEL : PERMANENT_MODEL;
   function changeView(next: DentalView) {
     setView(next);
     if (next === "upper" || next === "lower") setJaw(next);
