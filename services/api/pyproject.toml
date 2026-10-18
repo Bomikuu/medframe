@@ -18,10 +18,16 @@ dependencies = [
   "django-storages[s3]>=1.14",
   "pillow>=11",
   "whitenoise>=6.8",
+  "channels>=4.3,<5",
+  "channels-redis>=4.3,<5",
 ]
 
 [dependency-groups]
-dev = ["httpx>=0.28", "ruff>=0.11"]
+dev = [
+    "daphne>=4.2,<5",
+    "httpx>=0.28",
+    "ruff>=0.11",
+]
 
 [build-system]
 requires = ["hatchling"]

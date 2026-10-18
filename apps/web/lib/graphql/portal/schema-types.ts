@@ -15,6 +15,7 @@ export type Scalars = {
 export type PortalMutation = {
   __typename?: 'PortalMutation';
   authorizePortalDownload: Scalars['String']['output'];
+  myAppointmentAction: Scalars['JSON']['output'];
   savePortalPreferences: Scalars['JSON']['output'];
   submitPatientReport: Scalars['JSON']['output'];
 };
@@ -24,6 +25,14 @@ export type PortalMutationAuthorizePortalDownloadArgs = {
   linkId: Scalars['UUID']['input'];
   releaseId: Scalars['UUID']['input'];
   versionId: Scalars['UUID']['input'];
+};
+
+
+export type PortalMutationMyAppointmentActionArgs = {
+  appointmentId: Scalars['UUID']['input'];
+  data: Scalars['JSON']['input'];
+  linkId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
 };
 
 
@@ -44,12 +53,31 @@ export type PortalMutationSubmitPatientReportArgs = {
 
 export type PortalQuery = {
   __typename?: 'PortalQuery';
+  myAppointmentAvailability: Scalars['JSON']['output'];
+  myAppointments: Scalars['JSON']['output'];
+  myQueue: Scalars['JSON']['output'];
   portalLinks: Scalars['JSON']['output'];
   portalRecord: Scalars['JSON']['output'];
   portalRecords: Scalars['JSON']['output'];
   portalReports: Scalars['JSON']['output'];
   portalSession: Scalars['JSON']['output'];
   portalWorkspace: Scalars['JSON']['output'];
+};
+
+
+export type PortalQueryMyAppointmentAvailabilityArgs = {
+  data: Scalars['JSON']['input'];
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyAppointmentsArgs = {
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyQueueArgs = {
+  linkId: Scalars['UUID']['input'];
 };
 
 

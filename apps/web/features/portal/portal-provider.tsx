@@ -207,6 +207,20 @@ function PortalShell({
               Shared records
             </Link>
             <Link
+              href={href("/portal/appointments")}
+              aria-current={pathname === "/portal/appointments" ? "page" : undefined}
+              className="text-primary hover:underline"
+            >
+              My appointments
+            </Link>
+            <Link
+              href={href("/portal/queue")}
+              aria-current={pathname === "/portal/queue" ? "page" : undefined}
+              className="text-primary hover:underline"
+            >
+              My queue
+            </Link>
+            <Link
               aria-current={pathname === "/portal/reports" ? "page" : undefined}
               href={href("/portal/reports")}
               className="text-primary hover:underline"

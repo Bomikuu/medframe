@@ -1,0 +1,17 @@
+query MyOperationAppointments($linkId: UUID!) {
+  myAppointments(linkId: $linkId)
+}
+query MyOperationQueue($linkId: UUID!) {
+  myQueue(linkId: $linkId)
+}
+query MyOperationSlots($linkId: UUID!, $data: JSON!) {
+  myAppointmentAvailability(linkId: $linkId, data: $data)
+}
+mutation MyOperationAction($linkId: UUID!, $appointmentId: UUID!, $data: JSON!, $requestId: UUID!) {
+  myAppointmentAction(
+    linkId: $linkId
+    appointmentId: $appointmentId
+    data: $data
+    requestId: $requestId
+  )
+}

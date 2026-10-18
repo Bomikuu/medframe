@@ -112,3 +112,7 @@ Private upload controls report real transfer/scan state, preserve uncropped clin
 Record filters distinguish search criteria from clinical entry fields and use unique form IDs. Template guidance is visibly separate from entered facts. Plan history and patient releases show version/as-of information; patient reports remain labeled as submitted information.
 
 The simpler portal uses the same validated tokens and shadcn/Radix owners. Its display preferences expose only mode/density. Theme changes apply tokens atomically through `useAppearanceTokens`; a short `data-theme-changing` phase suppresses intermediate color interpolation. Clinical semantic colors remain fixed. Private previews share `features/documents/document-preview.tsx`, retain full image framing, render one bounded PDF page at a time and provide accessible text plus original download fallback.
+
+## Clinic operations
+
+The operations agenda and queue extend the focused clinical desk with divided rows and grouped forms. Appointments, Queue, and Schedules are explicit navigation destinations. Date/time controls use the established native typed Input inside FormField; single choices use the canonical Radix FormSelect. Confirmation remains owned by SafetyProvider. Queue estimates show a range, setting-based explanation, update time, and disconnected fallback. Operational actions never imply clinical finalization. Patient appointments/queue retain the separate portal identity and authorized relationship switcher.

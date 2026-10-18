@@ -25,3 +25,6 @@ graphify-out/
 .next-batch1-checkpoint/
 
 apps/web/public/vendor/pdfjs/
+
+.next-batch3-rehearsal/
+.next-batch2-checkpoint/

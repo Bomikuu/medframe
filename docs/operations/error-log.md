@@ -39,3 +39,45 @@ The existing clinic patient and administrator/Dentist membership were confirmed 
 - Adding the Dentist role directly had omitted the provider profile normally created by the native `provision_staff` command.
 - Completed account provisioning through that existing command for the same clinic/branch; confirmed profile exists. Dentistry is the command's role category, credentials remain `not_verified`, and professional title remains blank.
 - No clinical record was created, password/MFA reset, or application code changed. Logged the incomplete role-setup workflow for later review.
+
+## Batch 3 — single verification pass, 2026-10-19
+
+User instruction: implement natively, test once, and log discovered problems without repairing or retrying them. All items below are deferred. Batch 3 was not activated.
+
+### B3-001 — Patient appointment action PostgreSQL locking error
+
+- Severity: blocking patient appointment actions.
+- Reproduction: `tests_django.test_operations_portal.OperationsPortalTests.test_keep_and_cancel_are_explicit_patient_actions` in the single targeted Django run.
+- Actual: `django.db.utils.NotSupportedError: FOR UPDATE cannot be applied to the nullable side of an outer join`.
+- Location: `services/api/medframe_apps/operations/appointments.py`, `patient_appointment_action`, locking appointment query with related nullable resource.
+- Impact: the tested patient keep/cancel flow fails; reschedule uses the same initial query and remains unverified/affected.
+- Evidence: `/tmp/medframe-batch3-backend.log`; 27 tests ran, 26 passed and one errored. No failed assertions, no retries, no repair applied.
+
+### B3-002 — Patient screen TypeScript render blocker
+
+- Severity: blocks the production frontend build and local Batch 3 activation.
+- Reproduction: `npm run typecheck`; also reached by the single `NEXT_DIST_DIR=.next-batch3-rehearsal npm run build`.
+- Actual: `features/portal/operations/patient-operations.tsx(52,7): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.`
+- Impact: the new patient operations error-state JSX does not type-check. Production JavaScript compilation succeeded, but Next.js rejected the subsequent TypeScript stage. No usable Batch 3 production artifact is claimed.
+- Evidence: `/tmp/medframe-batch3-types.log`, `/tmp/medframe-batch3-build.log`. No repair or rebuild applied.
+
+### B3-003 — SQL migration readability / Ruff findings
+
+- Severity: formatting/readability gate failure.
+- Reproduction: the targeted Ruff invocation recorded in the verification evidence.
+- Actual: 23 `E501` line-length findings in `services/api/medframe_apps/operations/migrations/0002_authority_integrity.py`, embedded SQL lines 25–70.
+- Impact: Ruff does not pass. Python auto-formatting does not wrap embedded SQL strings. The migration itself applied successfully in the rehearsal clone.
+- Evidence: `/tmp/medframe-batch3-ruff.log`. No SQL rewriting or lint suppression applied after discovery.
+
+### B3-004 — React Compiler warnings in operations forms
+
+- Severity: nonblocking lint warnings, deferred.
+- Actual: `react-hooks/incompatible-library` warnings for React Hook Form `watch()` in booking and schedule forms. ESLint returned exit 0 with two warnings and no errors.
+- Impact: affected components are excluded from automatic memoization; runtime behavior was not browser-verified.
+- Evidence: `/tmp/medframe-batch3-lint.log`. No repair applied.
+
+### B3-005 — Connected browser journey not executed
+
+- The single production build was blocked by B3-002, so the planned `apps/web/tests/operations.spec.ts` journey was not run. No browser pass, screenshot review, accessibility runtime pass, or staff/patient integration pass is claimed.
+- The source journey covers schedule setup, booking/rescheduling, check-in/calling, clinical handoff availability, verified patient invitation, socket connection/delay refresh, and narrow layout. It does not fully exercise patient rescheduling/cancellation, service completion, every overflow/reconnect case, or the complete proposed verification matrix.
+- Broader boundary/load/real-clinical review remains unperformed. These are coverage limitations, not confirmed additional defects.

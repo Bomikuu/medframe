@@ -25,6 +25,11 @@ for role in ("clinic_administrator", "doctor", "dentist"):
     ROLE_PERMISSIONS[role].add("portal.manage")
 
 
+for role in ("clinic_administrator", "receptionist", "doctor", "dentist"):
+    ROLE_PERMISSIONS[role].update({"operations.read", "appointments.manage", "queues.manage"})
+ROLE_PERMISSIONS["clinic_administrator"].add("schedules.manage")
+
+
 def seed_roles():
     content_type = ContentType.objects.get_for_model(Membership)
     for name, codenames in ROLE_PERMISSIONS.items():

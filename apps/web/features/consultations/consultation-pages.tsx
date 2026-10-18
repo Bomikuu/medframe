@@ -20,6 +20,7 @@ import {
   ConsultationDocument,
   ConsultationSetupDocument,
   CreateConsultationDocument,
+  OperationsActionDocument,
   type ConsultationSetupQuery,
 } from "@/lib/graphql/generated";
 import { EncounterEditor } from "./encounter-editor";
@@ -100,6 +101,7 @@ function ConsultationSetup({
 }
 
 function StartForm({ data, patientId }: { data: ConsultationSetupQuery; patientId: string }) {
+  const query = useSearchParams();
   const { organizationId, href } = useWorkspace();
   const capture = useRequestScope();
   const router = useRouter();
@@ -130,6 +132,18 @@ function StartForm({ data, patientId }: { data: ConsultationSetupQuery; patientI
         reason: values.reason,
         requestId: values.requestId,
       });
+      if (isCurrent() && query.get("ticket") && query.get("ticketVersion")) {
+        await getGraphqlClient().request(OperationsActionDocument, {
+          organizationId,
+          action: "link",
+          data: {
+            id: query.get("ticket"),
+            expected_version: Number(query.get("ticketVersion")),
+            encounter_id: result.createEncounter.id,
+          },
+          requestId: values.requestId,
+        });
+      }
       if (isCurrent()) {
         form.reset({
           reason: "",

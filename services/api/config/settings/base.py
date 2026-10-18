@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "medframe_apps.treatments",
     "medframe_apps.documents",
     "medframe_apps.portal",
+    "medframe_apps.operations",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -102,7 +103,7 @@ DATABASES = {
         "HOST": target_url.hostname,
         "PORT": target_url.port or 5432,
         "CONN_MAX_AGE": 0,
-        "TEST": {"NAME": "medframe_django_test"},
+        "TEST": {"NAME": os.environ.get("DJANGO_TEST_DATABASE_NAME", "medframe_django_test")},
     }
 }
 USE_TZ = True
@@ -160,3 +161,14 @@ LOGGING = {
     "loggers": {"django.request": {"handlers": ["null"], "propagate": False}},
 }
 LOGGING["loggers"]["django.server"] = {"handlers": ["null"], "propagate": False}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get("OPERATIONS_REDIS_URL", runtime.redis_url)],
+            "prefix": os.environ.get("OPERATIONS_CHANNEL_PREFIX", "medframe-operations"),
+            "group_expiry": 60,
+        },
+    }
+}

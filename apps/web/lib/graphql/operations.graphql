@@ -1,0 +1,30 @@
+query OperationsSetup($organizationId: UUID!, $branchId: UUID, $search: String! = "") {
+  operationsSetup(organizationId: $organizationId, branchId: $branchId, search: $search)
+}
+query OperationSlots($organizationId: UUID!, $data: JSON!) {
+  appointmentAvailability(organizationId: $organizationId, data: $data)
+}
+query OperationAppointments($organizationId: UUID!, $filters: JSON!, $after: String) {
+  appointments(organizationId: $organizationId, filters: $filters, after: $after)
+}
+query OperationQueue($organizationId: UUID!, $branchId: UUID!, $providerId: UUID, $after: String) {
+  branchQueue(
+    organizationId: $organizationId
+    branchId: $branchId
+    providerId: $providerId
+    after: $after
+  )
+}
+mutation OperationsAction(
+  $organizationId: UUID!
+  $action: String!
+  $data: JSON!
+  $requestId: UUID!
+) {
+  operationsAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    requestId: $requestId
+  )
+}

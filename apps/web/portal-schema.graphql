@@ -9,12 +9,16 @@ The `JSON` scalar type represents JSON values as specified by [ECMA-404](https:/
 scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
 
 type PortalMutation {
+  myAppointmentAction(linkId: UUID!, appointmentId: UUID!, data: JSON!, requestId: UUID!): JSON!
   submitPatientReport(linkId: UUID!, category: String!, text: String!, requestId: UUID!): JSON!
   authorizePortalDownload(linkId: UUID!, releaseId: UUID!, versionId: UUID!): String!
   savePortalPreferences(linkId: UUID!, mode: String!, density: String!, expectedVersion: Int!): JSON!
 }
 
 type PortalQuery {
+  myAppointments(linkId: UUID!): JSON!
+  myQueue(linkId: UUID!): JSON!
+  myAppointmentAvailability(linkId: UUID!, data: JSON!): JSON!
   portalSession: JSON!
   portalLinks: JSON!
   portalWorkspace(linkId: UUID!): JSON!

@@ -9,6 +9,7 @@ from api_graphql.clinical import ClinicalMutation, ClinicalQuery
 from api_graphql.consultation_templates import TemplateMutation, TemplateQuery
 from api_graphql.contract_aliases import ContractMutation, ContractQuery
 from api_graphql.dental_history import DentalHistoryQuery
+from api_graphql.operations import OperationsMutation, OperationsQuery
 from api_graphql.patients import PatientMutation, PatientQuery
 from api_graphql.portal_staff import PortalStaffMutation, PortalStaffQuery
 from api_graphql.record_queries import RecordQuery
@@ -46,6 +47,7 @@ class WorkspaceType:
 
 @strawberry.type
 class Query(
+    OperationsQuery,
     PatientQuery,
     ClinicalQuery,
     WorkspaceQuery,
@@ -91,6 +93,7 @@ class PrivateSchema(strawberry.Schema):
 
 @strawberry.type
 class Mutation(
+    OperationsMutation,
     PatientMutation,
     ClinicalMutation,
     WorkspaceMutation,

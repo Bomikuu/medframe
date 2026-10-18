@@ -125,6 +125,7 @@ export type Mutation = {
   finalizeEncounter: EncounterType;
   issuePortalInvitation: Scalars['JSON']['output'];
   markNotificationsRead: Scalars['Boolean']['output'];
+  operationsAction: Scalars['JSON']['output'];
   previewPortalRelease: Scalars['JSON']['output'];
   publishPortalRelease: Scalars['JSON']['output'];
   registerPatient: PatientDemographics;
@@ -288,6 +289,14 @@ export type MutationIssuePortalInvitationArgs = {
 export type MutationMarkNotificationsReadArgs = {
   ids: Array<Scalars['UUID']['input']>;
   organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationOperationsActionArgs = {
+  action: Scalars['String']['input'];
+  data: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
 };
 
 
@@ -574,6 +583,9 @@ export type ProviderType = {
 
 export type Query = {
   __typename?: 'Query';
+  appointmentAvailability: Scalars['JSON']['output'];
+  appointments: Scalars['JSON']['output'];
+  branchQueue: Scalars['JSON']['output'];
   chartRevisions: Scalars['JSON']['output'];
   clinicAppearance: Scalars['JSON']['output'];
   clinicDashboard: Scalars['JSON']['output'];
@@ -596,6 +608,7 @@ export type Query = {
   medicalDocuments: Array<DocumentType>;
   myOrganizations: Array<OrganizationType>;
   notifications: Scalars['JSON']['output'];
+  operationsSetup: Scalars['JSON']['output'];
   organizationBranding: Scalars['JSON']['output'];
   patient: PatientDemographics;
   patientAccessGrants: Array<PatientAssignee>;
@@ -619,6 +632,27 @@ export type Query = {
   toothHistory: Scalars['JSON']['output'];
   treatmentPlans: Scalars['JSON']['output'];
   userPreferences: Scalars['JSON']['output'];
+};
+
+
+export type QueryAppointmentAvailabilityArgs = {
+  data: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryAppointmentsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  filters: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryBranchQueueArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  branchId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  providerId?: InputMaybe<Scalars['UUID']['input']>;
 };
 
 
@@ -759,6 +793,13 @@ export type QueryMedicalDocumentsArgs = {
 
 export type QueryNotificationsArgs = {
   organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryOperationsSetupArgs = {
+  branchId?: InputMaybe<Scalars['UUID']['input']>;
+  organizationId: Scalars['UUID']['input'];
+  search?: Scalars['String']['input'];
 };
 
 

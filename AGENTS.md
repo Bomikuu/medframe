@@ -17,3 +17,5 @@ Frontend work must also follow `apps/web/AGENTS.md` and the relevant installed N
 Do not push, publish, deploy, reset the source database, or delete the checkpoint without a corresponding user instruction. Keep secrets and backups out of Git. Use synthetic records for development and tests. Report actual verification and unfinished functionality honestly.
 
 The user's testing preference, October 19, 2026: keep verification bounded and proportional to the feature. When an issue is found, document its reproduction, impact, and evidence in `docs/operations/error-log.md`; do not attempt a fix until the user requests it. Do not turn a feature phase into repeated broad testing and repair cycles.
+
+For Batch 3, the user explicitly requested native implementation and one testing pass only. Run the accumulated targeted checks once at the end; log failures and do not retry or fix them without a later user instruction.

@@ -106,6 +106,27 @@ export function ClinicShell({ children }: { children: ReactNode }) {
               show: can("patients.clinical.read"),
             },
             {
+              path: "/clinic/appointments",
+              label: "Appointments",
+              Icon: Stethoscope,
+              active: pathname.startsWith("/clinic/appointments"),
+              show: can("operations.read"),
+            },
+            {
+              path: "/clinic/queue",
+              label: "Queue",
+              Icon: UsersIcon,
+              active: pathname.startsWith("/clinic/queue"),
+              show: can("operations.read"),
+            },
+            {
+              path: "/clinic/settings/schedules",
+              label: "Schedules",
+              Icon: Settings,
+              active: pathname.startsWith("/clinic/settings/schedules"),
+              show: can("schedules.manage"),
+            },
+            {
               path: "/clinic/settings/templates",
               label: "Templates",
               Icon: Stethoscope,
@@ -116,7 +137,7 @@ export function ClinicShell({ children }: { children: ReactNode }) {
               path: "/clinic/settings/appearance",
               label: "Appearance",
               Icon: Settings,
-              active: settings && !pathname.startsWith("/clinic/settings/templates"),
+              active: pathname.startsWith("/clinic/settings/appearance"),
               show: true,
             },
           ]

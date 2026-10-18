@@ -93,6 +93,7 @@ input MedicationInput {
 }
 
 type Mutation {
+  operationsAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   registerPatient(organizationId: UUID!, data: RegisterPatientInput!): PatientDemographics!
   updatePatientDemographics(organizationId: UUID!, patientId: UUID!, data: UpdateDemographicsInput!): PatientDemographics!
   savePatientClinicalHistory(organizationId: UUID!, patientId: UUID!, data: SaveClinicalHistoryInput!): ClinicalHistory!
@@ -209,6 +210,10 @@ type ProviderType {
 }
 
 type Query {
+  operationsSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
+  appointmentAvailability(organizationId: UUID!, data: JSON!): JSON!
+  appointments(organizationId: UUID!, filters: JSON!, after: String = null): JSON!
+  branchQueue(organizationId: UUID!, branchId: UUID!, providerId: UUID = null, after: String = null): JSON!
   patientClinicalContext(organizationId: UUID!, patientId: UUID!, revisionId: UUID = null): ClinicalHistory
   clinicPatients(organizationId: UUID!, query: String! = "", first: Int! = 20, after: UUID = null): PatientPage!
   recentPatients(organizationId: UUID!): [PatientSummary!]!
