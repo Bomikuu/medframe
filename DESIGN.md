@@ -56,6 +56,10 @@ components:
     height: "44px"
 ---
 
+## Runtime and amendment status
+
+The frontmatter and runtime mapping below describe the preserved implementation at `77bf229`. The user's Django Edition amendment changes the target defaults to white/light, slate text, navy actions, configurable organization/user tokens, and Lucide. Those runtime changes have not yet been implemented. Follow `docs/superpowers/specs/2026-10-18-medframe-django-amendment.md` and the integrated Batch 1 plan; update the token map/sidecar together with actual CSS and components during implementation, rather than claiming target tokens are already live.
+
 ## Overview
 
 **Creative North Star: "A focused clinical desk"**
@@ -123,3 +127,9 @@ The organization panel groups real authorized organization/branch information. L
 ## Patient surfaces
 
 Patient management inherits the existing Operate world. The directory uses a compact search toolbar and a read-oriented table with stacked mobile rows. Registration uses a bounded, naturally scrolling form with separated identity, contact, emergency-contact, and guardian fieldsets; short date/sex/phone controls do not stretch to the full content width. The patient overview keeps identity and reference visible before demographics, medical history, and authorized access management. Medical records use flat sections and a chronological event list rather than nested cards. Shared loading/error/status and confirmation owners are recorded in UX-CONTRACT.md.
+
+## Approved Django Batch 1 visual target
+
+The established clinical Operate language remains: readable Inter, restrained borders, clear groups, type-appropriate inputs, accessible state feedback, and focused records. The approved amendment makes white the dominant page/sidebar/header/card background, with slate text and navy primary actions; muted `#F8FAFC` is a secondary surface rather than the entire dashboard. Default mode is light, independent of the operating system. Dark and system modes are saved explicit options.
+
+One effective-theme resolver combines platform defaults, validated organization branding, and allowed user preferences. Appearance, font/radius/component/density presets, sidebar/header layout, and known dashboard widget order/sizes persist and preview without a reload. Organization administrators own clinic branding; personal preferences cannot override record permissions. Logo/profile controls become active only with the real protected asset pipeline. Lucide replaces the prior icon family coherently through a shared owner.

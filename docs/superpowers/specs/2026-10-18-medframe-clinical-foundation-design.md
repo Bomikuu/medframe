@@ -1,5 +1,7 @@
 # Medframe clinical foundation design
 
+Historical architecture: preserved at `checkpoint/pre-django-2026-10-18`. The user's Django Edition now supersedes conflicting stack, theme-default, icon, and delivery grouping decisions; see `2026-10-18-medframe-django-amendment.md`. Existing confidentiality and clinical-integrity rules remain migration requirements.
+
 Status: architecture approved by the user on October 18, 2026. The foundation slice is implemented; later clinical slices remain pending.
 
 Source: `docs/requirements/medframe-master-v3.txt`, supplied by the user on October 18, 2026. The master brief remains authoritative. This document translates it into domain boundaries and release gates; it does not replace the roadmap.

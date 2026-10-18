@@ -1,0 +1,2455 @@
+This version focuses on four important changes:
+1. Django replaces FastAPI — using Django ORM, authentication, migrations, Django Admin, and Strawberry GraphQL.
+2. Clinical-first development — doctors, patients, medical records, consultations, diagnoses, and interactive 3D dental charting come first.
+3. White, customizable dashboard — professional, minimal, with configurable colors, typography, layouts, components, and clinic branding.
+4. Batch-based implementation — implement multiple connected features together instead of completing only one minor feature per development cycle.
+The first batch should produce a working clinical platform, not just authentication or dashboard mockups.
+Copy-Paste Implementation Prompt
+# MEDFRAME
+## The Foundation of Modern Care
+### Master Implementation Specification — Django Edition
+
+# ============================================================
+# 1. PROJECT OVERVIEW
+# ============================================================
+
+Build Medframe, a modern, secure, customizable healthcare
+management platform designed for doctors, dentists, clinics,
+patients, and healthcare organizations.
+
+Project Name: Medframe
+Repository: medframe
+Tagline: The Foundation of Modern Care.
+
+Medframe should function as a clinical operating system.
+
+The platform will eventually support:
+
+- Doctor and dentist dashboards
+- Patient registration and management
+- Electronic medical records
+- Medical consultations
+- Diagnosis documentation
+- Interactive 3D dental charting
+- Interactive anatomical visualization
+- Treatment plans
+- Medical documents and X-rays
+- Patient portals
+- Appointment scheduling
+- Real-time queues
+- Billing and payments
+- Diagnostic center collaboration
+- Clinic administration
+- Personalized clinic websites
+- Clinic website builder
+
+INITIAL FOCUS:
+
+1. Doctors and dentists
+2. Patient management
+3. Clinical consultations
+4. Medical records
+5. Diagnosis documentation
+6. Interactive 3D dental chart
+7. Treatment management
+8. Clinical history
+9. Dashboard customization
+10. Clinic branding
+
+IMPORTANT:
+
+Medframe is a clinical platform first.
+
+Do not prioritize appointment booking, queue management,
+marketing pages, or public clinic website builders during
+the initial development.
+
+These features will be implemented after the core clinical
+workflows are functional.
+
+The first implementation should already allow doctors to
+register patients, conduct consultations, interact with
+dental models, record diagnoses, and save medical records.
+
+# ============================================================
+# 2. TECHNOLOGY STACK
+# ============================================================
+
+FRONTEND:
+
+- Next.js with App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Hook Form
+- Zod
+- Apollo Client or another suitable GraphQL client
+- GraphQL Code Generator
+- React Three Fiber
+- Three.js
+- Lucide Icons
+
+BACKEND:
+
+- Python
+- Django
+- Strawberry GraphQL
+- strawberry-graphql-django
+- Django ORM
+- Django Migrations
+- Django Authentication
+- Django Permissions
+- Django Admin
+- PostgreSQL
+
+ADDITIONAL INFRASTRUCTURE:
+
+- Redis when caching or real-time messaging becomes necessary
+- Celery for asynchronous background jobs
+- Django Channels for future real-time features
+- Private S3-compatible storage for medical files
+
+ARCHITECTURE:
+
+Use a modular Django application.
+
+Avoid introducing unnecessary microservices.
+
+Django must remain the primary backend.
+
+Do not use FastAPI for the initial implementation.
+
+GraphQL should be the primary communication interface
+between Next.js and Django.
+
+Use Django views or REST endpoints only when appropriate,
+such as health checks and secure file operations.
+
+Use Django's existing capabilities whenever possible.
+
+Avoid unnecessarily recreating features already provided
+by Django.
+
+# ============================================================
+# 3. DEVELOPMENT APPROACH — BATCH IMPLEMENTATION
+# ============================================================
+
+IMPORTANT IMPLEMENTATION INSTRUCTION:
+
+Do not implement only one tiny feature per development cycle.
+
+Implement MULTIPLE RELATED FEATURES in each development batch.
+
+A batch should represent a complete functional milestone.
+
+For example:
+
+BAD APPROACH:
+
+Task 1:
+Create patient database model.
+
+Stop.
+
+Task 2:
+Create patient API.
+
+Stop.
+
+Task 3:
+Create patient form.
+
+Stop.
+
+Task 4:
+Create patient list.
+
+Stop.
+
+GOOD APPROACH:
+
+BATCH: PATIENT MANAGEMENT
+
+Implement together:
+
+- Patient database models
+- Patient registration
+- Patient list
+- Patient search
+- Patient profile
+- Medical history
+- GraphQL queries and mutations
+- Validation
+- Authorization
+- Relevant tests
+
+The batch should be functional from frontend to database.
+
+Each batch should include:
+
+1. Database models
+2. Django migrations
+3. Backend business logic
+4. GraphQL operations
+5. Frontend pages and components
+6. Validation
+7. Authorization
+8. Relevant tests
+9. Integration verification
+
+Implement multiple cohesive features in one batch.
+
+Avoid stopping after creating only models,
+only API endpoints, or only frontend mockups.
+
+When a feature is straightforward, complete the surrounding
+related functionality in the same batch.
+
+Do not artificially split closely related changes
+into numerous tiny tasks.
+
+Do not ask for confirmation after every file or component.
+
+Continue implementing the defined batch using reasonable
+technical decisions.
+
+However:
+
+- Do not skip security requirements.
+- Do not bypass validation.
+- Do not sacrifice data integrity.
+- Do not invent clinical information.
+- Do not implement unrelated future modules prematurely.
+- Do not claim a feature works without verifying it.
+
+If a dependency or technical limitation blocks a feature,
+complete the remaining feasible functionality and clearly
+identify the blocker.
+
+# ============================================================
+# 4. REPOSITORY STRUCTURE
+# ============================================================
+
+Use a monorepo named:
+
+medframe/
+
+Suggested structure:
+
+medframe/
+│
+├── apps/
+│   └── web/
+│       ├── src/
+│       │   ├── app/
+│       │   ├── components/
+│       │   ├── features/
+│       │   │   ├── dashboard/
+│       │   │   ├── patients/
+│       │   │   ├── doctors/
+│       │   │   ├── consultations/
+│       │   │   ├── dental/
+│       │   │   ├── treatments/
+│       │   │   ├── records/
+│       │   │   ├── documents/
+│       │   │   ├── branding/
+│       │   │   └── settings/
+│       │   ├── hooks/
+│       │   ├── lib/
+│       │   └── styles/
+│       └── public/
+│
+├── services/
+│   └── api/
+│       ├── config/
+│       │   ├── settings/
+│       │   ├── urls.py
+│       │   └── asgi.py
+│       │
+│       ├── apps/
+│       │   ├── accounts/
+│       │   ├── organizations/
+│       │   ├── patients/
+│       │   ├── providers/
+│       │   ├── encounters/
+│       │   ├── clinical/
+│       │   ├── dental/
+│       │   ├── treatments/
+│       │   ├── documents/
+│       │   ├── branding/
+│       │   └── auditing/
+│       │
+│       ├── graphql/
+│       │   ├── schema.py
+│       │   ├── queries.py
+│       │   └── mutations.py
+│       │
+│       ├── manage.py
+│       └── requirements/
+│
+├── packages/
+│   └── shared/
+│
+├── infrastructure/
+├── docs/
+└── README.md
+
+Keep Django applications focused on business domains.
+
+Use Django models for data persistence.
+
+Use service functions or domain services
+for complex business operations.
+
+Avoid placing complicated business logic directly
+inside GraphQL resolvers.
+
+GraphQL resolvers should call authorized services.
+
+# ============================================================
+# 5. BRAND IDENTITY
+# ============================================================
+
+BRAND NAME:
+
+Medframe
+
+TAGLINE:
+
+The Foundation of Modern Care.
+
+BRAND PERSONALITY:
+
+- Professional
+- Modern
+- Minimal
+- Trustworthy
+- Sophisticated
+- Clinical
+- Secure
+- Accessible
+
+The product must feel like professional healthcare software.
+
+Avoid childish, overly playful, or cartoonish design.
+
+------------------------------------------------------------
+5.1 DEFAULT BRAND COLORS
+------------------------------------------------------------
+
+Primary:
+Deep Navy
+#0F2D4A
+
+Secondary:
+Medical Teal
+#0EA5A4
+
+Accent:
+Soft Teal
+#22C1B6
+
+Main Background:
+White
+#FFFFFF
+
+Secondary Background:
+#F8FAFC
+
+Primary Text:
+#1E293B
+
+Secondary Text:
+#475569
+
+Borders:
+#E2E8F0
+
+These are DEFAULT values.
+
+They must not be permanently hardcoded across components.
+
+Create a configurable theme system.
+
+------------------------------------------------------------
+5.2 LOGO
+------------------------------------------------------------
+
+Use the previously selected Medframe logo,
+concept #11 from the medical instrument exploration.
+
+The symbol represents:
+
+- A human figure
+- Medical care
+- A medical staff-inspired form
+- Connected healthcare
+
+Use the approved reference asset when available.
+
+Do not create an unrelated replacement logo.
+
+Support:
+
+- Horizontal logo
+- Icon-only logo
+- Light-background logo
+- Dark-background logo
+- Monochrome logo
+- Favicon
+
+Prefer solid colors.
+
+Avoid excessive gradients.
+
+------------------------------------------------------------
+5.3 TYPOGRAPHY
+------------------------------------------------------------
+
+Default Font:
+
+Inter
+
+However, typography must be configurable.
+
+Create a typography system with:
+
+- Font family
+- Font size scale
+- Heading scale
+- Font weight
+- Line height
+- Letter spacing where appropriate
+
+Support a safe list of approved fonts.
+
+Avoid arbitrary untrusted font URLs.
+
+# ============================================================
+# 6. DASHBOARD DESIGN
+# ============================================================
+
+IMPORTANT:
+
+THE DEFAULT DASHBOARD MUST BE WHITE.
+
+Use a predominantly white interface.
+
+Avoid making the entire dashboard light gray.
+
+The design should feel:
+
+- Clean
+- Spacious
+- Professional
+- Enterprise-ready
+- Modern
+- Information-efficient
+
+DEFAULT APPEARANCE:
+
+Page Background:
+#FFFFFF
+
+Sidebar:
+#FFFFFF
+
+Header:
+#FFFFFF
+
+Cards:
+#FFFFFF
+
+Borders:
+Light neutral gray
+
+Text:
+Dark slate or navy
+
+Accent:
+Medical teal
+
+Use subtle borders to distinguish sections.
+
+Do not rely on large shadows or gradients.
+
+Keep the interface visually calm.
+
+------------------------------------------------------------
+6.1 LAYOUT
+------------------------------------------------------------
+
+Create a professional application shell.
+
+Include:
+
+- Sidebar navigation
+- Header
+- Main content area
+- Breadcrumbs
+- Contextual page actions
+- User account menu
+- Organization switcher
+- Search
+- Notifications
+
+The sidebar should support:
+
+- Expanded mode
+- Collapsed mode
+- Icons with labels
+- Active item indication
+- Grouped navigation
+- Responsive mobile behavior
+
+Do not make the sidebar unnecessarily wide.
+
+Avoid excessive nested navigation.
+
+------------------------------------------------------------
+6.2 DASHBOARD INFORMATION
+------------------------------------------------------------
+
+Doctor dashboard should include:
+
+- Total patients
+- Recent consultations
+- Draft consultations
+- Pending treatments
+- Recent patient activity
+- Relevant alerts
+- Quick actions
+
+QUICK ACTIONS:
+
+- Register Patient
+- Find Patient
+- Start Consultation
+- Open Dental Chart
+- Review Medical Records
+
+Prioritize actionable information.
+
+Avoid filling the dashboard with decorative statistics.
+
+Do not show every available metric by default.
+
+Allow users to customize dashboard widgets.
+
+# ============================================================
+# 7. CUSTOMIZABLE DESIGN SYSTEM
+# ============================================================
+
+THIS IS A CORE REQUIREMENT.
+
+Medframe must support extensive visual customization.
+
+Do not build a rigid design system where colors,
+layouts, and component styles are permanently fixed.
+
+Create a centralized theme configuration system.
+
+Use:
+
+- CSS variables
+- Tailwind theme tokens
+- Reusable shadcn/ui components
+- Database-backed branding settings
+- User preference settings
+
+All major application components should consume
+design tokens rather than hardcoded style values.
+
+------------------------------------------------------------
+7.1 GLOBAL THEME CONFIGURATION
+------------------------------------------------------------
+
+Create configurable design tokens for:
+
+COLORS:
+
+- Primary
+- Secondary
+- Accent
+- Background
+- Foreground
+- Sidebar background
+- Sidebar foreground
+- Header background
+- Card background
+- Border
+- Input
+- Muted
+- Success
+- Warning
+- Error
+
+TYPOGRAPHY:
+
+- Font family
+- Base font size
+- Heading scale
+- Font weights
+
+COMPONENTS:
+
+- Border radius
+- Border thickness presets
+- Button appearance variants
+- Input appearance variants
+- Card appearance variants
+- Table density
+- Shadow presets
+
+LAYOUT:
+
+- Sidebar width
+- Sidebar collapsed state
+- Content maximum width
+- Content spacing
+- Page density
+- Header configuration
+
+Do not expose every possible CSS property.
+
+Provide safe, structured customization settings.
+
+------------------------------------------------------------
+7.2 APPEARANCE SETTINGS
+------------------------------------------------------------
+
+Create a settings page:
+
+/clinic/settings/appearance
+
+Allow authorized users to customize:
+
+- Primary color
+- Secondary color
+- Accent color
+- Background appearance
+- Typography
+- Border radius
+- Component density
+- Sidebar appearance
+- Logo
+- Clinic branding
+
+Include:
+
+- Live preview
+- Save
+- Cancel
+- Reset to Default
+
+Changes should update the interface dynamically.
+
+Avoid requiring a full browser reload.
+
+Validate all customization values.
+
+------------------------------------------------------------
+7.3 THEME MODES
+------------------------------------------------------------
+
+Default:
+
+Light Mode
+
+The default appearance must be white.
+
+Support optional:
+
+- Dark Mode
+- System Preference
+
+Dark mode must not compromise clinical information
+readability or accessibility.
+
+Save user preferences.
+
+Do not make dark mode the default.
+
+------------------------------------------------------------
+7.4 BRANDING LEVELS
+------------------------------------------------------------
+
+Support different customization scopes.
+
+PLATFORM DEFAULTS:
+
+Medframe's default identity.
+
+ORGANIZATION BRANDING:
+
+Clinic-specific logo, colors, and appearance.
+
+USER PREFERENCES:
+
+Personal interface preferences such as:
+
+- Sidebar state
+- Density
+- Theme mode
+- Preferred dashboard layout
+
+Use a clear configuration precedence:
+
+Platform Defaults
+    ↓
+Organization Theme
+    ↓
+Allowed User Preferences
+
+Only authorized administrators may change
+organization-wide branding.
+
+Individual users should not modify another
+organization's appearance.
+
+------------------------------------------------------------
+7.5 CUSTOMIZABLE DASHBOARD
+------------------------------------------------------------
+
+Allow doctors to customize their dashboard.
+
+Examples:
+
+- Show or hide widgets
+- Reorder widgets
+- Configure widget sizes
+- Change compactness
+- Set preferred dashboard sections
+
+Available widgets may include:
+
+- Recent Patients
+- Recent Consultations
+- Draft Notes
+- Pending Treatments
+- Follow-Ups
+- Recent Documents
+
+Persist dashboard preferences.
+
+Provide a reset option.
+
+Do not allow dashboard customization
+to bypass data access permissions.
+
+------------------------------------------------------------
+7.6 FUTURE CLINIC BRANDING
+------------------------------------------------------------
+
+Prepare branding architecture for future
+personalized clinic landing pages.
+
+Each clinic should eventually be able to define:
+
+- Logo
+- Colors
+- Typography
+- Images
+- Website templates
+- Section layouts
+
+However:
+
+Do not implement the full website builder yet.
+
+For now, implement reusable branding
+and theme configuration foundations.
+
+The public website builder will be introduced
+in a later development phase.
+
+# ============================================================
+# 8. SECURITY AND PATIENT CONFIDENTIALITY
+# ============================================================
+
+SECURITY IS NON-NEGOTIABLE.
+
+Medframe handles sensitive patient information.
+
+Implement security from the beginning.
+
+AUTHENTICATION:
+
+Use Django authentication as the foundation.
+
+Create a custom User model from the beginning
+if additional identity fields are needed.
+
+Support:
+
+- Login
+- Logout
+- Secure sessions
+- Account recovery
+- MFA for clinical and administrative staff
+- Session revocation
+- Rate limiting
+
+Use secure HTTP-only cookies.
+
+Configure CSRF protection correctly for
+GraphQL mutations and session-based authentication.
+
+Do not store authentication credentials
+in localStorage.
+
+AUTHORIZATION:
+
+Implement organization-scoped access control.
+
+Support:
+
+- Platform Administrator
+- Clinic Administrator
+- Doctor
+- Dentist
+- Nurse
+- Receptionist
+- Patient
+
+Enforce:
+
+- Role permissions
+- Organization membership
+- Patient relationship authorization
+- Resource-level access restrictions
+
+A doctor must not automatically access
+every patient's records.
+
+A clinic must not access unrelated organizations' data.
+
+Receptionists must not automatically have access
+to detailed clinical notes.
+
+Do not rely on frontend permissions alone.
+
+DATA PROTECTION:
+
+- HTTPS/TLS
+- Encryption at rest
+- Encrypted backups
+- Private document storage
+- Secure secrets
+- No patient data in application logs
+- Appropriate retention controls
+
+AUDIT LOGGING:
+
+Track:
+
+- Medical record access
+- Medical record modification
+- Diagnosis updates
+- Consultation finalization
+- Treatment updates
+- Document access
+- Permission changes
+
+Preserve finalized clinical information.
+
+Support authorized amendments rather than
+silently overwriting historical records.
+
+Design for applicable Philippine data privacy
+requirements, including sensitive health information.
+
+Do not claim legal compliance without appropriate review.
+
+# ============================================================
+# 9. MULTI-TENANT CLINICS
+# ============================================================
+
+Support multiple healthcare organizations.
+
+Each organization can contain:
+
+- Branches
+- Doctors
+- Dentists
+- Staff
+- Patients
+- Clinical encounters
+- Dental charts
+- Treatment plans
+- Documents
+- Branding settings
+
+A user may belong to multiple organizations.
+
+Permissions must be evaluated independently.
+
+Create Django models for:
+
+- Organization
+- Branch
+- Membership
+- Role
+- Provider Profile
+- Organization Settings
+
+Support an organization switcher.
+
+Do not expose another clinic's records
+through search, GraphQL queries, or direct URLs.
+
+Use server-side tenant scoping on all
+protected data access.
+
+# ============================================================
+# 10. DOCTOR DASHBOARD
+# ============================================================
+
+Build the doctor dashboard early.
+
+Suggested route:
+
+/clinic
+
+The dashboard should show clinically relevant
+information rather than marketing metrics.
+
+Include:
+
+OVERVIEW:
+
+- Total patients
+- Recent consultations
+- Active encounters
+- Draft consultations
+- Pending treatment plans
+
+RECENT ACTIVITY:
+
+- Recently accessed patients
+- Recently completed consultations
+- Updated clinical records
+
+QUICK ACTIONS:
+
+- New Patient
+- Find Patient
+- New Consultation
+- Dental Chart
+- Medical Records
+
+Use real backend data.
+
+Do not rely on hardcoded mock arrays
+for completed functionality.
+
+Apply organization-scoped authorization.
+
+Use the white Medframe theme by default.
+
+# ============================================================
+# 11. PATIENT MANAGEMENT
+# ============================================================
+
+Implement complete patient management.
+
+FEATURES:
+
+- Register patient
+- Edit permitted demographics
+- Search patients
+- View patient profiles
+- Review medical history
+- Review consultation history
+- Review dental chart
+- Review treatments
+- View documents
+
+PATIENT PROFILE:
+
+Personal Information:
+- Name
+- Date of birth
+- Contact details
+- Address when necessary
+- Emergency contact
+- Guardian information where applicable
+
+Clinical Information:
+- Medical history
+- Allergies
+- Medications
+- Existing conditions
+- Past procedures
+
+Clinical Records:
+- Consultations
+- Diagnoses
+- Treatment plans
+- Medical documents
+- Dental chart
+
+Create appropriate Django models.
+
+Separate patient identity records
+from organization-specific clinical records.
+
+A patient may exist across multiple clinics,
+but one clinic must not automatically access
+another clinic's confidential records.
+
+PATIENT TIMELINE:
+
+Display important clinical events chronologically.
+
+Example:
+
+January:
+Initial Examination
+
+March:
+Tooth Decay Recorded
+
+April:
+Dental Filling Completed
+
+October:
+Follow-Up Consultation
+
+Allow selecting events to review details.
+
+# ============================================================
+# 12. CLINICAL CONSULTATIONS
+# ============================================================
+
+Create a dedicated consultation system.
+
+A consultation is represented by a clinical encounter.
+
+Do not require an appointment to create an encounter.
+
+Support:
+
+- Walk-in consultations
+- Unscheduled consultations
+- Follow-up consultations
+- Appointment-linked consultations later
+
+ENCOUNTER INFORMATION:
+
+- Patient
+- Organization
+- Provider
+- Date
+- Reason for visit
+- Symptoms
+- Examination findings
+- Diagnoses
+- Procedures
+- Notes
+- Treatment plan
+- Documents
+
+SUPPORT STATUSES:
+
+- Draft
+- In Progress
+- Completed
+- Finalized
+- Amended
+
+Use explicit state transitions.
+
+------------------------------------------------------------
+12.1 CONSULTATION WORKSPACE
+------------------------------------------------------------
+
+Create a professional consultation interface.
+
+Include:
+
+PATIENT OVERVIEW:
+
+- Patient identity
+- Relevant medical history
+- Allergies
+- Medications
+- Previous consultations
+
+CURRENT CONSULTATION:
+
+- Reason for visit
+- Symptoms
+- Examination findings
+- Diagnosis
+- Procedures
+- Notes
+
+CLINICAL VISUALIZATION:
+
+- Dental chart
+- Anatomical models later
+
+TREATMENT:
+
+- Proposed procedures
+- Treatment plan
+- Follow-up instructions
+
+DOCUMENTS:
+
+- X-rays
+- Reports
+- Other attachments
+
+Make the workspace efficient.
+
+Avoid unnecessary navigation while
+conducting a consultation.
+
+------------------------------------------------------------
+12.2 SOAP NOTES
+------------------------------------------------------------
+
+Support structured SOAP notes.
+
+Subjective:
+Patient-reported symptoms.
+
+Objective:
+Clinical examination findings.
+
+Assessment:
+Clinical interpretation and diagnosis.
+
+Plan:
+Procedures, treatment, and follow-up.
+
+Support:
+
+- Drafts
+- Editing
+- Autosave
+- Finalization
+- Authorized amendments
+
+Preserve previous finalized information.
+
+# ============================================================
+# 13. DIAGNOSIS AND CLINICAL FINDINGS
+# ============================================================
+
+Implement structured clinical findings.
+
+Doctors should be able to:
+
+- Add diagnoses
+- Add symptoms
+- Record observations
+- Select diagnosis status
+- Add severity where relevant
+- Add notes
+- Associate findings with encounters
+- Associate findings with anatomical locations
+
+Distinguish:
+
+- Patient-reported concern
+- Clinical observation
+- Suspected diagnosis
+- Confirmed diagnosis
+- Resolved condition
+
+Do not automatically convert patient symptoms
+into confirmed medical diagnoses.
+
+Design diagnosis terminology so it can later
+integrate with established medical coding systems.
+
+Do not hardcode all diagnosis logic in frontend components.
+
+Medframe is not an autonomous diagnostic system.
+
+# ============================================================
+# 14. INTERACTIVE 3D DENTAL CHART
+# ============================================================
+
+THIS IS ONE OF MEDFRAME'S MAIN FEATURES.
+
+Create an interactive 3D dental chart using:
+
+- React Three Fiber
+- Three.js
+- GLTF / GLB assets
+
+The model must integrate with the
+patient's actual clinical records.
+
+------------------------------------------------------------
+14.1 MODEL INTERACTION
+------------------------------------------------------------
+
+Allow:
+
+- Rotate
+- Zoom
+- Pan
+- Select individual teeth
+- Highlight selected teeth
+- Isolate teeth
+- Show upper jaw
+- Show lower jaw
+- Reset model position
+- Switch viewing angles
+
+Every tooth should be independently selectable.
+
+Use standardized dental numbering.
+
+Support permanent and primary dentition.
+
+------------------------------------------------------------
+14.2 TOOTH SELECTION
+------------------------------------------------------------
+
+Clicking a tooth should open its clinical information.
+
+Example:
+
+Tooth:
+16
+
+Location:
+Upper Right First Molar
+
+Condition:
+Dental Caries
+
+Affected Surface:
+Occlusal
+
+Severity:
+Moderate
+
+Treatment:
+Filling Recommended
+
+Status:
+Pending
+
+A contextual panel should allow:
+
+- Record Finding
+- Add Diagnosis
+- Add Procedure
+- Add Treatment
+- Add Note
+- View History
+
+------------------------------------------------------------
+14.3 TOOTH CONDITIONS
+------------------------------------------------------------
+
+Support:
+
+- Healthy
+- Dental caries
+- Cavity
+- Cracked tooth
+- Missing tooth
+- Filling
+- Crown
+- Dental implant
+- Root canal treatment
+- Gum inflammation
+
+Allow multiple findings where appropriate.
+
+Support tooth surface selection:
+
+- Mesial
+- Distal
+- Buccal
+- Lingual
+- Occlusal
+- Incisal
+
+------------------------------------------------------------
+14.4 VISUAL CONDITIONS
+------------------------------------------------------------
+
+The model should visually represent
+recorded tooth conditions.
+
+Examples:
+
+Healthy:
+Normal tooth appearance.
+
+Decay:
+Darkened affected region.
+
+Missing:
+Tooth hidden from visualization.
+
+Crack:
+Fracture annotation.
+
+Filling:
+Restoration representation.
+
+Crown:
+Crown representation.
+
+Implant:
+Implant representation.
+
+Do not present approximate illustrations
+as precise patient-specific anatomy.
+
+The clinical data must remain authoritative.
+
+------------------------------------------------------------
+14.5 PERSISTENCE
+------------------------------------------------------------
+
+Dental findings must be stored in PostgreSQL.
+
+Suggested models:
+
+DentalChart
+Tooth
+ToothFinding
+ToothSurfaceFinding
+DentalProcedure
+DentalChartRevision
+
+The 3D model must render from persisted records.
+
+Do not use frontend state as the authoritative
+source of clinical information.
+
+Reloading the page should restore the chart.
+
+------------------------------------------------------------
+14.6 DENTAL HISTORY
+------------------------------------------------------------
+
+Track each tooth's history.
+
+Example:
+
+January:
+Healthy
+
+March:
+Caries
+
+April:
+Filling Completed
+
+October:
+Follow-Up
+
+Allow dentists to review past dental states.
+
+Provide historical comparison.
+
+Preserve finalized chart information.
+
+------------------------------------------------------------
+14.7 2D ALTERNATIVE
+------------------------------------------------------------
+
+Provide a conventional 2D dental chart.
+
+Both 2D and 3D must use the same backend data.
+
+Users must still be able to document findings
+if 3D rendering is unavailable.
+
+# ============================================================
+# 15. TREATMENTS AND PROCEDURES
+# ============================================================
+
+Allow doctors to manage procedures.
+
+Examples:
+
+- Dental examination
+- Dental cleaning
+- Filling
+- Extraction
+- Root canal
+- Crown placement
+- Implant
+- Orthodontic adjustment
+
+PROCEDURE FIELDS:
+
+- Procedure
+- Patient
+- Encounter
+- Provider
+- Tooth when applicable
+- Tooth surface when applicable
+- Date
+- Status
+- Notes
+
+PROCEDURE STATUSES:
+
+- Proposed
+- Planned
+- In Progress
+- Completed
+- Cancelled
+
+Do not confuse proposed treatments
+with completed procedures.
+
+Allow treatment plans containing
+multiple procedures.
+
+Example:
+
+Root Canal Treatment Plan:
+
+1. Initial Examination
+2. Root Canal
+3. Crown Placement
+4. Follow-Up
+
+Track progress and history.
+
+# ============================================================
+# 16. MEDICAL RECORDS
+# ============================================================
+
+Create secure longitudinal patient records.
+
+Include:
+
+- Medical history
+- Allergies
+- Medications
+- Encounters
+- Diagnoses
+- Procedures
+- Treatment plans
+- Dental charts
+- Medical documents
+
+Support:
+
+- Timeline
+- Search
+- Filtering
+- Historical review
+- Authorized amendments
+
+Every clinical record should preserve:
+
+- Author
+- Organization
+- Patient
+- Date
+- Relevant encounter
+- Clinical status
+- Revision information
+
+Protect finalized records.
+
+# ============================================================
+# 17. MEDICAL DOCUMENT MANAGEMENT
+# ============================================================
+
+Support secure uploads for:
+
+- X-rays
+- Dental photos
+- Laboratory reports
+- Prescriptions
+- Medical documents
+- Consent documents
+
+Implement:
+
+- Private storage
+- Authorization
+- File type validation
+- File size limits
+- Malware scanning
+- Secure previews
+- Temporary signed downloads
+- Audit events
+
+Associate files with the correct
+patient and encounter.
+
+Never store medical files in
+public frontend directories.
+
+# ============================================================
+# 18. PATIENT PORTAL
+# ============================================================
+
+After the clinical foundation is functional,
+implement the patient portal.
+
+Patients should be able to view:
+
+- Personal information
+- Available medical records
+- Consultation history
+- Dental chart
+- Completed procedures
+- Treatment plans
+- Documents
+- Follow-up instructions
+
+Allow patient-reported information
+to be submitted separately.
+
+Do not allow patients to modify
+clinician-confirmed diagnoses.
+
+Require appropriate identity verification
+before granting access to existing records.
+
+Support guardian access when authorized.
+
+# ============================================================
+# 19. APPOINTMENTS — LATER PHASE
+# ============================================================
+
+Implement appointment scheduling after
+the clinical system is stable.
+
+Support:
+
+- Provider schedules
+- Availability
+- Booking
+- Rescheduling
+- Cancellation
+- Walk-ins
+- Follow-ups
+
+Appointments and encounters must remain
+separate domain entities.
+
+A consultation must work without a booking.
+
+Prevent double-booking through backend
+transactions and concurrency safeguards.
+
+# ============================================================
+# 20. QUEUE MANAGEMENT — LATER PHASE
+# ============================================================
+
+Implement real-time queue management
+after appointment scheduling.
+
+Patients should know how busy a clinic is.
+
+Example:
+
+Patients Waiting:
+5
+
+Currently Consulting:
+2
+
+Estimated Wait:
+35–50 minutes
+
+Authenticated patients can view:
+
+- Their queue number
+- Their position
+- Patients ahead
+- Estimated waiting time
+- Delay information
+
+Provide:
+
+- Keep Appointment
+- Reschedule
+- Cancel
+
+Never show another patient's identity
+or medical information in public queues.
+
+Use privacy-safe aggregated data.
+
+Estimated waiting time should consider:
+
+- Patients ahead
+- Consultation duration
+- Number of doctors
+- Active consultations
+- Clinic resources
+- Cancellations
+- No-shows
+- Delays
+
+Use Django Channels and Redis
+when implementing real-time updates.
+
+# ============================================================
+# 21. BILLING — LATER PHASE
+# ============================================================
+
+Support:
+
+- Consultation charges
+- Procedure charges
+- Invoices
+- Payments
+- Partial payments
+- Discounts
+- Refunds
+- Outstanding balances
+
+Example:
+
+Consultation:
+PHP 500
+
+Dental Cleaning:
+PHP 1,200
+
+Total:
+PHP 1,700
+
+Use backend-authoritative calculations.
+
+Keep financial records separate from
+finalized clinical documentation.
+
+# ============================================================
+# 22. DIAGNOSTIC COLLABORATION — LATER PHASE
+# ============================================================
+
+Allow clinics to collaborate with:
+
+- X-ray centers
+- Laboratories
+- Diagnostic providers
+
+Workflow:
+
+1. Doctor creates diagnostic request.
+2. Patient selects authorized center.
+3. Center accepts request.
+4. Examination is performed.
+5. Results are uploaded.
+6. Doctor receives notification.
+7. Doctor reviews results.
+
+Support secure sharing and auditing.
+
+Prepare for future DICOMweb and FHIR integrations.
+
+# ============================================================
+# 23. PERSONALIZED CLINIC WEBSITES — LATER PHASE
+# ============================================================
+
+Eventually, clinics should have their own
+personalized public websites.
+
+Example:
+
+/clinics/bright-smile-dental
+
+Each clinic can customize:
+
+- Logo
+- Colors
+- Fonts
+- Layout
+- Images
+- Sections
+- Services
+- Doctors
+- Booking
+- Queue display
+
+Create a clinic website builder later.
+
+Support:
+
+- Templates
+- Section editing
+- Reordering
+- Preview
+- Drafts
+- Publishing
+- Revision history
+- SEO
+- Custom domains
+
+IMPORTANT:
+
+Do not build this during the
+initial clinical development batches.
+
+For now, only establish the branding
+architecture needed to support it later.
+
+# ============================================================
+# 24. GRAPHQL IMPLEMENTATION
+# ============================================================
+
+Use Strawberry GraphQL with Django.
+
+Use strawberry-graphql-django where appropriate.
+
+INITIAL QUERIES:
+
+- currentUser
+- myOrganizations
+- clinicDashboard
+- patients
+- patient
+- patientHistory
+- encounters
+- encounter
+- dentalChart
+- toothHistory
+- treatmentPlans
+- medicalDocuments
+- organizationBranding
+- userPreferences
+
+INITIAL MUTATIONS:
+
+- createPatient
+- updatePatient
+- createEncounter
+- updateEncounterDraft
+- finalizeEncounter
+- amendEncounter
+- addDiagnosis
+- addClinicalNote
+- addObservation
+- addProcedure
+- saveToothFinding
+- updateDentalChart
+- createTreatmentPlan
+- addTreatmentItem
+- updateTreatmentStatus
+- uploadMedicalDocument
+- updateOrganizationBranding
+- updateUserPreferences
+- saveDashboardLayout
+
+Use Django ORM for queries and persistence.
+
+Avoid excessive database queries.
+
+Use select_related and prefetch_related
+where appropriate.
+
+Implement GraphQL pagination.
+
+Enforce authorization before accessing
+protected records.
+
+Apply query complexity and depth restrictions.
+
+Generate frontend TypeScript types.
+
+# ============================================================
+# 25. INITIAL DATABASE MODELS
+# ============================================================
+
+Create the models required by the first
+clinical development batches.
+
+IDENTITY:
+
+- User
+- Organization
+- Branch
+- OrganizationMembership
+- Role
+
+PROVIDERS:
+
+- ProviderProfile
+- ProviderSpecialty
+
+PATIENTS:
+
+- Patient
+- PatientMedicalHistory
+- PatientAllergy
+- PatientMedication
+
+CLINICAL:
+
+- Encounter
+- ClinicalNote
+- Diagnosis
+- ClinicalObservation
+- Procedure
+
+DENTAL:
+
+- DentalChart
+- ToothFinding
+- ToothSurfaceFinding
+- DentalProcedure
+- DentalChartRevision
+
+TREATMENTS:
+
+- TreatmentPlan
+- TreatmentPlanItem
+
+DOCUMENTS:
+
+- MedicalDocument
+- DocumentVersion
+
+BRANDING:
+
+- OrganizationBranding
+- OrganizationTheme
+- UserAppearancePreferences
+- DashboardLayout
+
+AUDITING:
+
+- AuditEvent
+- ClinicalRecordRevision
+
+Use Django migrations.
+
+Do not manually create production
+database tables outside migrations.
+
+Design models with:
+
+- Foreign keys
+- Organization scope
+- Constraints
+- Indexes
+- Timestamps
+- Status history
+- Revision tracking
+
+Do not create every future module's
+database tables immediately.
+
+# ============================================================
+# 26. FIRST DEVELOPMENT BATCH
+# ============================================================
+
+IMPLEMENT MULTIPLE FEATURES IN THE FIRST BATCH.
+
+Do not stop after project initialization.
+
+The first batch should deliver a working
+clinical management foundation.
+
+BATCH 1 — CLINICAL FOUNDATION
+
+IMPLEMENT TOGETHER:
+
+1. Project Setup
+
+- Initialize Next.js
+- Initialize Django
+- Configure PostgreSQL
+- Configure Strawberry GraphQL
+- Configure environment variables
+- Configure development environment
+
+2. Authentication and Organizations
+
+- User model
+- Login
+- Logout
+- Secure sessions
+- Organization model
+- Membership model
+- Doctor/dentist roles
+- Basic access permissions
+
+3. Medframe Application Shell
+
+- White dashboard
+- Sidebar
+- Header
+- Organization switcher
+- Navigation
+- Account menu
+- Responsive behavior
+
+4. Branding and Appearance
+
+- Medframe theme tokens
+- Organization branding
+- User appearance preferences
+- Light mode
+- Optional dark mode
+- Appearance settings
+- Logo configuration
+- Color customization
+- Typography customization
+- Sidebar customization
+
+5. Patient Management
+
+- Register patient
+- Patient list
+- Search patients
+- Patient profile
+- Edit patient information
+- Medical history
+- Allergies
+- Medications
+
+6. Clinical Consultations
+
+- Start consultation
+- Encounter records
+- SOAP notes
+- Draft persistence
+- Diagnosis recording
+- Consultation history
+- Finalization and amendments
+
+7. Dental Chart Foundation
+
+- Dental chart model
+- Tooth identification
+- Tooth findings
+- Surface findings
+- Interactive tooth selection
+- Condition rendering
+- Save and retrieve dental chart
+- 2D chart fallback
+
+8. Basic Treatment Management
+
+- Add proposed procedure
+- Record completed procedure
+- Create treatment plan
+- View treatment history
+
+9. Medical Records and Documents
+
+- Clinical timeline
+- Encounter history
+- Secure document association
+- Upload and retrieve protected files
+
+10. Tests and Integration
+
+- Database migration tests
+- Authentication tests
+- Patient authorization tests
+- Encounter persistence tests
+- Dental chart persistence tests
+- Tenant isolation tests
+- Theme persistence tests
+
+IMPORTANT:
+
+This is one integrated development batch.
+
+The goal is not to create ten disconnected
+sets of files.
+
+The goal is to produce a working clinical workflow.
+
+Implement these modules cohesively.
+
+Use shared services and components.
+
+Do not stop after implementing only
+the dashboard or authentication.
+
+If the implementation environment has limits,
+prioritize completing secure end-to-end workflows
+over creating partially functional feature shells.
+
+# ============================================================
+# 27. FIRST BATCH ACCEPTANCE CRITERIA
+# ============================================================
+
+The first development batch should demonstrate:
+
+DOCTOR WORKFLOW:
+
+1. Doctor logs into Medframe.
+2. Doctor opens the white dashboard.
+3. Doctor searches for a patient.
+4. Doctor registers a new patient.
+5. Doctor opens the patient profile.
+6. Doctor reviews medical history.
+7. Doctor starts a consultation.
+8. Doctor enters clinical notes.
+9. Doctor adds a diagnosis.
+10. Doctor opens the dental chart.
+11. Doctor selects a tooth.
+12. Doctor records a tooth condition.
+13. Doctor selects affected surfaces.
+14. Dental chart reflects the finding.
+15. Doctor adds a treatment or procedure.
+16. Doctor optionally uploads an X-ray.
+17. Doctor saves the encounter.
+18. Doctor finalizes the encounter.
+19. The record appears in patient history.
+20. Doctor can reopen and review the saved information.
+
+BRANDING WORKFLOW:
+
+1. Administrator opens appearance settings.
+2. Administrator changes primary color.
+3. Administrator changes typography.
+4. Administrator changes logo.
+5. Administrator previews the appearance.
+6. Administrator saves the configuration.
+7. The application updates.
+8. The configuration persists after refresh.
+9. Other organizations remain unaffected.
+10. Authorized users can restore defaults.
+
+SECURITY WORKFLOW:
+
+1. Clinic A creates a patient.
+2. Clinic B attempts to access that patient.
+3. Access is rejected.
+4. Unauthorized staff attempt to view restricted notes.
+5. Access is rejected.
+6. Sensitive operations create audit events.
+
+All completed functionality must use real persistence.
+
+Do not depend on hardcoded placeholder data.
+
+# ============================================================
+# 28. SECOND DEVELOPMENT BATCH
+# ============================================================
+
+BATCH 2 — ADVANCED CLINICAL EXPERIENCE
+
+Build on the existing clinical foundation.
+
+Implement multiple features together:
+
+1. Improved 3D Dental Model
+
+- Better dental geometry
+- Upper/lower jaw controls
+- Surface-level condition visualization
+- Tooth isolation
+- Camera presets
+- Selected tooth details
+
+2. Dental History
+
+- Historical chart states
+- Timeline comparison
+- Previous vs current findings
+- Tooth-specific treatment history
+
+3. Treatment Plans
+
+- Multi-step treatment plans
+- Progress tracking
+- Planned vs completed procedures
+- Follow-up recommendations
+
+4. Medical Records
+
+- Better document management
+- Record filtering
+- Structured history
+- Secure previews
+- Historical review
+
+5. Patient Portal
+
+- Patient authentication
+- Identity verification
+- Patient dashboard
+- Read-only clinical history
+- Dental chart viewing
+- Treatment plan viewing
+
+6. Clinical Experience Improvements
+
+- Consultation templates
+- Improved data entry
+- Draft management
+- Reusable clinical components
+- Efficient navigation
+
+Do not start public website development.
+
+# ============================================================
+# 29. THIRD DEVELOPMENT BATCH
+# ============================================================
+
+BATCH 3 — CLINIC OPERATIONS
+
+Implement:
+
+1. Provider Schedules
+2. Appointment Availability
+3. Appointment Booking
+4. Rescheduling
+5. Appointment Management
+6. Patient Check-In
+7. Receptionist Queue Management
+8. Waiting Time Estimation
+9. Real-Time Queue Updates
+10. Patient Queue Monitoring
+
+Maintain confidentiality.
+
+Public calendars and queues must never expose
+private patient information.
+
+# ============================================================
+# 30. FUTURE DEVELOPMENT BATCHES
+# ============================================================
+
+BATCH 4:
+
+Billing, payments, notifications,
+SMS reminders, and follow-ups.
+
+BATCH 5:
+
+Diagnostic center collaboration,
+referrals, X-ray sharing, and result review.
+
+BATCH 6:
+
+General practice anatomical visualization,
+body-region annotations, and skeletal models.
+
+BATCH 7:
+
+Personalized clinic landing pages,
+website builder, publishing, and SEO.
+
+BATCH 8:
+
+Advanced analytics, additional specialties,
+interoperability, and optional AI assistance.
+
+# ============================================================
+# 31. PERFORMANCE AND DEVELOPMENT EFFICIENCY
+# ============================================================
+
+Avoid unnecessary commands and expensive validation
+during routine development.
+
+Use targeted tests for changed functionality.
+
+Do not run full production builds
+after every minor frontend change.
+
+Do not repeatedly reinstall dependencies.
+
+Do not repeatedly regenerate migrations
+when models have not changed.
+
+Use Django management commands.
+
+Common commands:
+
+python manage.py runserver
+
+python manage.py makemigrations
+
+python manage.py migrate
+
+python manage.py test
+
+python manage.py createsuperuser
+
+Use pytest with pytest-django if appropriate.
+
+Keep development scripts straightforward.
+
+Provide convenient commands for:
+
+- Starting frontend
+- Starting backend
+- Running migrations
+- Running targeted tests
+- Running development services
+
+Use Docker Compose for PostgreSQL
+and other required local infrastructure
+when appropriate.
+
+Do not introduce unnecessary infrastructure
+before it is needed.
+
+# ============================================================
+# 32. CODE QUALITY
+# ============================================================
+
+Follow these principles:
+
+- Type-safe frontend
+- Modular Django applications
+- Reusable React components
+- Centralized design tokens
+- Server-side authorization
+- Clinical data integrity
+- Consistent validation
+- Database transactions
+- Secure file handling
+- Efficient database queries
+- Auditable sensitive operations
+- Accessibility
+- Responsive design
+
+Avoid:
+
+- Giant components
+- Duplicated business logic
+- Hardcoded branding
+- Unnecessary abstractions
+- Unrelated refactoring
+- Excessive dependencies
+- Mock APIs presented as finished functionality
+- Medical data stored only in frontend state
+
+Use sensible naming conventions.
+
+Keep the codebase maintainable.
+
+# ============================================================
+# 33. TESTING REQUIREMENTS
+# ============================================================
+
+Write tests for:
+
+AUTHENTICATION:
+
+- Login
+- Logout
+- Session handling
+- Unauthorized access
+
+TENANT ISOLATION:
+
+- Clinic A cannot access Clinic B
+- Organization queries are scoped correctly
+- Cross-tenant mutations are rejected
+
+PATIENT MANAGEMENT:
+
+- Patient creation
+- Patient updates
+- Patient retrieval
+- Authorized search
+- Medical history persistence
+
+CLINICAL:
+
+- Encounter creation
+- SOAP note persistence
+- Diagnosis recording
+- Finalization
+- Authorized amendments
+- Historical record integrity
+
+DENTAL:
+
+- Tooth selection mapping
+- Tooth condition persistence
+- Surface findings
+- Multiple findings
+- Historical chart retrieval
+- Unauthorized updates
+
+BRANDING:
+
+- Organization theme persistence
+- User preferences
+- Theme reset
+- Organization isolation
+- Invalid theme values rejected
+
+DOCUMENTS:
+
+- Authorized uploads
+- Private file access
+- Patient associations
+- Unsupported file rejection
+
+Prioritize tests for high-risk
+clinical and security functionality.
+
+# ============================================================
+# 34. FINAL EXECUTION INSTRUCTIONS
+# ============================================================
+
+Start by inspecting the repository.
+
+If the repository is empty, initialize the project.
+
+Use:
+
+- Next.js
+- TypeScript
+- Tailwind
+- shadcn/ui
+- Django
+- Strawberry GraphQL
+- PostgreSQL
+- React Three Fiber
+- Three.js
+
+Establish the Medframe design system.
+
+The default dashboard must be WHITE.
+
+Implement organization branding and user appearance
+preferences using reusable design tokens.
+
+Do not hardcode styling throughout the application.
+
+Implement the first batch as multiple connected features.
+
+Do not stop after scaffolding.
+
+Do not stop after implementing authentication.
+
+Do not stop after creating database models.
+
+Do not stop after generating dashboard mockups.
+
+Continue through the first integrated clinical workflow.
+
+Use real Django models and GraphQL operations.
+
+Ensure frontend actions persist to PostgreSQL.
+
+Maintain proper authorization and audit trails.
+
+Do not move to appointments or public website development
+until the core clinical foundation is operational.
+
+At the end of each batch:
+
+1. Summarize implemented features.
+2. Identify relevant database migrations.
+3. Describe completed workflows.
+4. Report tests performed and results.
+5. Identify incomplete functionality.
+6. List meaningful next-batch priorities.
+
+Do not claim unimplemented features are complete.
+
+Prioritize:
+
+1. Patient confidentiality
+2. Clinical record integrity
+3. Working doctor workflows
+4. Interactive dental charting
+5. Reliable persistence
+6. Customizable professional UI
+7. Performance
+8. Maintainability
+
+Build Medframe as a clinical-first healthcare platform
+that doctors can use to manage real workflows,
+with appointments and clinic websites introduced later.
+
+Medframe — The Foundation of Modern Care.
+
+My additional recommendations
+There are three implementation decisions I would make from the beginning.
+1. Treat theme customization as a proper application module
+Instead of scattering theme configuration throughout Next.js, create a dedicated branding Django application.
+For example, the organization can store settings equivalent to:
+interface MedframeTheme {
+  branding: {
+    organizationName: string;
+    logoUrl?: string;
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+  };
+
+  appearance: {
+    mode: "light" | "dark" | "system";
+    fontFamily: string;
+    borderRadius: "none" | "small" | "medium" | "large";
+    density: "compact" | "comfortable" | "spacious";
+  };
+
+  layout: {
+    sidebar: "expanded" | "collapsed";
+    sidebarWidth: number;
+    contentWidth: "contained" | "full";
+    headerStyle: "standard" | "compact";
+  };
+}
+
+This is a conceptual frontend type; the actual values should be validated against Django models and stored securely.
+The app reads the effective configuration and applies CSS variables.
+This lets each clinic customize its appearance without rebuilding or redeploying the application.
+2. Keep the dashboard genuinely white
+Based on your preference for minimal, professional interfaces, I would use the following default appearance.
+Element	Default
+Page background	#FFFFFF
+Sidebar	#FFFFFF
+Header	#FFFFFF
+Cards	#FFFFFF
+Borders	#E2E8F0
+Primary text	#1E293B
+Primary actions	#0F2D4A
+Interactive accents	#0EA5A4
+Font	Inter
+Shadows	Minimal
+Gradients	None by default
+Components	shadcn/ui
+
+
+White should be the dominant background, with borders and typography creating hierarchy. Reserve stronger colors for actions, selected states, and important information.
+3. Integrate the 3D dental model with the consultation
+I would avoid treating the dental model as a completely separate record-editing application.
+Instead, make it available directly within the clinical consultation workspace.
+For example:
+MEDFRAME
+└── Clinical Workspace
+    │
+    ├── Patient Overview
+    │
+    ├── Current Consultation
+    │
+    ├── Dental Chart
+    │   ├── Interactive 3D Model
+    │   ├── Tooth Selection
+    │   ├── Clinical Findings
+    │   ├── Tooth Conditions
+    │   └── Treatment History
+    │
+    ├── Clinical Notes
+    │
+    ├── Diagnosis
+    │
+    ├── Procedures
+    │
+    ├── Treatment Plan
+    │
+    └── Medical Documents
+
+When the dentist clicks a tooth and records a finding, that record should immediately become part of the current encounter's draft. Once the encounter is finalized, the findings become part of the patient's clinical history.
+This avoids having separate, inconsistent records between the 3D model and the consultation.
+The intended outcome of Batch 1 is a functioning Medframe clinical workspace with multiple connected capabilities—not a collection of disconnected pages.

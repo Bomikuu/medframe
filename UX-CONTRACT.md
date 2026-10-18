@@ -1,4 +1,4 @@
-# Medframe foundation interaction contract
+# Medframe shared interaction contract
 
 Visual rules live in [DESIGN.md](DESIGN.md). The master brief and approved clinical design own business/security policy.
 
@@ -60,3 +60,11 @@ Authority: the approved clinical design and `docs/superpowers/plans/2026-10-18-m
 | Scrollbar                            | `app/globals.css`                                                 | Global token colors, standards baseline plus engine fallback; forced-colors uses system defaults.                                                                              |
 
 Organization UUID is nonsecret URL context. Patient search terms, contact details, and clinical input never go into query strings or browser storage. Patient links preserve organization context; switching organizations returns to the directory. Unavailable/denied clinical data is an error, never an empty medical history. Missing review states remain "Not reviewed"; only an explicit clinician submission records none reported.
+
+## Django Edition amendment contract
+
+Authority: `docs/requirements/medframe-django-edition.txt` and `docs/superpowers/specs/2026-10-18-medframe-django-amendment.md`. Existing patient/auth interaction contracts are migration regression requirements. Django, appearance settings, encounters/dental/treatments/documents, notifications, and the new default theme remain target behaviors until implemented and tested.
+
+Batch 1 will keep one organization/patient context and centralized safe drafts/version/request keys across its forms. Branding preview is explicitly unsaved until Save; Cancel restores the persisted effective theme; Reset previews defaults before Save. Light is the new default, with saved dark/system choices. Widget visibility/order does not affect authorization. Encounter saves/finalization/amendments, dental findings, procedures, and document links share explicit version/state rules. Draft findings render only as encounter draft overlays until finalized. No patient/encounter file is exposed through a public frontend path.
+
+The user requires native work without subagents. No per-component approval or partial-scaffold handoff splits the integrated batch.

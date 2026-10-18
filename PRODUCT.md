@@ -8,7 +8,9 @@ web
 
 ## Stack
 
-Explicitly selected in the user's master brief and approved architecture: one Next.js App Router application with TypeScript, Tailwind CSS, shadcn/ui, React Hook Form, Zod, a typed GraphQL client and code generation, and React Three Fiber/Three.js. The backend is a FastAPI/Strawberry modular monolith using SQLAlchemy, Alembic, PostgreSQL, Redis, and private S3-compatible document storage.
+Current target, selected in the user's Django Edition amendment: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, React Hook Form, Zod, a suitable typed GraphQL client/code generation, React Three Fiber/Three.js, and Lucide. The backend target is a modular Django application using Django ORM, authentication, sessions, permissions, migrations, Admin, Strawberry, strawberry-graphql-django, and PostgreSQL. Private S3-compatible storage/scanning and Celery support the connected document/asset workflows; Redis already supports shared throttling and can also provide the broker.
+
+The currently runnable, verified baseline still uses FastAPI/SQLAlchemy/Alembic and Phosphor. It is saved as `77bf229` / `checkpoint/pre-django-2026-10-18`. Do not describe Django or the target theme as already implemented before migration verification.
 
 ## Users
 
@@ -16,7 +18,7 @@ Dentists and doctors documenting real clinical care are the primary users. Clini
 
 ## Product Purpose
 
-Provide a clinical workspace for patient management, consultations, structured medical records, interactive dental charting, treatment planning, and longitudinal history. The first complete release lets a dentist register a patient, document care, record tooth/surface findings and procedures, attach supporting documents, finalize the consultation, and reopen its persisted history.
+Provide a clinical workspace for patient management, consultations, structured medical records, interactive dental charting, treatment planning, and longitudinal history. Batch 1 must deliver the connected clinical workflow: Django-backed identity/organizations/patients, a white customizable shell, provider/consultation/SOAP/diagnosis workflows, integrated 2D/3D tooth/surface findings, procedures/basic treatment plans, protected documents, finalization/amendments, and reopening exact persisted history. Organization branding and user/dashboard preferences are part of this batch.
 
 ## Positioning
 
@@ -28,30 +30,32 @@ Clinicians work with patient context, medical history, allergies, findings, note
 
 ## Capabilities and Constraints
 
-- Deliver foundation, patients, consultations, dental charting, then treatment/history/documents as integrated vertical slices.
+- Deliver the Django Edition's integrated Batch 1 with multiple connected features. Internal work packages/commits are implementation order, not separate user handoffs. Batch 2 improves clinical visualization/history/plans and adds verified patient access; operations and public websites remain later.
 - Persist clinical records in PostgreSQL and enforce tenant and patient authorization in backend services.
 - Staff must complete MFA. Receptionists and administrators receive no automatic entitlement to clinical notes.
 - Finalized records are immutable; amendments preserve the original and identify author, time, and reason.
 - Keep subjective symptoms, confirmed diagnoses, proposed treatment, completed procedures, and illustrative previews distinct.
 - Use synthetic patient data during development. Do not claim regulatory compliance or anatomical validation without review.
-- Patient portal follows the clinical milestone. Scheduling, queues, billing, diagnostics, general anatomy, and clinic websites follow the roadmap.
-- Maintain readable source, focused modules, Prettier for supported formats, Ruff for Python, and Tailwind-first styling.
+- Patient portal follows the complete Batch 1 clinical milestone. Scheduling/queues, financial communication, diagnostics, general anatomy, clinic websites, and expansion follow Batches 3–8 of the new roadmap.
+- Maintain readable source, focused modules, Prettier for supported formats, Ruff for Python, and Tailwind-first styling. Execute natively without subagents or delegated reviews, as the user instructed on October 18, 2026.
 - Group and size form inputs for their expected content. Profile-image uploads use circular avatar controls; clinical images retain complete framing.
 
 ## Brand Commitments
 
 Name: Medframe. Tagline: The Foundation of Modern Care.
 
-The user specifies a professional, clinical, trustworthy, minimal, modern, secure identity; Inter typography; deep navy `#0F2D4A`, medical teal `#0EA5A4`, soft teal `#22C1B6`, off-white `#F8FAFC`, and slate `#475569`. Preserve these commitments with accessible contrast. Avoid excessive gradients, cartoon illustration, unnecessary decoration, excessive cards, and oversized controls.
+The amended identity remains professional, clinical, trustworthy, minimal, modern, and secure. The default is explicitly light and predominantly white: page/sidebar/header/cards `#FFFFFF`, secondary background `#F8FAFC`, foreground `#1E293B`, supporting text `#475569`, borders `#E2E8F0`, navy actions `#0F2D4A`, and teal interaction accents `#0EA5A4`. Inter remains the default within a safe configurable font system. Organization branding and allowed user preferences consume centralized validated tokens; dark/system modes are optional saved choices. Preserve accessible contrast and meaningful clinical semantic colors. Avoid excessive gradients, cartoon illustration, unnecessary decoration, excessive cards, and oversized controls.
 
 Use the approved concept-11 medical symbol when supplied. Do not invent an unrelated substitute. The text name can identify the product while that asset is unavailable.
 
 ## Evidence on Hand
 
-- `docs/requirements/medframe-master-v3.txt`: exact copy of the supplied master brief.
-- `docs/superpowers/specs/2026-10-18-medframe-clinical-foundation-design.md`: architecture approved on October 18, 2026, including subsequent code/form requirements.
-- The initial repository has no application or existing visual implementation.
-- The approved logo and licensed/clinically reviewed anatomical assets are not present. No production infrastructure, customer claims, clinical validation, or compliance evidence has been provided.
+- `docs/requirements/medframe-django-edition.txt`: exact new authoritative user brief; overrides conflicting earlier stack, theme, icon, and delivery instructions.
+- `docs/superpowers/specs/2026-10-18-medframe-django-amendment.md`: migration/preservation, clinical integrity, appearance, execution, and eight-batch roadmap.
+- `docs/superpowers/plans/2026-10-18-medframe-django-batch-1.md`: one integrated implementation plan covering all connected Batch 1 features.
+- `docs/operations/pre-django-checkpoint.md`: source/data recovery locations and verified baseline evidence.
+- `docs/requirements/medframe-master-v3.txt` and the older foundation/patient plans: historical context and unchanged requirements, not the current stack/release authority.
+- The approved logo and licensed/clinically reviewed anatomical asset remain unavailable. No production infrastructure, clinical validation, or compliance evidence is supplied.
 
 ## Product Principles
 

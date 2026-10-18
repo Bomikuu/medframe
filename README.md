@@ -1,5 +1,13 @@
 # Medframe
 
+## Current status and Django amendment
+
+The verified patient-management implementation is preserved at commit `77bf229`, tag `checkpoint/pre-django-2026-10-18`. It passes 47 backend tests and 5 production browser journeys. A private source/database/configuration backup is recorded in [checkpoint notes](docs/operations/pre-django-checkpoint.md).
+
+The latest target is the [Django Edition](docs/requirements/medframe-django-edition.txt): Django replaces FastAPI; the dashboard defaults to white/light; branding and user/dashboard preferences become persistent; Batch 1 includes connected consultations, diagnoses, dental charting, treatments, and protected documents. Work is native with no subagents. Read the [amendment](docs/superpowers/specs/2026-10-18-medframe-django-amendment.md) and [integrated Batch 1 plan](docs/superpowers/plans/2026-10-18-medframe-django-batch-1.md).
+
+**The commands below still run the preserved FastAPI baseline. Django migration is not yet implemented; `manage.py` commands will replace these after verified cutover.** Existing accounts and source data remain intact.
+
 The Foundation of Modern Care.
 
 A clinical-first healthcare platform. This branch implements the **foundation slice**: secure staff authentication, mandatory authenticator MFA, recovery codes, password recovery, tenant-scoped workspace access, branch scoping, and audit records. Patient registration, consultations, dental charting, treatments, and medical uploads are subsequent slices, not implemented controls.

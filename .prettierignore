@@ -9,3 +9,4 @@ apps/web/schema.graphql
 test-results
 playwright-report
 apps/web/lib/graphql/schema-types.ts
+docs/requirements/medframe-django-edition.txt
