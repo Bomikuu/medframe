@@ -15,3 +15,5 @@ Django must own backend persistence, authentication, permissions, migrations, an
 Frontend work must also follow `apps/web/AGENTS.md` and the relevant installed Next.js guides. Use the project's established design system and shared interaction contracts; the new default is a predominantly white light-mode interface with explicit dark/system preferences.
 
 Do not push, publish, deploy, reset the source database, or delete the checkpoint without a corresponding user instruction. Keep secrets and backups out of Git. Use synthetic records for development and tests. Report actual verification and unfinished functionality honestly.
+
+The user's testing preference, October 19, 2026: keep verification bounded and proportional to the feature. When an issue is found, document its reproduction, impact, and evidence in `docs/operations/error-log.md`; do not attempt a fix until the user requests it. Do not turn a feature phase into repeated broad testing and repair cycles.
