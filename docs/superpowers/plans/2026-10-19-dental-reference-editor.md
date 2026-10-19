@@ -9,4 +9,5 @@ Reference: `/tmp/codex-clipboard-c34d3e71-7556-46fb-968e-c643cf2f38df.png`. Mode
 - [x] Add focused navigation/header/tooth-preview/surface components; retain existing RHF finding entries, point notes, read-only history and save/finalization callbacks. Use actual patient identity/status, never the sample image's fabricated data.
 - [x] Format and run the single build/lint/detector pass. Build is blocked by REF-001, so browser confirmation did not run. Log REF-001/002; do not silently repair or retry.
 - [x] Record actual results, maintain pending design/behavior docs and save reviewable source with rollback preserved.
-- [ ] Pending user choice: add the missing shadcn Switch, perform one focused confirmation and activate locally, or leave findings deferred.
+- [x] User authorized the missing Switch repair and local activation. Added the official primitive, passed the repair build/TypeScript and five focused browser groups, then activated locally.
+- [ ] REF-002/003/004 remain deferred. Full viewport/mobile visual acceptance requires later authorized repair; no extra round was run.

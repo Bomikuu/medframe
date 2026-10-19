@@ -184,3 +184,23 @@ DENT-003's blocked desktop/mobile and save/reload checks are now completed at th
 - No font-token rewrite or suppression was made. These advisories are distinct from the build blocker and remain deferred.
 - ESLint passes with zero errors and the same two existing operations warnings. The 37 source-derived PNG previews rendered successfully; neither result proves the application UI renders.
 - Evidence: `/tmp/medframe-reference-design.log`, `/tmp/medframe-reference-lint.log`, `/tmp/medframe-reference-previews.log`.
+
+## Reference editor — authorized activation resolution
+
+The user explicitly requested “Fix blocker and activate locally”. REF-001 is resolved in `51de539`: the official shadcn radix-nova Switch source was added, its `cn` import resolved to the existing helper, and state selectors adapted to the installed Radix data-state attributes. No new package was needed. The production build and TypeScript stage pass; targeted Switch lint passes. The old build failure is retained above as historical evidence.
+
+The one focused browser confirmation records five passed assertion groups and zero page errors: reference composition/32 previews; FDI/Universal and view/label/camera/expansion controls; surface entry/cancel; point-note save/reload and Notes tab; mobile controls/2D/navigation. These assertions do **not** establish a full visual pass. Screenshot review found REF-003/004 below. Per the user's bounded-testing preference, they were logged without repair/retry. The reference editor is activated locally with these remaining limits; prior `.next-dental-editor` remains preserved.
+
+### REF-003 — Shared dialog cap leaves bottom viewport gap (deferred)
+
+- Actual: `apps/web/app/globals.css` applies `max-height: 90dvh` to dialog content, including the editor. Captured editor height is 799.1875px at 888px viewport height, 900px at 1000px, and 810px at 900px. The underlying consultation remains visible through the overlay below it.
+- Impact: the editor does not occupy the complete viewport height despite its explicit h-dvh class. No scoped max-height override was applied after discovery.
+- Evidence: `.impeccable/review/reference-editor/desktop-reference.png`, `desktop-1440.png`, `mobile.png`, and `medframe-reference-browser.json`.
+
+### REF-004 — Narrow visual rendering and action layout (deferred)
+
+- At 390px the action row clips the Mark completed action; the captured model region is blank despite the ready label. The inspector capture also shows the canvas pin/label above the mobile inspector content. Exact rendering cause is uninvestigated; a transient capture cannot be excluded without another pass.
+- Impact: mobile controls and persisted Notes text were asserted successfully, but mobile anatomical rendering/layering and full action access are not visually accepted. The browser harness did not assert pixel content or action-row overflow and therefore reports its limited group as passing.
+- Evidence: `.impeccable/review/reference-editor/mobile.png`, `mobile-inspector.png` and the final browser report. No mobile repair, second browser round or broader test sweep was run.
+
+REF-002 text-size advisories and older EDITOR-001 test import ordering remain deferred. The new confirmation used the editor's explicit data marker and successfully exercised the note save/reload coverage previously blocked by EDITOR-002; the older harness itself was not changed.

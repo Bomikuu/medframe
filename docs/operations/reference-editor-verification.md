@@ -1,6 +1,6 @@
 # Reference-guided editor — October 19, 2026
 
-**Status: implementation saved; build blocked by REF-001, confirmation authorization requested.** The current live editor is unchanged. This report records actual results, not a browser acceptance claim.
+**Current status: activated locally after authorized REF-001 repair.** The initial failed pass below remains historical evidence; the activation record at the end supersedes its runtime status. Desktop interactions pass focused confirmation. Full visual acceptance is incomplete because REF-003/004 remain deferred.
 
 ## Reference and scope
 
@@ -36,3 +36,25 @@ REF-001/002 in `error-log.md` contain reproduction and evidence. The user was as
 Work branch: `codex/dental-reference-editor`. Source checkpoint: `checkpoint/pre-reference-editor-2026-10-19` at `389ee64`. Existing `.next-dental-editor` and `.next-anatomical-dental` artifacts remain intact. No backend/schema/database changes, credential changes, public deployment, source reset or additional third-party download occurred.
 
 The preserved live web/API use ports 3000/8000. Review API 8001 was started while preparing verification; review web 3001 cannot start without the successful build. Review API 8001 is stopped while awaiting the required instruction; port 3000 remains unchanged. The approval prompt remains pending.
+
+## Authorized activation — October 19, 2026
+
+The user requested “Fix blocker and activate locally”. Commit `51de539` adds the actual [shadcn Switch](https://ui.shadcn.com/docs/components/radix/switch) from the [radix-nova registry source](https://ui.shadcn.com/r/styles/radix-nova/switch.json). Its virtual cn import is mapped to `@/lib/utils`, and data-state selectors match the installed Radix implementation. No dependency or backend change was required.
+
+The one repair build passes production compilation and TypeScript; targeted Switch lint passes. One focused browser confirmation records five passed assertion groups with zero page errors:
+
+- Real identity/header/navigation, 32 selectable teeth and loaded PNG previews; captured at 1770px and 1440px.
+- FDI/Universal display (FDI 16 displays as Universal 3), camera tiles and matching camera select, show-label switch, Pan/Rotate and expand/restore panels.
+- Manual mesial surface selection passed into the existing finding Sheet; cancelling removed the synthetic unfinished entry.
+- Clicked FDI 26 point, added a note, saved through the parent draft, reloaded, reopened the anchored pin and inspected its Notes tab text.
+- At 390px, inspector controls, persisted note text, 2D alternative and return to SOAP/navigation remain accessible at the asserted scope.
+
+These group results are **not a full visual pass**. Native screenshot inspection found the shared 90dvh dialog height cap and mobile blank-canvas/action-clipping/pin-layering evidence. REF-003/004 document exact scope and uncertainty. No repair/retry followed the confirmation. The three REF-002 text advisories and older backend-test import ordering remain deferred. No backend tests were repeated because this repair adds only the UI primitive.
+
+Current web port **3000** runs `.next-dental-reference` with BACKEND_URL `http://127.0.0.1:8000`, WEB_ORIGIN `http://localhost:3000` and built socket URL `ws://localhost:8000/ws/operations`. Runtime session 99125; log `/tmp/medframe-reference-runtime.log`. API process 3715796 was retained. Database, existing accounts, passwords/MFA, worker and beat remain unchanged. Only the dedicated synthetic draft received `Synthetic reference editor: point note.` during confirmation. No consultation was completed/finalized.
+
+Local HTTP smoke checks returned 200 for login and the tooth-16/upper-view PNGs; both asset checksums matched the prepared files. Temporary review API 8001/web 3001 were stopped. Evidence/harness/logs are retained in ignored `.impeccable/review/reference-editor/`.
+
+For UI rollback, stop only the reference web process and restart `.next-dental-editor` from `apps/web` with the same BACKEND_URL/WEB_ORIGIN on port 3000. No API/database rollback is necessary. The earlier `.next-anatomical-dental` artifact and all source checkpoints also remain intact.
+
+Impeccable review/documentation were performed inline, without subagents. Screenshot review requires fixes for REF-003/004 before full visual acceptance; those defects were not canonized as design-system choices. Existing DESIGN.md token values and `.impeccable/design.json` remain unchanged.
