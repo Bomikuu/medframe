@@ -23,3 +23,7 @@ Preserve the existing Medframe Operate surface and actual shadcn eight-block inp
 This is the next connected Station access milestone. Patient self-service and department queues remain the following phase; live payments/TV remain later. No automatic account elevation, hardware changes, public deployment, live messages, password reset or subagents.
 
 Preserve source/build, encrypted checkpoint/verified review clone, accumulated bounded checks, then fresh activation checkpoint and all-original-row verification around additive migration. Native source/visual review replaces delegated review by user instruction.
+
+## Delivered state
+
+Active locally with separate additive proof/session tables, preserving the existing handoff table. Ten-minute inactivity is API inactivity (polls count); the absolute thirty-minute expiry remains fixed. Evidence and acceptance gaps: `docs/operations/station-code-access-verification.md`. Patient kiosk/department queue and payment/TV phases remain outstanding.
