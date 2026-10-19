@@ -1,6 +1,6 @@
 # Medframe Batch 5 — diagnostic collaboration
 
-Status: proposed written design, awaiting the user’s review. The user requested Batch 5 with Jev, Graphify and Impeccable. Native execution only, no subagents. No product code, migrations or runtime changes have been made for this batch.
+Status: approved by the user’s “proceed” on October 19, 2026; implementation plan is prepared for review. The user requested Batch 5 with Jev, Graphify and Impeccable. Native execution only, no subagents. No product code, migrations or runtime changes have been made for this batch.
 
 ## Outcome and authority
 
