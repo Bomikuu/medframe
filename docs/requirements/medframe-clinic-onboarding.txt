@@ -1,0 +1,1435 @@
+# MEDFRAME — CLINIC INVITATION & ONBOARDING
+## Complete Multi-Step, Resumable Clinic Registration Experience
+
+Implement a complete invitation-based clinic onboarding system
+for Medframe.
+
+Medframe is a clinical management platform for healthcare
+organizations, doctors, dentists, and patients.
+
+Technology stack:
+
+Frontend:
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Hook Form
+- Zod
+
+Backend:
+- Django
+- Strawberry GraphQL
+- PostgreSQL
+- Django Authentication
+- Django ORM
+
+The onboarding system should allow clinics to register through
+an invitation, configure their organization, create an account,
+and start using Medframe.
+
+IMPORTANT:
+
+Do not create one long registration form.
+
+Build a professional multi-step onboarding experience.
+
+Users must be able to leave and return without losing progress.
+
+Implement all related features in one cohesive development batch.
+
+Preserve the existing Medframe design system, authentication,
+organization models, and GraphQL architecture.
+
+Do not implement the public clinic website builder as part
+of this task.
+
+==================================================
+1. ONBOARDING EXPERIENCE
+==================================================
+
+The onboarding should follow this flow:
+
+INVITATION
+    ↓
+WELCOME TO MEDFRAME
+    ↓
+CLINIC INFORMATION
+    ↓
+MEDICAL SPECIALTIES
+    ↓
+CLINIC BRANDING
+    ↓
+PRACTICE DETAILS
+    ↓
+CREATE ACCOUNT
+    ↓
+REVIEW & CONFIRM
+    ↓
+WELCOME DASHBOARD
+
+Every step should feel connected.
+
+Provide:
+
+- Clear progress indicator
+- Back and Continue buttons
+- Save and Exit
+- Automatic draft saving
+- Validation
+- Responsive layouts
+- Smooth transitions
+- Contextual help
+- Completion feedback
+
+Allow users to navigate back to completed steps.
+
+Do not require users to restart onboarding
+after leaving the application.
+
+==================================================
+2. INVITATION SYSTEM
+==================================================
+
+Implement invitation-based clinic registration.
+
+A Medframe platform administrator can invite a clinic.
+
+Invitation fields:
+
+- Clinic contact email
+- Contact name, optional
+- Clinic name, optional
+- Invitation expiration
+- Invitation status
+
+INVITATION STATUSES:
+
+- Pending
+- Opened
+- In Progress
+- Completed
+- Expired
+- Revoked
+
+Generate a secure invitation link.
+
+Example:
+
+medframe.com/onboarding/invite/[token]
+
+The token must:
+
+- Be cryptographically secure
+- Be time-limited
+- Be validated server-side
+- Be revocable
+- Prevent unauthorized reuse
+- Be stored as a secure hash in the database
+
+Do not expose sequential invitation IDs.
+
+The invitation should be associated with
+the intended recipient email.
+
+Do not treat possession of a URL alone as
+sufficient proof of identity for account creation.
+
+Require email verification or an equivalent
+secure identity-verification mechanism.
+
+Provide appropriate handling for:
+
+- Expired invitations
+- Revoked invitations
+- Invalid invitations
+- Already completed invitations
+- Existing Medframe users
+- Interrupted onboarding
+
+If the recipient already has a Medframe account,
+allow them to authenticate and continue.
+
+Do not force them to create another account.
+
+==================================================
+3. INTRODUCTION PAGE
+==================================================
+
+THE FIRST PAGE MUST BE AN INTRODUCTION TO MEDFRAME.
+
+This is not a registration form.
+
+Create a polished welcome experience using
+an interactive slide presentation.
+
+The page should introduce Medframe's purpose
+and major capabilities.
+
+DESIGN:
+
+- Professional
+- Premium SaaS appearance
+- Clean white background
+- Medframe branding
+- Subtle medical illustrations or interface previews
+- Strong typography
+- Restrained color accents
+
+Use:
+
+- Manrope for headings
+- Plus Jakarta Sans for UI text
+- Medframe navy and teal colors
+
+Avoid excessive gradients.
+
+--------------------------------------------------
+3.1 INTRODUCTION SLIDES
+--------------------------------------------------
+
+Create approximately 4–5 slides.
+
+SLIDE 1 — WELCOME
+
+Title:
+Welcome to Medframe
+
+Description:
+The foundation of modern care.
+
+Manage your practice, patients, and clinical workflows
+in one connected platform.
+
+Visual:
+Professional Medframe application preview.
+
+SLIDE 2 — CLINICAL MANAGEMENT
+
+Title:
+Your practice, organized.
+
+Description:
+Manage patient records, consultations, diagnoses,
+and treatment plans from one workspace.
+
+Visual:
+Doctor dashboard or patient management preview.
+
+SLIDE 3 — INTERACTIVE MEDICAL RECORDS
+
+Title:
+A clearer way to visualize care.
+
+Description:
+Document clinical findings using interactive dental
+charts and anatomical visualizations.
+
+Visual:
+3D dental model or anatomy workspace preview.
+
+SLIDE 4 — CONNECTED PATIENT CARE
+
+Title:
+Better coordination. Better care.
+
+Description:
+Connect your clinical workflows with appointments,
+patient communication, and follow-ups.
+
+Visual:
+Patient appointment or care-management preview.
+
+If a feature is not yet available, indicate that
+it is upcoming rather than falsely suggesting
+it is already operational.
+
+SLIDE 5 — GET STARTED
+
+Title:
+Let's set up your clinic.
+
+Description:
+Tell us about your practice, personalize your workspace,
+and invite your team when you're ready.
+
+Primary CTA:
+Get Started
+
+Secondary CTA:
+Learn More
+
+--------------------------------------------------
+3.2 SLIDE INTERACTIONS
+--------------------------------------------------
+
+Support:
+
+- Next
+- Previous
+- Slide indicators
+- Keyboard navigation
+- Touch/swipe gestures where appropriate
+- Skip Introduction
+- Get Started
+
+Use shadcn Carousel or an appropriate
+accessible carousel implementation.
+
+Do not create excessive animations.
+
+Transitions should be smooth and restrained.
+
+Store whether the user has completed
+or skipped the introduction.
+
+Returning users should resume onboarding
+rather than being forced through the slides again.
+
+==================================================
+4. ONBOARDING LAYOUT
+==================================================
+
+Create a dedicated onboarding layout.
+
+Do not reuse the entire clinic dashboard sidebar.
+
+The onboarding should feel focused.
+
+HEADER:
+
+- Medframe logo
+- Progress indicator
+- Save and Exit action
+- Help action
+
+MAIN CONTENT:
+
+- Current step title
+- Short description
+- Form or interactive content
+- Optional contextual guidance
+
+FOOTER:
+
+- Back
+- Continue
+
+Use a consistent maximum content width.
+
+Avoid excessively wide forms.
+
+Desktop:
+
+Use a balanced layout.
+
+For example:
+
+Left:
+Form content
+
+Right:
+Helpful preview or contextual information
+
+Do not force a side panel when it adds
+little value.
+
+Mobile:
+
+Use a single-column layout.
+
+Keep navigation actions accessible.
+
+==================================================
+5. STEP 1 — CLINIC INFORMATION
+==================================================
+
+Collect the clinic's basic information.
+
+FIELDS:
+
+Clinic Name *
+Clinic Type *
+Clinic Email *
+Contact Number *
+Country
+Region / Province
+City
+Street Address
+Postal Code
+Clinic Description
+
+CLINIC TYPE:
+
+- Dental Clinic
+- General Medical Clinic
+- Multi-Specialty Clinic
+- Diagnostic Center
+- Other
+
+Allow selecting one primary clinic type.
+
+Use a suitable shadcn Select or card selector.
+
+Do not rely on basic HTML inputs when
+existing shadcn components are available.
+
+VALIDATION:
+
+- Clinic name required
+- Email validation
+- Phone validation
+- Required contact information
+- Reasonable text limits
+
+Prefill known information from the invitation.
+
+Do not allow changing the verified invitation
+recipient's identity without re-verification.
+
+Provide helpful descriptions.
+
+Example:
+
+Clinic Name
+
+"This is the name your team will see throughout Medframe."
+
+Save this information as a draft.
+
+Do not create an active organization immediately
+when the user begins this step.
+
+==================================================
+6. STEP 2 — MEDICAL SPECIALTIES
+==================================================
+
+Ask what type of medical practice the clinic operates.
+
+This step should be visually interactive.
+
+Do not use a giant dropdown containing every specialty.
+
+Use selectable specialty cards or a searchable
+multi-select interface.
+
+EXAMPLE SPECIALTIES:
+
+DENTAL:
+
+- General Dentistry
+- Orthodontics
+- Oral Surgery
+- Endodontics
+- Periodontics
+- Pediatric Dentistry
+- Prosthodontics
+
+GENERAL MEDICINE:
+
+- General Practice
+- Family Medicine
+- Internal Medicine
+- Pediatrics
+- Dermatology
+- Cardiology
+- Orthopedics
+- Other
+
+Allow multiple specialties.
+
+Provide:
+
+- Search
+- Category grouping
+- Selected state
+- Clear selection
+- Custom specialty request when appropriate
+
+Do not automatically grant professional credentials
+based on specialty selection.
+
+--------------------------------------------------
+6.1 PROVIDER INFORMATION
+--------------------------------------------------
+
+Ask about the clinic's providers.
+
+Examples:
+
+How many doctors or dentists work at your clinic?
+
+Options:
+
+- Just me
+- 2–5
+- 6–10
+- 11–20
+- 20+
+
+Ask:
+
+What type of providers work at your clinic?
+
+Options:
+
+- Dentist
+- Physician
+- Nurse
+- Medical Assistant
+- Other
+
+Allow multiple selections.
+
+This information helps configure
+the initial clinical workspace.
+
+Do not require every doctor to create
+an account during onboarding.
+
+Individual staff invitations can happen later.
+
+==================================================
+7. STEP 3 — CLINIC BRANDING
+==================================================
+
+Allow clinics to personalize their Medframe workspace.
+
+FIELDS:
+
+- Clinic Logo
+- Primary Brand Color
+- Secondary Brand Color
+- Accent Color
+- Optional Clinic Short Name
+
+DEFAULT COLORS:
+
+Primary:
+#0F2D4A
+
+Secondary:
+#0EA5A4
+
+Accent:
+#22C1B6
+
+--------------------------------------------------
+7.1 LOGO UPLOAD
+--------------------------------------------------
+
+Use a professional upload component.
+
+Support:
+
+- Click to upload
+- Drag and drop
+- Image preview
+- Replace image
+- Remove image
+
+Accept approved raster image formats.
+
+Validate:
+
+- File type
+- File size
+- Image dimensions
+
+Scan uploads where applicable.
+
+Store draft uploads securely.
+
+Do not allow arbitrary executable SVG content.
+
+Do not expose unpublished logos through
+unrestricted public file URLs.
+
+Provide a fallback logo using
+clinic initials.
+
+--------------------------------------------------
+7.2 COLOR CUSTOMIZATION
+--------------------------------------------------
+
+Provide:
+
+- Color picker
+- Hex input
+- Suggested brand presets
+- Reset to Medframe defaults
+
+Allow real-time preview.
+
+Do not require users to manually enter
+hex values.
+
+--------------------------------------------------
+7.3 LIVE BRAND PREVIEW
+--------------------------------------------------
+
+Display a sample clinic workspace.
+
+The preview should demonstrate:
+
+- Clinic logo
+- Sidebar appearance
+- Header
+- Buttons
+- Cards
+- Primary colors
+
+Example:
+
+Your Clinic Workspace
+
+[Clinic Logo]
+
+Dashboard
+Patients
+Consultations
+Records
+
+The preview updates when users change colors.
+
+Do not apply unpublished branding globally.
+
+The organization theme becomes active
+after onboarding is completed.
+
+==================================================
+8. STEP 4 — PRACTICE DETAILS
+==================================================
+
+Ask for essential clinic operational details.
+
+Keep this step lightweight.
+
+FIELDS:
+
+- Primary Branch Name
+- Operating Days
+- Opening Hours
+- Closing Hours
+- Timezone
+- Appointment Duration Preference
+- Accepting Walk-ins
+
+Use appropriate controls.
+
+OPERATING DAYS:
+
+Use selectable weekday buttons.
+
+HOURS:
+
+Use time selectors.
+
+TIMEZONE:
+
+Default appropriately when location is known,
+but allow users to change it.
+
+APPOINTMENT DURATION:
+
+- 15 minutes
+- 30 minutes
+- 45 minutes
+- 60 minutes
+- Custom
+
+WALK-IN POLICY:
+
+- Accept Walk-ins
+- Appointments Only
+- Both
+
+This information prepares future scheduling
+without requiring complete scheduling setup.
+
+Do not make advanced configuration mandatory.
+
+Allow users to configure more later.
+
+==================================================
+9. STEP 5 — CREATE ACCOUNT
+==================================================
+
+After collecting clinic information,
+allow the invited administrator to create an account.
+
+FIELDS:
+
+- First Name
+- Last Name
+- Email
+- Password
+- Confirm Password
+
+Email should come from the verified invitation
+where appropriate.
+
+Use Django Authentication.
+
+IMPORTANT:
+
+Do not create a second user model or
+custom password storage system.
+
+Reuse Medframe's existing authentication architecture.
+
+Support:
+
+- Secure password validation
+- Password visibility toggle
+- Email verification
+- Existing account login
+- Terms acknowledgment
+- Privacy notice acknowledgment
+
+If the user already has an account:
+
+Display:
+
+"Already using Medframe?"
+
+Action:
+
+Sign in to continue.
+
+After successful authentication,
+associate the setup with the verified user.
+
+Do not automatically grant access to an existing
+organization simply because email addresses match.
+
+==================================================
+10. STEP 6 — REVIEW AND CONFIRM
+==================================================
+
+Create a complete review screen.
+
+Display grouped information.
+
+CLINIC INFORMATION:
+
+- Clinic name
+- Clinic type
+- Location
+- Contact information
+
+MEDICAL SPECIALTIES:
+
+- Selected specialties
+- Provider types
+- Estimated provider count
+
+BRANDING:
+
+- Logo
+- Selected colors
+- Workspace preview
+
+PRACTICE DETAILS:
+
+- Branch
+- Operating hours
+- Appointment preferences
+
+ACCOUNT:
+
+- Administrator name
+- Verified email
+
+Do not display passwords.
+
+Every section should have an Edit action.
+
+Clicking Edit returns the user to
+the relevant step.
+
+Preserve previously entered values.
+
+PRIMARY ACTION:
+
+Create My Clinic
+
+On confirmation:
+
+1. Validate invitation status.
+2. Validate authenticated user.
+3. Validate submitted clinic information.
+4. Validate specialty selections.
+5. Validate required branding configuration.
+6. Validate organization uniqueness constraints.
+7. Create the organization.
+8. Create the initial branch.
+9. Assign the administrator membership.
+10. Save organization branding.
+11. Save configured specialties.
+12. Save practice settings.
+13. Mark onboarding completed.
+14. Mark the invitation consumed.
+
+Use a Django database transaction.
+
+Prevent partial organization creation.
+
+Ensure repeated submissions cannot create
+duplicate organizations.
+
+Use an idempotency mechanism.
+
+==================================================
+11. RESUMABLE ONBOARDING
+==================================================
+
+THIS IS A CRITICAL REQUIREMENT.
+
+Users must be able to leave onboarding
+and return later.
+
+Examples:
+
+A clinic administrator completes:
+
+- Introduction
+- Clinic Information
+- Specialties
+
+Then closes the browser.
+
+When they return, Medframe should restore
+their progress.
+
+They should continue from the last
+incomplete step.
+
+--------------------------------------------------
+11.1 AUTOMATIC SAVING
+--------------------------------------------------
+
+Automatically save each valid step.
+
+Support:
+
+- Save on Continue
+- Debounced autosave for appropriate fields
+- Save and Exit
+- Resume Later
+
+Show saving feedback.
+
+Examples:
+
+Saving...
+
+All changes saved
+
+Unable to save changes
+
+Never show a successful save indicator
+until the server confirms persistence.
+
+--------------------------------------------------
+11.2 RESUME FLOW
+--------------------------------------------------
+
+Before account creation, use a securely verified
+invitation and onboarding session.
+
+An invited user should be able to resume
+through the original invitation process or
+a secure resume link sent to the verified email.
+
+Do not depend only on localStorage.
+
+Do not store passwords in onboarding drafts.
+
+Do not place sensitive setup information
+inside invitation URLs.
+
+Use server-side persistence.
+
+After account creation, associate the
+onboarding draft with the authenticated user.
+
+Returning users should see:
+
+"Welcome back. Continue setting up your clinic."
+
+Display their current progress.
+
+Action:
+
+Continue Setup
+
+Optionally provide:
+
+Start Over
+
+Starting over must require confirmation.
+
+--------------------------------------------------
+11.3 DRAFT STATUS
+--------------------------------------------------
+
+Support:
+
+- Not Started
+- In Progress
+- Awaiting Verification
+- Ready for Review
+- Completed
+- Expired
+- Cancelled
+
+Track the current step.
+
+Track completed steps.
+
+Track last saved time.
+
+Track the verified invitation owner.
+
+Use expiration and cleanup policies
+for abandoned onboarding drafts.
+
+Do not allow another invited user to access
+a draft they do not own.
+
+==================================================
+12. DJANGO DATA MODELS
+==================================================
+
+Reuse existing organization and authentication
+models whenever possible.
+
+Add the following concepts where needed.
+
+CLINIC INVITATION:
+
+ClinicInvitation
+- id
+- email
+- contact_name
+- clinic_name
+- token_hash
+- status
+- invited_by
+- expires_at
+- accepted_at
+- completed_at
+- created_at
+
+ONBOARDING SESSION:
+
+ClinicOnboarding
+- id
+- invitation
+- user
+- current_step
+- status
+- progress_data
+- schema_version
+- last_saved_at
+- completed_at
+- created_at
+- updated_at
+
+SPECIALTY REFERENCE:
+
+MedicalSpecialty
+- id
+- name
+- category
+- code
+- active
+
+ORGANIZATION CONFIGURATION:
+
+Use existing models where available:
+
+- Organization
+- Branch
+- OrganizationMembership
+- OrganizationBranding
+- OrganizationSettings
+
+Avoid unnecessarily duplicating fields.
+
+Use Django migrations.
+
+Store flexible onboarding draft fields
+in a validated JSONField where appropriate.
+
+Store finalized organization data
+in normalized relational models.
+
+Do not use onboarding JSON as the
+authoritative organization record after completion.
+
+==================================================
+13. GRAPHQL IMPLEMENTATION
+==================================================
+
+Use Strawberry GraphQL with Django.
+
+Implement authorized onboarding operations.
+
+QUERIES:
+
+- onboardingInvitation
+- onboardingSession
+- onboardingProgress
+- availableSpecialties
+- availableClinicTypes
+- brandingPresets
+
+MUTATIONS:
+
+- verifyOnboardingInvitation
+- startClinicOnboarding
+- saveOnboardingStep
+- updateClinicInformation
+- updateClinicSpecialties
+- updateClinicBranding
+- updatePracticeDetails
+- verifyOnboardingEmail
+- completeClinicOnboarding
+- cancelClinicOnboarding
+
+Use GraphQL for structured onboarding data.
+
+Use an authenticated or securely tokenized
+file upload endpoint for clinic logo uploads
+when appropriate.
+
+Do not expose invitation tokens
+through unrestricted GraphQL queries.
+
+Validate permissions on every operation.
+
+Use Django ORM and transactions.
+
+==================================================
+14. INVITATION ADMINISTRATION
+==================================================
+
+Create a basic invitation management interface.
+
+Available to authorized Medframe administrators.
+
+FEATURES:
+
+- Invite Clinic
+- View Pending Invitations
+- View Accepted Invitations
+- View Completed Invitations
+- View Expired Invitations
+- Resend Invitation
+- Revoke Invitation
+
+Use shadcn Data Table.
+
+Display:
+
+- Contact
+- Email
+- Clinic
+- Status
+- Sent Date
+- Expiration
+- Actions
+
+Create an invitation dialog.
+
+FIELDS:
+
+- Contact Email
+- Contact Name
+- Clinic Name
+- Expiration
+
+Use Sonner for feedback.
+
+Do not expose secret invitation tokens
+in the administration table.
+
+==================================================
+15. COMPLETION EXPERIENCE
+==================================================
+
+After successful onboarding, display
+a professional welcome screen.
+
+TITLE:
+
+Your clinic is ready.
+
+DESCRIPTION:
+
+Welcome to Medframe.
+Your workspace has been created successfully.
+
+Display:
+
+- Clinic logo
+- Clinic name
+- Administrator name
+- Selected specialties
+
+PRIMARY ACTION:
+
+Go to Dashboard
+
+OPTIONAL NEXT STEPS:
+
+- Register Your First Patient
+- Invite Your Team
+- Complete Your Clinic Profile
+- Configure Additional Settings
+
+Use a restrained success animation
+or subtle visual confirmation.
+
+Do not use exaggerated confetti or
+cartoonish illustrations.
+
+Redirect to the authenticated clinic dashboard.
+
+==================================================
+16. DASHBOARD FIRST-LOGIN EXPERIENCE
+==================================================
+
+When a newly registered clinic opens
+its dashboard for the first time:
+
+Show a contextual setup checklist.
+
+Examples:
+
+- Clinic Information — Complete
+- Branding — Complete
+- Administrator Account — Complete
+- Invite Team Members — Optional
+- Register First Patient — Pending
+- Configure Clinical Templates — Optional
+
+Do not show an empty dashboard with
+large meaningless metric cards.
+
+Use proper empty states.
+
+Example:
+
+"No patients yet."
+
+"Register your first patient to begin
+managing clinical records."
+
+Action:
+
+Register Patient
+
+Allow dismissing the onboarding checklist.
+
+Persist its dismissal state.
+
+==================================================
+17. DESIGN REQUIREMENTS
+==================================================
+
+Use the Medframe design system.
+
+DEFAULT:
+
+- White backgrounds
+- Subtle gray surfaces
+- Navy primary actions
+- Teal accents
+- Minimal gradients
+- Professional iconography
+
+TYPOGRAPHY:
+
+- Manrope for headings
+- Plus Jakarta Sans for interface text
+
+Use shadcn/ui:
+
+- Card
+- Button
+- Input
+- Label
+- Select
+- Combobox
+- Checkbox
+- Switch
+- Calendar
+- Dialog
+- AlertDialog
+- Progress
+- Tabs
+- Avatar
+- Separator
+- Tooltip
+- Sonner
+- Skeleton
+
+Provide proper:
+
+- Hover states
+- Focus states
+- Selected states
+- Loading states
+- Error states
+- Disabled states
+
+Use clear visual hierarchy.
+
+Do not make every step a plain
+white form inside a large white card.
+
+Introduce contextual visuals, previews,
+and subtle colored surfaces where useful.
+
+Maintain Medframe's professional personality.
+
+==================================================
+18. RESPONSIVENESS
+==================================================
+
+Support:
+
+- Desktop
+- Tablet
+- Mobile
+
+The onboarding must work on mobile devices.
+
+Ensure:
+
+- Progress indicator adapts to smaller screens
+- Forms do not overflow
+- Buttons remain accessible
+- Logo preview remains visible
+- Specialty cards reflow
+- Account creation remains readable
+- Review screen remains navigable
+
+Avoid horizontal overflow.
+
+Do not force narrow three-column forms.
+
+==================================================
+19. SECURITY
+==================================================
+
+Invitation onboarding creates privileged
+organization accounts.
+
+Apply strict security controls.
+
+Requirements:
+
+- Cryptographically secure invitation tokens
+- Hashed token storage
+- Invitation expiration
+- Revocation
+- Email verification
+- Rate limiting
+- Replay protection
+- CSRF protection where applicable
+- Secure authentication sessions
+- Server-side validation
+- Organization authorization
+- Audit logging
+
+Do not grant administrator privileges until
+the invitation and user identity are verified.
+
+Prevent duplicate organization creation.
+
+Do not expose invitation information
+to unrelated users.
+
+Validate uploaded logos.
+
+Do not expose draft organization details publicly.
+
+Keep onboarding data isolated from
+clinical patient records.
+
+==================================================
+20. TESTING
+==================================================
+
+Test:
+
+INVITATIONS:
+
+- Valid invitation
+- Expired invitation
+- Revoked invitation
+- Invalid token
+- Existing account
+- Reused invitation
+
+ONBOARDING:
+
+- Start onboarding
+- Save clinic information
+- Save specialties
+- Upload logo
+- Save practice details
+- Create account
+- Review information
+- Complete setup
+
+RESUME:
+
+- Leave after first step
+- Return using secure invitation flow
+- Restore saved information
+- Continue from previous step
+- Preserve completed steps
+- Reject unauthorized draft access
+
+ORGANIZATION CREATION:
+
+- Organization created once
+- Correct administrator membership
+- Correct specialties
+- Correct branding
+- Correct branch configuration
+- Transaction rollback on failure
+
+UI:
+
+- Step navigation
+- Validation
+- Responsive layout
+- Loading states
+- Toast feedback
+- Logo previews
+- Progress indicator
+
+==================================================
+21. IMPLEMENTATION BATCH
+==================================================
+
+Implement all related onboarding functionality
+in one cohesive development batch.
+
+PASS 1:
+
+Inspect existing:
+
+- Django authentication
+- Organization models
+- Memberships
+- Branding configuration
+- GraphQL schema
+- Frontend routes
+
+PASS 2:
+
+Implement:
+
+- Invitation models
+- Onboarding models
+- Migrations
+- Backend services
+- GraphQL operations
+
+PASS 3:
+
+Implement:
+
+- Introduction carousel
+- Clinic information step
+- Specialty selection
+- Branding customization
+- Practice details
+- Account creation
+- Review and confirmation
+
+PASS 4:
+
+Implement:
+
+- Autosave
+- Resume functionality
+- Secure invitation verification
+- Completion transaction
+- Account association
+
+PASS 5:
+
+Implement:
+
+- Administrator invitation management
+- Welcome screen
+- First-login setup checklist
+
+PASS 6:
+
+Verify:
+
+- End-to-end onboarding
+- Security
+- Form validation
+- Responsive layouts
+- Existing functionality
+
+Do not stop after creating the form UI.
+
+Do not stop after creating database models.
+
+Implement a complete working onboarding experience.
+
+==================================================
+22. ACCEPTANCE CRITERIA
+==================================================
+
+The feature is complete when:
+
+1. An administrator can invite a clinic.
+2. The clinic receives a secure invitation.
+3. The invitation opens the Medframe introduction.
+4. The user can navigate the introduction slides.
+5. The user can enter clinic information.
+6. The user can select medical specialties.
+7. The user can configure provider types.
+8. The user can upload a clinic logo.
+9. The user can customize branding.
+10. The user can configure basic practice details.
+11. The user can create or use an existing account.
+12. The user can review and edit previous steps.
+13. Unfinished onboarding is saved.
+14. The user can securely resume later.
+15. Completing setup creates the organization.
+16. The administrator receives correct permissions.
+17. Organization branding is applied.
+18. The clinic dashboard becomes accessible.
+19. A welcome experience is displayed.
+20. The workflow works on mobile and desktop.
+
+Preserve existing Medframe functionality.
+
+Use real PostgreSQL persistence.
+
+Do not use frontend-only state
+as the authoritative onboarding record.
+
+Do not create public clinic websites
+during this implementation.
+
+FINAL GOAL:
+
+A professional, invitation-based,
+multi-step clinic onboarding experience
+that introduces Medframe, collects clinic details,
+configures branding, creates an administrator account,
+and securely supports saving and resuming progress.
