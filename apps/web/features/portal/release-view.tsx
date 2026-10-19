@@ -112,7 +112,7 @@ export function ReleaseView({
             {result.test_name} · Result version {result.sequence}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Center report by {result.author} · {dateLabel(result.performed_at)}
+            Center report by {result.author} · {timeLabel(result.performed_at)}
           </p>
           <p className="text-sm leading-7 whitespace-pre-wrap">{result.report}</p>
           {result.review && (
