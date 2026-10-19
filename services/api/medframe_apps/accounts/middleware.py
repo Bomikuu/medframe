@@ -11,6 +11,8 @@ class ClinicalSessionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        request.native_session_key = request.session.session_key
+        request.native_last_seen_at = None
         if request.user.is_authenticated:
             now = timezone.now()
             session = ClinicalSession.objects.filter(
@@ -27,6 +29,7 @@ class ClinicalSessionMiddleware:
             ):
                 logout(request)
             else:
+                request.native_last_seen_at = session.last_seen_at
                 ClinicalSession.objects.filter(id=session.id, revoked=False).update(
                     last_seen_at=now
                 )

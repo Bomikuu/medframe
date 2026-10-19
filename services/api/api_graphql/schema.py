@@ -77,7 +77,11 @@ class Query(
     def my_organizations(self, info: Info) -> list[OrganizationType]:
         queryset = Organization.objects.filter(
             membership__user=info.context.user, membership__active=True, active=True
-        ).order_by("name")[:50]
+        )
+        access = getattr(info.context, "station_access", None)
+        if access:
+            queryset = queryset.filter(id=access.handoff.encounter.organization_id)
+        queryset = queryset.order_by("name")[:50]
         return [
             OrganizationType(id=item.id, name=item.name, timezone=item.timezone)
             for item in queryset
@@ -90,6 +94,11 @@ class Query(
         branches = Branch.objects.filter(organization_id=organization_id)
         if member.branch_id:
             branches = branches.filter(id=member.branch_id)
+        access = getattr(info.context, "station_access", None)
+        if access:
+            branches = branches.filter(id=access.handoff.encounter.branch_id)
+        from medframe_apps.stations.access_scope import permissions
+
         audit(info.context.user, "workspace.read", organization_id)
         return WorkspaceType(
             organization=OrganizationType(
@@ -100,7 +109,7 @@ class Query(
             branches=[
                 BranchType(id=item.id, name=item.name) for item in branches.order_by("name")[:50]
             ],
-            permissions=sorted(permissions_for(member)),
+            permissions=sorted(permissions(permissions_for(member))),
         )
 
 

@@ -4,21 +4,19 @@ import { SafetyProvider } from "@/features/workspace/safety-provider";
 import { WorkspaceProvider } from "@/features/workspace/workspace-provider";
 import { StationShell } from "@/features/stations/station-shell";
 import { ButtonLink } from "@/components/ui/button-link";
+import { StationSessionBoundary } from "@/features/stations/access-session";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const store = await cookies();
   if (!store.has("medframe_django_session"))
     return (
       <main id="main" className="mx-auto grid max-w-lg gap-5 p-8 pt-20">
-        <h1 className="text-2xl font-semibold">Sign in to clinician Station</h1>
+        <h1 className="text-2xl font-semibold">Open Station with a code</h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          Use your own staff account and MFA. Then return to Station on this device. Pairing alone
-          does not grant clinical access.
+          Ask the clinician to generate a handoff code from their signed-in computer. Enter it on
+          this approved tablet to open the assigned consultation.
         </p>
-        <ButtonLink href="/login">Staff sign in</ButtonLink>
-        <ButtonLink href="/station" variant="outline">
-          Device setup
-        </ButtonLink>
+        <ButtonLink href="/station">Enter Station code</ButtonLink>
       </main>
     );
   return (
@@ -31,7 +29,9 @@ export default async function Layout({ children }: { children: React.ReactNode }
     >
       <SafetyProvider>
         <WorkspaceProvider>
-          <StationShell>{children}</StationShell>
+          <StationSessionBoundary>
+            <StationShell>{children}</StationShell>
+          </StationSessionBoundary>
         </WorkspaceProvider>
       </SafetyProvider>
     </Suspense>

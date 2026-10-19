@@ -12,6 +12,10 @@ class StationMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        from medframe_apps.stations.access import find_session, live
+
+        access = find_session(getattr(request, "native_session_key", request.session.session_key))
+        request.station_access = access
         request.station_credential = None
         request.station_error = None
         secret = request.COOKIES.get(DEVICE_COOKIE)
@@ -33,9 +37,52 @@ class StationMiddleware:
                     "DEVICE_UNAVAILABLE", "This device needs clinic approval.", 403
                 )
         protected = request.path == "/graphql" or request.path.startswith(
-                ("/documents/", "/diagnostics/", "/portal/", "/onboarding/", "/admin/")
+            ("/documents/", "/diagnostics/", "/portal/", "/onboarding/", "/admin/")
         )
         credential = request.station_credential
+        if access:
+            # Native middleware refreshed last_seen; validate its previous timestamp
+            # so Station's shorter inactivity policy cannot be extended by a poll.
+            previous = getattr(request, "native_last_seen_at", None)
+            if previous:
+                access.session.last_seen_at = previous
+            if not request.user.is_authenticated or not live(access, credential):
+                from django.contrib.auth import logout
+
+                from medframe_apps.accounts.models import ClinicalSession
+
+                ClinicalSession.objects.filter(id=access.session_id).update(revoked=True)
+                logout(request)
+                if request.path not in {
+                    "/auth/csrf",
+                    "/auth/logout",
+                    "/stations/context",
+                    "/stations/access",
+                }:
+                    return JsonResponse(
+                        {
+                            "code": "STATION_EXPIRED",
+                            "message": "This Station session ended. "
+                            "Ask the clinician for a new code.",
+                        },
+                        status=403,
+                    )
+                request.station_access = None
+            elif request.path not in {
+                "/graphql",
+                "/auth/csrf",
+                "/auth/logout",
+                "/stations/context",
+                "/stations/encounter",
+                "/documents/download",
+            } and not request.path.startswith("/documents/upload/"):
+                return JsonResponse(
+                    {
+                        "code": "STATION_SCOPE",
+                        "message": "This session opens only its assigned consultation.",
+                    },
+                    status=403,
+                )
         if protected and (
             request.station_error
             or (credential and credential.device.mode != "clinician")

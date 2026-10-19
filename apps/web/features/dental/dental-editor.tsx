@@ -259,7 +259,7 @@ export function DentalEditor({
         data-dental-editor="true"
         aria-label="Dental editor"
         showCloseButton={false}
-        className="inset-0 top-0 left-0 z-50 flex h-dvh w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none p-0 sm:max-w-none"
+        className="inset-0 top-[var(--station-session-offset,0px)] left-0 z-50 flex h-[calc(100dvh-var(--station-session-offset,0px))] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none p-0 sm:max-w-none"
         aria-describedby="dental-editor-description"
       >
         <DentalEditorHeader

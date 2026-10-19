@@ -14,6 +14,7 @@ export type Device = {
   verification_phrase: string | null;
 };
 export type StationContext = {
+  access?: AccessSession;
   paired: boolean;
   error: string | null;
   device: {
@@ -25,6 +26,12 @@ export type StationContext = {
     organization_id: string;
     branch: string;
   } | null;
+};
+export type AccessSession = {
+  clinician: string;
+  expires_at: string;
+  encounter_id: string;
+  organization_id: string;
 };
 export type Selection = {
   tab?: string;

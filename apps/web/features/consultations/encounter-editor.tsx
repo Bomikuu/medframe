@@ -43,6 +43,7 @@ import { EditorSelectionContext } from "@/features/stations/editor-selection";
 import { VisitContext } from "@/features/stations/visit-context";
 import { TreatmentPlans } from "@/features/treatments/treatment-plans";
 import { ClinicalAlerts } from "@/features/stations/clinical-alerts";
+import { useStationAccess } from "@/features/stations/access-session";
 
 type EditorProps = {
   initial: EncounterFieldsFragment;
@@ -71,6 +72,7 @@ function OwnedEncounterEditor({
   focused = false,
   leaseControl,
 }: EditorProps & { leaseControl: EditingControl }) {
+  const stationAccess = useStationAccess();
   const timeLabel = useClinicTime();
   const { organizationId, href, can } = useWorkspace();
   const { confirm, putDraft, clearDirty, guard } = useSafety();
@@ -419,9 +421,14 @@ function OwnedEncounterEditor({
           <PatientAvatar name={encounter.patientName} className="size-16 border-0 text-lg" />
           <div className="min-w-0 flex-1 basis-64 [&_[data-page-header]]:mb-0">
             <PageHeading title={encounter.patientName} description={encounter.reason}>
-              <ButtonLink variant="outline" href={href(`/clinic/patients/${encounter.patientId}`)}>
-                Patient record
-              </ButtonLink>
+              {!stationAccess && (
+                <ButtonLink
+                  variant="outline"
+                  href={href(`/clinic/patients/${encounter.patientId}`)}
+                >
+                  Patient record
+                </ButtonLink>
+              )}
             </PageHeading>
             <div className="mt-3">
               <StatusBadge value={encounter.status} />
@@ -544,7 +551,7 @@ function OwnedEncounterEditor({
         <details className="rounded-lg border border-border px-4 py-3">
           <summary className="min-h-8 text-sm font-medium">Consultation template & prompts</summary>
           <div className="grid gap-4 py-3">
-            {!readOnly && (
+            {!readOnly && !stationAccess && (
               <TemplatePicker busy={busy || composing || lifecycleBusy} apply={applyGuidance} />
             )}
             <TemplatePrompts value={encounter.template} />

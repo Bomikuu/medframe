@@ -8,6 +8,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { errorMessage } from "@/lib/auth/client";
 import { StationCode } from "./code-input";
 import { modeLabels, stationRequest, type StationContext } from "./client";
+import { AccessCodeForm } from "./access-code-form";
 
 export function StationEntry() {
   const [context, setContext] = useState<StationContext | null>(null);
@@ -63,8 +64,8 @@ export function StationEntry() {
             On this device.
           </h1>
           <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
-            Connect a clinic tablet, kiosk or display. Your clinic chooses what it can do; each
-            clinician still signs in with their own account.
+            Connect a clinic tablet, kiosk or display. Your clinic chooses what it can do. A
+            clinician’s temporary code opens their assigned consultation here.
           </p>
           <div className="mt-8 flex items-start gap-3 text-sm text-muted-foreground">
             <ShieldCheck className="mt-0.5 size-5 shrink-0 text-teal-ink" />
@@ -88,15 +89,15 @@ export function StationEntry() {
                 </p>
               </div>
               {device.mode === "clinician" ? (
-                <>
-                  <p className="text-sm leading-6">
-                    Sign in with your own staff account and MFA, then open this device’s clinical
-                    workspace.
-                  </p>
-                  <ButtonLink href={`/station/clinician?organization=${device.organization_id}`}>
-                    Open clinician Station <ArrowRight />
+                context.access ? (
+                  <ButtonLink
+                    href={`/station/clinician/consultations/${context.access.encounter_id}?organization=${context.access.organization_id}`}
+                  >
+                    Resume assigned consultation <ArrowRight />
                   </ButtonLink>
-                </>
+                ) : (
+                  <AccessCodeForm />
+                )
               ) : (
                 <p role="status" className="rounded-lg bg-muted p-4 text-sm leading-6">
                   Device approved.{" "}
@@ -162,11 +163,6 @@ export function StationEntry() {
               {error}
             </p>
           )}
-          <div className="mt-8 border-t border-border pt-5">
-            <ButtonLink href="/login" variant="ghost">
-              Staff sign in
-            </ButtonLink>
-          </div>
         </section>
       </div>
     </main>

@@ -14,6 +14,9 @@ def check_membership_device(organization_id, permission):
     request = current_request.get()
     if request is None:
         return
+    from medframe_apps.stations.access_scope import check_permission
+
+    check_permission(organization_id, permission)
     if getattr(request, "station_error", None):
         raise request.station_error
     credential = getattr(request, "station_credential", None)

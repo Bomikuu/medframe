@@ -13,6 +13,7 @@ import { errorMessage, requestWithCsrf } from "@/lib/auth/client";
 import { TemporaryCode } from "./code-input";
 import { stationRequest, type Transfer } from "./client";
 import type { EditingControl } from "./use-editing-lease";
+import { useStationAccess } from "./access-session";
 
 export function HandoffControls({
   control,
@@ -40,6 +41,7 @@ export function HandoffControls({
   const [transfer, setTransfer] = useState<Transfer | null>(null);
   const [working, setWorking] = useState(false);
   const [error, setError] = useState("");
+  const access = useStationAccess();
   const scope = { organization_id: organizationId, encounter_id: encounterId };
   async function show() {
     setOpen(true);
@@ -122,17 +124,19 @@ export function HandoffControls({
     <>
       {control.canEdit ? (
         <>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy || working}
-            onClick={() => void show()}
-            className="min-h-11"
-          >
-            <ArrowRightLeft />
-            <span className="hidden sm:inline">Continue elsewhere</span>
-            <span className="sm:hidden">Handoff</span>
-          </Button>
+          {!access && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy || working}
+              onClick={() => void show()}
+              className="min-h-11"
+            >
+              <ArrowRightLeft />
+              <span className="hidden sm:inline">Continue elsewhere</span>
+              <span className="sm:hidden">Handoff</span>
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -170,15 +174,18 @@ export function HandoffControls({
         <DialogContent className="z-[120] max-h-[90dvh] overflow-y-auto sm:max-w-lg">
           <DialogTitle>Continue on another device</DialogTitle>
           <DialogDescription>
-            The receiving device must be paired, approved and signed in. Your current device keeps
-            control until the named clinician accepts.
+            The receiving tablet must be paired and approved. For the same clinician, this one-use
+            code opens the saved consultation without another login. Your current device keeps
+            control until it is opened.
           </DialogDescription>
           {transfer ? (
             <div className="mt-3 grid gap-5">
               <TemporaryCode code={transfer.code} expiresAt={transfer.expires_at} />
               <p className="text-sm leading-6 text-muted-foreground">
-                On the receiving tablet, open Station and choose Receive a handoff. New saves
-                invalidate this code. Expiry leaves this device in control.
+                {kind === "device"
+                  ? "On the approved tablet, open Station and enter this clinician access code. No login is needed."
+                  : "The named receiving clinician signs in with their own identity to review and accept responsibility."}{" "}
+                New saves invalidate this code. Expiry leaves this device in control.
               </p>
               <Button
                 type="button"

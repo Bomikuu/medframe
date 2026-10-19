@@ -29,6 +29,11 @@ def require_document(user, organization_id, version_id, *, write=False):
     if version is None:
         raise DomainError("NOT_FOUND", "Document is unavailable.", 404)
     document = version.document
+    from medframe_apps.stations.access_scope import deny, scope
+
+    access = scope()
+    if access and write and document.encounter_id != access.handoff.encounter_id:
+        deny()
     if document.purpose == "diagnostic":
         raise DomainError("NOT_FOUND", "Use the authorized diagnostic request for this file.", 404)
     if document.purpose == "clinical":
@@ -69,6 +74,11 @@ def require_asset(user, organization_id, version_id, purpose):
 
 @transaction.atomic
 def begin_document_upload(user, organization_id, patient_id, encounter_id, purpose, metadata):
+    from medframe_apps.stations.access_scope import deny, scope
+
+    access = scope()
+    if access and (purpose != "clinical" or str(encounter_id) != str(access.handoff.encounter_id)):
+        deny()
     if purpose not in {"clinical", "logo", "avatar"}:
         raise DomainError("INVALID_INPUT", "Choose a supported upload purpose.")
     if purpose == "clinical":

@@ -7,8 +7,28 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { StatusBadge } from "@/components/application/status-badge";
 import { LoadState } from "@/features/patients/feedback";
 import { ReceiveHandoff } from "./receive-handoff";
+import { useStationAccess } from "./access-session";
 
 export function ClinicianHome() {
+  const access = useStationAccess();
+  if (access)
+    return (
+      <section className="mx-auto grid max-w-xl gap-5 py-10">
+        <h1 className="text-2xl font-semibold">Your assigned consultation</h1>
+        <p className="text-sm leading-6 text-muted-foreground">
+          This tablet session is limited to the consultation opened by {access.clinician}.
+        </p>
+        <ButtonLink
+          href={`/station/clinician/consultations/${access.encounter_id}?organization=${access.organization_id}`}
+        >
+          Resume consultation
+        </ButtonLink>
+      </section>
+    );
+  return <FullClinicianHome />;
+}
+
+function FullClinicianHome() {
   const { organizationId, href, can, overview } = useWorkspace();
   const remote = useRemote(ConsultationsDocument, { organizationId });
   if (!can("patients.clinical.read"))

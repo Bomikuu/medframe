@@ -52,6 +52,9 @@ def require_transferable(encounter, request, provider_id):
 
 @transaction.atomic
 def offer(request, organization_id, encounter_id, data):
+    from medframe_apps.stations.access import source_session
+
+    source = source_session(request)
     encounter = locked_encounter(request, organization_id, encounter_id)
     lease = EditingLease.objects.select_for_update().filter(encounter=encounter).first()
     if not lease or not owns(request, lease) or lease.locked or lease.expires_at <= timezone.now():
@@ -84,6 +87,12 @@ def offer(request, organization_id, encounter_id, data):
         selection=data.selection.model_dump(mode="json"),
         expires_at=timezone.now() + timedelta(minutes=5),
     )
+    if source:
+        from medframe_apps.stations.models import HandoffAccessProof
+
+        HandoffAccessProof.objects.create(
+            handoff=row, source_session=source, source_auth_epoch=request.user.auth_epoch
+        )
     event(request.user, organization_id, "handoff.offered", encounter=encounter, handoff=row)
     return {"id": str(row.id), "code": secret, "expires_at": row.expires_at.isoformat()}
 

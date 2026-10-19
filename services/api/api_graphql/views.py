@@ -20,6 +20,9 @@ def graphql(request):
     if not isinstance(data, dict) or not isinstance(data.get("query"), str):
         raise DomainError("INVALID_QUERY", "Use one GraphQL operation per request.")
     validate_query(data["query"])
+    from medframe_apps.stations.access_scope import validate_graphql
+
+    validate_graphql(request, data["query"], data.get("variables"))
     throttle(request, "graphql", str(request.user.id), 120, 60)
     result = schema.execute_sync(
         data["query"], variable_values=data.get("variables"), context_value=request

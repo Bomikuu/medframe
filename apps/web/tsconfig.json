@@ -62,7 +62,9 @@
     ".next-clinic-onboarding/types/**/*.ts",
     ".next-clinic-onboarding/dev/types/**/*.ts",
     ".next-station/types/**/*.ts",
-    ".next-station/dev/types/**/*.ts"
+    ".next-station/dev/types/**/*.ts",
+    ".next-station-code/types/**/*.ts",
+    ".next-station-code/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

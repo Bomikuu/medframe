@@ -5,9 +5,11 @@ import { Brand } from "@/components/brand";
 import { ButtonLink } from "@/components/ui/button-link";
 import { ClinicalLocaleProvider } from "@/components/application/clinical-locale";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
+import { useStationAccess } from "./access-session";
 
 export function StationShell({ children }: { children: ReactNode }) {
   const { workspace, href } = useWorkspace();
+  const access = useStationAccess();
   return (
     <ClinicalLocaleProvider timezone={workspace.organization.timezone}>
       <div className="min-h-dvh bg-background">
@@ -20,12 +22,21 @@ export function StationShell({ children }: { children: ReactNode }) {
             </span>
           </div>
           <div className="flex gap-2">
-            <ButtonLink href={href("/station/clinician")} variant="ghost">
-              Station home
+            <ButtonLink
+              href={href(
+                access
+                  ? `/station/clinician/consultations/${access.encounter_id}`
+                  : "/station/clinician",
+              )}
+              variant="ghost"
+            >
+              {access ? "Assigned consultation" : "Station home"}
             </ButtonLink>
-            <ButtonLink href={href("/clinic")} variant="outline">
-              Clinic workspace
-            </ButtonLink>
+            {!access && (
+              <ButtonLink href={href("/clinic")} variant="outline">
+                Clinic workspace
+              </ButtonLink>
+            )}
           </div>
         </header>
         <main id="main" className="mx-auto max-w-[1920px] p-4 sm:p-6">

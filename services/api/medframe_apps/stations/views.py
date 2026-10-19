@@ -76,6 +76,15 @@ def context(request):
     elif request.COOKIES.get(DEVICE_COOKIE):
         result["error"] = "This device credential is unavailable. Pair it again with staff."
     response = JsonResponse(result)
+    access = getattr(request, "station_access", None)
+    if access:
+        result["access"] = {
+            "clinician": request.user.display_name,
+            "expires_at": access.expires_at.isoformat(),
+            "encounter_id": str(access.handoff.encounter_id),
+            "organization_id": str(access.handoff.encounter.organization_id),
+        }
+        response = JsonResponse(result)
     if not request.COOKIES.get(EDITOR_COOKIE):
         cookie(response, EDITOR_COOKIE, secrets.token_urlsafe(32))
     return response
@@ -86,13 +95,14 @@ def context(request):
 def pair(request):
     data = json_object(request)
     throttle(request, "station.pair", digest(str(data.get("code", ""))), 5, 300)
-    if request.user.is_authenticated:
-        raise DomainError(
-            "SIGN_OUT_REQUIRED",
-            "Sign out of patient or staff access before pairing this device.",
-            409,
-        )
     secret, credential = pairing.redeem(request, data.get("code", ""))
+    if request.user.is_authenticated:
+        from django.contrib.auth import logout
+
+        from medframe_apps.accounts.models import ClinicalSession
+
+        ClinicalSession.objects.filter(session_key=request.session.session_key).update(revoked=True)
+        logout(request)
     return cookie(JsonResponse({"state": "pending"}), DEVICE_COOKIE, secret)
 
 
@@ -152,6 +162,13 @@ def encounter(request):
     throttle(request, "station.editor", str(request.user.id), 180, 60)
     org, encounter_id = identifier(data, "organization_id"), identifier(data, "encounter_id")
     action = data.get("action", "status")
+    if getattr(request, "station_access", None) and action not in {
+        "status",
+        "claim",
+        "lock",
+        "visit",
+    }:
+        raise DomainError("STATION_SCOPE", "This action is not available in a code session.", 403)
     if action == "visit":
         from medframe_apps.encounters.services import require_encounter
         from medframe_apps.operations.models import QueueTicket
@@ -210,3 +227,12 @@ def handoff(request):
         handoffs.cancel(request, org, encounter_id, identifier(data, "handoff_id"))
         return JsonResponse({"ok": True})
     raise DomainError("INVALID_INPUT", "Choose offer, preview, accept or cancel.")
+
+
+@require_POST
+@domain_view
+def access(request):
+    from medframe_apps.stations.access import redeem
+
+    throttle(request, "station.access", request.COOKIES.get(DEVICE_COOKIE, "unpaired"), 5, 300)
+    return JsonResponse(redeem(request, json_object(request).get("code", "")))

@@ -41,6 +41,9 @@ def validated_draft(content):
 
 
 def require_encounter(user, organization_id, encounter_id, *, write=False, station_check=True):
+    from medframe_apps.stations.access_scope import check_encounter
+
+    check_encounter(encounter_id)
     if write:
         require_membership(user, organization_id, "encounters.write")
     allowed = scoped_patients(

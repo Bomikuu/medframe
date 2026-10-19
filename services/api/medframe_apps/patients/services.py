@@ -44,10 +44,13 @@ def scoped_patients(user, organization_id, permission="patients.demographics.rea
     credential = getattr(request, "station_credential", None) if request else None
     if credential:
         queryset = queryset.filter(branch_id=credential.device.branch_id)
+    access = getattr(request, "station_access", None) if request else None
+    if access:
+        queryset = queryset.filter(id=access.handoff.encounter.patient_id)
     directory = not permission.startswith("patients.clinical.") and bool(
         {"patients.directory.manage", "patients.access.manage"} & permissions
     )
-    if not directory:
+    if not directory or access:
         if "patients.clinical.read" not in permissions:
             return queryset.none()
         queryset = queryset.filter(access_grants__membership=member, access_grants__active=True)

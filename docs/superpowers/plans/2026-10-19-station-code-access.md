@@ -2,7 +2,7 @@
 
 **Goal:** A code issued by a named authenticated clinician opens the same consultation on an approved tablet without another login.
 
-**Architecture:** Extend ConsultationHandoff with source native-session/auth-epoch proof, add StationAccessSession, then atomically accept the existing handoff and create a bounded native staff session. Reuse existing clinical editor/lease and enforce narrow authorization at every shared boundary.
+**Architecture:** Link ConsultationHandoff to a new HandoffAccessProof with source native-session/auth-epoch proof, and add StationAccessSession, then atomically accept the existing handoff and create a bounded native staff session. Reuse existing clinical editor/lease and enforce narrow authorization at every shared boundary.
 
 **Spec:** `docs/superpowers/specs/2026-10-19-station-code-access-design.md`.
 
@@ -10,7 +10,7 @@
 
 - [ ] Preserve source tag/build and encrypted verified review clone. Existing graph first; sanitized Jev risk judgment.
 - [ ] Tests first: synthetic `test_station_access.py` pins anonymous successful redemption, same draft/old writer rejection, unchanged password/MFA, no unapproved/kiosk/foreign credential, no code reuse/expired issuer/stale draft, no responsibility impersonation, issuer/device/session expiry, exact patient/encounter restriction, alias/fragment financial/Admin/identity denial, delegated chain denial and session termination.
-- [ ] `stations/access.py` owns native issuance/redemption and live StationAccessSession validation; `access_scope.py` owns GraphQL/domain/HTTP constraints. Add source proof fields and one additive Django migration. Integrate existing middleware, handoff, membership/patient/encounter/document boundaries; expose `/stations/access` and scoped context.
+- [ ] `stations/access.py` owns native issuance/redemption and live StationAccessSession validation; `access_scope.py` owns GraphQL/domain/HTTP constraints. Add separate source-proof/session tables and one additive Django migration, preserving the existing handoff table and its row fingerprints. Integrate existing middleware, handoff, membership/patient/encounter/document boundaries; expose `/stations/access` and scoped context.
 - [ ] Add public `AccessCodeForm`, native source code disclosure, scoped session strip and end/resume routes. Preserve real shadcn/Tailwind/Impeccable world; no new tokens/assets. Existing provider handoff remains separate.
 - [ ] Format with Ruff/Prettier; run accumulated new/backend auth/lease cases, scoped lint/build and one two-browser no-login path with phone/tablet capture. Log unrelated findings; repair only activation blockers with bounded focused confirmation. Refresh relevant Graphify code corpus and record Jev/evidence.
 - [ ] Commit; fresh encrypted checkpoint/verified restore, stop writes/fingerprint/apply additive migration/verify originals/start `.next-station-code` and original Django services. Preserve `.next-station` and accounts. Record actual results and deferred phases, without push.

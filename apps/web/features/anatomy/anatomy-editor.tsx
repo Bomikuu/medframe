@@ -180,7 +180,7 @@ export function AnatomyEditor({
       aria-label="Anatomy editor"
       className={
         expanded && active
-          ? "fixed inset-0 z-40 flex h-dvh min-h-0 flex-col overflow-hidden bg-background"
+          ? "fixed inset-0 top-[var(--station-session-offset,0px)] z-40 flex h-[calc(100dvh-var(--station-session-offset,0px))] min-h-0 flex-col overflow-hidden bg-background"
           : "relative flex h-[780px] min-h-[560px] min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card"
       }
     >

@@ -102,3 +102,18 @@ class StationEvent(Record):
     encounter = models.ForeignKey("encounters.Encounter", null=True, on_delete=models.PROTECT)
     handoff = models.ForeignKey(ConsultationHandoff, null=True, on_delete=models.PROTECT)
     kind = models.CharField(max_length=40)
+
+
+class HandoffAccessProof(Record):
+    handoff = models.OneToOneField(
+        ConsultationHandoff, on_delete=models.PROTECT, related_name="access_proof"
+    )
+    source_session = models.ForeignKey("accounts.ClinicalSession", on_delete=models.PROTECT)
+    source_auth_epoch = models.PositiveIntegerField()
+
+
+class StationAccessSession(Record):
+    session = models.OneToOneField("accounts.ClinicalSession", on_delete=models.PROTECT)
+    handoff = models.OneToOneField(ConsultationHandoff, on_delete=models.PROTECT)
+    credential = models.ForeignKey(DeviceCredential, on_delete=models.PROTECT)
+    expires_at = models.DateTimeField()
