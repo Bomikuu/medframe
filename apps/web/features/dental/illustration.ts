@@ -57,5 +57,14 @@ export function illustrationChanges(findings: Finding[], tooth: string, group: I
         !finding.anchor &&
         illustrationGroup(finding.condition) === group,
     )
-    .map((finding): Finding => ({ ...finding, status: "resolved" }));
+    .map(({ key, tooth, surfaces, condition, severity, notes, anchor }): Finding => ({
+      key,
+      tooth,
+      surfaces: [...surfaces],
+      condition,
+      severity,
+      status: "resolved",
+      notes,
+      ...(anchor ? { anchor } : {}),
+    }));
 }

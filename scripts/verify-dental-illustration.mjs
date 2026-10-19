@@ -60,7 +60,7 @@ assert.equal(
   dentalIllustration([finding(IMPACTION_PRESETS[0].condition, "47")], "47").impaction,
   null,
 );
-const originalFinding = finding("Missing tooth");
+const originalFinding = { ...finding("Missing tooth"), encounter_id: "read-only-chart-metadata" };
 const changes = illustrationChanges(
   [originalFinding, finding("Pain on palpation")],
   "48",
@@ -69,6 +69,7 @@ const changes = illustrationChanges(
 assert.equal(changes.length, 1);
 assert.equal(changes[0].key, originalFinding.key);
 assert.equal(changes[0].status, "resolved");
+assert.equal("encounter_id" in changes[0], false);
 assert.equal(originalFinding.status, "active");
 console.log(
   "PASS: explicit current states only; copy-forward retains finding identity without changing source evidence",
