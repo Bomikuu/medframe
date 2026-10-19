@@ -80,8 +80,27 @@ def lease_data(request, encounter, lease):
     }
 
 
+def assign(request, encounter, lease, now):
+    lease.owner = request.user
+    lease.client_digest = client_digest(request)
+    lease.credential = getattr(request, "station_credential", None)
+    lease.expires_at = now + LEASE_TIME
+    lease.generation += 1
+    lease.locked = False
+    lease.updated_at = now
+    lease.save()
+
+
 @transaction.atomic
-def status(request, organization_id, encounter_id, action="status"):
+def status(
+    request,
+    organization_id,
+    encounter_id,
+    action="status",
+    *,
+    expected_version=None,
+    generation=None,
+):
     encounter = locked_encounter(request, organization_id, encounter_id)
     lease = (
         EditingLease.objects.select_for_update(of=("self",))
@@ -90,7 +109,20 @@ def status(request, organization_id, encounter_id, action="status"):
         .first()
     )
     now = timezone.now()
-    if action == "claim":
+    if action == "take":
+        from medframe_apps.common import check_version
+
+        check_version(encounter.version, expected_version)
+        if not lease or lease.owner_id != request.user.id or lease.generation != generation:
+            raise DomainError(
+                "OWNERSHIP", "Editing control changed. Review the current owner.", 409
+            )
+        if owns(request, lease):
+            raise DomainError("OWNERSHIP", "This device already owns editing control.", 409)
+        clinician_device(request, organization_id, encounter.branch_id, required=True, write=True)
+        assign(request, encounter, lease, now)
+        event(request.user, organization_id, "editor.taken", encounter=encounter)
+    elif action == "claim":
         if lease and lease.expires_at > now and not owns(request, lease):
             raise DomainError("OWNERSHIP", "Request a handoff from the active editing device.", 409)
         credential = getattr(request, "station_credential", None)
@@ -121,7 +153,7 @@ def status(request, organization_id, encounter_id, action="status"):
         lease.save(update_fields=["locked", "generation"])
         event(request.user, organization_id, "editor.locked", encounter=encounter)
     elif action != "status":
-        raise DomainError("INVALID_INPUT", "Choose status, claim or lock.")
+        raise DomainError("INVALID_INPUT", "Choose status, claim, take or lock.")
     if lease and owns(request, lease) and lease.expires_at > now and not lease.locked:
         lease.expires_at = now + LEASE_TIME
         lease.updated_at = now

@@ -96,4 +96,9 @@ def event(user, organization_id, kind, *, device=None, encounter=None, handoff=N
         handoff=handoff,
         kind=kind,
     )
-    audit(user, "station." + kind, organization_id, encounter.id if encounter else device.id)
+    audit(
+        user,
+        "station." + kind,
+        organization_id,
+        encounter.id if encounter else (device.id if device else None),
+    )

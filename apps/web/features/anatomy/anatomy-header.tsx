@@ -14,7 +14,7 @@ import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "@/features/patients/use-remote";
 export type AnatomyConsultation = {
   patientName: string;
-  patientId: string;
+  patientId?: string;
   status: string;
   saveStatus: string;
   busy: boolean;
@@ -44,8 +44,8 @@ export function AnatomyHeader({
   const { organizationId } = useWorkspace();
   const patient = useRemote(
     PatientRecordDocument,
-    { organizationId, patientId: consultation.patientId },
-    { enabled: active },
+    { organizationId, patientId: consultation.patientId ?? "" },
+    { enabled: active && !!consultation.patientId },
   ).data?.patientDemographics;
   const state = consultation.status.replaceAll("_", " ");
   return (

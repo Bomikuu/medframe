@@ -35,3 +35,13 @@ class OfferInput(Input):
     summary: str = Field(default="", max_length=1200)
     tasks: str = Field(default="", max_length=1200)
     selection: EditorSelection = Field(default_factory=EditorSelection)
+
+
+class WalkInInput(Input):
+    organization_id: UUID
+    branch_id: UUID
+    request_id: UUID
+    patient_id: UUID | None = None
+    new_patient: dict | None = None
+    reason: str = Field(min_length=1, max_length=240)
+    content: dict

@@ -28,9 +28,10 @@ export type StationContext = {
   } | null;
 };
 export type AccessSession = {
+  kind?: "doctor";
   clinician: string;
   expires_at: string;
-  encounter_id: string;
+  encounter_id?: string;
   organization_id: string;
 };
 export type Selection = {

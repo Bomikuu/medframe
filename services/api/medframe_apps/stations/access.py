@@ -14,7 +14,7 @@ from medframe_apps.stations.models import StationAccessSession
 
 
 def source_session(request):
-    if getattr(request, "station_access", None):
+    if getattr(request, "station_access", None) or getattr(request, "station_doctor", None):
         raise DomainError(
             "STATION_SCOPE", "Generate a new code from your authenticated workstation.", 403
         )

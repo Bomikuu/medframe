@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Textarea } from "@/components/ui/textarea";
 import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
+import { useSafety } from "@/features/workspace/safety-provider";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { errorMessage, requestWithCsrf } from "@/lib/auth/client";
 import { TemporaryCode } from "./code-input";
@@ -32,8 +33,8 @@ export function HandoffControls({
 }) {
   const { organizationId } = useWorkspace();
   const router = useRouter();
+  const { confirm } = useSafety();
   const [open, setOpen] = useState(false);
-  const [kind, setKind] = useState("device");
   const [providers, setProviders] = useState<{ id: string; name: string }[]>([]);
   const [provider, setProvider] = useState("");
   const [summary, setSummary] = useState("");
@@ -71,10 +72,10 @@ export function HandoffControls({
         action: "offer",
         handoff: {
           expected_version: version,
-          kind,
-          provider_id: kind === "responsibility" ? provider : null,
-          summary: kind === "responsibility" ? summary : "",
-          tasks: kind === "responsibility" ? tasks : "",
+          kind: "responsibility",
+          provider_id: provider,
+          summary,
+          tasks,
           selection: control.selection.current,
         },
       });
@@ -133,7 +134,7 @@ export function HandoffControls({
               className="min-h-11"
             >
               <ArrowRightLeft />
-              <span className="hidden sm:inline">Continue elsewhere</span>
+              <span className="hidden sm:inline">Transfer responsibility</span>
               <span className="sm:hidden">Handoff</span>
             </Button>
           )}
@@ -156,36 +157,58 @@ export function HandoffControls({
           className="min-h-11"
           disabled={working}
           onClick={() => {
-            setWorking(true);
-            void control
-              .refresh("claim")
-              .catch((cause) => control.setError(errorMessage(cause)))
-              .finally(() => setWorking(false));
+            void (async () => {
+              const taking =
+                access?.kind === "doctor" && control.lease?.live && !control.lease.mine;
+              if (
+                taking &&
+                !(await confirm({
+                  title: "Move editing to this device?",
+                  description:
+                    "Only the last saved version moves. Unsaved input on your other device stays there and that device immediately loses save access. Save there first if needed.",
+                  action: "Move editing here",
+                }))
+              )
+                return;
+              setWorking(true);
+              try {
+                await control.refresh(
+                  taking ? "take" : "claim",
+                  control.lease
+                    ? { version: control.lease.version, generation: control.lease.generation }
+                    : undefined,
+                );
+              } catch (cause) {
+                control.setError(errorMessage(cause));
+              } finally {
+                setWorking(false);
+              }
+            })();
           }}
         >
           {control.lease?.mine
             ? "Resume editing"
             : control.lease?.live
-              ? "Editing on another device"
+              ? access?.kind === "doctor"
+                ? "Move editing to this device"
+                : "Editing on another device"
               : "Claim editing"}
         </Button>
       )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="z-[120] max-h-[90dvh] overflow-y-auto sm:max-w-lg">
-          <DialogTitle>Continue on another device</DialogTitle>
+          <DialogTitle>Transfer clinical responsibility</DialogTitle>
           <DialogDescription>
-            The receiving tablet must be paired and approved. For the same clinician, this one-use
-            code opens the saved consultation without another login. Your current device keeps
-            control until it is opened.
+            Choose an existing clinician to accept responsibility under their own identity. To
+            connect your own tablet, use Connect my device on Station home.
           </DialogDescription>
           {transfer ? (
             <div className="mt-3 grid gap-5">
               <TemporaryCode code={transfer.code} expiresAt={transfer.expires_at} />
               <p className="text-sm leading-6 text-muted-foreground">
-                {kind === "device"
-                  ? "On the approved tablet, open Station and enter this clinician access code. No login is needed."
-                  : "The named receiving clinician signs in with their own identity to review and accept responsibility."}{" "}
-                New saves invalidate this code. Expiry leaves this device in control.
+                The named receiving clinician signs in with their own identity to review and accept
+                responsibility. New saves invalidate this code. Expiry leaves this device in
+                control.
               </p>
               <Button
                 type="button"
@@ -198,56 +221,44 @@ export function HandoffControls({
             </div>
           ) : (
             <div className="mt-3 grid gap-5">
-              <FormSelect
-                id="handoff-kind"
-                label="What should move?"
-                value={kind}
-                onChange={setKind}
-                options={[
-                  { value: "device", label: "Same clinician, another device" },
-                  { value: "responsibility", label: "Hand responsibility to another clinician" },
-                ]}
-              />
-              {kind === "responsibility" && (
-                <>
-                  <FormSelect
-                    id="handoff-provider"
-                    label="Receiving clinician"
-                    value={provider}
-                    onChange={setProvider}
-                    options={[
-                      { value: "", label: "Choose an existing clinician" },
-                      ...providers.map((p) => ({ value: p.id, label: p.name })),
-                    ]}
+              <>
+                <FormSelect
+                  id="handoff-provider"
+                  label="Receiving clinician"
+                  value={provider}
+                  onChange={setProvider}
+                  options={[
+                    { value: "", label: "Choose an existing clinician" },
+                    ...providers.map((p) => ({ value: p.id, label: p.name })),
+                  ]}
+                />
+                <FormField id="handoff-summary" label="Handoff summary">
+                  <Textarea
+                    id="handoff-summary"
+                    value={summary}
+                    maxLength={1200}
+                    onChange={(e) => setSummary(e.target.value)}
+                    rows={3}
                   />
-                  <FormField id="handoff-summary" label="Handoff summary">
-                    <Textarea
-                      id="handoff-summary"
-                      value={summary}
-                      maxLength={1200}
-                      onChange={(e) => setSummary(e.target.value)}
-                      rows={3}
-                    />
-                  </FormField>
-                  <FormField id="handoff-tasks" label="Outstanding tasks">
-                    <Textarea
-                      id="handoff-tasks"
-                      value={tasks}
-                      maxLength={1200}
-                      onChange={(e) => setTasks(e.target.value)}
-                      rows={3}
-                    />
-                  </FormField>
-                  <p className="text-xs leading-5 text-muted-foreground">
-                    Acceptance changes the responsible provider on unfinished care. Existing patient
-                    access is still required; active linked queue responsibility must be resolved
-                    first.
-                  </p>
-                </>
-              )}
+                </FormField>
+                <FormField id="handoff-tasks" label="Outstanding tasks">
+                  <Textarea
+                    id="handoff-tasks"
+                    value={tasks}
+                    maxLength={1200}
+                    onChange={(e) => setTasks(e.target.value)}
+                    rows={3}
+                  />
+                </FormField>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  Acceptance changes the responsible provider on unfinished care. Existing patient
+                  access is still required; active linked queue responsibility must be resolved
+                  first.
+                </p>
+              </>
               <Button
                 type="button"
-                disabled={working || (kind === "responsibility" && (!provider || !summary.trim()))}
+                disabled={working || !provider || !summary.trim()}
                 onClick={() => void offer()}
               >
                 {working ? "Saving and preparing…" : "Save & generate handoff code"}

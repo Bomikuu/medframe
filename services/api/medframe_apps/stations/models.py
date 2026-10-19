@@ -117,3 +117,36 @@ class StationAccessSession(Record):
     handoff = models.OneToOneField(ConsultationHandoff, on_delete=models.PROTECT)
     credential = models.ForeignKey(DeviceCredential, on_delete=models.PROTECT)
     expires_at = models.DateTimeField()
+
+
+class DoctorAccessCode(Record):
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT)
+    branch = models.ForeignKey("organizations.Branch", on_delete=models.PROTECT)
+    provider = models.ForeignKey("providers.ProviderProfile", on_delete=models.PROTECT)
+    source_session = models.ForeignKey("accounts.ClinicalSession", on_delete=models.PROTECT)
+    source_auth_epoch = models.PositiveIntegerField()
+    digest = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True)
+
+
+class DoctorStationSession(Record):
+    session = models.OneToOneField("accounts.ClinicalSession", on_delete=models.PROTECT)
+    code = models.OneToOneField(DoctorAccessCode, on_delete=models.PROTECT)
+    credential = models.ForeignKey(DeviceCredential, on_delete=models.PROTECT)
+    expires_at = models.DateTimeField()
+
+
+class WalkInCommit(Record):
+    organization = models.ForeignKey("organizations.Organization", on_delete=models.PROTECT)
+    actor = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+    request_id = models.UUIDField()
+    input_digest = models.CharField(max_length=64)
+    encounter = models.OneToOneField("encounters.Encounter", on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["organization", "actor", "request_id"], name="station_walk_in_once"
+            )
+        ]

@@ -65,7 +65,7 @@ export function StationEntry() {
           </h1>
           <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
             Connect a clinic tablet, kiosk or display. Your clinic chooses what it can do. A
-            clinician’s temporary code opens their assigned consultation here.
+            doctor’s temporary code opens their clinical workspace here.
           </p>
           <div className="mt-8 flex items-start gap-3 text-sm text-muted-foreground">
             <ShieldCheck className="mt-0.5 size-5 shrink-0 text-teal-ink" />
@@ -91,9 +91,16 @@ export function StationEntry() {
               {device.mode === "clinician" ? (
                 context.access ? (
                   <ButtonLink
-                    href={`/station/clinician/consultations/${context.access.encounter_id}?organization=${context.access.organization_id}`}
+                    href={
+                      context.access.kind === "doctor"
+                        ? `/station/clinician?organization=${context.access.organization_id}`
+                        : `/station/clinician/consultations/${context.access.encounter_id}?organization=${context.access.organization_id}`
+                    }
                   >
-                    Resume assigned consultation <ArrowRight />
+                    {context.access.kind === "doctor"
+                      ? "Open doctor workspace"
+                      : "Resume assigned consultation"}{" "}
+                    <ArrowRight />
                   </ButtonLink>
                 ) : (
                   <AccessCodeForm />

@@ -55,6 +55,22 @@ MUTATIONS = {
 }
 
 
+DOCTOR_PERMISSIONS = PERMISSIONS | {"patients.register", "treatments.write"}
+DOCTOR_QUERIES = QUERIES | {
+    "encounters",
+    "providers",
+    "clinicPatients",
+    "patients",
+    "patientDirectory",
+}
+DOCTOR_MUTATIONS = MUTATIONS | {"createEncounter", "createTreatmentPlan", "updateTreatmentItem"}
+
+
+def doctor_scope():
+    request = current_request.get()
+    return getattr(request, "station_doctor", None) if request else None
+
+
 def scope():
     request = current_request.get()
     return getattr(request, "station_access", None) if request else None
@@ -63,12 +79,18 @@ def scope():
 def deny():
     raise DomainError(
         "STATION_SCOPE",
-        "This code opens only its assigned consultation. Use your own workstation for other tasks.",
+        "This task is outside this Station session. Use your authenticated workstation.",
         403,
     )
 
 
 def check_permission(organization_id, permission):
+    doctor = doctor_scope()
+    if doctor and (
+        str(organization_id) != str(doctor.code.organization_id)
+        or permission not in DOCTOR_PERMISSIONS
+    ):
+        deny()
     access = scope()
     if access and (
         str(organization_id) != str(access.handoff.encounter.organization_id)
@@ -84,12 +106,14 @@ def check_encounter(encounter_id):
 
 
 def permissions(values):
-    return set(values) & PERMISSIONS if scope() else values
+    allowed = DOCTOR_PERMISSIONS if doctor_scope() else PERMISSIONS if scope() else None
+    return set(values) & allowed if allowed else values
 
 
 def validate_graphql(request, query, variables):
     access = getattr(request, "station_access", None)
-    if not access:
+    doctor = getattr(request, "station_doctor", None)
+    if not access and not doctor:
         return
     # Ordinary query limits execute first; do not invent a second permissive parser.
     document = parse(query, max_tokens=2000)
@@ -97,8 +121,12 @@ def validate_graphql(request, query, variables):
         d.name.value: d for d in document.definitions if isinstance(d, FragmentDefinitionNode)
     }
     operation = next(d for d in document.definitions if isinstance(d, OperationDefinitionNode))
-    allowed = QUERIES if operation.operation.value == "query" else MUTATIONS
-    encounter = access.handoff.encounter
+    allowed = (
+        (DOCTOR_QUERIES if doctor else QUERIES)
+        if operation.operation.value == "query"
+        else (DOCTOR_MUTATIONS if doctor else MUTATIONS)
+    )
+    encounter = access.handoff.encounter if access else None
 
     def roots(selection, visited=frozenset()):
         for node in selection.selections:
@@ -120,16 +148,25 @@ def validate_graphql(request, query, variables):
             a.name.value: value_from_ast_untyped(a.value, variables or {})
             for a in (field.arguments or ())
         }
-        for key, expected in {
-            "organizationId": encounter.organization_id,
-            "patientId": encounter.patient_id,
-            "encounterId": encounter.id,
-        }.items():
+        expected_args = (
+            {"organizationId": doctor.code.organization_id}
+            if doctor
+            else {
+                "organizationId": encounter.organization_id,
+                "patientId": encounter.patient_id,
+                "encounterId": encounter.id,
+            }
+        )
+        for key, expected in expected_args.items():
             if key in args and args[key] is not None and str(args[key]) != str(expected):
                 deny()
-        if name == "beginDocumentUpload" and (
-            str(args.get("encounterId")) != str(encounter.id)
-            or str(args.get("patientId")) != str(encounter.patient_id)
-            or args.get("purpose") != "clinical"
+        if (
+            access
+            and name == "beginDocumentUpload"
+            and (
+                str(args.get("encounterId")) != str(encounter.id)
+                or str(args.get("patientId")) != str(encounter.patient_id)
+                or args.get("purpose") != "clinical"
+            )
         ):
             deny()

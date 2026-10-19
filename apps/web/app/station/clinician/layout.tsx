@@ -13,8 +13,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
       <main id="main" className="mx-auto grid max-w-lg gap-5 p-8 pt-20">
         <h1 className="text-2xl font-semibold">Open Station with a code</h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          Ask the clinician to generate a handoff code from their signed-in computer. Enter it on
-          this approved tablet to open the assigned consultation.
+          Ask the doctor to choose Connect my device from Station home on their signed-in computer.
+          Enter their code on this approved tablet to open the clinical workspace.
         </p>
         <ButtonLink href="/station">Enter Station code</ButtonLink>
       </main>

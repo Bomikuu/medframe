@@ -1,6 +1,8 @@
 const allowedPaths = new Set([
   "stations/context",
   "stations/access",
+  "stations/doctor",
+  "stations/walk-in",
   "stations/pair",
   "stations/manage",
   "stations/encounter",

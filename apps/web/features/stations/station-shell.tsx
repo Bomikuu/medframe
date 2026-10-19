@@ -24,13 +24,13 @@ export function StationShell({ children }: { children: ReactNode }) {
           <div className="flex gap-2">
             <ButtonLink
               href={href(
-                access
+                access && access.kind !== "doctor"
                   ? `/station/clinician/consultations/${access.encounter_id}`
                   : "/station/clinician",
               )}
               variant="ghost"
             >
-              {access ? "Assigned consultation" : "Station home"}
+              {access && access.kind !== "doctor" ? "Assigned consultation" : "Station home"}
             </ButtonLink>
             {!access && (
               <ButtonLink href={href("/clinic")} variant="outline">

@@ -98,7 +98,9 @@ export function StationSessionBoundary({ children }: { children: ReactNode }) {
           role="status"
         >
           <p>
-            <strong>{context.access.clinician}</strong> · Assigned consultation only · Ends{" "}
+            <strong>{context.access.clinician}</strong> ·{" "}
+            {context.access.kind === "doctor" ? "Clinical workspace" : "Assigned consultation only"}{" "}
+            · Ends{" "}
             {new Date(context.access.expires_at).toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",

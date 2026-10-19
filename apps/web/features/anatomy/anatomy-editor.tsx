@@ -31,7 +31,7 @@ export function AnatomyEditor({
 }: {
   active: boolean;
   readOnly: boolean;
-  patientId: string;
+  patientId?: string;
   save: () => Promise<unknown>;
   consultation: AnatomyConsultation;
 }) {

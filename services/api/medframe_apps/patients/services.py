@@ -50,7 +50,7 @@ def scoped_patients(user, organization_id, permission="patients.demographics.rea
     directory = not permission.startswith("patients.clinical.") and bool(
         {"patients.directory.manage", "patients.access.manage"} & permissions
     )
-    if not directory or access:
+    if not directory or access or (request and getattr(request, "station_doctor", None)):
         if "patients.clinical.read" not in permissions:
             return queryset.none()
         queryset = queryset.filter(access_grants__membership=member, access_grants__active=True)

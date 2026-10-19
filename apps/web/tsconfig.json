@@ -64,7 +64,9 @@
     ".next-station/types/**/*.ts",
     ".next-station/dev/types/**/*.ts",
     ".next-station-code/types/**/*.ts",
-    ".next-station-code/dev/types/**/*.ts"
+    ".next-station-code/dev/types/**/*.ts",
+    ".next-station-doctor/types/**/*.ts",
+    ".next-station-doctor/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

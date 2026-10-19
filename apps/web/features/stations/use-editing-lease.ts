@@ -14,11 +14,13 @@ export function useEditingLease(organizationId: string, encounterId: string, ena
     selection.current = { ...selection.current, ...next };
   }, []);
   const refresh = useCallback(
-    async (action = "status") => {
+    async (action = "status", snapshot?: { version: number; generation: number }) => {
       const result = await stationRequest<Lease>("encounter", {
         action,
         organization_id: organizationId,
         encounter_id: encounterId,
+        expected_version: snapshot?.version,
+        generation: snapshot?.generation,
       });
       setLease(result);
       setError("");

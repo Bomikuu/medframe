@@ -15,6 +15,12 @@ class StationMiddleware:
         from medframe_apps.stations.access import find_session, live
 
         access = find_session(getattr(request, "native_session_key", request.session.session_key))
+        from medframe_apps.stations import doctor_access
+
+        doctor = doctor_access.find_session(
+            getattr(request, "native_session_key", request.session.session_key)
+        )
+        request.station_doctor = doctor
         request.station_access = access
         request.station_credential = None
         request.station_error = None
@@ -40,6 +46,44 @@ class StationMiddleware:
             ("/documents/", "/diagnostics/", "/portal/", "/onboarding/", "/admin/")
         )
         credential = request.station_credential
+        if doctor:
+            previous = getattr(request, "native_last_seen_at", None)
+            if previous:
+                doctor.session.last_seen_at = previous
+            if not request.user.is_authenticated or not doctor_access.live(doctor, credential):
+                from django.contrib.auth import logout
+
+                from medframe_apps.accounts.models import ClinicalSession
+
+                ClinicalSession.objects.filter(id=doctor.session_id).update(revoked=True)
+                logout(request)
+                request.station_doctor = None
+                if request.path not in {
+                    "/auth/csrf",
+                    "/auth/logout",
+                    "/stations/context",
+                    "/stations/doctor",
+                }:
+                    return JsonResponse(
+                        {"code": "STATION_EXPIRED", "message": "Ask the doctor for a new code."},
+                        status=403,
+                    )
+            elif request.path not in {
+                "/graphql",
+                "/auth/csrf",
+                "/auth/logout",
+                "/stations/context",
+                "/stations/encounter",
+                "/stations/walk-in",
+                "/documents/download",
+            } and not request.path.startswith("/documents/upload/"):
+                return JsonResponse(
+                    {
+                        "code": "STATION_SCOPE",
+                        "message": "Use your authenticated workstation for this task.",
+                    },
+                    status=403,
+                )
         if access:
             # Native middleware refreshed last_seen; validate its previous timestamp
             # so Station's shorter inactivity policy cannot be extended by a poll.

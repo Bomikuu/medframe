@@ -18,6 +18,8 @@ from medframe_apps.stations import views as stations
 urlpatterns = [
     path("stations/context", stations.context),
     path("stations/access", stations.access),
+    path("stations/doctor", stations.doctor),
+    path("stations/walk-in", stations.walk_in),
     path("stations/pair", stations.pair),
     path("stations/manage", stations.manage),
     path("stations/encounter", stations.encounter),

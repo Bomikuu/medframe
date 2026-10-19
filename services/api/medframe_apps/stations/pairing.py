@@ -43,13 +43,17 @@ def device_data(device):
     }
 
 
-@transaction.atomic
-def create(request, organization_id, data):
-    administrator(request, organization_id, data.branch_id)
+def validate_functions(data):
     if not data.functions or not set(data.functions) <= FUNCTIONS[data.mode]:
         raise DomainError("INVALID_INPUT", "Choose only functions available for this mode.")
     if data.mode == "clinician" and "clinical.read" not in data.functions:
         raise DomainError("INVALID_INPUT", "Clinician devices need record reading enabled.")
+
+
+@transaction.atomic
+def create(request, organization_id, data):
+    administrator(request, organization_id, data.branch_id)
+    validate_functions(data)
     device = StationDevice.objects.create(
         organization_id=organization_id,
         branch_id=data.branch_id,
@@ -159,3 +163,32 @@ def redeem(request, value):
     device.save(update_fields=["state", "version"])
     event(None, device.organization_id, "device.redeemed", device=device)
     return secret, credential
+
+
+@transaction.atomic
+def update(request, organization_id, identifier, expected_version, data):
+    device = scoped_device(request, organization_id, identifier)
+    check_version(device.version, expected_version)
+    administrator(request, organization_id, data.branch_id)
+    validate_functions(data)
+    scope_changed = (
+        device.branch_id != data.branch_id
+        or device.mode != data.mode
+        or set(device.functions) != set(data.functions)
+    )
+    device.name = data.name
+    device.branch_id = data.branch_id
+    device.mode = data.mode
+    device.functions = sorted(set(data.functions))
+    if scope_changed:
+        DeviceCredential.objects.filter(device=device).update(revoked=True)
+        PairingChallenge.objects.filter(device=device, consumed_at__isnull=True).update(
+            expires_at=timezone.now()
+        )
+        device.state = "setup"
+        device.approved_by = None
+        device.approved_at = None
+    device.version += 1
+    device.save()
+    event(request.user, organization_id, "device.updated", device=device)
+    return {"device": device_data(device), "pairing_required": scope_changed}

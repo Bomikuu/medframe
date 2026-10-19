@@ -81,6 +81,9 @@ class Query(
         access = getattr(info.context, "station_access", None)
         if access:
             queryset = queryset.filter(id=access.handoff.encounter.organization_id)
+        doctor = getattr(info.context, "station_doctor", None)
+        if doctor:
+            queryset = queryset.filter(id=doctor.code.organization_id)
         queryset = queryset.order_by("name")[:50]
         return [
             OrganizationType(id=item.id, name=item.name, timezone=item.timezone)
@@ -97,6 +100,9 @@ class Query(
         access = getattr(info.context, "station_access", None)
         if access:
             branches = branches.filter(id=access.handoff.encounter.branch_id)
+        doctor = getattr(info.context, "station_doctor", None)
+        if doctor:
+            branches = branches.filter(id=doctor.code.branch_id)
         from medframe_apps.stations.access_scope import permissions
 
         audit(info.context.user, "workspace.read", organization_id)

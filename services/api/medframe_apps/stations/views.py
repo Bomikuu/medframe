@@ -76,6 +76,15 @@ def context(request):
     elif request.COOKIES.get(DEVICE_COOKIE):
         result["error"] = "This device credential is unavailable. Pair it again with staff."
     response = JsonResponse(result)
+    doctor = getattr(request, "station_doctor", None)
+    if doctor:
+        result["access"] = {
+            "kind": "doctor",
+            "clinician": request.user.display_name,
+            "expires_at": doctor.expires_at.isoformat(),
+            "organization_id": str(doctor.code.organization_id),
+        }
+        response = JsonResponse(result)
     access = getattr(request, "station_access", None)
     if access:
         result["access"] = {
@@ -143,6 +152,16 @@ def manage(request):
     if action == "create":
         device = pairing.create(request, organization_id, parsed(DeviceInput, data["device"]))
         return JsonResponse({"device": pairing.device_data(device)})
+    if action == "update":
+        return JsonResponse(
+            pairing.update(
+                request,
+                organization_id,
+                identifier(data, "device_id"),
+                data["expected_version"],
+                parsed(DeviceInput, data["device"]),
+            )
+        )
     return JsonResponse(
         pairing.manage(
             request,
@@ -200,7 +219,16 @@ def encounter(request):
                 ]
             }
         )
-    return JsonResponse(ownership.status(request, org, encounter_id, action))
+    return JsonResponse(
+        ownership.status(
+            request,
+            org,
+            encounter_id,
+            action,
+            expected_version=data.get("expected_version"),
+            generation=data.get("generation"),
+        )
+    )
 
 
 @require_POST
@@ -236,3 +264,37 @@ def access(request):
 
     throttle(request, "station.access", request.COOKIES.get(DEVICE_COOKIE, "unpaired"), 5, 300)
     return JsonResponse(redeem(request, json_object(request).get("code", "")))
+
+
+@require_POST
+@domain_view
+def doctor(request):
+    from medframe_apps.stations import doctor_access
+
+    data = json_object(request)
+    if data.get("action") == "issue":
+        require_session_realm(request, "staff")
+        throttle(request, "station.doctor.issue", str(request.user.id), 15, 300)
+        return JsonResponse(
+            doctor_access.issue(
+                request,
+                identifier(data, "organization_id"),
+                identifier(data, "branch_id"),
+            )
+        )
+    if data.get("action", "redeem") != "redeem":
+        raise DomainError("INVALID_INPUT", "Choose issue or redeem.")
+    throttle(
+        request, "station.doctor.redeem", request.COOKIES.get(DEVICE_COOKIE, "unpaired"), 5, 300
+    )
+    return JsonResponse(doctor_access.redeem(request, data.get("code", "")))
+
+
+@require_POST
+@domain_view
+def walk_in(request):
+    from medframe_apps.stations.walk_in import commit
+
+    require_session_realm(request, "staff")
+    throttle(request, "station.walk_in", str(request.user.id), 30, 300)
+    return JsonResponse(commit(request, json_object(request)))

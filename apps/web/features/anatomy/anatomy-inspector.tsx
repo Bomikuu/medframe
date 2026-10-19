@@ -41,7 +41,7 @@ export function AnatomyInspector({
   readOnly: boolean;
   isolate: boolean;
   onIsolate: () => void;
-  patientId: string;
+  patientId?: string;
   onCarry: (finding: AnatomyFinding) => void;
 }) {
   const selectedFindings = findings
@@ -114,7 +114,13 @@ export function AnatomyInspector({
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {tab === "history" ? (
-          <PatientAnatomy patientId={patientId} onCarry={readOnly ? undefined : onCarry} />
+          patientId ? (
+            <PatientAnatomy patientId={patientId} onCarry={readOnly ? undefined : onCarry} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Confirm the patient to load anatomy history. No history has been reviewed.
+            </p>
+          )
         ) : (
           <>
             {tab === "details" && (

@@ -63,8 +63,8 @@ export function DentalEditor({
   clinicalContext,
 }: {
   readOnly: boolean;
-  patientId: string;
-  encounterId: string;
+  patientId?: string;
+  encounterId?: string;
   revisionId?: string | null;
   active?: boolean;
   patientName: string;
@@ -80,12 +80,16 @@ export function DentalEditor({
 }) {
   const { organizationId } = useWorkspace();
   const remote = useRemote(DentalReferenceDocument, { organizationId });
-  const chart = useRemote(DentalChartDocument, {
-    organizationId,
-    patientId,
-    encounterId: revisionId ? null : encounterId,
-    revisionId,
-  });
+  const chart = useRemote(
+    DentalChartDocument,
+    {
+      organizationId,
+      patientId: patientId ?? "",
+      encounterId: revisionId ? null : encounterId,
+      revisionId,
+    },
+    { enabled: !!patientId },
+  );
   const { control, register, setValue } = useFormContext<EncounterForm>();
   const findings = useFieldArray({ control, name: "content.findings" });
   const values = useWatch({ control, name: "content.findings" });
@@ -642,11 +646,17 @@ export function DentalEditor({
                 </section>
               </TabsContent>
               <TabsContent value="history">
-                <ToothHistory
-                  key={`${patientId}:${selected}`}
-                  patientId={patientId}
-                  tooth={selected}
-                />
+                {patientId ? (
+                  <ToothHistory
+                    key={`${patientId}:${selected}`}
+                    patientId={patientId}
+                    tooth={selected}
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Confirm the patient to load tooth history. No history has been reviewed.
+                  </p>
+                )}
               </TabsContent>
             </Tabs>
           </aside>
