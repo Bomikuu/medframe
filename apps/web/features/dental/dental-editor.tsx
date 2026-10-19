@@ -1,5 +1,11 @@
 "use client";
 
+import { Bot } from "lucide-react";
+import { ClinicalAssistantPreview } from "@/features/assistant/clinical-assistant-preview";
+import { EditorPanel } from "@/features/anatomy/editor-panel";
+import { useDesktopPanels } from "@/features/anatomy/use-editor-panels";
+import { IllustrationControls } from "./illustration-controls";
+import { illustrationChanges, type IllustrationGroup } from "./illustration";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/application/status-badge";
 import { ClinicalEntry } from "@/components/application/clinical-entry";
@@ -120,6 +126,9 @@ export function DentalEditor({
   }, [pending, noteText, onPendingChange]);
   const [activePin, setActivePin] = useState<string | null>(null);
   const [inspectorOpen, setInspectorOpen] = useState(false);
+  const desktop = useDesktopPanels();
+  const [assistantOpen, setAssistantOpen] = useState(true);
+  const [assistantDrawer, setAssistantDrawer] = useState(false);
   const viewport = useDentalViewport(
     restored?.tooth ? { tooth: restored.tooth, surface: restored.surface ?? null } : null,
   );
@@ -156,6 +165,32 @@ export function DentalEditor({
       status: "active",
       notes: "",
     });
+  }
+  function changeIllustration(group: IllustrationGroup, condition: string | null) {
+    if (readOnly) return;
+    const changes = illustrationChanges(displayFindings, selected, group);
+    const newCount =
+      changes.filter((item) => !values.some((value) => value.key === item.key)).length +
+      (condition ? 1 : 0);
+    if (values.length + newCount > 80) return;
+    for (const change of changes) {
+      const index = values.findIndex((item) => item.key === change.key);
+      if (index >= 0)
+        setValue(`content.findings.${index}.status`, "resolved", { shouldDirty: true });
+      else findings.append(change);
+    }
+    if (condition)
+      findings.append({
+        key: crypto.randomUUID(),
+        tooth: selected,
+        surfaces: [],
+        condition,
+        severity: "unknown",
+        status: "active",
+        notes: "",
+      });
+    viewport.setAnatomyOnly(false);
+    viewport.focusTooth(selected, group === "impaction" ? "buccal" : selectedSurface);
   }
   const noteKey = `dental-note:${organizationId}:${encounterId}`;
   useUnsavedChanges(noteKey, !!pending && !!noteText.trim(), () => {
@@ -293,373 +328,420 @@ export function DentalEditor({
                   <DropdownMenuItem onSelect={show2DChart}>View 2D chart</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <Button
+                type="button"
+                variant="outline"
+                aria-label="Toggle Medframe AI"
+                aria-pressed={desktop ? assistantOpen : assistantDrawer}
+                onClick={() =>
+                  desktop ? setAssistantOpen(!assistantOpen) : setAssistantDrawer(!assistantDrawer)
+                }
+              >
+                <Bot />
+                <span className="hidden sm:inline">Medframe AI</span>
+              </Button>
               {actions}
             </>
           }
         />
         {clinicalContext}
-        <div
-          className={`relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] ${viewport.expandedCanvas ? "" : "lg:grid-cols-[248px_minmax(0,1fr)_340px] 2xl:grid-cols-[280px_minmax(0,1fr)_380px]"}`}
-        >
+        <div className="flex min-h-0 flex-1">
           <div
-            className={
-              viewport.expandedCanvas
-                ? "hidden"
-                : "hidden min-h-0 border-r border-border bg-card lg:block"
-            }
+            className={`relative grid min-h-0 min-w-0 flex-1 grid-cols-[minmax(0,1fr)] ${viewport.expandedCanvas ? "" : "lg:grid-cols-[200px_minmax(0,1fr)_310px] 2xl:grid-cols-[224px_minmax(0,1fr)_330px]"}`}
           >
-            <ToothNavigator
-              teeth={teeth}
-              selected={selected}
-              onSelect={selectTooth}
-              dentition={dentition}
-              onDentition={changeDentition}
-              viewport={viewport}
-            />
-          </div>
-          <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto bg-muted/30 p-3 xl:p-4">
-            {active && (
-              <Dental3D
-                selected={selected}
-                onSelect={(tooth, surface) => {
-                  setSelected(tooth);
-                  setSelectedSurface(surface ?? null);
-                }}
-                selectedSurface={selectedSurface}
-                findings={displayFindings}
-                dentition={dentition}
-                editor
-                annotations={annotations}
-                workspace={viewport}
-                onAnnotate={addFinding}
-              />
-            )}
-            <details
-              ref={chartRef}
-              open={chartOpen || dentition === "primary"}
-              onToggle={(event) => setChartOpen(event.currentTarget.open)}
-              className="mt-2 shrink-0 rounded-lg border border-border bg-card px-3 py-1 text-xs"
+            <div
+              className={
+                viewport.expandedCanvas
+                  ? "hidden"
+                  : "hidden min-h-0 border-r border-border bg-card lg:block"
+              }
             >
-              <summary className="min-h-11 text-sm font-medium">
-                2D tooth selector · keyboard alternative
-              </summary>
-              <div className="mt-3 max-h-64 overflow-y-auto">
-                <div className="mb-3 lg:hidden">
-                  <FormSelect
-                    id="mobile-dentition"
-                    label="Dentition"
-                    value={dentition}
-                    onChange={(value) => {
-                      setDentition(value as typeof dentition);
-                      setSelected(value === "primary" ? "54" : "16");
-                    }}
-                    options={[
-                      { value: "permanent", label: "Permanent" },
-                      { value: "primary", label: "Primary" },
-                    ]}
-                  />
-                </div>{" "}
-                <DentalChartGrid
-                  teeth={teeth}
-                  dentition={dentition}
-                  selected={selected}
-                  findings={displayFindings}
-                  onSelect={(id) => {
-                    selectTooth(id);
-                  }}
-                />
-              </div>
-            </details>
-          </div>
-          <aside
-            aria-label="Tooth inspector"
-            className={`${viewport.expandedCanvas ? "hidden" : inspectorOpen ? "absolute inset-x-0 bottom-0 z-20 max-h-[60dvh] shadow-lg" : "hidden"} min-h-0 min-w-0 overflow-y-auto border-t border-border bg-card p-4 ${viewport.expandedCanvas ? "" : "lg:static lg:block lg:max-h-none lg:border-t-0 lg:border-l lg:shadow-none"}`}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h2 className="text-xl font-semibold">Tooth {selected}</h2>
-                <p className="mt-1 text-sm text-muted-foreground capitalize">{current?.label}</p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="hidden xl:inline-flex"
-                onClick={show2DChart}
-              >
-                View in 2D chart
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                className="lg:hidden"
-                onClick={() => setInspectorOpen(false)}
-              >
-                Close details
-              </Button>
+              <ToothNavigator
+                teeth={teeth}
+                selected={selected}
+                onSelect={selectTooth}
+                dentition={dentition}
+                onDentition={changeDentition}
+                viewport={viewport}
+              />
             </div>
-            <ToothIdentity tooth={current} />
-            <span className="mb-5 inline-flex rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-              Selected · FDI {selected}
-            </span>
-            <Tabs value={inspectorTab} onValueChange={setInspectorTab} className="gap-4">
-              <TabsList className="w-full">
-                <TabsTrigger value="findings">Findings</TabsTrigger>
-                <TabsTrigger value="treatments">Treatments</TabsTrigger>
-                <TabsTrigger value="history">History</TabsTrigger>
-                <TabsTrigger value="notes">Notes</TabsTrigger>
-              </TabsList>
-              <TabsContent value="findings" forceMount className="data-[state=inactive]:hidden">
-                {!readOnly && (
-                  <Button
-                    type="button"
-                    className="mb-2 w-full"
-                    onClick={addFinding}
-                    disabled={findings.fields.length >= 80}
-                  >
-                    + Add finding for tooth {selected}
-                  </Button>
-                )}
-                <h3 className="text-sm font-semibold">
-                  Current findings (
-                  {displayFindings.filter((item) => item.tooth === selected && !item.anchor).length}
-                  )
-                </h3>
-                {displayFindings
-                  .filter(
-                    (item) =>
-                      item.tooth === selected &&
-                      !item.anchor &&
-                      !values.some((value) => value.key === item.key),
-                  )
-                  .map((item) => (
-                    <div key={item.key} className="rounded-lg border border-border p-3">
-                      <p className="text-sm font-medium">{item.condition}</p>
-                      <p className="mt-2 text-xs text-muted-foreground">
-                        {item.surfaces.join(", ") || "Whole tooth"} · {item.status}
-                      </p>
-                      {item.notes && <p className="mt-2 text-sm">{item.notes}</p>}
-                    </div>
-                  ))}
-                <ToothSurfacePicker
-                  tooth={current}
-                  value={selectedSurface}
-                  onChange={(surface) => {
-                    setSelectedSurface(surface);
-                    viewport.focusTooth(selected, surface);
+            <div className="flex min-h-0 min-w-0 flex-col overflow-y-auto bg-muted/30 p-3 xl:p-4">
+              {active && (
+                <Dental3D
+                  selected={selected}
+                  onSelect={(tooth, surface) => {
+                    setSelected(tooth);
+                    setSelectedSurface(surface ?? null);
                   }}
+                  selectedSurface={selectedSurface}
+                  findings={displayFindings}
+                  dentition={dentition}
+                  editor
+                  annotations={annotations}
+                  workspace={viewport}
+                  onAnnotate={addFinding}
                 />
-                {!values.some((finding) => finding.tooth === selected) && (
-                  <p className="text-sm text-muted-foreground">
-                    No finding recorded for this tooth in this visit.
-                  </p>
-                )}
-                <div className="grid gap-5">
-                  {findings.fields.map(
-                    (field, index) =>
-                      values[index]?.tooth === selected &&
-                      !values[index]?.anchor && (
-                        <ClinicalEntry
-                          key={field.id}
-                          title={`Finding · tooth ${selected}`}
-                          summary={values[index]?.condition ?? ""}
-                          status={values[index]?.status ?? "active"}
-                          path={`content.findings.${index}`}
-                          readOnly={readOnly}
-                          onRemove={() => findings.remove(index)}
-                        >
-                          <div className="grid gap-4">
-                            <FormField id={`finding-${index}`} label="Finding or condition">
-                              <Input
-                                id={`finding-${index}`}
-                                {...register(`content.findings.${index}.condition`)}
-                                maxLength={120}
-                              />
-                            </FormField>
-                            <div>
-                              <p id={`surfaces-${index}`} className="mb-3 text-sm font-medium">
-                                Affected surfaces (optional)
-                              </p>
-                              <div
-                                className="flex flex-wrap gap-4"
-                                role="group"
-                                aria-labelledby={`surfaces-${index}`}
-                              >
-                                {current?.surfaces.map((surface) => (
-                                  <label
-                                    key={surface}
-                                    className="flex min-h-11 items-center gap-2 text-sm"
-                                  >
-                                    <Checkbox
-                                      checked={values[index].surfaces.includes(surface)}
-                                      onCheckedChange={(checked) =>
-                                        setValue(
-                                          `content.findings.${index}.surfaces`,
-                                          checked === true
-                                            ? [...values[index].surfaces, surface]
-                                            : values[index].surfaces.filter(
-                                                (value) => value !== surface,
-                                              ),
-                                          { shouldDirty: true },
-                                        )
-                                      }
-                                    />
-                                    {surface}
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="grid gap-4 sm:grid-cols-2">
-                              <FormSelect
-                                id={`severity-${index}`}
-                                label="Severity"
-                                value={values[index].severity}
-                                onChange={(value) =>
-                                  setValue(
-                                    `content.findings.${index}.severity`,
-                                    value as (typeof values)[number]["severity"],
-                                    { shouldDirty: true },
-                                  )
-                                }
-                                options={["unknown", "mild", "moderate", "severe"].map((value) => ({
-                                  value,
-                                  label: value,
-                                }))}
-                              />
-                              <FormSelect
-                                id={`finding-status-${index}`}
-                                label="Finding status"
-                                value={values[index].status}
-                                onChange={(value) =>
-                                  setValue(
-                                    `content.findings.${index}.status`,
-                                    value as (typeof values)[number]["status"],
-                                    { shouldDirty: true },
-                                  )
-                                }
-                                options={["active", "resolved", "historical"].map((value) => ({
-                                  value,
-                                  label: value,
-                                }))}
-                              />
-                            </div>
-                            <FormField
-                              id={`finding-notes-${index}`}
-                              label="Finding notes (optional)"
-                            >
-                              <Input
-                                id={`finding-notes-${index}`}
-                                {...register(`content.findings.${index}.notes`)}
-                                maxLength={500}
-                              />
-                            </FormField>
-                            {!readOnly && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                onClick={() => findings.remove(index)}
-                              >
-                                Remove finding
-                              </Button>
-                            )}
-                          </div>
-                        </ClinicalEntry>
-                      ),
-                  )}
+              )}
+              <details
+                ref={chartRef}
+                open={chartOpen || dentition === "primary"}
+                onToggle={(event) => setChartOpen(event.currentTarget.open)}
+                className="mt-2 shrink-0 rounded-lg border border-border bg-card px-3 py-1 text-xs"
+              >
+                <summary className="min-h-11 text-sm font-medium">
+                  2D tooth selector · keyboard alternative
+                </summary>
+                <div className="mt-3 max-h-64 overflow-y-auto">
+                  <div className="mb-3 lg:hidden">
+                    <FormSelect
+                      id="mobile-dentition"
+                      label="Dentition"
+                      value={dentition}
+                      onChange={(value) => {
+                        setDentition(value as typeof dentition);
+                        setSelected(value === "primary" ? "54" : "16");
+                      }}
+                      options={[
+                        { value: "permanent", label: "Permanent" },
+                        { value: "primary", label: "Primary" },
+                      ]}
+                    />
+                  </div>{" "}
+                  <DentalChartGrid
+                    teeth={teeth}
+                    dentition={dentition}
+                    selected={selected}
+                    findings={displayFindings}
+                    onSelect={(id) => {
+                      selectTooth(id);
+                    }}
+                  />
                 </div>
-                <p className="mt-4 text-xs text-muted-foreground">
-                  {values.length} finding{values.length === 1 ? "" : "s"} recorded in this visit.
-                  Select another tooth to review its findings.
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  The chart summarizes up to five saved findings per tooth. Preserved visit history
-                  contains the complete evidence.
-                </p>
-              </TabsContent>
-              <TabsContent value="treatments">
-                <h3 className="mb-3 font-medium">Procedures for tooth {selected}</h3>
-                <p className="mb-4 text-xs leading-5 text-muted-foreground">
-                  This visit’s recorded procedures. Proposed care remains separate from completed
-                  care.
-                </p>
-                {procedures
-                  .filter((item) => item.tooth === selected)
-                  .map((item, index) => (
-                    <div
-                      key={index}
-                      className="mb-3 grid gap-2 rounded-md border border-border p-3"
+              </details>
+            </div>
+            <aside
+              aria-label="Tooth inspector"
+              className={`${viewport.expandedCanvas ? "hidden" : inspectorOpen ? "absolute inset-x-0 bottom-0 z-20 max-h-[60dvh] shadow-lg" : "hidden"} min-h-0 min-w-0 overflow-y-auto border-t border-border bg-card p-4 ${viewport.expandedCanvas ? "" : "lg:static lg:block lg:max-h-none lg:border-t-0 lg:border-l lg:shadow-none"}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h2 className="text-xl font-semibold">Tooth {selected}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground capitalize">{current?.label}</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="hidden xl:inline-flex"
+                  onClick={show2DChart}
+                >
+                  View in 2D chart
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="lg:hidden"
+                  onClick={() => setInspectorOpen(false)}
+                >
+                  Close details
+                </Button>
+              </div>
+              <ToothIdentity tooth={current} />
+              <span className="mb-5 inline-flex rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
+                Selected · FDI {selected}
+              </span>
+              <IllustrationControls
+                tooth={selected}
+                findings={displayFindings}
+                disabled={readOnly || values.length >= 80}
+                onChange={changeIllustration}
+              />
+              <Tabs value={inspectorTab} onValueChange={setInspectorTab} className="gap-4">
+                <TabsList className="w-full">
+                  <TabsTrigger value="findings">Findings</TabsTrigger>
+                  <TabsTrigger value="treatments">Treatments</TabsTrigger>
+                  <TabsTrigger value="history">History</TabsTrigger>
+                  <TabsTrigger value="notes">Notes</TabsTrigger>
+                </TabsList>
+                <TabsContent value="findings" forceMount className="data-[state=inactive]:hidden">
+                  {!readOnly && (
+                    <Button
+                      type="button"
+                      className="mb-2 w-full"
+                      onClick={addFinding}
+                      disabled={findings.fields.length >= 80}
                     >
-                      <p className="text-sm font-medium">{item.description}</p>
-                      <StatusBadge value={item.status} />
-                      <p className="text-xs text-muted-foreground">
-                        {item.surfaces.join(", ") || "Whole tooth"}
-                      </p>
-                    </div>
-                  ))}
-                {!procedures.some((item) => item.tooth === selected) && (
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    No procedure recorded for this tooth in this visit. Add proposed or completed
-                    care in the consultation Procedures tab.
-                  </p>
-                )}
-              </TabsContent>
-              <TabsContent value="notes">
-                {" "}
-                <section aria-label="Pinned notes" className="mb-5 border-b border-border pb-4">
-                  <h3 className="mb-3 flex items-center gap-2 font-medium">
-                    <MessageSquare className="size-4" />
-                    Pinned notes
+                      + Add finding for tooth {selected}
+                    </Button>
+                  )}
+                  <h3 className="text-sm font-semibold">
+                    Current findings (
+                    {
+                      displayFindings.filter((item) => item.tooth === selected && !item.anchor)
+                        .length
+                    }
+                    )
                   </h3>
                   {displayFindings
-                    .filter((item) => item.tooth === selected && item.anchor)
+                    .filter(
+                      (item) =>
+                        item.tooth === selected &&
+                        !item.anchor &&
+                        !values.some((value) => value.key === item.key),
+                    )
                     .map((item) => (
-                      <Button
-                        type="button"
-                        key={item.key}
-                        variant="ghost"
-                        className="mb-2 h-auto w-full justify-start py-3 text-left whitespace-normal"
-                        onClick={() => {
-                          openPin(item.key);
-                          setInspectorOpen(false);
-                        }}
-                      >
-                        <span className="grid gap-1">
-                          <span className="line-clamp-2 text-sm">
-                            {item.notes || item.condition}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {item.status} ·{" "}
-                            {item.anchor?.asset === "dundee-molar26-v1"
-                              ? "Detailed molar"
-                              : "Full arch"}
-                          </span>
-                        </span>
-                      </Button>
+                      <div key={item.key} className="rounded-lg border border-border p-3">
+                        <p className="text-sm font-medium">{item.condition}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          {item.surfaces.join(", ") || "Whole tooth"} · {item.status}
+                        </p>
+                        {item.notes && <p className="mt-2 text-sm">{item.notes}</p>}
+                      </div>
                     ))}
-                  {!displayFindings.some((item) => item.tooth === selected && item.anchor) && (
-                    <p className="text-xs leading-5 text-muted-foreground">
-                      {readOnly
-                        ? "No pinned notes on this tooth."
-                        : "Choose Comment, then click a point on the tooth to add a note."}
+                  <ToothSurfacePicker
+                    tooth={current}
+                    value={selectedSurface}
+                    onChange={(surface) => {
+                      setSelectedSurface(surface);
+                      viewport.focusTooth(selected, surface);
+                    }}
+                  />
+                  {!values.some((finding) => finding.tooth === selected) && (
+                    <p className="text-sm text-muted-foreground">
+                      No finding recorded for this tooth in this visit.
                     </p>
                   )}
-                </section>
-              </TabsContent>
-              <TabsContent value="history">
-                {patientId ? (
-                  <ToothHistory
-                    key={`${patientId}:${selected}`}
-                    patientId={patientId}
-                    tooth={selected}
-                  />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Confirm the patient to load tooth history. No history has been reviewed.
+                  <div className="grid gap-5">
+                    {findings.fields.map(
+                      (field, index) =>
+                        values[index]?.tooth === selected &&
+                        !values[index]?.anchor && (
+                          <ClinicalEntry
+                            key={field.id}
+                            title={`Finding · tooth ${selected}`}
+                            summary={values[index]?.condition ?? ""}
+                            status={values[index]?.status ?? "active"}
+                            path={`content.findings.${index}`}
+                            readOnly={readOnly}
+                            onRemove={() => findings.remove(index)}
+                          >
+                            <div className="grid gap-4">
+                              <FormField id={`finding-${index}`} label="Finding or condition">
+                                <Input
+                                  id={`finding-${index}`}
+                                  {...register(`content.findings.${index}.condition`)}
+                                  maxLength={120}
+                                />
+                              </FormField>
+                              <div>
+                                <p id={`surfaces-${index}`} className="mb-3 text-sm font-medium">
+                                  Affected surfaces (optional)
+                                </p>
+                                <div
+                                  className="flex flex-wrap gap-4"
+                                  role="group"
+                                  aria-labelledby={`surfaces-${index}`}
+                                >
+                                  {current?.surfaces.map((surface) => (
+                                    <label
+                                      key={surface}
+                                      className="flex min-h-11 items-center gap-2 text-sm"
+                                    >
+                                      <Checkbox
+                                        checked={values[index].surfaces.includes(surface)}
+                                        onCheckedChange={(checked) =>
+                                          setValue(
+                                            `content.findings.${index}.surfaces`,
+                                            checked === true
+                                              ? [...values[index].surfaces, surface]
+                                              : values[index].surfaces.filter(
+                                                  (value) => value !== surface,
+                                                ),
+                                            { shouldDirty: true },
+                                          )
+                                        }
+                                      />
+                                      {surface}
+                                    </label>
+                                  ))}
+                                </div>
+                              </div>
+                              <div className="grid gap-4 sm:grid-cols-2">
+                                <FormSelect
+                                  id={`severity-${index}`}
+                                  label="Severity"
+                                  value={values[index].severity}
+                                  onChange={(value) =>
+                                    setValue(
+                                      `content.findings.${index}.severity`,
+                                      value as (typeof values)[number]["severity"],
+                                      { shouldDirty: true },
+                                    )
+                                  }
+                                  options={["unknown", "mild", "moderate", "severe"].map(
+                                    (value) => ({
+                                      value,
+                                      label: value,
+                                    }),
+                                  )}
+                                />
+                                <FormSelect
+                                  id={`finding-status-${index}`}
+                                  label="Finding status"
+                                  value={values[index].status}
+                                  onChange={(value) =>
+                                    setValue(
+                                      `content.findings.${index}.status`,
+                                      value as (typeof values)[number]["status"],
+                                      { shouldDirty: true },
+                                    )
+                                  }
+                                  options={["active", "resolved", "historical"].map((value) => ({
+                                    value,
+                                    label: value,
+                                  }))}
+                                />
+                              </div>
+                              <FormField
+                                id={`finding-notes-${index}`}
+                                label="Finding notes (optional)"
+                              >
+                                <Input
+                                  id={`finding-notes-${index}`}
+                                  {...register(`content.findings.${index}.notes`)}
+                                  maxLength={500}
+                                />
+                              </FormField>
+                              {!readOnly && (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  onClick={() => findings.remove(index)}
+                                >
+                                  Remove finding
+                                </Button>
+                              )}
+                            </div>
+                          </ClinicalEntry>
+                        ),
+                    )}
+                  </div>
+                  <p className="mt-4 text-xs text-muted-foreground">
+                    {values.length} finding{values.length === 1 ? "" : "s"} recorded in this visit.
+                    Select another tooth to review its findings.
                   </p>
-                )}
-              </TabsContent>
-            </Tabs>
-          </aside>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    The chart summarizes up to five saved findings per tooth. Preserved visit
+                    history contains the complete evidence.
+                  </p>
+                </TabsContent>
+                <TabsContent value="treatments">
+                  <h3 className="mb-3 font-medium">Procedures for tooth {selected}</h3>
+                  <p className="mb-4 text-xs leading-5 text-muted-foreground">
+                    This visit’s recorded procedures. Proposed care remains separate from completed
+                    care.
+                  </p>
+                  {procedures
+                    .filter((item) => item.tooth === selected)
+                    .map((item, index) => (
+                      <div
+                        key={index}
+                        className="mb-3 grid gap-2 rounded-md border border-border p-3"
+                      >
+                        <p className="text-sm font-medium">{item.description}</p>
+                        <StatusBadge value={item.status} />
+                        <p className="text-xs text-muted-foreground">
+                          {item.surfaces.join(", ") || "Whole tooth"}
+                        </p>
+                      </div>
+                    ))}
+                  {!procedures.some((item) => item.tooth === selected) && (
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      No procedure recorded for this tooth in this visit. Add proposed or completed
+                      care in the consultation Procedures tab.
+                    </p>
+                  )}
+                </TabsContent>
+                <TabsContent value="notes">
+                  {" "}
+                  <section aria-label="Pinned notes" className="mb-5 border-b border-border pb-4">
+                    <h3 className="mb-3 flex items-center gap-2 font-medium">
+                      <MessageSquare className="size-4" />
+                      Pinned notes
+                    </h3>
+                    {displayFindings
+                      .filter((item) => item.tooth === selected && item.anchor)
+                      .map((item) => (
+                        <Button
+                          type="button"
+                          key={item.key}
+                          variant="ghost"
+                          className="mb-2 h-auto w-full justify-start py-3 text-left whitespace-normal"
+                          onClick={() => {
+                            openPin(item.key);
+                            setInspectorOpen(false);
+                          }}
+                        >
+                          <span className="grid gap-1">
+                            <span className="line-clamp-2 text-sm">
+                              {item.notes || item.condition}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {item.status} ·{" "}
+                              {item.anchor?.asset === "dundee-molar26-v1"
+                                ? "Detailed molar"
+                                : "Full arch"}
+                            </span>
+                          </span>
+                        </Button>
+                      ))}
+                    {!displayFindings.some((item) => item.tooth === selected && item.anchor) && (
+                      <p className="text-xs leading-5 text-muted-foreground">
+                        {readOnly
+                          ? "No pinned notes on this tooth."
+                          : "Choose Comment, then click a point on the tooth to add a note."}
+                      </p>
+                    )}
+                  </section>
+                </TabsContent>
+                <TabsContent value="history">
+                  {patientId ? (
+                    <ToothHistory
+                      key={`${patientId}:${selected}`}
+                      patientId={patientId}
+                      tooth={selected}
+                    />
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Confirm the patient to load tooth history. No history has been reviewed.
+                    </p>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </aside>
+          </div>
+          {(!desktop || assistantOpen) && (
+            <EditorPanel
+              desktop={desktop}
+              open={!desktop && assistantDrawer && active}
+              onOpenChange={setAssistantDrawer}
+              ownHeader
+              title="Medframe AI"
+              description="Unconnected dental assistant preview."
+              className="w-[300px] shrink-0 border-l border-border 2xl:w-[320px]"
+            >
+              <ClinicalAssistantPreview
+                key={patientId ?? encounterId ?? "walk-in"}
+                context={{
+                  domain: "dental",
+                  title: `Tooth ${selected}${selectedSurface ? ` · ${selectedSurface}` : ""}`,
+                  detail: current?.label,
+                  findingCount: displayFindings.filter((item) => item.tooth === selected).length,
+                }}
+                onClose={() => (desktop ? setAssistantOpen(false) : setAssistantDrawer(false))}
+              />
+            </EditorPanel>
+          )}
         </div>
       </DialogContent>
     </Dialog>

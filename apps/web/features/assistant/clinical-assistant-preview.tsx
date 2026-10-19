@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   Bot,
   X,
@@ -12,13 +12,27 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-const suggestions = [
-  "Explain the selected structure",
-  "Summarize recorded findings",
-  "Prepare follow-up questions",
-];
-export function AnatomyAssistant({ onClose }: { onClose: () => void }) {
+export type ClinicalAssistantContext = {
+  domain: "dental" | "anatomy";
+  title: string;
+  detail?: string;
+  findingCount: number;
+};
+
+export function ClinicalAssistantPreview({
+  onClose,
+  context,
+}: {
+  onClose: () => void;
+  context: ClinicalAssistantContext;
+}) {
   const [draft, setDraft] = useState("");
+  const composerId = useId();
+  const suggestions = [
+    `Explain ${context.title.toLowerCase()}`,
+    `Summarize findings for ${context.title.toLowerCase()}`,
+    "Prepare follow-up questions",
+  ];
   return (
     <div className="flex h-full min-h-0 flex-col" aria-label="Medframe AI preview">
       <header className="flex shrink-0 items-start gap-3 border-b border-border p-5">
@@ -50,13 +64,23 @@ export function AnatomyAssistant({ onClose }: { onClose: () => void }) {
           <div className="rounded-xl rounded-tl-sm border border-border/60 bg-muted/45 p-4 text-sm leading-6">
             <p className="font-medium">A little more context, right beside your chart.</p>
             <p className="mt-2 text-muted-foreground">
-              This space is being prepared for questions about anatomy and your clinical workflow.
+              This space is being prepared for questions about your focused{" "}
+              {context.domain === "dental" ? "tooth" : "structure"} and clinical workflow.
             </p>
             <p className="mt-3 text-xs font-medium text-teal-ink">
               AI is not connected yet. No answers are generated.
             </p>
           </div>
         </div>
+        <section aria-label="Assistant focus" className="mt-5 border-y border-border py-4">
+          <p className="text-xs text-muted-foreground">Current focus</p>
+          <p className="mt-1 text-sm font-semibold">{context.title}</p>
+          {context.detail && <p className="mt-1 text-xs text-muted-foreground">{context.detail}</p>}
+          <p className="mt-2 text-xs text-muted-foreground">
+            {context.findingCount} recorded finding{context.findingCount === 1 ? "" : "s"} · local
+            preview
+          </p>
+        </section>
         <div className="mt-8 grid gap-2">
           <p className="mb-1 flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <Sparkles className="size-3.5" />
@@ -83,12 +107,12 @@ export function AnatomyAssistant({ onClose }: { onClose: () => void }) {
         </div>
       </div>
       <div className="shrink-0 border-t border-border bg-card p-4">
-        <label htmlFor="anatomy-ai-composer" className="sr-only">
+        <label htmlFor={composerId} className="sr-only">
           AI message preview
         </label>
         <div className="rounded-xl border border-input/60 bg-background p-2 shadow-sm">
           <Textarea
-            id="anatomy-ai-composer"
+            id={composerId}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder="Ask a follow-up question…"

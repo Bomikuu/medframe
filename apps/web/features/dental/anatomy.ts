@@ -1,5 +1,3 @@
-import type { Finding } from "@/features/consultations/schema";
-
 export const PERMANENT_MODEL = "/models/dental-permanent-dundee-v1.glb";
 export const MOLAR_REFERENCE_MODEL = "/models/dental-molar-26-dundee-v1.glb";
 export const PERMANENT_IDS = [1, 2, 3, 4].flatMap((quadrant) =>
@@ -12,19 +10,7 @@ export function isPermanentTooth(value: unknown): value is string {
   return typeof value === "string" && PERMANENT_IDS.includes(value);
 }
 
-// Free-text records are never inferred from partial word matches. Unrecognized
-// terms retain their exact annotation instead of pretending to locate pathology.
-export function toothPresentation(findings: Finding[], tooth: string) {
-  const active = findings.filter(
-    (finding) => finding.tooth === tooth && finding.status === "active",
-  );
-  const missing = active.some((finding) =>
-    ["missing", "missing tooth", "absent tooth", "tooth absent"].includes(
-      finding.condition.trim().toLowerCase(),
-    ),
-  );
-  return { active, missing };
-}
+export { dentalIllustration as toothPresentation } from "./illustration";
 
 export const VIEW_OPTIONS: { value: DentalView; label: string }[] = [
   { value: "front", label: "Front view" },

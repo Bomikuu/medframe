@@ -14,7 +14,7 @@ import { AnatomyHeader, type AnatomyConsultation } from "./anatomy-header";
 import { AnatomyToolbar } from "./anatomy-toolbar";
 import { StructureNavigator } from "./structure-navigator";
 import { AnatomyInspector, type InspectorTab } from "./anatomy-inspector";
-import { AnatomyAssistant } from "./anatomy-assistant";
+import { ClinicalAssistantPreview } from "@/features/assistant/clinical-assistant-preview";
 import { ViewThumbnails } from "./view-thumbnails";
 import { EditorPanel } from "./editor-panel";
 import { useDesktopPanels } from "./use-editor-panels";
@@ -408,8 +408,15 @@ export function AnatomyEditor({
             description="Unconnected assistant interface preview."
             className="border-l border-border shadow-[-4px_0_18px_-12px_rgba(16,42,67,0.15)]"
           >
-            <AnatomyAssistant
+            <ClinicalAssistantPreview
               key={patientId}
+              context={{
+                domain: "anatomy",
+                title: current.label,
+                detail: layer,
+                findingCount: findings.filter((finding) => finding.structure_id === current.id)
+                  .length,
+              }}
               onClose={() => (desktop ? setAssistantOpen(false) : setAssistantDrawer(false))}
             />
           </EditorPanel>

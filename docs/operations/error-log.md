@@ -490,3 +490,13 @@ The final focused browser report records one `Failed to execute 'removeChild' on
 Final source inspection finds the combined agenda sorted active queues by displayed appointment/check-in time. This can disagree with a staff-reordered queue and mislabel who is up next. It blocks accurate activation of the requested agenda. Preserve native queue `order` for active tickets (current service first), then chronological scheduled appointments. Add one focused priority-order case; do not rerun the broad backend/browser passes or change queue mutations. This is a new feature activation repair under the standing authorization, not an unrelated queue rewrite.
 
 STATION-GALLERY-004 confirmation: the added priority case passes, retaining staff queue order ahead of later scheduled patients. Scoped Ruff passes. Original preservation verifies all 5,339 rows across 126 tables after additive stations.0005; the repaired source has a separately verified private activation bundle. The gallery is active locally. STATION-GALLERY-003 remains deferred, with no third browser round. See `docs/operations/station-gallery-verification.md` for precise staged evidence and current runtime.
+
+## DENTAL-ILLUSTRATION-001 — build compatibility blocker (resolved for activation)
+
+The first `.next-dental-illustration` build compiled JavaScript but TypeScript rejected passing Three.js's `BufferAttribute | InterleavedBufferAttribute` to `Box3.setFromBufferAttribute` in the new label/overlay code. Evidence: `.impeccable/review/dental-illustration/build.log`. Activation-authorized repair uses the already computed geometry bounding box instead. The subsequent production build/TypeScript passes (`build-confirmation.log`). No backend/schema/data change.
+
+## DENTAL-ILLUSTRATION-002 — geometry harness pivot assertion (corrected)
+
+The initial focused geometry script passed state semantics, then incorrectly compared the rotated irregular tooth's axis-aligned bounding-box center with the original approximate box center (`center 18 mesial`). A changing AABB center does not establish pivot drift. The implementation rotates around the precise original geometry box center. The corrected harness transforms that same tooth-local pivot through all twelve presets and verifies stable center, no accumulated rotation, reset and local-point round-trip. `geometry.log` retains the failure; `geometry-confirmation.log` has three passing groups. Product code was not changed for this assertion. No repeated broad suite.
+
+The pre-existing anatomy `Bot` unused-import warning remains deferred with ANAT-REF-003. Older unrelated editor/Station/GPU findings remain deferred; this phase does not claim to resolve them.

@@ -1,0 +1,7 @@
+# Dental illustration and shared assistant
+
+Mode: Operate. Retain the real Dundee anatomy, current consultation aggregate, full-screen editor, navy/white/teal clinical design and native Station identity/end-session control. Clearly selected tooth uses cyan fill, dark outline and a readable label. Surface labels remain manual; the asset has no clinical surface segmentation.
+
+Current-state presets are explicit findings, saved with the existing draft: missing/extracted, crown present, orthodontic bracket present, and schematic mesial/distal/horizontal impaction on FDI 18/28/38/48 only. Clear copies the same saved finding identity into the current visit as resolved; exact prior revisions remain intact. Proposed procedures never imply completed care or change illustration. Reference mode omits treatment overlays and rotations. Model accessories and angles are generic educational illustrations, not measured patient anatomy.
+
+Anatomy and Dental share `ClinicalAssistantPreview`, with a typed local context supplied by the owning editor. Focus updates title/detail/finding count and prompt suggestions. Unique composer IDs support mounted editors. Send/attachments stay disabled; no AI provider, fabricated advice, remote upload or persistent chat store. Desktop has a right panel; tablet/phone use the established labelled drawer.

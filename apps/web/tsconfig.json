@@ -68,7 +68,9 @@
     ".next-station-doctor/types/**/*.ts",
     ".next-station-doctor/dev/types/**/*.ts",
     ".next-station-gallery/types/**/*.ts",
-    ".next-station-gallery/dev/types/**/*.ts"
+    ".next-station-gallery/dev/types/**/*.ts",
+    ".next-dental-illustration/types/**/*.ts",
+    ".next-dental-illustration/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

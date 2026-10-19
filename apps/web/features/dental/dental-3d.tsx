@@ -32,6 +32,7 @@ class ModelBoundary extends Component<{ children: ReactNode }, { failed: boolean
 
 export default function Dental3D({
   selected,
+  selectedSurface,
   onSelect,
   findings,
   dentition,
@@ -75,6 +76,15 @@ export default function Dental3D({
   return (
     <ModelBoundary>
       <div className={editor ? "flex h-full min-h-0 min-w-0 flex-col gap-3" : "grid min-w-0 gap-4"}>
+        <div role="status" className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="rounded-md bg-cyan-800 px-3 py-2 font-semibold text-white">
+            Selected · {selected}
+            {selectedSurface ? ` · ${selectedSurface}` : " · whole tooth"}
+          </span>
+          {condition.impaction && <span>Impaction · {condition.impaction}</span>}
+          {condition.crown && <span>Crown present</span>}
+          {condition.bracket && <span>Bracket present</span>}
+        </div>
         <CanvasToolbar viewport={viewport} annotations={annotations} onAnnotate={onAnnotate} />
         <div
           aria-label="Interactive anatomical dental model"
@@ -118,6 +128,7 @@ export default function Dental3D({
                 key={modelUrl}
                 url={modelUrl}
                 selected={selected}
+                selectedSurface={selectedSurface}
                 onSelect={onSelect}
                 findings={findings}
                 jaw={viewport.jaw}

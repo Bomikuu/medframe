@@ -4,6 +4,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "rea
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { Html, useGLTF } from "@react-three/drei";
 import {
+  BackSide,
+  Group,
+  Matrix4,
+  MeshBasicMaterial,
   Box3,
   Color,
   Mesh,
@@ -18,12 +22,17 @@ import type { Finding } from "@/features/consultations/schema";
 import { isPermanentTooth, toothPresentation, type DentalView, type JawView } from "./anatomy";
 import { AnnotationPins, type AnnotationInteraction } from "./annotation-pins";
 import { dentalFitDistance, toothDirection, type ToothFocus } from "./camera-focus";
+import { applyImpaction } from "./tooth-transform";
+import { clearIllustrationOverlays, updateIllustrationOverlays } from "./illustration-overlays";
 import { placeCamera } from "@/lib/three/place-camera";
 
 type PreparedAnatomy = {
   root: Object3D;
   teeth: Mesh[];
-  originals: Map<MeshStandardMaterial, { emissive: Color; intensity: number }>;
+  originals: Map<MeshStandardMaterial, { emissive: Color; intensity: number; color: Color }>;
+  transforms: Map<Mesh, Matrix4>;
+  outlines: Map<Mesh, Mesh>;
+  overlays: Group;
 };
 
 type Presentation = {
@@ -46,6 +55,13 @@ function updatePresentation(prepared: PreparedAnatomy, options: Presentation) {
       (reference || isolate || jaw === "both" || mesh.userData.jaw === jaw) &&
       (!isolate || id === selected) &&
       (anatomyOnly || !condition.missing);
+    applyImpaction(
+      mesh,
+      prepared.transforms.get(mesh)!,
+      id,
+      anatomyOnly ? null : condition.impaction,
+    );
+    prepared.outlines.get(mesh)!.visible = mesh.visible && id === selected;
     // A hidden tooth cannot intercept a click on another jaw/tooth.
     mesh.raycast = mesh.visible ? Mesh.prototype.raycast : () => {};
     const materials = (
@@ -53,17 +69,21 @@ function updatePresentation(prepared: PreparedAnatomy, options: Presentation) {
     ) as MeshStandardMaterial[];
     for (const material of materials) {
       const original = prepared.originals.get(material)!;
+      material.color.copy(original.color);
       material.emissive.copy(original.emissive);
       material.emissiveIntensity = original.intensity;
       if (id === selected) {
-        material.emissive.set("#0ea5a4");
-        material.emissiveIntensity = 0.3;
+        material.color.set("#45d4e5");
+        material.emissive.set("#087e91");
+        material.emissiveIntensity = 0.55;
       } else if (!anatomyOnly && condition.active.length) {
         material.emissive.set("#a75b12");
         material.emissiveIntensity = 0.18;
       }
     }
   }
+  prepared.root.updateMatrixWorld(true);
+  updateIllustrationOverlays(prepared.overlays, prepared.teeth, findings, selected, anatomyOnly);
 }
 
 function frameAnatomy(
@@ -118,9 +138,27 @@ function frameAnatomy(
   placeCamera(camera, controls, center, direction, distance, up);
 }
 
+function SelectionLabel({ mesh, text }: { mesh: Mesh; text: string }) {
+  const group = useRef<Group>(null);
+  useFrame(() => {
+    const center = mesh.geometry.boundingBox!.getCenter(new Vector3());
+    group.current?.position.copy(mesh.localToWorld(center));
+  });
+  return (
+    <group ref={group}>
+      <Html center zIndexRange={[8, 0]} style={{ pointerEvents: "none" }}>
+        <span className="rounded-md border-2 border-white bg-cyan-900 px-3 py-2 text-xs font-bold whitespace-nowrap text-white shadow-md">
+          {text}
+        </span>
+      </Html>
+    </group>
+  );
+}
+
 export function AnatomicalScene({
   url,
   selected,
+  selectedSurface = null,
   onSelect,
   findings,
   jaw,
@@ -137,6 +175,7 @@ export function AnatomicalScene({
 }: {
   url: string;
   selected: string;
+  selectedSurface?: string | null;
   onSelect: (id: string) => void;
   findings: Finding[];
   jaw: JawView;
@@ -160,10 +199,20 @@ export function AnatomicalScene({
     .map((finding) => finding.tooth)
     .sort()
     .join(",");
+  const impactionKey = findings
+    .map((finding) =>
+      toothPresentation([finding], finding.tooth).impaction
+        ? `${finding.tooth}:${finding.condition}:${finding.status}`
+        : "",
+    )
+    .join("|");
   const prepared = useMemo(() => {
     const root = scene.clone(true);
     const teeth: Mesh[] = [];
-    const originals = new Map<MeshStandardMaterial, { emissive: Color; intensity: number }>();
+    const originals: PreparedAnatomy["originals"] = new Map();
+    const transforms = new Map<Mesh, Matrix4>();
+    const outlines = new Map<Mesh, Mesh>();
+    const overlays = new Group();
     root.traverse((object) => {
       if (!(object instanceof Mesh)) return;
       if (!isPermanentTooth(object.userData.tooth_id)) {
@@ -179,6 +228,7 @@ export function AnatomicalScene({
           originals.set(material, {
             emissive: material.emissive.clone(),
             intensity: material.emissiveIntensity,
+            color: material.color.clone(),
           });
           return material;
         },
@@ -186,6 +236,7 @@ export function AnatomicalScene({
       // Material arrays require geometry groups. Preserve the source shape so
       // single-material teeth remain drawable and raycastable.
       object.material = multipleMaterials ? materials : materials[0];
+      transforms.set(object, object.matrix.clone());
       teeth.push(object);
     });
     const expected = reference
@@ -197,13 +248,31 @@ export function AnatomicalScene({
     ) {
       throw new Error("The anatomical asset has incomplete tooth identities.");
     }
+    // Add outlines after traversal so helpers never enter the tooth registry.
+    for (const tooth of teeth) {
+      tooth.geometry.computeBoundingBox();
+      const center = tooth.geometry.boundingBox!.getCenter(new Vector3());
+      const outline = new Mesh(
+        tooth.geometry,
+        new MeshBasicMaterial({ color: "#00687d", side: BackSide, depthWrite: false }),
+      );
+      outline.scale.setScalar(1.045);
+      outline.position.copy(center).multiplyScalar(1 - 1.045);
+      outline.visible = false;
+      outline.raycast = () => {};
+      tooth.add(outline);
+      outlines.set(tooth, outline);
+    }
     root.updateMatrixWorld(true);
-    return { root, teeth, originals };
+    return { root, teeth, originals, transforms, outlines, overlays };
   }, [scene, reference]);
 
   useEffect(
     () => () => {
       for (const material of prepared.originals.keys()) material.dispose();
+      for (const outline of prepared.outlines.values())
+        (outline.material as MeshBasicMaterial).dispose();
+      clearIllustrationOverlays(prepared.overlays);
     },
     [prepared],
   );
@@ -229,6 +298,7 @@ export function AnatomicalScene({
     frameSelection,
     anatomyOnly,
     missingKey,
+    impactionKey,
     invalidate,
   ]);
 
@@ -259,12 +329,10 @@ export function AnatomicalScene({
     }
   }
   const selectedMesh = prepared.teeth.find((mesh) => mesh.userData.tooth_id === selected);
-  const labelPosition = selectedMesh
-    ? new Box3().setFromObject(selectedMesh).getCenter(new Vector3())
-    : null;
   return (
     <>
       <primitive object={prepared.root} onClick={select} />
+      <primitive object={prepared.overlays} />
       <AnnotationPins
         teeth={prepared.teeth}
         findings={findings}
@@ -272,19 +340,13 @@ export function AnatomicalScene({
         interaction={annotations}
       />
       {showLabel &&
-        labelPosition &&
+        selectedMesh &&
         (anatomyOnly || !toothPresentation(findings, selected).missing) &&
         (reference || isolate || jaw === "both" || selectedMesh?.userData.jaw === jaw) && (
-          <Html
-            position={labelPosition}
-            center
-            zIndexRange={[8, 0]}
-            style={{ pointerEvents: "none" }}
-          >
-            <span className="rounded-md border border-border bg-card px-2 py-1 text-xs font-semibold whitespace-nowrap text-foreground shadow-sm">
-              {reference ? "Reference 26" : selected}
-            </span>
-          </Html>
+          <SelectionLabel
+            mesh={selectedMesh}
+            text={`${reference ? "Reference 26" : `Tooth ${selected}`}${selectedSurface ? ` · ${selectedSurface}` : ""}`}
+          />
         )}
     </>
   );
