@@ -3,6 +3,7 @@ import { z } from "zod";
 export const themeSchema = z
   .object({
     primary: z.string().regex(/^#[0-9a-f]{6}$/i),
+    secondary: z.string().regex(/^#[0-9a-f]{6}$/i),
     accent: z.string().regex(/^#[0-9a-f]{6}$/i),
     font: z.enum(["medframe", "manrope", "jakarta", "inter", "source_sans_3", "noto_sans"]),
     radius: z.enum(["square", "subtle", "rounded"]),

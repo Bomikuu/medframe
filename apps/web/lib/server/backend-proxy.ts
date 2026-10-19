@@ -1,4 +1,9 @@
 const allowedPaths = new Set([
+  "onboarding/graphql",
+  "onboarding/account/prepare",
+  "onboarding/account/mfa/enroll",
+  "onboarding/account/mfa/verify",
+  "onboarding/logo/upload",
   "graphql",
   "portal/graphql",
   "portal/auth/csrf",
@@ -26,12 +31,14 @@ export const backendUrl = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
 export const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 
 export async function proxyBackend(request: Request, path: string): Promise<Response> {
-  const upload = /^(?:diagnostics\/)?documents\/upload\/[0-9a-f-]{36}$/.test(path);
-  const download = [
-    "documents/download",
-    "portal/documents/download",
-    "diagnostics/documents/download",
-  ].includes(path);
+  const logoUpload = path === "onboarding/logo/upload";
+  const logoDownload = /^onboarding\/logo\/[0-9a-f-]{36}\/content$/.test(path);
+  const upload = logoUpload || /^(?:diagnostics\/)?documents\/upload\/[0-9a-f-]{36}$/.test(path);
+  const download =
+    logoDownload ||
+    ["documents/download", "portal/documents/download", "diagnostics/documents/download"].includes(
+      path,
+    );
   const expectedMethod = path.endsWith("auth/csrf") || download ? "GET" : "POST";
   if ((!allowedPaths.has(path) && !upload && !download) || request.method !== expectedMethod) {
     return Response.json({ message: "This endpoint is unavailable." }, { status: 404 });
@@ -56,7 +63,7 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
         const { done, value } = await reader.read();
         if (done) break;
         size += value.byteLength;
-        if (size > (upload ? 21 * 1024 * 1024 : 65_536)) {
+        if (size > (logoUpload ? 2 * 1024 * 1024 + 65536 : upload ? 21 * 1024 * 1024 : 65_536)) {
           await reader.cancel();
           return Response.json({ message: "The request is too large." }, { status: 413 });
         }

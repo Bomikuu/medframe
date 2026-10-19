@@ -38,6 +38,7 @@ def contrast(first, second):
 class ThemeSettings(BaseModel):
     model_config = ConfigDict(extra="forbid")
     primary: str = Field(default="#102A43", pattern=r"^#[0-9A-Fa-f]{6}$")
+    secondary: str = Field(default="#0EA5A4", pattern=r"^#[0-9A-Fa-f]{6}$")
     accent: str = Field(default="#0D9488", pattern=r"^#[0-9A-Fa-f]{6}$")
     font: Literal["medframe", "manrope", "jakarta", "inter", "source_sans_3", "noto_sans"] = (
         "medframe"

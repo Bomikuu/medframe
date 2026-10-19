@@ -12,6 +12,9 @@ import { PageHeading, LoadState, dateLabel } from "@/features/patients/feedback"
 import { useWorkspace } from "./workspace-provider";
 import { ClinicalWidgets } from "./clinical-widgets";
 
+import { SetupChecklist } from "./setup-checklist";
+import { PlatformLink } from "@/features/platform/clinic-invitations";
+
 export function ClinicOverview() {
   const { workspace, can, href } = useWorkspace();
   return (
@@ -33,6 +36,10 @@ export function ClinicOverview() {
           </ButtonLink>
         )}
       </PageHeading>
+      <div className="mb-4">
+        <PlatformLink />
+      </div>
+      <SetupChecklist />
       {can("patients.demographics.read") ? (
         <PatientOverview />
       ) : (

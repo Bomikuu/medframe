@@ -1,5 +1,6 @@
 from django.urls import path
 
+from api_graphql.onboarding_views import graphql as onboarding_graphql
 from api_graphql.portal_views import graphql as portal_graphql
 from api_graphql.views import graphql
 from config import views
@@ -9,10 +10,17 @@ from medframe_apps.accounts import views as auth
 from medframe_apps.communications.views import sms_status
 from medframe_apps.diagnostics import views as diagnostics
 from medframe_apps.documents import views as documents
+from medframe_apps.onboarding import views as onboarding
 from medframe_apps.portal import files as portal_files
 from medframe_apps.portal import views as portal_auth
 
 urlpatterns = [
+    path("onboarding/graphql", onboarding_graphql),
+    path("onboarding/account/prepare", onboarding.prepare_account),
+    path("onboarding/account/mfa/enroll", onboarding.enroll),
+    path("onboarding/account/mfa/verify", onboarding.verify_mfa),
+    path("onboarding/logo/upload", onboarding.upload),
+    path("onboarding/logo/<uuid:identifier>/content", onboarding.logo_content),
     path("diagnostics/documents/upload/<uuid:version_id>", diagnostics.upload),
     path("diagnostics/documents/download", diagnostics.download),
     path("communications/sms/status", sms_status),

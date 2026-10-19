@@ -14,4 +14,7 @@ class Command(BaseCommand):
         from api_graphql.portal_schema import schema as portal_schema
 
         (ROOT / "apps/web/portal-schema.graphql").write_text(portal_schema.as_str() + "\n")
+        from api_graphql.onboarding_schema import schema as onboarding_schema
+
+        (ROOT / "apps/web/onboarding-schema.graphql").write_text(onboarding_schema.as_str() + "\n")
         self.stdout.write("Django GraphQL schema exported.")

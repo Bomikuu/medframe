@@ -25,6 +25,32 @@ def deliver_recovery_mail():
             item.attempts += 1
             try:
                 payload = json.loads(cipher().decrypt(item.encrypted_payload.encode()))
+                if item.kind in {"clinic_invitation", "clinic_email_code", "clinic_resume"}:
+                    from medframe_apps.onboarding.models import ClinicInvitation
+                    from medframe_apps.onboarding.policy import invitation_state
+
+                    invitation_record = ClinicInvitation.objects.filter(
+                        id=payload.get("invitation"), generation=payload.get("generation")
+                    ).first()
+                    if invitation_record and invitation_state(invitation_record) not in {
+                        "expired",
+                        "revoked",
+                        "completed",
+                    }:
+                        content = (
+                            (
+                                "Your Medframe verification code: "
+                                + payload["code"]
+                                + "\nExpires in 10 minutes."
+                            )
+                            if item.kind == "clinic_email_code"
+                            else "Continue setting up your clinic:\n" + payload["link"]
+                        )
+                        send_mail("Medframe clinic setup", content, None, [payload["recipient"]])
+                    item.sent_at = timezone.now()
+                    item.encrypted_payload = ""
+                    item.save()
+                    continue
                 if item.kind not in {"password_reset", "portal_invitation"}:
                     raise ValueError("Unknown mail kind")
                 invitation = item.kind == "portal_invitation"

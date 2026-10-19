@@ -1,0 +1,38 @@
+schema {
+  query: OnboardingQuery
+  mutation: Mutation
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+type Mutation {
+  verifyOnboardingInvitation(token: String!): JSON!
+  requestOnboardingCode: JSON!
+  verifyOnboardingEmail(code: String!): JSON!
+  startClinicOnboarding: JSON!
+  saveOnboardingStep(step: String!, data: JSON!, expectedVersion: Int!, complete: Boolean! = false): JSON!
+  completeOnboardingIntroduction(skipped: Boolean! = false): JSON!
+  removeOnboardingLogo(expectedVersion: Int!): JSON!
+  completeClinicOnboarding(expectedVersion: Int!, requestId: UUID!): JSON!
+  cancelClinicOnboarding: JSON!
+  requestOnboardingResume: JSON!
+  updateClinicInformation(data: JSON!, expectedVersion: Int!, complete: Boolean! = false): JSON!
+  updateClinicSpecialties(data: JSON!, expectedVersion: Int!, complete: Boolean! = false): JSON!
+  updateClinicBranding(data: JSON!, expectedVersion: Int!, complete: Boolean! = false): JSON!
+  updatePracticeDetails(data: JSON!, expectedVersion: Int!, complete: Boolean! = false): JSON!
+}
+
+type OnboardingQuery {
+  onboardingInvitation: JSON!
+  onboardingSession: JSON!
+  onboardingProgress: JSON!
+  availableSpecialties: JSON!
+  availableClinicTypes: JSON!
+  brandingPresets: JSON!
+  onboardingNotices: JSON!
+}
+
+scalar UUID

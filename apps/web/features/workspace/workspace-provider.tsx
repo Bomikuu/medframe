@@ -13,6 +13,8 @@ import { LoadState, RemoteNotice } from "@/features/patients/feedback";
 import { useSafety } from "./safety-provider";
 import { ThemeProvider } from "@/features/branding/theme-provider";
 
+import { PlatformLink } from "@/features/platform/clinic-invitations";
+
 type Workspace = {
   organizationId: string;
   workspace: ClinicWorkspaceQuery["clinicWorkspace"];
@@ -39,6 +41,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         <p className="mt-4 text-sm text-muted-foreground">
           Contact your clinic administrator to arrange access.
         </p>
+        <div className="mt-6">
+          <PlatformLink />
+        </div>
         <a href="/login" className="mt-6 inline-block text-primary underline">
           Return to sign in
         </a>

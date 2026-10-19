@@ -94,6 +94,10 @@ input MedicationInput {
 }
 
 type Mutation {
+  inviteClinic(data: JSON!, requestId: UUID!): JSON!
+  resendClinicInvitation(invitationId: UUID!, expectedVersion: Int!): JSON!
+  revokeClinicInvitation(invitationId: UUID!, expectedVersion: Int!): JSON!
+  dismissClinicSetup(organizationId: UUID!, expectedVersion: Int!): JSON!
   diagnosticAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   diagnosticPartnershipAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   beginDiagnosticUpload(organizationId: UUID!, diagnosticRequestId: UUID!, metadata: JSON!, requestId: UUID!): JSON!
@@ -225,6 +229,9 @@ type ProviderType {
 }
 
 type Query {
+  platformCapabilities: JSON!
+  clinicInvitations(offset: Int! = 0, status: String! = ""): JSON!
+  clinicSetupChecklist(organizationId: UUID!): JSON!
   anatomyReference(organizationId: UUID!): JSON!
   anatomyChart(organizationId: UUID!, patientId: UUID!, revisionId: UUID = null, filters: JSON = null, after: String = null, first: Int! = 20): JSON!
   anatomyRevisions(organizationId: UUID!, patientId: UUID!, after: String = null, first: Int! = 20): JSON!

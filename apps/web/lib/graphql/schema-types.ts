@@ -128,8 +128,10 @@ export type Mutation = {
   createTreatmentPlan: Scalars['JSON']['output'];
   diagnosticAction: Scalars['JSON']['output'];
   diagnosticPartnershipAction: Scalars['JSON']['output'];
+  dismissClinicSetup: Scalars['JSON']['output'];
   editTreatmentItem: Scalars['JSON']['output'];
   finalizeEncounter: EncounterType;
+  inviteClinic: Scalars['JSON']['output'];
   issuePortalInvitation: Scalars['JSON']['output'];
   markNotificationsRead: Scalars['Boolean']['output'];
   operationsAction: Scalars['JSON']['output'];
@@ -137,10 +139,12 @@ export type Mutation = {
   publishPortalRelease: Scalars['JSON']['output'];
   registerPatient: PatientDemographics;
   reorderTreatmentPlan: Scalars['JSON']['output'];
+  resendClinicInvitation: Scalars['JSON']['output'];
   resetOrganizationBranding: Scalars['JSON']['output'];
   resetUserPreferences: Scalars['JSON']['output'];
   retryDocumentScan: DocumentType;
   reviewPatientReport: Scalars['JSON']['output'];
+  revokeClinicInvitation: Scalars['JSON']['output'];
   revokePortalAccess: Scalars['Boolean']['output'];
   saveConsultationTemplate: Scalars['JSON']['output'];
   saveDashboardLayout: Scalars['JSON']['output'];
@@ -316,6 +320,12 @@ export type MutationDiagnosticPartnershipActionArgs = {
 };
 
 
+export type MutationDismissClinicSetupArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
 export type MutationEditTreatmentItemArgs = {
   data: Scalars['JSON']['input'];
   expectedVersion: Scalars['Int']['input'];
@@ -330,6 +340,12 @@ export type MutationFinalizeEncounterArgs = {
   encounterId: Scalars['UUID']['input'];
   expectedVersion: Scalars['Int']['input'];
   organizationId: Scalars['UUID']['input'];
+};
+
+
+export type MutationInviteClinicArgs = {
+  data: Scalars['JSON']['input'];
+  requestId: Scalars['UUID']['input'];
 };
 
 
@@ -386,6 +402,12 @@ export type MutationReorderTreatmentPlanArgs = {
 };
 
 
+export type MutationResendClinicInvitationArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  invitationId: Scalars['UUID']['input'];
+};
+
+
 export type MutationResetOrganizationBrandingArgs = {
   expectedVersion: Scalars['Int']['input'];
   organizationId: Scalars['UUID']['input'];
@@ -410,6 +432,12 @@ export type MutationReviewPatientReportArgs = {
   organizationId: Scalars['UUID']['input'];
   reportId: Scalars['UUID']['input'];
   state: Scalars['String']['input'];
+};
+
+
+export type MutationRevokeClinicInvitationArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  invitationId: Scalars['UUID']['input'];
 };
 
 
@@ -661,7 +689,9 @@ export type Query = {
   chartRevisions: Scalars['JSON']['output'];
   clinicAppearance: Scalars['JSON']['output'];
   clinicDashboard: Scalars['JSON']['output'];
+  clinicInvitations: Scalars['JSON']['output'];
   clinicPatients: PatientPage;
+  clinicSetupChecklist: Scalars['JSON']['output'];
   clinicWorkspace: WorkspaceType;
   communicationReminders: Scalars['JSON']['output'];
   communicationSetup: Scalars['JSON']['output'];
@@ -704,6 +734,7 @@ export type Query = {
   patientTimeline: PatientTimelinePage;
   patients: PatientPage;
   planRevisions: Scalars['JSON']['output'];
+  platformCapabilities: Scalars['JSON']['output'];
   providers: Array<ProviderType>;
   recentPatients: Array<PatientSummary>;
   recordAuthors: Scalars['JSON']['output'];
@@ -815,11 +846,22 @@ export type QueryClinicDashboardArgs = {
 };
 
 
+export type QueryClinicInvitationsArgs = {
+  offset?: Scalars['Int']['input'];
+  status?: Scalars['String']['input'];
+};
+
+
 export type QueryClinicPatientsArgs = {
   after?: InputMaybe<Scalars['UUID']['input']>;
   first?: Scalars['Int']['input'];
   organizationId: Scalars['UUID']['input'];
   query?: Scalars['String']['input'];
+};
+
+
+export type QueryClinicSetupChecklistArgs = {
+  organizationId: Scalars['UUID']['input'];
 };
 
 

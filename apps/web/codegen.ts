@@ -2,6 +2,12 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
   generates: {
+    "lib/graphql/onboarding/generated.ts": {
+      schema: "onboarding-schema.graphql",
+      documents: ["lib/graphql/onboarding/*.graphql"],
+      plugins: ["typescript", "typescript-operations", "typed-document-node"],
+      config: { scalars: { UUID: "string", JSON: "unknown" } },
+    },
     "lib/graphql/portal/schema-types.ts": {
       schema: "portal-schema.graphql",
       documents: ["lib/graphql/portal/*.graphql"],

@@ -1,0 +1,7 @@
+query PlatformCapabilities { platformCapabilities }
+query ClinicInvitations($offset: Int!, $status: String!) { clinicInvitations(offset: $offset, status: $status) }
+mutation InviteClinic($data: JSON!, $key: UUID!) { inviteClinic(data: $data, requestId: $key) }
+mutation ResendClinicInvitation($id: UUID!, $version: Int!) { resendClinicInvitation(invitationId: $id, expectedVersion: $version) }
+mutation RevokeClinicInvitation($id: UUID!, $version: Int!) { revokeClinicInvitation(invitationId: $id, expectedVersion: $version) }
+query ClinicSetupChecklist($org: UUID!) { clinicSetupChecklist(organizationId: $org) }
+mutation DismissClinicSetup($org: UUID!, $version: Int!) { dismissClinicSetup(organizationId: $org, expectedVersion: $version) }

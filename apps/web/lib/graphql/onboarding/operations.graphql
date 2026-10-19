@@ -1,0 +1,10 @@
+query OnboardingBoot { onboardingInvitation availableSpecialties availableClinicTypes brandingPresets onboardingNotices }
+query OnboardingSession { onboardingSession }
+mutation ExchangeClinicInvite($token: String!) { verifyOnboardingInvitation(token: $token) }
+mutation RequestClinicCode { requestOnboardingCode }
+mutation VerifyClinicEmail($code: String!) { verifyOnboardingEmail(code: $code) }
+mutation FinishClinicIntro($skipped: Boolean!) { completeOnboardingIntroduction(skipped: $skipped) }
+mutation SaveOnboardingStep($step: String!, $data: JSON!, $version: Int!, $complete: Boolean!) { saveOnboardingStep(step: $step, data: $data, expectedVersion: $version, complete: $complete) }
+mutation CompleteClinicSetup($version: Int!, $key: UUID!) { completeClinicOnboarding(expectedVersion: $version, requestId: $key) }
+mutation RemoveClinicLogo($version: Int!) { removeOnboardingLogo(expectedVersion: $version) }
+mutation RequestClinicResume { requestOnboardingResume }

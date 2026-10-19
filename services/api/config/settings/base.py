@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "medframe_apps.diagnostics",
     "medframe_apps.anatomy",
     "medframe_apps.communications",
+    "medframe_apps.onboarding",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

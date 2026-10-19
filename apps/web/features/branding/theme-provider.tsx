@@ -117,6 +117,7 @@ export function useAppearanceTokens(
     };
     update();
     const variables: Record<string, string> = {
+      "--brand-secondary": theme.secondary,
       "--clinic-primary": theme.primary,
       "--brand-teal": theme.accent,
       "--radius": { square: "0px", subtle: "8px", rounded: "12px" }[theme.radius],
