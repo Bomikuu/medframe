@@ -65,7 +65,10 @@ export function PatientOperations({ queue = false }: { queue?: boolean }) {
             </p>
           )}
           {data.tickets.map((row) => (
-            <section key={row.id} className="grid gap-3 rounded-lg border border-border p-5">
+            <section
+              key={row.id}
+              className="grid gap-3 rounded-xl border border-border bg-card p-5"
+            >
               <h3 className="text-lg font-semibold">Your ticket {row.number}</h3>
               <p className="text-sm">
                 {row.provider} · {row.status.replaceAll("_", " ")}

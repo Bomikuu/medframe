@@ -229,3 +229,25 @@ REF-002 text-size advisories and older EDITOR-001 test import ordering remain de
 The initial lint command ran from the repository root, where there is no ESLint config. It did not
 inspect product code. The single valid scoped lint invocation ran from `apps/web`; its result is
 AUTH-001 above. This was a command-location correction, with no product repair.
+
+## Visual reconstruction — October 19, 2026
+
+### UI-RECON-001 — Throttled review and blocked dental acceptance (deferred)
+
+- Initial sweep navigated rapidly and reached the existing 120/minute per-user GraphQL limit. Its error-state captures were rejected as visual evidence. The paced final sweep completed 128 route/width captures with no geometry findings, then recorded four staff HTTP 429 / RATE_LIMITED responses during interaction checks.
+- The final dental group navigated to the synthetic encounter and timed out after 20 seconds waiting for `[data-dental-editor=true]`. No final-build dental or consultation-editor screenshot was captured. Throttling may explain the timeout; the exact cause was not established. Five other interaction groups passed.
+- Impact: dental full viewport/model rendering, mobile actions/inspector layering and consultation interaction changes are not browser-accepted in this build. Source contains scoped repairs to REF-003/004, but those earlier visual findings cannot be marked verified/resolved. Final browser process exits nonzero.
+- Evidence: `.impeccable/review/reconstruction/browser-report.json`, `/tmp/medframe-reconstruction-browser-final.log`; initial evidence separately retained. Stale dental PNGs from the initial run are not final evidence. Limits were not weakened, counters were not deleted, and no further repair/retry was performed.
+
+### UI-RECON-002 — Active tab can be offscreen after viewport resize (deferred)
+
+- Reproduction observed in the captured patient Documents view: select a later patient tab at desktop width, then shrink to 390px. Its content stays correct, but the horizontal tab rail may retain the desktop scroll offset and show earlier tabs first.
+- Impact: selected tab may require horizontal scrolling to see. State-change auto-reveal exists; resize auto-reveal is not implemented. No page overflow was recorded.
+- Evidence: `.impeccable/review/reconstruction/patient-documents-390.png`. No additional source fix or browser loop was run.
+
+### Current dispositions and coverage limits
+
+- AUTH-001's `watch("remember")` was replaced with `useWatch`; final ESLint is zero errors/warnings. The two older operations watch warnings were removed within the same form reconstruction. REF-002's 11px dental labels were raised to the shared 13px secondary size.
+- REF-003/004 remain unverified after source changes because UI-RECON-001 blocked acceptance. EDITOR-001's unrelated test import ordering and AUTH-002's dependency triage remain deferred.
+- The synthetic portal had no released snapshot and the patient had no saved medical history revision. Populated exact-version/history pages were not visually accepted; no fake releases or diagnoses were created for screenshots.
+- A dark-preview capture caught the closing Select menu during its animation. Color-mode change and cancel restoration assertions passed; this transient image is not a settled-overlay acceptance image. No recapture was performed.

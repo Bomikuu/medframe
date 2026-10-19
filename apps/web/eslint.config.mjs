@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     ".next-dental-editor/**",
     ".next-dental-reference/**",
     ".next-login-enhancements/**",
+    ".next-reconstruction/**",
     ".next-batch1-checkpoint/**",
     "public/vendor/**",
     "out/**",

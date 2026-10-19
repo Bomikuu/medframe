@@ -127,3 +127,12 @@ The anatomical replacement is active locally after the user authorized its block
 ## Reference-guided editor revision
 
 `use-dental-viewport.ts` is the shared view-state owner for the tooth rail, canvas tools, camera navigation and preview strip. Display numbering can change between FDI/Universal; selected keys, surfaces, anchors and backend writes remain FDI. Header actions call the existing encounter save/completion/finalization owners and retain their permission/IME/upload gates. Inspector Notes remains separate from clinical findings; surface cards show tooth identity previews and do not infer surface segmentation. REF-001 is repaired and the reference editor is active locally. Five focused browser assertion groups pass, but REF-003/004 remain visual defects; do not present this as complete mobile or viewport acceptance.
+
+## Visual reconstruction contract — October 19, 2026
+
+- The current reconstruction brief supersedes the old purely white/Inter defaults. Manrope/Jakarta and refined semantic tokens are appearance presets; existing explicit saved choices and preview/save/cancel remain valid.
+- EntrySheet owns wide, guarded entry panels and provides cancel/complete actions to embedded booking. Successful backend booking closes the panel; failed booking preserves fields. Container-width queries own multi-column fields.
+- RecordFilterForm owns compact search/type/actions, advanced Collapsible controls and applied removable chips. Applying/removing/clearing resets the caller's keyset pagination. No private search text is persisted in browser storage or URLs.
+- DocumentCollection owns table/card rendering; DocumentHistory pages authorized existing versions. Existing private-byte preview/download/quarantine permissions remain unchanged. Uploaded-by and clinic timezone are authoritative server data, never guessed.
+- ClinicalLocaleProvider owns clinic-time formatting for both staff and patient surfaces. Identity/session context remains owned by their existing separate providers.
+- Shared status badges always include text; colors convey actual workflow state. Clickable surfaces have hover/focus feedback, and static information remains static.

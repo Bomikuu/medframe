@@ -28,7 +28,7 @@ export function IdentityFields() {
           {...register("fullName")}
         />
       </FormField>
-      <div className="grid max-w-lg gap-5 sm:grid-cols-2">
+      <div className="grid max-w-lg gap-5 @[440px]:grid-cols-2">
         <FormField id="dateOfBirth" label="Date of birth" error={errors.dateOfBirth?.message}>
           <Input
             id="dateOfBirth"

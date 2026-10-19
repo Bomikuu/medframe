@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -26,7 +27,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/application/status-badge";
 import { FileText, Stethoscope, Crosshair, MessageSquare } from "@/components/icons";
 import { PatientAvatar } from "@/components/application/patient-avatar";
-import { PageHeading, failureCode, failureText, timeLabel } from "@/features/patients/feedback";
+import { PageHeading, failureCode, failureText } from "@/features/patients/feedback";
 import { DentalEditor } from "@/features/dental/dental-editor";
 import { DocumentPanel } from "@/features/documents/document-panel";
 import { templateSchema } from "./templates/schema";
@@ -46,6 +47,7 @@ export function EncounterEditor({
   exactRevision?: boolean;
   reload: () => void;
 }) {
+  const timeLabel = useClinicTime();
   const { organizationId, href, can } = useWorkspace();
   const { confirm, putDraft, clearDirty, guard } = useSafety();
   const capture = useRequestScope();
@@ -325,18 +327,22 @@ export function EncounterEditor({
     encounter.status === "completed" || (encounter.isAmendment && !encounter.editable);
   return (
     <div className="grid gap-6">
-      <div className="flex items-center gap-3">
-        <PatientAvatar name={encounter.patientName} />
-        <div>
-          <p className="text-xs font-medium text-muted-foreground uppercase">Consultation</p>
-          <StatusBadge value={encounter.status} />
+      <section
+        data-panel
+        className="flex min-w-0 flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-5 sm:p-6"
+      >
+        <PatientAvatar name={encounter.patientName} className="size-16 border-0 text-lg" />
+        <div className="min-w-0 flex-1 basis-64 [&_[data-page-header]]:mb-0">
+          <PageHeading title={encounter.patientName} description={encounter.reason}>
+            <ButtonLink variant="outline" href={href(`/clinic/patients/${encounter.patientId}`)}>
+              Patient record
+            </ButtonLink>
+          </PageHeading>
+          <div className="mt-3">
+            <StatusBadge value={encounter.status} />
+          </div>
         </div>
-      </div>
-      <PageHeading title={encounter.patientName} description={encounter.reason}>
-        <ButtonLink variant="outline" href={href(`/clinic/patients/${encounter.patientId}`)}>
-          Patient record
-        </ButtonLink>
-      </PageHeading>
+      </section>
 
       {uploadPending && (
         <p role="status" className="text-sm">
@@ -345,7 +351,7 @@ export function EncounterEditor({
       )}
       <div
         data-panel
-        className="sticky top-16 z-10 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-4"
+        className="sticky top-[72px] z-10 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4"
       >
         <div>
           <p className="font-medium">
@@ -464,7 +470,7 @@ export function EncounterEditor({
                   </TabsList>
                 </div>
                 <TabsContent value="notes" forceMount className="data-[state=inactive]:hidden">
-                  <div className="grid min-w-0 gap-6 rounded-lg border border-border p-4 sm:p-6">
+                  <div className="grid min-w-0 gap-6 rounded-xl border border-border bg-card p-4 sm:p-6">
                     <SoapFields readOnly={readOnly || lifecycleBusy} />
                     <DiagnosisFields
                       readOnly={readOnly || lifecycleBusy}
@@ -475,7 +481,7 @@ export function EncounterEditor({
                   </div>
                 </TabsContent>
                 <TabsContent value="dental" forceMount className="data-[state=inactive]:hidden">
-                  <div className="min-w-0 rounded-lg border border-border p-4 sm:p-6">
+                  <div className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-6">
                     <DentalEditor
                       active={clinicalTab === "dental"}
                       patientName={encounter.patientName}
@@ -617,7 +623,7 @@ export function EncounterEditor({
                   </div>
                 </TabsContent>
                 <TabsContent value="procedures" forceMount className="data-[state=inactive]:hidden">
-                  <div className="rounded-lg border border-border p-4 sm:p-6">
+                  <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
                     <ProcedureFields readOnly={readOnly || lifecycleBusy} />
                   </div>
                 </TabsContent>

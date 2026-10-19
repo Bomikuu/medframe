@@ -1,9 +1,10 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { z } from "zod";
 import { releasePayloadSchema } from "./schema";
 import { ChartView } from "@/features/dental/chart-view";
 import { DocumentPreview } from "@/features/documents/document-preview";
-import { timeLabel, dateLabel } from "@/features/patients/feedback";
+import { dateLabel } from "@/features/patients/feedback";
 
 export function ReleaseView({
   payload,
@@ -12,6 +13,7 @@ export function ReleaseView({
   payload: z.infer<typeof releasePayloadSchema>;
   authorize?: (versionId: string) => Promise<string>;
 }) {
+  const timeLabel = useClinicTime();
   return (
     <div className="grid gap-8">
       <section>

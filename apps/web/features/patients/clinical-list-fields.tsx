@@ -74,7 +74,7 @@ export function ClinicalListFields() {
           />
         </div>
         {allergies.fields.map((entry, index) => (
-          <div key={entry.id} className="grid gap-4 rounded-lg border border-border p-4">
+          <div key={entry.id} className="grid gap-4 rounded-xl border border-border bg-card p-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
                 id={`allergen-${index}`}
@@ -167,7 +167,7 @@ export function ClinicalListFields() {
           />
         </div>
         {medications.fields.map((entry, index) => (
-          <div key={entry.id} className="grid gap-4 rounded-lg border border-border p-4">
+          <div key={entry.id} className="grid gap-4 rounded-xl border border-border bg-card p-4">
             <FormField
               id={`medication-${index}`}
               label={`Medication ${index + 1}`}

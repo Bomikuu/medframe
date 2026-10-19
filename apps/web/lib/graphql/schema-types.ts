@@ -507,6 +507,7 @@ export type OrganizationType = {
   __typename?: 'OrganizationType';
   id: Scalars['UUID']['output'];
   name: Scalars['String']['output'];
+  timezone: Scalars['String']['output'];
 };
 
 export type PatientAssignee = {

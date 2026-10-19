@@ -3,6 +3,7 @@
 import { ButtonLink } from "@/components/ui/button-link";
 
 import { PatientAvatar } from "@/components/application/patient-avatar";
+import { EmptyState } from "@/components/application/empty-state";
 import Link from "next/link";
 import { ArrowRightIcon, PlusIcon, MagnifyingGlassIcon } from "@/components/icons";
 import { PatientDashboardDocument, type PatientDashboardQuery } from "@/lib/graphql/generated";
@@ -12,13 +13,26 @@ import { useWorkspace } from "./workspace-provider";
 import { ClinicalWidgets } from "./clinical-widgets";
 
 export function ClinicOverview() {
-  const { workspace, can } = useWorkspace();
+  const { workspace, can, href } = useWorkspace();
   return (
     <>
       <PageHeading
         title="Dashboard"
         description={`${workspace.organization.name} · ${workspace.branches.map((branch) => branch.name).join(", ")}`}
-      />
+      >
+        {can("patients.demographics.read") && (
+          <ButtonLink variant="outline" href={href("/clinic/patients")}>
+            <MagnifyingGlassIcon />
+            Find patient
+          </ButtonLink>
+        )}
+        {can("patients.register") && (
+          <ButtonLink href={href("/clinic/patients/new")}>
+            <PlusIcon />
+            Register patient
+          </ButtonLink>
+        )}
+      </PageHeading>
       {can("patients.demographics.read") ? (
         <PatientOverview />
       ) : (
@@ -32,28 +46,11 @@ export function ClinicOverview() {
 }
 
 function PatientOverview() {
-  const { organizationId, href, can } = useWorkspace();
+  const { organizationId } = useWorkspace();
   const { data, error, reload } = useRemote(PatientDashboardDocument, { organizationId });
   if (!data) return <LoadState error={error} retry={reload} />;
   return (
     <div className="grid gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted-foreground">
-          {data.clinicPatients.totalCount.toLocaleString("en-PH")} patient records available to you
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <ButtonLink variant="outline" href={href("/clinic/patients")}>
-            <MagnifyingGlassIcon />
-            Find patient
-          </ButtonLink>
-          {can("patients.register") && (
-            <ButtonLink href={href("/clinic/patients/new")}>
-              <PlusIcon />
-              Register patient
-            </ButtonLink>
-          )}
-        </div>
-      </div>
       <ClinicalWidgets recentPatients={<RecentPatients patients={data.recentPatients} />} />
     </div>
   );
@@ -63,17 +60,17 @@ function RecentPatients({ patients }: { patients: PatientDashboardQuery["recentP
   const { href } = useWorkspace();
   return (
     <section>
-      <h2 className="text-xl font-semibold">Recently opened</h2>
+      <h2 className="text-xl font-semibold">Recently opened patients</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         Patient records you have opened and can still access.
       </p>
       {patients.length ? (
-        <ul className="mt-5 divide-y divide-border border-y border-border">
+        <ul className="mt-5 divide-y divide-border">
           {patients.map((patient) => (
             <li key={patient.id}>
               <Link
                 href={href(`/clinic/patients/${patient.id}`)}
-                className="flex items-center justify-between gap-4 py-4 hover:text-primary"
+                className="-mx-2 flex items-center justify-between gap-4 rounded-lg px-2 py-4 transition-colors hover:bg-surface-hover hover:text-primary"
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <PatientAvatar name={patient.fullName} />
@@ -90,9 +87,12 @@ function RecentPatients({ patients }: { patients: PatientDashboardQuery["recentP
           ))}
         </ul>
       ) : (
-        <p className="mt-5 rounded-lg border border-dashed border-border p-6 text-sm leading-6 text-muted-foreground">
-          No recently opened patients. Find or register a patient to begin.
-        </p>
+        <div className="mt-5">
+          <EmptyState
+            title="No recently opened patients"
+            description="Find or register a patient to begin."
+          />
+        </div>
       )}
     </section>
   );

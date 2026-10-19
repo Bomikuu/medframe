@@ -16,6 +16,7 @@ export function FormSelect({
   onChange,
   options,
   error,
+  disabled,
 }: {
   id: string;
   label: string;
@@ -23,13 +24,14 @@ export function FormSelect({
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
   error?: string;
+  disabled?: boolean;
 }) {
   return (
     <FormField id={id} label={label} error={error}>
-      <ChoiceRoot value={value} onValueChange={onChange}>
+      <ChoiceRoot value={value} onValueChange={onChange} disabled={disabled}>
         <SelectTrigger
           id={id}
-          className="h-11 w-full data-[size=default]:h-11"
+          className="h-11 w-full min-w-0 data-[size=default]:h-11 [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:truncate"
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-help` : undefined}
         >

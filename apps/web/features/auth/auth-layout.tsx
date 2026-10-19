@@ -4,7 +4,7 @@ import { ShieldCheck } from "lucide-react";
 import { Brand } from "@/components/brand";
 export function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-muted/40">
+    <div className="flex min-h-dvh flex-col bg-background">
       <header className="flex items-center justify-between gap-4 border-b border-border bg-card px-5 py-5 sm:px-10">
         <Link href="/login" aria-label="Medframe sign in">
           <Brand />
@@ -18,7 +18,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         id="main"
         className="flex w-full flex-1 flex-col items-center justify-center px-4 py-10 sm:py-14"
       >
-        <div className="w-full max-w-[440px] rounded-xl border border-border bg-card p-6 sm:p-8">
+        <div className="w-full max-w-[440px] rounded-2xl border-0 bg-card p-6 shadow-[var(--panel-shadow)] sm:p-9">
           {children}
         </div>
         <p className="mt-6 max-w-sm text-center text-xs leading-6 text-muted-foreground">

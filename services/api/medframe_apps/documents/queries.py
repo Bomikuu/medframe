@@ -18,6 +18,7 @@ def document_summary(item):
         "size": item.size,
         "scan_state": item.scan_state,
         "created_at": item.created_at.isoformat(),
+        "uploaded_by": item.uploaded_by.display_name or "Name not recorded",
         "encounter_id": str(item.document.encounter_id) if item.document.encounter_id else None,
     }
 
@@ -46,7 +47,7 @@ def list_documents(user, organization_id, patient_id, filters=None, after=None, 
         document__organization_id=organization_id,
         document__patient_id=patient_id,
         document__purpose="clinical",
-    ).select_related("document")
+    ).select_related("document", "uploaded_by")
     if parsed.query:
         query = query.filter(document__label__icontains=parsed.query)
     if parsed.status:

@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -17,7 +18,7 @@ import { FormField } from "@/components/form-field";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { LoadState, failureText, timeLabel } from "@/features/patients/feedback";
+import { LoadState, failureText } from "@/features/patients/feedback";
 import { recordPage } from "@/features/records/schema";
 import { PageControls } from "@/features/records/record-filters";
 const accessSchema = z.object({
@@ -42,6 +43,7 @@ const accessSchema = z.object({
   ),
 });
 export function PatientPortalAccess({ patientId }: { patientId: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId } = useWorkspace();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(PatientPortalAccessDocument, { organizationId, patientId, after });
@@ -106,7 +108,7 @@ export function PatientPortalAccess({ patientId }: { patientId: string }) {
         Verify the person’s identity and guardian authority in clinic before inviting them. Contact
         details alone do not grant access.
       </p>
-      <details className="rounded-lg border border-border p-5">
+      <details className="rounded-xl border border-border bg-card p-5">
         <summary className="min-h-11 font-medium">Issue a verified invitation</summary>
         <form
           noValidate

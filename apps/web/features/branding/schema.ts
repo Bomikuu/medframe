@@ -4,7 +4,7 @@ export const themeSchema = z
   .object({
     primary: z.string().regex(/^#[0-9a-f]{6}$/i),
     accent: z.string().regex(/^#[0-9a-f]{6}$/i),
-    font: z.enum(["inter", "source_sans_3", "noto_sans"]),
+    font: z.enum(["medframe", "manrope", "jakarta", "inter", "source_sans_3", "noto_sans"]),
     radius: z.enum(["square", "subtle", "rounded"]),
     density: z.enum(["comfortable", "compact"]),
     content_width: z.enum(["contained", "full"]),

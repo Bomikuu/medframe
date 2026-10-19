@@ -33,7 +33,7 @@ export function DentalEditorHeader({
   return (
     <>
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 xl:px-6">
-        <div className="flex min-w-0 items-center gap-3 xl:gap-5">
+        <div className="flex max-w-full min-w-0 items-center gap-3 xl:gap-5">
           <Button type="button" variant="ghost" onClick={onExit} aria-label="Back to consultation">
             <ArrowLeftIcon />
             <span className="hidden xl:inline">Back to consultation</span>
@@ -57,7 +57,7 @@ export function DentalEditorHeader({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex max-w-full flex-wrap items-center gap-2">
           <Button
             type="button"
             variant="outline"
@@ -67,7 +67,7 @@ export function DentalEditorHeader({
           >
             Tooth details
           </Button>
-          <fieldset disabled={pending} className="flex items-center gap-2">
+          <fieldset disabled={pending} className="contents">
             {actions}
           </fieldset>
         </div>

@@ -14,8 +14,8 @@ export function FormField({
   children: ReactNode;
 }) {
   return (
-    <div className="grid min-w-0 content-start gap-2">
-      <label htmlFor={id} className="text-sm font-medium">
+    <div data-form-field className="grid max-w-full min-w-0 content-start gap-2">
+      <label htmlFor={id} className="text-sm leading-5 font-medium text-foreground">
         {label}
       </label>
       {children}

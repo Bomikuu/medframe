@@ -160,7 +160,7 @@ export function PatientForm({
           onSubmit={(event) => {
             void form.handleSubmit(submit)(event);
           }}
-          className="grid max-w-3xl gap-6"
+          className="@container grid max-w-3xl min-w-0 gap-7 rounded-xl border border-border bg-card p-5 sm:p-7"
         >
           <IdentityFields />
           {!patient && (

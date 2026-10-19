@@ -78,7 +78,7 @@ export default function Dental3D({
         <CanvasToolbar viewport={viewport} annotations={annotations} onAnnotate={onAnnotate} />
         <div
           aria-label="Interactive anatomical dental model"
-          className={`${editor ? "min-h-[280px] flex-1" : viewport.expandedCanvas ? "h-[70dvh]" : "h-[360px] sm:h-[480px]"} relative min-w-0 overflow-hidden rounded-lg bg-muted/30 ${annotations?.tool === "comment" ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
+          className={`${editor ? "h-[48dvh] min-h-[300px] shrink-0 lg:h-auto lg:min-h-[320px] lg:flex-1" : viewport.expandedCanvas ? "h-[70dvh]" : "h-[360px] sm:h-[480px]"} relative isolate min-w-0 overflow-hidden rounded-xl bg-muted/30 ${annotations?.tool === "comment" ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         >
           {!ready && (
             <p

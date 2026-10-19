@@ -32,7 +32,15 @@ import {
 } from "./schema";
 import { ArrowUp, ArrowDown } from "@/components/icons";
 
-const label = (value: string) => value.replaceAll("_", " ");
+const fontLabels: Record<string, string> = {
+  medframe: "Medframe · Jakarta + Manrope",
+  manrope: "Manrope",
+  jakarta: "Plus Jakarta Sans",
+  inter: "Inter (legacy)",
+  source_sans_3: "Source Sans 3",
+  noto_sans: "Noto Sans",
+};
+const label = (value: string) => fontLabels[value] ?? value.replaceAll("_", " ");
 const options = (values: readonly string[]) =>
   values.map((value) => ({ value, label: label(value) }));
 
@@ -151,7 +159,7 @@ function OrganizationAppearance({ setPending }: { setPending: (value: boolean) =
           }
         })}
       >
-        <div className="grid gap-5 rounded-lg border border-border p-5 sm:grid-cols-2">
+        <div className="grid gap-5 rounded-xl border border-border bg-card p-5 sm:grid-cols-2">
           <FormField
             id="theme-primary"
             label="Primary action color"
@@ -169,7 +177,14 @@ function OrganizationAppearance({ setPending }: { setPending: (value: boolean) =
           <FormField id="theme-accent" label="Accent color">
             <Input id="theme-accent" {...form.register("accent")} maxLength={7} />
           </FormField>
-          {choice("font", "Font family", ["inter", "source_sans_3", "noto_sans"])}
+          {choice("font", "Font family", [
+            "medframe",
+            "manrope",
+            "jakarta",
+            "inter",
+            "source_sans_3",
+            "noto_sans",
+          ])}
           {choice("radius", "Corner radius", ["square", "subtle", "rounded"])}
           {choice("density", "Default density", ["comfortable", "compact"])}
           {choice("content_width", "Content width", ["contained", "full"])}
@@ -264,7 +279,7 @@ function PersonalAppearance({ setPending }: { setPending: (value: boolean) => vo
     return () => preview(null, null);
   }, [serializedValues, preview]);
   return (
-    <section className="grid gap-6 border-t border-border pt-8">
+    <section className="grid min-w-0 gap-6">
       <h2 className="text-xl font-semibold">Your preferences</h2>
       <form
         noValidate
@@ -292,7 +307,7 @@ function PersonalAppearance({ setPending }: { setPending: (value: boolean) => vo
           }
         })}
       >
-        <div className="grid gap-5 rounded-lg border border-border p-5 sm:grid-cols-2">
+        <div className="grid gap-5 rounded-xl border border-border bg-card p-5 sm:grid-cols-2">
           <FormSelect
             id="personal-mode"
             label="Color mode"

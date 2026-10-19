@@ -97,6 +97,7 @@ export const portalLinkSchema = z.object({
   relationship: z.enum(["self", "guardian"]),
 });
 export const portalWorkspaceSchema = z.object({
+  timezone: z.string(),
   clinic_name: z.string(),
   patient_name: z.string(),
   reference: z.string(),

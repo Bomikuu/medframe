@@ -29,11 +29,15 @@ export function Notifications() {
         <Button
           type="button"
           variant="ghost"
-          className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center gap-2 rounded-lg px-2 text-sm hover:bg-muted"
+          className="relative flex size-11 items-center justify-center rounded-xl bg-muted/70 text-muted-foreground hover:bg-secondary hover:text-primary"
           aria-label={`Notifications${unread.length ? `, ${unread.length} unread` : ""}`}
         >
           <Bell size={18} />
-          {unread.length > 0 && <span>{unread.length}</span>}
+          {unread.length > 0 && (
+            <span className="absolute top-0 right-0 grid h-5 min-w-5 place-items-center rounded-full bg-teal-ink px-1 text-xs font-semibold text-card">
+              {unread.length > 9 ? "9+" : unread.length}
+            </span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 max-w-[calc(100vw-2rem)] p-5">

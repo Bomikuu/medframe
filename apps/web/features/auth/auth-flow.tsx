@@ -100,7 +100,7 @@ export function AuthFlow({
   return (
     <div className="grid gap-8">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight">{heading}</h1>
+        <h1 className="font-heading text-3xl font-bold tracking-tight">{heading}</h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
       </header>
       {error && (

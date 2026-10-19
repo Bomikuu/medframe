@@ -46,11 +46,15 @@ Clinicians work with patient context, medical history, allergies, findings, note
 
 Name: Medframe. Tagline: The Foundation of Modern Care.
 
-The amended identity remains professional, clinical, trustworthy, minimal, modern, and secure. The default is explicitly light and predominantly white: page/sidebar/header/cards `#FFFFFF`, secondary background `#F8FAFC`, foreground `#1E293B`, supporting text `#475569`, borders `#E2E8F0`, navy actions `#0F2D4A`, and teal interaction accents `#0EA5A4`. Inter remains the default within a safe configurable font system. Organization branding and allowed user preferences consume centralized validated tokens; dark/system modes are optional saved choices. Preserve accessible contrast and meaningful clinical semantic colors. Avoid excessive gradients, cartoon illustration, unnecessary decoration, excessive cards, and oversized controls.
+The October 19 application-wide reconstruction brief supersedes earlier visual defaults. Manrope headings and Plus Jakarta Sans body/UI are self-hosted with next/font/google. The light default uses a cool `#F7F9FC` canvas, white task surfaces, navy `#102A43`, teal `#0D9488`, readable text and semantic status tints. Clinic branding and allowed personal preferences remain centralized and validated; explicit legacy font choices and dark/system modes are retained. Avoid excessive gradients, cartoon illustration, unnecessary decoration and uniform nested cards.
 
-Use the approved concept-11 medical symbol when supplied. Do not invent an unrelated substitute. The text name can identify the product while that asset is unavailable.
+The original concept-11 logo asset is unavailable. A Lucide HeartPulse companion mark accompanies the wordmark without claiming to reproduce that asset. Clinic logos preserve proportions.
+
+The reconstruction is active locally on `codex/visual-reconstruction` with `.next-reconstruction`; its source/data checkpoint, tool evidence, verification and remaining dental acceptance gap are recorded in `docs/operations/visual-reconstruction-verification.md`.
 
 ## Evidence on Hand
+
+- `docs/requirements/medframe-visual-reconstruction.txt`: current comprehensive visual brief; preserves the existing backend roadmap and integrations.
 
 - `docs/requirements/medframe-django-edition.txt`: exact new authoritative user brief; overrides conflicting earlier stack, theme, icon, and delivery instructions.
 - `docs/superpowers/specs/2026-10-18-medframe-django-amendment.md`: migration/preservation, clinical integrity, appearance, execution, and eight-batch roadmap.

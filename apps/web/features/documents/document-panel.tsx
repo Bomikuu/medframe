@@ -2,6 +2,17 @@
 
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { useEffect, useState } from "react";
+import { MoreHorizontal, Upload, History, RefreshCw, Camera, Building2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/application/empty-state";
+import { ViewSwitcher } from "@/components/application/view-switcher";
+import { DocumentCollection, type DocumentFile } from "./document-collection";
+import { DocumentHistory } from "./document-history";
 import { Button } from "@/components/ui/button";
 import {
   PatientDocumentsDocument,
@@ -43,7 +54,7 @@ export function DocumentPanel({
   purpose?: "clinical" | "avatar" | "logo";
   onUploadPending?: (pending: boolean) => void;
 }) {
-  const { organizationId, can } = useWorkspace();
+  const { organizationId, can, workspace } = useWorkspace();
   const [before, setBefore] = useState<string | undefined>();
   const [versionTarget, setVersionTarget] = useState<{
     id: string;
@@ -51,6 +62,9 @@ export function DocumentPanel({
     encounterId?: string;
   } | null>(null);
   const archive = purpose === "clinical" && !!patientId && !encounterId;
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [view, setView] = useState<"table" | "cards">(archive ? "table" : "cards");
+  const [history, setHistory] = useState<{ id: string; label: string } | null>(null);
   const authors = useRecordAuthors(patientId, archive);
   const [filters, setFilters] = useState<RecordFilters>({});
   const [after, setAfter] = useState<string>();
@@ -68,6 +82,8 @@ export function DocumentPanel({
       content_type: z.string(),
       size: z.number(),
       scan_state: z.string(),
+      created_at: z.string(),
+      uploaded_by: z.string().optional(),
       encounter_id: z.string().nullable(),
     }),
   ).safeParse(filtered.data?.documentRecords);
@@ -93,6 +109,8 @@ export function DocumentPanel({
                 encounterId: item.encounter_id,
                 contentType: item.content_type,
                 scanState: item.scan_state,
+                createdAt: item.created_at,
+                uploadedBy: item.uploaded_by,
               })),
             }
           : null,
@@ -160,43 +178,241 @@ export function DocumentPanel({
       : purpose === "logo"
         ? can("organization.manage")
         : true);
-  return (
-    <section aria-labelledby={`documentsHeading-${purpose}`} className="grid gap-5">
-      <div>
-        <h2 id={`documentsHeading-${purpose}`} className="text-xl font-semibold">
-          {purpose === "clinical"
-            ? "Documents and images"
-            : purpose === "avatar"
-              ? "Profile image"
-              : "Clinic logo"}
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {purpose === "clinical"
-            ? "Private files are scanned before download. Attach exact clean versions to this visit."
-            : "Upload an image, wait for its scan, then choose it in appearance settings."}
-        </p>
-      </div>
-      {purpose !== "clinical" && attachedIds?.[0] && (
-        <SecureImage
-          id={attachedIds[0]}
-          avatar={purpose === "avatar"}
-          alt={purpose === "avatar" ? "Selected profile image" : "Selected clinic logo"}
-          className={purpose === "avatar" ? "size-24" : "h-24 max-w-64"}
-        />
-      )}
-      {previewId && (
-        <div className="grid justify-items-start gap-3">
-          <SecureImage
-            id={previewId}
-            avatar={purpose === "avatar"}
-            alt="Uploaded image preview"
-            className={purpose === "avatar" ? "size-32" : "h-40 max-w-full"}
-          />
-          <Button type="button" variant="ghost" onClick={() => setPreviewId(null)}>
+  const uploadPanel = allowUpload ? (
+    <EntrySheet
+      open={uploadOpen}
+      onOpenChange={setUploadOpen}
+      triggerVariant="default"
+      draftKeys={[
+        `${organizationId}:${patientId ?? purpose}:${versionTarget?.encounterId ?? encounterId ?? "general"}:upload`,
+      ]}
+      title={
+        purpose === "avatar"
+          ? "Update profile image"
+          : purpose === "logo"
+            ? "Update clinic logo"
+            : "Upload document"
+      }
+      description={
+        versionTarget
+          ? `Upload a new version of ${versionTarget.label}. Existing versions are preserved.`
+          : "Select a file and wait for its security scan before attaching it."
+      }
+    >
+      <UploadControl
+        key={versionTarget?.id ?? "new"}
+        patientId={patientId}
+        encounterId={versionTarget?.encounterId ?? encounterId}
+        documentId={versionTarget?.id}
+        initialLabel={versionTarget?.label}
+        onPendingChange={onUploadPending}
+        purpose={purpose}
+        onUploaded={remote.reload}
+      />
+    </EntrySheet>
+  ) : null;
+  if (purpose !== "clinical") {
+    const currentImage = previewId ?? attachedIds?.[0];
+    return (
+      <section aria-labelledby={`documentsHeading-${purpose}`} className="grid min-w-0 gap-5">
+        <div className="flex flex-wrap items-center gap-5 rounded-xl border border-border bg-card p-5">
+          {currentImage ? (
+            <SecureImage
+              id={currentImage}
+              avatar={purpose === "avatar"}
+              alt={purpose === "avatar" ? "Your profile image" : "Clinic logo"}
+              className={purpose === "avatar" ? "size-24" : "h-20 max-w-32 object-contain"}
+            />
+          ) : (
+            <span
+              className={`grid size-24 shrink-0 place-items-center bg-teal-soft text-teal-ink ${purpose === "avatar" ? "rounded-full" : "rounded-xl"}`}
+            >
+              {purpose === "avatar" ? (
+                <Camera className="size-8" />
+              ) : (
+                <Building2 className="size-8" />
+              )}
+            </span>
+          )}
+          <div className="min-w-0 flex-1 basis-52">
+            <h2 id={`documentsHeading-${purpose}`} className="text-xl font-semibold">
+              {purpose === "avatar" ? "Profile image" : "Clinic logo"}
+            </h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+              {purpose === "avatar"
+                ? "Choose a clear portrait for your account. Your photo becomes available after its security scan."
+                : "Keep your clinic recognizable. Logos retain their original proportions."}
+            </p>
+            <div className="mt-4">{uploadPanel}</div>
+          </div>
+        </div>
+        {!remote.data ? (
+          <LoadState error={remote.error} retry={remote.reload} />
+        ) : (
+          files.length > 0 && (
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {files.map((file) => (
+                <li
+                  key={file.id}
+                  className="flex min-w-0 flex-wrap items-center gap-3 rounded-xl border border-border bg-card p-4"
+                >
+                  {file.scanState === "clean" && (
+                    <SecureImage
+                      id={file.id}
+                      avatar={purpose === "avatar"}
+                      alt={file.label}
+                      className={purpose === "avatar" ? "size-14" : "h-14 max-w-24 object-contain"}
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium wrap-anywhere">{file.label}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {file.scanState === "clean"
+                        ? "Ready to use"
+                        : file.scanState.replaceAll("_", " ")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">{renderActions(file)}</div>
+                </li>
+              ))}
+            </ul>
+          )
+        )}
+        {previewId && (
+          <Button
+            type="button"
+            variant="ghost"
+            className="w-fit"
+            onClick={() => setPreviewId(null)}
+          >
             Close image preview
           </Button>
+        )}
+        {failure !== null && (
+          <p role="alert" className="text-sm text-destructive">
+            {failureText(failure)}
+          </p>
+        )}
+        <Button type="button" variant="ghost" className="w-fit" onClick={remote.reload}>
+          <RefreshCw />
+          Refresh image status
+        </Button>
+      </section>
+    );
+  }
+  function renderActions(file: DocumentFile) {
+    const attached = attachedIds?.includes(file.id);
+    const eligible = !encounterId || !file.encounterId || file.encounterId === encounterId;
+    const canVersion =
+      allowUpload &&
+      file.scanState === "clean" &&
+      (!file.encounterId || file.encounterId === encounterId);
+    return (
+      <>
+        {file.scanState === "clean" && purpose === "clinical" && (
+          <DocumentPreview
+            label={file.label}
+            contentType={file.contentType}
+            authorize={async () => {
+              const result = await getGraphqlClient().request(DocumentDownloadDocument, {
+                organizationId,
+                versionId: file.id,
+              });
+              return `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}`;
+            }}
+          />
+        )}
+        {file.scanState === "clean" && purpose !== "clinical" && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy === file.id}
+            onClick={() => void act(file.id, "download")}
+          >
+            Preview image
+          </Button>
+        )}
+        {onAttach && !readOnly && eligible && (
+          <Button
+            type="button"
+            variant={attached ? "ghost" : "outline"}
+            disabled={!attached && file.scanState !== "clean"}
+            onClick={() => onAttach(file.id, !attached)}
+          >
+            {attached
+              ? "Remove attachment"
+              : purpose === "clinical"
+                ? "Attach to visit"
+                : "Use image"}
+          </Button>
+        )}
+        {(canVersion ||
+          archive ||
+          (!readOnly && file.scanState === "unavailable" && allowUpload)) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                disabled={busy === file.id}
+                aria-label={`Actions for ${file.label}`}
+              >
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {canVersion && (
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setVersionTarget({
+                      id: file.documentId,
+                      label: file.label,
+                      encounterId: file.encounterId ?? undefined,
+                    });
+                    setUploadOpen(true);
+                  }}
+                >
+                  <Upload />
+                  Upload new version
+                </DropdownMenuItem>
+              )}
+              {archive && (
+                <DropdownMenuItem
+                  onSelect={() => setHistory({ id: file.documentId, label: file.label })}
+                >
+                  <History />
+                  View history
+                </DropdownMenuItem>
+              )}
+              {!readOnly && file.scanState === "unavailable" && allowUpload && (
+                <DropdownMenuItem onSelect={() => void act(file.id, "scan")}>
+                  <RefreshCw />
+                  Retry scan
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </>
+    );
+  }
+  return (
+    <section
+      aria-labelledby={`documentsHeading-${purpose}`}
+      className="@container grid min-w-0 gap-5"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0 flex-1 basis-64">
+          <h2 id={`documentsHeading-${purpose}`} className="text-xl font-semibold">
+            Documents & imaging
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Private files, imaging and exact document versions for this patient.
+          </p>
         </div>
-      )}
+        {uploadPanel}
+      </div>
       {archive && (
         <RecordFilterForm
           authors={authors}
@@ -208,112 +424,28 @@ export function DocumentPanel({
           }}
         />
       )}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          {files.length} file version{files.length === 1 ? "" : "s"} in these results · Scanned
+          before preview or download
+        </p>
+        <ViewSwitcher value={view} onChange={setView} />
+      </div>
       {!remote.data ? (
         <LoadState error={remote.error} retry={remote.reload} />
+      ) : files.length ? (
+        <DocumentCollection
+          files={files}
+          view={view}
+          timezone={workspace.organization.timezone}
+          renderActions={renderActions}
+          attachedIds={attachedIds}
+        />
       ) : (
-        <div className="grid gap-3">
-          {files.length ? (
-            files.map((file) => {
-              const attached = attachedIds?.includes(file.id);
-              const eligible =
-                !encounterId || !file.encounterId || file.encounterId === encounterId;
-              return (
-                <div
-                  key={file.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4"
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium wrap-anywhere">{file.label}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Version {file.version} ·{" "}
-                      {file.scanState === "clean"
-                        ? "Security scan passed"
-                        : file.scanState === "unavailable"
-                          ? "Scanner unavailable, quarantined"
-                          : file.scanState}{" "}
-                      · {Math.ceil(file.size / 1024)} KiB
-                    </p>
-                    <p className="mt-1 text-xs">
-                      {attached
-                        ? "Attached to this revision"
-                        : file.encounterId && file.encounterId !== encounterId
-                          ? "Linked to another visit"
-                          : "Available patient file"}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {allowUpload &&
-                      file.scanState === "clean" &&
-                      (!file.encounterId || file.encounterId === encounterId) && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() =>
-                            setVersionTarget({
-                              id: file.documentId,
-                              label: file.label,
-                              encounterId: file.encounterId ?? undefined,
-                            })
-                          }
-                        >
-                          Upload new version
-                        </Button>
-                      )}
-                    {file.scanState === "clean" && purpose === "clinical" && (
-                      <DocumentPreview
-                        label={file.label}
-                        contentType={file.contentType}
-                        authorize={async () => {
-                          const result = await getGraphqlClient().request(
-                            DocumentDownloadDocument,
-                            { organizationId, versionId: file.id },
-                          );
-                          return `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}`;
-                        }}
-                      />
-                    )}
-                    {file.scanState === "clean" && purpose !== "clinical" && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={busy === file.id}
-                        onClick={() => void act(file.id, "download")}
-                      >
-                        Preview image
-                      </Button>
-                    )}
-                    {!readOnly && file.scanState === "unavailable" && allowUpload && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        disabled={busy === file.id}
-                        onClick={() => void act(file.id, "scan")}
-                      >
-                        Retry scan
-                      </Button>
-                    )}
-                    {onAttach && !readOnly && eligible && (
-                      <Button
-                        type="button"
-                        variant={attached ? "ghost" : "outline"}
-                        disabled={!attached && file.scanState !== "clean"}
-                        onClick={() => onAttach(file.id, !attached)}
-                      >
-                        {attached
-                          ? "Remove attachment"
-                          : purpose === "clinical"
-                            ? "Attach to visit"
-                            : "Use image"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <p className="text-sm text-muted-foreground">No files uploaded yet.</p>
-          )}
-        </div>
+        <EmptyState
+          title="No documents in these results"
+          description="Upload a document or adjust the filters. Only files you are authorized to access appear here."
+        />
       )}
       {failure !== null && (
         <p role="alert" className="text-sm text-destructive">
@@ -323,56 +455,47 @@ export function DocumentPanel({
       {archive && parsed.success && (
         <PageControls after={after} next={parsed.data.end_cursor} onChange={setAfter} />
       )}
-      {allowUpload && (
-        <EntrySheet
-          draftKeys={[
-            `${organizationId}:${patientId ?? purpose}:${versionTarget?.encounterId ?? encounterId ?? "general"}:upload`,
-          ]}
-          title={
-            purpose === "avatar"
-              ? "Update profile image"
-              : purpose === "logo"
-                ? "Update clinic logo"
-                : "Upload document"
-          }
-          description="Select a file and wait for its security scan before attaching it."
-        >
-          <UploadControl
-            key={versionTarget?.id ?? "new"}
-            patientId={patientId}
-            encounterId={versionTarget?.encounterId ?? encounterId}
-            documentId={versionTarget?.id}
-            initialLabel={versionTarget?.label}
-            onPendingChange={onUploadPending}
-            purpose={purpose}
-            onUploaded={remote.reload}
-          />
-        </EntrySheet>
-      )}
       {versionTarget && (
-        <Button type="button" variant="ghost" onClick={() => setVersionTarget(null)}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-fit"
+          onClick={() => setVersionTarget(null)}
+        >
           Upload a separate file instead
         </Button>
       )}
-      <div className="flex flex-wrap gap-3">
-        {before && (
-          <Button type="button" variant="outline" onClick={() => setBefore(undefined)}>
-            Newest files
-          </Button>
-        )}
-        {remote.data?.documents.length === 20 && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setBefore(remote.data?.documents.at(-1)?.id)}
-          >
-            Older files
-          </Button>
-        )}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+        <div className="flex gap-2">
+          {before && (
+            <Button type="button" variant="outline" onClick={() => setBefore(undefined)}>
+              Newest files
+            </Button>
+          )}
+          {remote.data?.documents.length === 20 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setBefore(remote.data?.documents.at(-1)?.id)}
+            >
+              Older files
+            </Button>
+          )}
+        </div>
+        <Button type="button" variant="ghost" onClick={remote.reload}>
+          <RefreshCw />
+          Refresh file status
+        </Button>
       </div>
-      <Button type="button" variant="ghost" onClick={remote.reload}>
-        Refresh file status
-      </Button>
+      {history && patientId && (
+        <DocumentHistory
+          key={history.id}
+          documentId={history.id}
+          label={history.label}
+          patientId={patientId}
+          onClose={() => setHistory(null)}
+        />
+      )}
     </section>
   );
 }

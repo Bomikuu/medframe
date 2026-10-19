@@ -13,6 +13,7 @@ query ClinicWorkspace($organizationId: UUID!) {
     organization {
       id
       name
+      timezone
     }
     permissions
     branches {

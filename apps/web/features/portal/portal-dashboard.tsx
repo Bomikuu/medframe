@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -8,13 +9,14 @@ import {
 } from "@/lib/graphql/portal/generated";
 import { getPortalClient } from "@/lib/graphql/portal/client";
 import { useRemote } from "@/features/patients/use-remote";
-import { LoadState, timeLabel } from "@/features/patients/feedback";
+import { LoadState } from "@/features/patients/feedback";
 import { recordPage } from "@/features/records/schema";
 import { PageControls } from "@/features/records/record-filters";
 import { usePortal } from "./portal-provider";
 import { releaseRowSchema, releasePayloadSchema } from "./schema";
 import { ReleaseView } from "./release-view";
 export function PortalDashboard() {
+  const timeLabel = useClinicTime();
   const { linkId, href } = usePortal();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(PortalRecordsDocument, { linkId, after }, { client: getPortalClient });
@@ -40,7 +42,7 @@ export function PortalDashboard() {
           )}
           <ul className="grid gap-4 lg:grid-cols-2">
             {parsed.data.items.map((item) => (
-              <li key={item.id} className="rounded-lg border border-border bg-card p-5">
+              <li key={item.id} className="rounded-xl border border-border bg-card p-5">
                 <Link
                   href={href(`/portal/records/${item.id}`)}
                   className="font-semibold text-primary hover:underline"
@@ -65,6 +67,7 @@ export function PortalDashboard() {
   );
 }
 export function PortalRecord({ releaseId }: { releaseId: string }) {
+  const timeLabel = useClinicTime();
   const { linkId, href } = usePortal();
   const remote = useRemote(
     PortalRecordDocument,

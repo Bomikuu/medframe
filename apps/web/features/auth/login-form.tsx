@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,13 +25,13 @@ export function LoginForm({
   const {
     register,
     control,
-    watch,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "", remember: false },
   });
+  const remember = useWatch({ control, name: "remember" });
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
       <FormField
@@ -98,12 +98,7 @@ export function LoginForm({
       <Button type="submit" disabled={busy} aria-busy={busy} className="mt-1 w-full">
         {busy ? "Signing in…" : "Sign in"}
       </Button>
-      <GoogleSignIn
-        portal={portal}
-        busy={busy}
-        remember={watch("remember")}
-        onSubmit={onGoogleSubmit}
-      />
+      <GoogleSignIn portal={portal} busy={busy} remember={remember} onSubmit={onGoogleSubmit} />
     </form>
   );
 }

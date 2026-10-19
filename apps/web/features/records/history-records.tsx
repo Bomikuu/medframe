@@ -1,11 +1,12 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useRecordAuthors } from "./use-record-authors";
 import { useState } from "react";
 import { z } from "zod";
 import { HistoryRecordsDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
-import { LoadState, timeLabel } from "@/features/patients/feedback";
+import { LoadState } from "@/features/patients/feedback";
 import { ButtonLink } from "@/components/ui/button-link";
 import { recordPage } from "./schema";
 import { RecordFilterForm, PageControls, type RecordFilters } from "./record-filters";
@@ -18,6 +19,7 @@ const eventSchema = z.object({
   encounter_revision_id: z.string().nullable(),
 });
 export function HistoryRecords({ patientId }: { patientId: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId, href } = useWorkspace();
   const authors = useRecordAuthors(patientId);
   const [filters, setFilters] = useState<RecordFilters>({});

@@ -93,7 +93,7 @@ export function ToothSurfacePicker({
             aria-label={`Select ${surface} surface`}
             aria-pressed={value === surface}
             onClick={() => onChange(value === surface ? null : surface)}
-            className={`grid h-auto min-w-0 gap-1 px-1 py-2 text-[11px] capitalize ${value === surface ? "border-primary bg-secondary text-secondary-foreground" : ""}`}
+            className={`grid h-auto min-w-0 gap-1 px-1 py-2 text-xs capitalize ${value === surface ? "border-primary bg-secondary text-secondary-foreground" : ""}`}
           >
             <ToothPreview tooth={tooth.id} className="mx-auto h-12 w-8" />
             <span>{surface}</span>

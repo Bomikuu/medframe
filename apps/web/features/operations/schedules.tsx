@@ -2,7 +2,7 @@
 
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,7 @@ function ScheduleEditor({ setup, reload }: { setup: OperationsSetup; reload: () 
     resolver: zodResolver(scheduleSchema),
     defaultValues: defaults,
   });
+  const scheduleValues = useWatch({ control: form.control });
   const discard = useCallback(() => {
     form.reset();
   }, [form]);
@@ -120,19 +121,19 @@ function ScheduleEditor({ setup, reload }: { setup: OperationsSetup; reload: () 
             first.
           </p>
         ) : (
-          <form noValidate onSubmit={save} className="grid gap-5">
+          <form noValidate onSubmit={save} className="@container grid min-w-0 gap-5">
             <FormSelect
               id="schedule-provider"
               label="Provider"
-              value={form.watch("provider_id")}
+              value={scheduleValues.provider_id ?? ""}
               onChange={(value) => form.setValue("provider_id", value, { shouldDirty: true })}
               options={setup.providers.map((row) => ({ value: row.id, label: row.name }))}
             />
-            <div className="grid max-w-3xl gap-4 sm:grid-cols-3">
+            <div className="grid max-w-3xl min-w-0 gap-4 @[480px]:grid-cols-2 @[760px]:grid-cols-3">
               <FormSelect
                 id="schedule-weekday"
                 label="Weekday"
-                value={form.watch("weekday")}
+                value={scheduleValues.weekday ?? "0"}
                 onChange={(value) => form.setValue("weekday", value, { shouldDirty: true })}
                 options={weekdays.map((label, index) => ({ value: String(index), label }))}
               />

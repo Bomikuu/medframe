@@ -27,10 +27,12 @@ export function DataTable<T>({
   columns,
   data,
   caption = "Records",
+  summary,
 }: {
   columns: ColumnDef<T>[];
   data: T[];
   caption?: string;
+  summary?: string;
 }) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   // TanStack Table is intentionally the state owner; its imperative APIs cannot be memoized.
@@ -46,7 +48,10 @@ export function DataTable<T>({
   });
   return (
     <div className="grid gap-3">
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p role="status" className="text-sm text-muted-foreground">
+          {summary ?? caption}
+        </p>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="outline">
@@ -71,7 +76,7 @@ export function DataTable<T>({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="overflow-hidden rounded-lg border border-border">
+      <div className="min-w-0 overflow-hidden rounded-xl border border-border bg-card">
         <Table>
           <caption className="sr-only">{caption}</caption>
           <TableHeader className="bg-muted/60">

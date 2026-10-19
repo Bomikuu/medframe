@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import {
   PatientReportsDocument,
@@ -11,11 +12,12 @@ import { useRemote } from "@/features/patients/use-remote";
 import { useRequestScope } from "@/features/patients/use-request-scope";
 import { FormSelect } from "@/features/patients/form-controls";
 import { Button } from "@/components/ui/button";
-import { LoadState, failureText, timeLabel } from "@/features/patients/feedback";
+import { LoadState, failureText } from "@/features/patients/feedback";
 import { recordPage } from "@/features/records/schema";
 import { PageControls } from "@/features/records/record-filters";
 import { reportSchema } from "./schema";
 export function ReportReview({ patientId }: { patientId: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId, can } = useWorkspace();
   const [after, setAfter] = useState<string>();
   const [history, setHistory] = useState("");
@@ -109,6 +111,7 @@ function ReconciliationHistory({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const timeLabel = useClinicTime();
   const { organizationId } = useWorkspace();
   const [afterVersion, setAfterVersion] = useState<number>();
   const [selectedLabel, setSelectedLabel] = useState("");

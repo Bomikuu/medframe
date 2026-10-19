@@ -9,6 +9,34 @@ from tests_django.test_boundaries import ClinicalFixture
 
 
 class RecordFilterTests(ClinicalFixture):
+    def test_document_presentational_metadata_stays_authorized(self):
+        from medframe_apps.documents.models import Document, DocumentVersion
+        from medframe_apps.documents.queries import list_documents
+
+        self.doctor.display_name = "Synthetic clinician"
+        self.doctor.save(update_fields=["display_name"])
+        document = Document.objects.create(
+            organization=self.organization,
+            patient=self.patient,
+            uploaded_by=self.doctor,
+            label="Synthetic versioned document",
+        )
+        DocumentVersion.objects.create(
+            document=document,
+            uploaded_by=self.doctor,
+            key=f"synthetic-metadata/{uuid4()}",
+            filename="synthetic.pdf",
+            content_type="application/pdf",
+            expected_size=1,
+            size=1,
+        )
+        result = list_documents(self.doctor, self.organization.id, self.patient.id)
+        self.assertEqual(result["items"][0]["uploaded_by"], "Synthetic clinician")
+        self.assertIn("created_at", result["items"][0])
+        self.patient.access_grants.update(active=False)
+        with self.assertRaises(DomainError):
+            list_documents(self.doctor, self.organization.id, self.patient.id)
+
     def setUp(self):
         from medframe_apps.encounters.services import create_encounter
 

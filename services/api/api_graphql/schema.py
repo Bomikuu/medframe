@@ -30,6 +30,7 @@ class UserType:
 class OrganizationType:
     id: UUID
     name: str
+    timezone: str
 
 
 @strawberry.type
@@ -67,7 +68,10 @@ class Query(
         queryset = Organization.objects.filter(
             membership__user=info.context.user, membership__active=True, active=True
         ).order_by("name")[:50]
-        return [OrganizationType(id=item.id, name=item.name) for item in queryset]
+        return [
+            OrganizationType(id=item.id, name=item.name, timezone=item.timezone)
+            for item in queryset
+        ]
 
     @strawberry.field
     @transaction.atomic
@@ -78,7 +82,11 @@ class Query(
             branches = branches.filter(id=member.branch_id)
         audit(info.context.user, "workspace.read", organization_id)
         return WorkspaceType(
-            organization=OrganizationType(id=member.organization_id, name=member.organization.name),
+            organization=OrganizationType(
+                id=member.organization_id,
+                name=member.organization.name,
+                timezone=member.organization.timezone,
+            ),
             branches=[
                 BranchType(id=item.id, name=item.name) for item in branches.order_by("name")[:50]
             ],

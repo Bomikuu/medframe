@@ -42,28 +42,30 @@ export function AppointmentsPage() {
         title="Appointments"
         description="Manage availability, bookings and arrivals. Consultations remain separate clinical records."
       />
-      <BranchChoice setup={remote.setup} change={(value) => void guard(() => setBranch(value))} />
-      <form
-        noValidate
-        className="flex max-w-xl flex-wrap items-end gap-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setQuery(search);
-        }}
-      >
-        <FormField id="operations-patient-search" label="Find patient for booking">
-          <Input
-            id="operations-patient-search"
-            type="search"
-            maxLength={160}
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </FormField>
-        <Button type="submit" variant="outline">
-          Find patient
-        </Button>
-      </form>
+      <div className="flex min-w-0 flex-wrap items-end gap-5 rounded-xl border border-border bg-card p-4 sm:p-5">
+        <BranchChoice setup={remote.setup} change={(value) => void guard(() => setBranch(value))} />
+        <form
+          noValidate
+          className="flex max-w-xl flex-wrap items-end gap-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            setQuery(search);
+          }}
+        >
+          <FormField id="operations-patient-search" label="Find patient for booking">
+            <Input
+              id="operations-patient-search"
+              type="search"
+              maxLength={160}
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+          </FormField>
+          <Button type="submit" variant="outline">
+            Find patient
+          </Button>
+        </form>
+      </div>
       <AppointmentAgenda key={remote.setup.branch_id} setup={remote.setup} />
     </div>
   );
@@ -99,15 +101,19 @@ function AppointmentAgenda({ setup }: { setup: OperationsSetup }) {
   };
   return (
     <>
-      <OperationsLiveStatus connected={connected} />
       <OperationNotice message={action.message} error={action.error} />
-      {can("appointments.manage") && (
-        <EntrySheet title="Book an appointment">
-          <div className="pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <OperationsLiveStatus connected={connected} />
+        {can("appointments.manage") && (
+          <EntrySheet
+            title="Book an appointment"
+            triggerVariant="default"
+            description="Choose the patient, provider and an available time. All details stay within this clinic."
+          >
             <BookingForm setup={setup} reload={remote.reload} />
-          </div>
-        </EntrySheet>
-      )}
+          </EntrySheet>
+        )}
+      </div>
       <OperationSection title="Daily agenda">
         <div className="grid max-w-3xl gap-4 sm:grid-cols-3">
           <DateChoice

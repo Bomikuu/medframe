@@ -1,0 +1,1361 @@
+# MEDFRAME — VISUAL DESIGN & UI RECONSTRUCTION
+## Complete Application-Wide Visual Redesign
+
+The previous UI redesign did not achieve the expected quality.
+
+Although the application now contains cards, tables, and
+structured sections, the overall interface still looks generic,
+unfinished, overly plain, and visually unrefined.
+
+Several components also have actual layout defects.
+
+This task is to significantly improve the visual quality
+of Medframe across the entire existing application.
+
+Do not simply adjust padding and border radius.
+
+Reconstruct the visual language, improve component composition,
+introduce meaningful visual emphasis, and ensure interactions
+feel polished.
+
+The objective is to make Medframe look like a premium,
+modern healthcare SaaS platform.
+
+Think of a polished commercial product rather than
+a basic CRUD administration template.
+
+IMPORTANT:
+
+- Preserve existing functionality.
+- Preserve Django and GraphQL integrations.
+- Preserve patient confidentiality.
+- Preserve existing theme customization.
+- Use shadcn/ui extensively.
+- Improve ALL existing pages.
+- Implement the improvements in one comprehensive batch.
+
+Do not proceed to the next backend feature batch.
+
+==================================================
+1. NEW VISUAL DIRECTION
+==================================================
+
+The current application is too bland.
+
+It relies excessively on:
+
+- White backgrounds
+- Thin borders
+- Small typography
+- Plain rectangular cards
+- Identical-looking buttons
+- Unstyled information blocks
+
+Introduce a more sophisticated visual identity.
+
+DESIGN PERSONALITY:
+
+- Modern healthcare technology
+- Premium enterprise SaaS
+- Clean but expressive
+- Professional but approachable
+- Minimal but not empty
+- Information-rich but organized
+- Interactive and responsive
+- Distinctive without looking playful
+
+IMPORTANT:
+
+Minimal does not mean colorless.
+
+Professional does not mean boring.
+
+Clean does not mean removing visual hierarchy.
+
+Use visual contrast, controlled color, meaningful
+grouping, and interactive details to create personality.
+
+Avoid cartoonish elements, excessive gradients,
+neon effects, and unnecessary decoration.
+
+==================================================
+2. CHANGE THE TYPOGRAPHY
+==================================================
+
+Stop using Inter as the primary application font.
+
+The current typography looks too generic and lacks character.
+
+Introduce a new typography system.
+
+RECOMMENDED:
+
+Headings:
+Manrope
+
+Body and UI:
+Plus Jakarta Sans
+
+Use next/font/google.
+
+Both fonts should be properly optimized and loaded
+through Next.js.
+
+Use Manrope for:
+
+- Page headings
+- Dashboard metrics
+- Important section headings
+- Prominent patient names
+
+Use Plus Jakarta Sans for:
+
+- Navigation
+- Buttons
+- Forms
+- Tables
+- Descriptions
+- Labels
+- General application text
+
+Establish a clear typographic scale.
+
+Suggested:
+
+Page Title:
+28–32px, semibold/bold
+
+Section Heading:
+18–22px, semibold
+
+Card Title:
+15–17px, semibold
+
+Body:
+14–15px
+
+Secondary Text:
+13–14px
+
+Form Labels:
+13–14px
+
+Metric Values:
+30–36px, bold
+
+IMPORTANT:
+
+The existing interface has several areas
+where the text looks too small.
+
+Increase readability.
+
+Do not use 11–12px text for important information.
+
+Avoid excessive font weights.
+
+Use strong but controlled hierarchy.
+
+Ensure all typography is configurable through
+the existing appearance settings.
+
+==================================================
+3. REFINE THE BRAND COLORS
+==================================================
+
+Keep Medframe's original identity.
+
+However, introduce a more refined application palette.
+
+PRIMARY NAVY:
+#102A43
+
+PRIMARY TEAL:
+#0D9488
+
+TEAL ACCENT:
+#14B8A6
+
+SOFT TEAL:
+#E8F7F5
+
+SOFT BLUE:
+#EFF6FF
+
+SOFT AMBER:
+#FFFBEB
+
+SOFT RED:
+#FEF2F2
+
+WHITE:
+#FFFFFF
+
+APP BACKGROUND:
+#F7F9FC
+
+BORDER:
+#E5EAF0
+
+PRIMARY TEXT:
+#172B4D
+
+SECONDARY TEXT:
+#64748B
+
+Use the original brand palette as a foundation,
+not an absolute limitation on every visual element.
+
+The main application should remain LIGHT.
+
+However, introduce subtle differences between
+the application background, content cards,
+interactive elements, and highlighted sections.
+
+For example:
+
+Application background:
+Very light neutral surface.
+
+Sidebar:
+White.
+
+Cards:
+White.
+
+Selected navigation:
+Soft teal.
+
+Primary CTA:
+Deep navy.
+
+Interactive highlights:
+Teal.
+
+Warnings:
+Soft amber.
+
+Errors:
+Soft red.
+
+Status indicators:
+Appropriate semantic colors.
+
+Avoid randomly introducing colors.
+
+Create a consistent semantic color system.
+
+Do not use gradients as the primary visual treatment.
+
+Flat colors with subtle depth are preferred.
+
+IMPORTANT:
+
+All colors must use design tokens.
+
+Preserve organization branding customization.
+
+==================================================
+4. REBUILD THE APPLICATION SHELL
+==================================================
+
+The sidebar and header currently feel unfinished.
+
+Improve their appearance.
+
+SIDEBAR:
+
+- Use the Medframe logo with its medical symbol.
+- Improve typography and navigation hierarchy.
+- Give navigation items more breathing room.
+- Use consistent Lucide icons.
+- Improve active state styling.
+- Add visible hover states.
+- Support collapsed navigation.
+- Improve organization switching.
+- Align icons and text consistently.
+- Make section groups visually distinct.
+
+ACTIVE NAVIGATION:
+
+Use a soft teal background with a stronger
+foreground or accent indicator.
+
+HOVER:
+
+Use a subtle surface color change.
+
+Do not make hover effects invisible.
+
+ORGANIZATION SWITCHER:
+
+Make it look like a proper organization selector.
+
+Consider displaying:
+
+- Clinic logo or initials
+- Organization name
+- Active branch
+- Expand indicator
+
+HEADER:
+
+Improve:
+
+- Breadcrumb styling
+- Notification button
+- User avatar
+- User menu
+- Divider and spacing
+- Contextual controls
+
+Avoid long truncated account names dominating the header.
+
+Use a compact identity display with a menu.
+
+==================================================
+5. MAKE EVERY INTERACTIVE ELEMENT FEEL ALIVE
+==================================================
+
+The application currently has very little hover feedback.
+
+Implement proper interactive states.
+
+ALL INTERACTIVE COMPONENTS SHOULD HAVE:
+
+- Default
+- Hover
+- Focus
+- Active/pressed
+- Disabled
+- Loading
+
+BUTTONS:
+
+On hover:
+
+- Adjust background shade.
+- Apply a subtle transition.
+- Improve visual feedback.
+
+Use transitions around 150–200ms.
+
+Avoid excessive scaling animations.
+
+CARDS:
+
+Clickable cards should respond on hover.
+
+Possible treatments:
+
+- Border color change
+- Subtle shadow increase
+- Slight background tint
+
+Do not apply hover animation to static cards.
+
+TABLE ROWS:
+
+Add visible hover backgrounds.
+
+Clickable rows should clearly indicate
+that they can be opened.
+
+NAVIGATION:
+
+Add hover states to sidebar items,
+tabs, menu items, and breadcrumbs.
+
+INPUTS:
+
+Use a distinct focus border and focus ring.
+
+TABS:
+
+Make selected states immediately recognizable.
+
+ICON BUTTONS:
+
+Provide hover backgrounds and tooltips.
+
+Use appropriate pointer cursors.
+
+Respect reduced-motion preferences.
+
+==================================================
+6. REDESIGN DASHBOARD METRIC CARDS
+==================================================
+
+The current dashboard metrics are functional
+but visually plain.
+
+Improve them significantly.
+
+CURRENT PROBLEM:
+
+The cards contain:
+
+- Small title
+- Large number
+- Tiny description
+- Small icon in corner
+
+Everything has nearly identical visual weight.
+
+NEW DIRECTION:
+
+Each metric card should feel intentionally designed.
+
+Include:
+
+- Metric label
+- Prominent numeric value
+- Icon inside a subtle tinted container
+- Supporting information
+- Optional comparison or trend if actual data exists
+- Clear clickable behavior when applicable
+
+EXAMPLES:
+
+TOTAL PATIENTS
+
+248
+
+Icon:
+Users
+
+Color:
+Soft blue icon background
+
+OPEN CONSULTATIONS
+
+12
+
+Icon:
+Clipboard
+
+Color:
+Soft teal icon background
+
+PENDING TREATMENTS
+
+8
+
+Icon:
+Activity
+
+Color:
+Soft amber icon background
+
+COMPLETED CONSULTATIONS
+
+156
+
+Icon:
+CheckCircle
+
+Color:
+Soft green icon background
+
+Do not fabricate metrics or trends.
+
+Use real backend data.
+
+IMPORTANT:
+
+Use controlled color accents.
+
+Do not make the entire card brightly colored.
+
+Metric cards should have:
+
+- Balanced padding
+- Strong numbers
+- Clear icons
+- Subtle background accents
+- Consistent heights
+- Visible interactions where clickable
+
+==================================================
+7. RECONSTRUCT THE DASHBOARD LAYOUT
+==================================================
+
+The dashboard currently feels like several
+unrelated rectangular containers.
+
+Improve composition.
+
+RECOMMENDED STRUCTURE:
+
+PAGE HEADER
+
+Dashboard title
+Clinic context
+Primary actions
+
+SUMMARY METRICS
+
+Responsive metric card grid.
+
+MAIN CONTENT
+
+Two-column layout where appropriate.
+
+LEFT AREA:
+
+Recent patients or consultations.
+
+RIGHT AREA:
+
+Pending treatments and actionable items.
+
+LOWER CONTENT:
+
+Recent activity or additional operational information.
+
+Avoid:
+
+- Huge empty spaces
+- Unbalanced columns
+- Repeated information
+- Identical card heights when unnecessary
+- Content sections containing only one short sentence
+  inside oversized containers
+
+IMPORTANT:
+
+Do not fill the page with unnecessary cards.
+
+Use meaningful sections.
+
+Improve information density and hierarchy.
+
+==================================================
+8. REDESIGN PATIENT PROFILE
+==================================================
+
+The current patient profile has too much
+unstructured whitespace.
+
+The patient header also looks disconnected
+from the rest of the page.
+
+Create a stronger patient identity section.
+
+PATIENT HEADER:
+
+Display:
+
+- Larger patient avatar
+- Patient name
+- Patient reference
+- Relevant demographic information
+- Contextual clinical information
+
+Actions:
+
+- Start Consultation
+- Edit Details
+- Documents
+- More Actions
+
+Group secondary actions appropriately.
+
+Avoid too many equally prominent buttons.
+
+PRIMARY ACTION:
+
+Start Consultation
+
+SECONDARY ACTIONS:
+
+Use outline or ghost variants.
+
+PATIENT TABS:
+
+Improve the appearance of:
+
+- Overview
+- Medical History
+- Consultations
+- Dental Chart
+- Treatments
+- Documents
+- Shared Records
+- Access
+
+Use a visible active indicator.
+
+Improve spacing.
+
+Make horizontal overflow manageable.
+
+Do not compress tabs into tiny text.
+
+Use icons selectively.
+
+==================================================
+9. REDESIGN THE DOCUMENTS PAGE
+==================================================
+
+The current documents tab looks unfinished.
+
+The search and filters occupy too much space.
+
+The actual document appears as plain text
+inside a large horizontal card.
+
+Completely improve this section.
+
+HEADER:
+
+Documents & Imaging
+
+Supporting description.
+
+Primary action:
+
+Upload Document
+
+FILTERS:
+
+Use a compact filter toolbar.
+
+Include:
+
+- Search
+- Status
+- Document type
+- Date range
+- Author filter
+
+Do not permanently display six large form fields
+when most users only need search and one filter.
+
+Consider:
+
+Primary toolbar:
+Search + Type + Filters button.
+
+Advanced filters:
+Popover or collapsible section.
+
+Use filter chips to display active filters.
+
+DOCUMENT VIEW:
+
+Support:
+
+- Table view
+- Card view
+
+TABLE COLUMNS:
+
+- Document
+- Type
+- Uploaded
+- Uploaded By
+- File Size
+- Status
+- Actions
+
+CARD VIEW:
+
+Each card should include:
+
+- File icon or authorized thumbnail
+- Document name
+- File type
+- Upload date
+- Status
+- Contextual actions
+
+Use suitable icons for:
+
+- PDF
+- Image
+- X-ray
+- Prescription
+- Laboratory report
+
+DOCUMENT ACTIONS:
+
+- Preview
+- Download
+- Upload New Version
+- View History
+
+Use DropdownMenu for secondary actions.
+
+Use an appropriate preview Dialog or Sheet.
+
+Preserve existing document authorization.
+
+Do not load private medical images through
+public third-party services.
+
+==================================================
+10. COMPLETELY FIX FORM LAYOUTS
+==================================================
+
+THIS IS A CRITICAL ISSUE.
+
+The current appointment booking Sheet contains
+overlapping inputs, broken columns, wrapped labels,
+and controls extending outside the available width.
+
+This is not acceptable.
+
+Review every form for similar problems.
+
+FORM DESIGN PRINCIPLES:
+
+- Consistent input heights
+- Clear labels
+- Consistent spacing
+- Proper alignment
+- Readable placeholders
+- Correct control widths
+- Visible focus states
+- Proper validation messages
+
+Use shadcn components.
+
+INPUT HEIGHTS:
+
+Use consistent heights around 40–44px.
+
+Avoid randomly mixing control sizes.
+
+LABELS:
+
+Labels should be clearly visible.
+
+Avoid excessive label wrapping.
+
+INPUT WIDTHS:
+
+Use w-full and min-w-0 where appropriate.
+
+Do not allow long values to overflow their containers.
+
+For grid children, ensure they can shrink properly.
+
+Avoid forcing three columns into narrow containers.
+
+Use responsive field grids.
+
+Example:
+
+Desktop:
+Two columns where appropriate.
+
+Mobile:
+One column.
+
+More complex forms can use grouped sections.
+
+IMPORTANT:
+
+Inspect actual rendered layouts.
+
+Do not assume responsive classes are correct
+without checking their rendered behavior.
+
+==================================================
+11. FIX THE APPOINTMENT BOOKING SHEET
+==================================================
+
+The current booking side panel is too narrow.
+
+Three-column form fields overlap.
+
+Patient and provider selectors overflow.
+
+The date field is compressed.
+
+The layout is visibly broken.
+
+Reconstruct the booking experience.
+
+RECOMMENDED:
+
+Use a wider shadcn Sheet or a suitably sized Dialog.
+
+Desktop width:
+Approximately 600–720px if using a side sheet.
+
+Mobile:
+Full available width.
+
+Use responsive layout rules.
+
+Do not use narrow three-column field grids.
+
+RECOMMENDED FORM STRUCTURE:
+
+HEADER:
+
+Book Appointment
+
+Short supporting description.
+
+SECTION 1: PATIENT AND PROVIDER
+
+Patient
+Provider
+
+Two columns on sufficiently wide screens.
+
+Single column on smaller screens.
+
+SECTION 2: VISIT DETAILS
+
+Visit Type
+Room / Chair
+Duration
+
+Use an appropriate layout.
+
+SECTION 3: SCHEDULE
+
+Visit Date
+Available Time
+
+Give the date picker enough width.
+
+Time selection should be readable
+and easy to interact with.
+
+SECTION 4: OPTIONAL DETAILS
+
+Operational notes or reason.
+
+SECTION 5: ACTIONS
+
+Cancel
+Book Appointment
+
+Use a fixed or sticky footer when appropriate.
+
+The action area must remain visible.
+
+VALIDATION:
+
+- Show errors beside affected fields.
+- Preserve form values after validation errors.
+- Disable submission when required information is missing.
+- Clearly display unavailable appointment slots.
+- Preserve server-side booking validation.
+
+IMPORTANT:
+
+The existing Sheet must not contain
+any overlapping text or inputs.
+
+The form should look polished and intentional.
+
+==================================================
+12. IMPROVE ALL MODALS AND SHEETS
+==================================================
+
+Review:
+
+- Patient registration
+- Edit patient
+- Add diagnosis
+- Add procedure
+- Upload document
+- Appointment booking
+- Appearance settings
+- Confirmation dialogs
+
+Fix:
+
+- Width
+- Height
+- Internal scrolling
+- Padding
+- Header spacing
+- Footer positioning
+- Button alignment
+- Close button visibility
+
+Use shadcn:
+
+- Dialog
+- Sheet
+- AlertDialog
+- Popover
+- Select
+- Calendar
+- Command
+
+Do not create custom primitive modal implementations.
+
+Use the proper interaction pattern for each task.
+
+Long forms should not be squeezed into narrow dialogs.
+
+==================================================
+13. IMPROVE TABLES
+==================================================
+
+Current tables look basic.
+
+Improve their styling using shadcn Table
+and TanStack Table where appropriate.
+
+Add:
+
+- Better header typography
+- Comfortable row height
+- Hover states
+- Clear column alignment
+- Consistent status badges
+- Appropriate avatars
+- Row actions
+- Sorting indicators
+- Pagination
+- Loading states
+
+Do not make every column the same width.
+
+Prioritize important information.
+
+For patient columns:
+
+Avatar + Name
+
+For statuses:
+
+Use semantic badges.
+
+For dates:
+
+Use concise, readable formatting.
+
+Example:
+
+Oct 19, 2026 · 8:28 AM
+
+Avoid excessively long timestamp strings
+unless detailed timing is required.
+
+Use the clinic's configured timezone.
+
+==================================================
+14. IMPROVE CARDS
+==================================================
+
+Cards should have different visual roles.
+
+Create consistent variants.
+
+SUMMARY CARD:
+
+Used for dashboard metrics.
+
+INFORMATION CARD:
+
+Used for grouped clinical information.
+
+ACTION CARD:
+
+Used for important interactive actions.
+
+DOCUMENT CARD:
+
+Used for files.
+
+PATIENT CARD:
+
+Used for patient directory.
+
+Do not use the same generic card composition
+for every type of information.
+
+Use controlled variation through:
+
+- Padding
+- Header composition
+- Background tint
+- Icon treatment
+- Borders
+- Hover effects
+- Typography
+
+Do not randomly apply gradients.
+
+==================================================
+15. ADD VISUAL PERSONALITY
+==================================================
+
+Medframe should have recognizable design characteristics.
+
+Introduce:
+
+1. Distinct typography.
+2. Strong medical teal highlights.
+3. Soft tinted icon containers.
+4. Professional icons.
+5. Clear active navigation.
+6. Subtle interactive motion.
+7. Improved status indicators.
+8. Better patient avatars.
+9. Clear selected states.
+10. More expressive dashboard metrics.
+
+Use clinical colors with restraint.
+
+For example:
+
+Teal:
+Primary interactive accents.
+
+Blue:
+Informational elements.
+
+Green:
+Completed or successful states.
+
+Amber:
+Pending or attention-required states.
+
+Red:
+Errors or high-priority warnings.
+
+Do not use red merely as decoration.
+
+Avoid using color to imply a medical diagnosis
+when no clinical information supports it.
+
+==================================================
+16. IMPROVE EMPTY STATES
+==================================================
+
+The application should not display
+large empty containers with one sentence.
+
+Create meaningful empty states.
+
+Example:
+
+No pending treatments
+
+Supporting text:
+There are no active treatment plans
+requiring attention.
+
+Use a subtle icon.
+
+Include a relevant action when available.
+
+Avoid large cartoon illustrations.
+
+Empty states should look intentional
+without consuming excessive space.
+
+==================================================
+17. IMPROVE TOASTS AND FEEDBACK
+==================================================
+
+Use shadcn Sonner.
+
+Provide polished feedback for:
+
+- Save
+- Update
+- Delete
+- Upload
+- Create
+- Finalize
+- Error
+
+Use appropriate status styling.
+
+Do not show success until the backend confirms it.
+
+Add loading feedback for asynchronous actions.
+
+Avoid excessive notifications.
+
+Use AlertDialog for destructive actions.
+
+==================================================
+18. FIX RESPONSIVENESS
+==================================================
+
+Review the application at:
+
+1440px
+1024px
+768px
+390px
+
+These are representative widths, not the only sizes.
+
+Check:
+
+- Sidebar behavior
+- Header
+- Metric cards
+- Tables
+- Patient details
+- Forms
+- Dialogs
+- Sheets
+- Dental model workspace
+
+CRITICAL:
+
+No input should overflow.
+
+No labels should overlap controls.
+
+No text should extend outside containers.
+
+No dialog should exceed the viewport.
+
+No primary actions should become inaccessible.
+
+No unexpected horizontal page scrolling.
+
+==================================================
+19. USE THE BROWSER FOR VISUAL VERIFICATION
+==================================================
+
+Do not judge the UI only by reading the source code.
+
+Inspect actual rendered pages when browser tooling
+is available.
+
+Review:
+
+- Dashboard
+- Patients
+- Patient profile
+- Documents
+- Consultations
+- Dental chart
+- Treatments
+- Appointments
+- Queue
+- Settings
+- Every other implemented route
+
+Capture screenshots where practical.
+
+Compare layouts for:
+
+- Spacing
+- Typography
+- Alignment
+- Content balance
+- Form layout
+- Card hierarchy
+- Interaction states
+
+Fix visible problems before considering
+the task complete.
+
+A successful build does not mean
+the interface is visually correct.
+
+==================================================
+20. SHADCN COMPONENT REQUIREMENTS
+==================================================
+
+Use shadcn components extensively.
+
+Prioritize:
+
+- Sidebar
+- Card
+- Button
+- Badge
+- Avatar
+- Tabs
+- Dialog
+- Sheet
+- AlertDialog
+- Table
+- Select
+- Calendar
+- Popover
+- DropdownMenu
+- Tooltip
+- Skeleton
+- Sonner
+- Separator
+- ScrollArea
+- Collapsible
+- Command
+- Input
+- Textarea
+- Field / Form
+- Checkbox
+- Switch
+
+Create application-level components only when
+they provide meaningful reuse.
+
+Use design tokens consistently.
+
+Do not hardcode colors throughout individual pages.
+
+==================================================
+21. APPLICATION-WIDE AUDIT
+==================================================
+
+Inspect EVERY implemented route.
+
+Do not improve only the three pages
+shown in the reference screenshots.
+
+For every page, check:
+
+- Typography
+- Colors
+- Layout
+- Spacing
+- Alignment
+- Header
+- Navigation
+- Cards
+- Tables
+- Forms
+- Dialogs
+- Sheets
+- Hover interactions
+- Focus states
+- Loading states
+- Empty states
+- Errors
+- Responsiveness
+
+Fix every identified visual regression.
+
+Preserve existing working interactions.
+
+==================================================
+22. IMPLEMENTATION STRATEGY
+==================================================
+
+Implement this as ONE COMPREHENSIVE UI BATCH.
+
+Do not ask for approval after every component.
+
+Proceed through:
+
+PASS 1:
+Establish new typography and refined design tokens.
+
+PASS 2:
+Improve application shell, sidebar, header, and navigation.
+
+PASS 3:
+Reconstruct dashboard composition and metric cards.
+
+PASS 4:
+Redesign patient directory and patient profile.
+
+PASS 5:
+Redesign medical documents and records.
+
+PASS 6:
+Rebuild broken forms, especially appointment booking.
+
+PASS 7:
+Improve consultations, dental workspace, and treatments.
+
+PASS 8:
+Add hover, focus, selected, and loading states.
+
+PASS 9:
+Inspect all implemented routes and fix visual regressions.
+
+Use the existing Django and GraphQL infrastructure.
+
+Avoid unrelated backend changes.
+
+Do not introduce fake data simply to make
+the dashboard look populated.
+
+Do not spend time on unnecessary full production builds
+during isolated visual changes.
+
+Perform targeted validation and relevant interaction tests.
+
+==================================================
+23. ACCEPTANCE CRITERIA
+==================================================
+
+The redesign is complete when:
+
+- Medframe uses the new typography system.
+- The application has a distinct visual personality.
+- The dashboard is no longer visually bland.
+- Summary metrics have clear visual emphasis.
+- Cards use appropriate visual variants.
+- Tables have hover and polished status presentation.
+- Patient information is organized effectively.
+- Document management looks professional.
+- Inputs are consistently styled.
+- All form controls align correctly.
+- Appointment booking no longer overflows.
+- Sheets and dialogs are appropriately sized.
+- Navigation has visible hover states.
+- Interactive elements provide feedback.
+- Colors are used meaningfully.
+- Empty states are thoughtfully designed.
+- All implemented pages are responsive.
+- Theme customization remains functional.
+- Patient confidentiality is preserved.
+- Existing business logic remains intact.
+
+Do not finish after making superficial CSS changes.
+
+The current application must look substantially
+more polished and intentional.
+
+The result should resemble a premium commercial
+healthcare SaaS product.
+
+==================================================
+24. FINAL INSTRUCTION
+==================================================
+
+Redesign the visual identity and interface
+of the CURRENT Medframe application.
+
+Do not build new major product features.
+
+Do not prioritize marketing pages.
+
+Do not redesign only one screen.
+
+Inspect and improve every existing page.
+
+Focus on:
+
+- Typography
+- Color hierarchy
+- Visual personality
+- Information composition
+- Interactive states
+- Forms
+- Responsive layouts
+- Component consistency
+
+Use shadcn/ui extensively.
+
+Preserve the existing application architecture.
+
+Most importantly:
+
+DO NOT INTERPRET MINIMAL AS PLAIN.
+
+Medframe should feel like a professionally designed
+healthcare technology product, not an unfinished
+administrative dashboard.

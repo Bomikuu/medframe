@@ -1,4 +1,5 @@
 "use client";
+import { ClinicalLocaleProvider } from "@/components/application/clinical-locale";
 import { createContext, useState, useContext, useEffect, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useRequestScope } from "@/features/patients/use-request-scope";
@@ -123,126 +124,133 @@ function PortalShell({
   const href = (path: string) => `${path}?link=${encodeURIComponent(link.id)}`;
   return (
     <PortalContext.Provider value={{ linkId: link.id, href }}>
-      <div className="min-h-dvh bg-background wrap-anywhere">
-        <header className="border-b border-border">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5 py-5">
-            <div className="flex items-center gap-4">
-              {workspace.logo_ticket && (
-                <Image
-                  src={`/api/backend/portal/documents/download?ticket=${encodeURIComponent(workspace.logo_ticket)}`}
-                  alt={`${workspace.clinic_name} logo`}
-                  width={160}
-                  height={60}
-                  unoptimized
-                  className="h-12 w-auto max-w-40 object-contain"
-                />
-              )}
-              <div>
-                <Brand />
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {workspace.clinic_name} · Patient portal
-                </p>
+      <ClinicalLocaleProvider timezone={workspace.timezone}>
+        <div className="min-h-dvh bg-background wrap-anywhere">
+          <header className="border-b border-border bg-card">
+            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-5 py-5">
+              <div className="flex items-center gap-4">
+                {workspace.logo_ticket && (
+                  <Image
+                    src={`/api/backend/portal/documents/download?ticket=${encodeURIComponent(workspace.logo_ticket)}`}
+                    alt={`${workspace.clinic_name} logo`}
+                    width={160}
+                    height={60}
+                    unoptimized
+                    className="h-12 w-auto max-w-40 object-contain"
+                  />
+                )}
+                <div>
+                  <Brand />
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {workspace.clinic_name} · Patient portal
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void guard(() => router.push("/login"))}
+                >
+                  Staff sign in
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    void guard(() => {
+                      void requestWithCsrf("portal/auth/logout", {}).finally(() => {
+                        router.replace("/portal/login");
+                        router.refresh();
+                      });
+                    })
+                  }
+                >
+                  Sign out
+                </Button>
               </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => void guard(() => router.push("/login"))}
-              >
-                Staff sign in
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  void guard(() => {
-                    void requestWithCsrf("portal/auth/logout", {}).finally(() => {
-                      router.replace("/portal/login");
-                      router.refresh();
-                    });
-                  })
-                }
-              >
-                Sign out
-              </Button>
+          </header>
+          <main id="main" className="mx-auto grid max-w-6xl gap-6 px-5 py-7">
+            <div className="flex flex-wrap items-end justify-between gap-5 rounded-xl border border-border bg-card p-5 sm:p-6">
+              <div>
+                <h1 className="text-2xl font-semibold">{workspace.patient_name}</h1>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {workspace.reference} ·{" "}
+                  {workspace.relationship === "guardian"
+                    ? "Verified guardian access"
+                    : "Your patient record"}
+                </p>
+              </div>
+              {links.length > 1 && (
+                <FormSelect
+                  id="portal-relationship"
+                  label="Patient connection"
+                  value={link.id}
+                  onChange={(value) =>
+                    void guard(() => router.push(`/portal?link=${encodeURIComponent(value)}`))
+                  }
+                  options={links.map((item) => ({
+                    value: item.id,
+                    label: `${item.patient_name} · ${item.clinic_name} · ${item.relationship}`,
+                  }))}
+                />
+              )}
             </div>
-          </div>
-        </header>
-        <main id="main" className="mx-auto grid max-w-6xl gap-6 px-5 py-7">
-          <div className="flex flex-wrap items-end justify-between gap-5">
-            <div>
-              <h1 className="text-2xl font-semibold">{workspace.patient_name}</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {workspace.reference} ·{" "}
-                {workspace.relationship === "guardian"
-                  ? "Verified guardian access"
-                  : "Your patient record"}
-              </p>
+            <nav
+              aria-label="Patient navigation"
+              className="flex gap-1 overflow-x-auto rounded-xl border border-border bg-card p-1 text-sm font-medium [&>a]:flex [&>a]:min-h-11 [&>a]:shrink-0 [&>a]:items-center [&>a]:rounded-lg [&>a]:px-4 [&>a:hover]:bg-surface-hover [&>a[aria-current=page]]:bg-teal-soft [&>a[aria-current=page]]:text-teal-ink"
+            >
+              <Link
+                aria-current={pathname === "/portal" ? "page" : undefined}
+                href={href("/portal")}
+                className="text-primary hover:underline"
+              >
+                Shared records
+              </Link>
+              <Link
+                href={href("/portal/appointments")}
+                aria-current={pathname === "/portal/appointments" ? "page" : undefined}
+                className="text-primary hover:underline"
+              >
+                My appointments
+              </Link>
+              <Link
+                href={href("/portal/queue")}
+                aria-current={pathname === "/portal/queue" ? "page" : undefined}
+                className="text-primary hover:underline"
+              >
+                My queue
+              </Link>
+              <Link
+                aria-current={pathname === "/portal/reports" ? "page" : undefined}
+                href={href("/portal/reports")}
+                className="text-primary hover:underline"
+              >
+                My reports
+              </Link>
+            </nav>
+            <div
+              key={link.id}
+              className="min-w-0 rounded-xl border border-border bg-card p-5 sm:p-6"
+            >
+              {children}
             </div>
-            {links.length > 1 && (
-              <FormSelect
-                id="portal-relationship"
-                label="Patient connection"
-                value={link.id}
-                onChange={(value) =>
-                  void guard(() => router.push(`/portal?link=${encodeURIComponent(value)}`))
-                }
-                options={links.map((item) => ({
-                  value: item.id,
-                  label: `${item.patient_name} · ${item.clinic_name} · ${item.relationship}`,
-                }))}
+            <details className="border-t border-border pt-5">
+              <summary className="min-h-11 text-sm font-medium">Display preferences</summary>
+              <PortalPreferences
+                key={workspace.preferences_version}
+                workspace={workspace}
+                reload={reload}
               />
-            )}
-          </div>
-          <nav
-            aria-label="Patient navigation"
-            className="flex gap-1 overflow-x-auto border-b border-border pb-2 text-sm font-medium [&>a]:flex [&>a]:min-h-11 [&>a]:shrink-0 [&>a]:items-center [&>a]:rounded-md [&>a]:px-3 [&>a[aria-current=page]]:bg-secondary [&>a[aria-current=page]]:text-secondary-foreground"
-          >
-            <Link
-              aria-current={pathname === "/portal" ? "page" : undefined}
-              href={href("/portal")}
-              className="text-primary hover:underline"
-            >
-              Shared records
-            </Link>
-            <Link
-              href={href("/portal/appointments")}
-              aria-current={pathname === "/portal/appointments" ? "page" : undefined}
-              className="text-primary hover:underline"
-            >
-              My appointments
-            </Link>
-            <Link
-              href={href("/portal/queue")}
-              aria-current={pathname === "/portal/queue" ? "page" : undefined}
-              className="text-primary hover:underline"
-            >
-              My queue
-            </Link>
-            <Link
-              aria-current={pathname === "/portal/reports" ? "page" : undefined}
-              href={href("/portal/reports")}
-              className="text-primary hover:underline"
-            >
-              My reports
-            </Link>
-          </nav>
-          <div key={link.id}>{children}</div>
-          <details className="border-t border-border pt-5">
-            <summary className="min-h-11 text-sm font-medium">Display preferences</summary>
-            <PortalPreferences
-              key={workspace.preferences_version}
-              workspace={workspace}
-              reload={reload}
-            />
-          </details>
-          <p className="border-t border-border pt-5 text-xs leading-6 text-muted-foreground">
-            This portal displays records your clinic explicitly released. Contact your clinic about
-            missing records or corrections.
-          </p>
-        </main>
-      </div>
+            </details>
+            <p className="border-t border-border pt-5 text-xs leading-6 text-muted-foreground">
+              This portal displays records your clinic explicitly released. Contact your clinic
+              about missing records or corrections.
+            </p>
+          </main>
+        </div>
+      </ClinicalLocaleProvider>
     </PortalContext.Provider>
   );
 }

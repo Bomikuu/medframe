@@ -2,16 +2,16 @@
 name: Medframe Clinical Workspace
 description: A white clinical workspace built for focused patient care.
 colors:
-  navy: "#0f2d4a"
-  primary: "#0f2d4a"
-  medical-teal: "#0ea5a4"
-  background: "#ffffff"
+  navy: "#102A43"
+  primary: "#102A43"
+  medical-teal: "#0D9488"
+  background: "#F7F9FC"
   surface: "#ffffff"
   muted: "#f8fafc"
-  foreground: "#1e293b"
-  supporting-text: "#475569"
-  border: "#e2e8f0"
-  input-border: "#8193a4"
+  foreground: "#172B4D"
+  supporting-text: "#586A80"
+  border: "#E5EAF0"
+  input-border: "#9AAABA"
   danger: "#b4233b"
   dark-background: "#101e2c"
   dark-surface: "#152637"
@@ -19,20 +19,20 @@ colors:
   dark-supporting-text: "#acbfce"
 typography:
   headline:
-    fontFamily: "Inter Variable, Inter, Arial, sans-serif"
-    fontSize: "30px"
+    fontFamily: "Manrope, Arial, sans-serif"
+    fontSize: "32px"
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: "-0.025em"
   body:
-    fontFamily: "Inter Variable, Inter, Arial, sans-serif"
-    fontSize: "14px"
+    fontFamily: "Plus Jakarta Sans, Arial, sans-serif"
+    fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: "normal"
   label:
-    fontFamily: "Inter Variable, Inter, Arial, sans-serif"
-    fontSize: "14px"
+    fontFamily: "Plus Jakarta Sans, Arial, sans-serif"
+    fontSize: "15px"
     fontWeight: 500
     lineHeight: "20px"
 rounded:
@@ -57,16 +57,16 @@ components:
 
 ## Overview
 
-Authentication keeps the existing white, navy and Inter form system. Staff and patient sign-in
+Authentication uses the shared white, navy and Jakarta/Manrope form system. Staff and patient sign-in
 share an unchecked Stay logged in checkbox and disclose the existing inactivity limit. MFA uses
 the official shadcn Input OTP with six separate slots, numeric keyboard, full-code paste and
 one-time-code autofill; recovery codes use an explicit alternate text field. Google uses its own
 Identity Services button when configured, with clear loading/unavailable/error states and the
 existing Medframe MFA step after Google identity verification.
 
-**Creative North Star: A focused clinical desk.** Medframe is an Operate surface for clinicians documenting patient care. A predominantly white workspace, restrained navy actions, slate text, and teal interaction feedback keep clinical content prominent. The existing identity and shared primitives remain; the approved Django Edition changes defaults and adds persisted, validated customization.
+**Creative North Star: A confident clinical desk.** Medframe is an Operate surface for clinicians documenting patient care. A cool neutral application canvas, white task surfaces, strong Manrope headings, Jakarta UI text, navy actions and teal selection make a recognizable clinical product. The October 19 reconstruction supersedes the earlier plain white visual system while preserving product behavior and customization.
 
-The local Django application implements these tokens; production-build, browser, visual self-review, and local cutover evidence are recorded in `docs/operations/django-batch-1-verification.md`. The concept-11 Medframe symbol is unavailable, so the product retains its text name. A saved clinic logo identifies that organization without inventing a substitute product symbol.
+The local Django application implements these tokens; current build, browser limitations, visual self-review and local cutover evidence are recorded in `docs/operations/visual-reconstruction-verification.md`. The original concept-11 logo asset is unavailable. A Lucide HeartPulse medical symbol accompanies the Medframe wordmark without claiming to reproduce that original asset. Saved clinic logos identify the organization in its selector and preserve their proportions.
 
 ## Colors
 
@@ -74,11 +74,11 @@ The local Django application implements these tokens; production-build, browser,
 
 Precedence is platform defaults → clinic branding → permitted personal preferences. Light is the default independent of the operating system. Dark/system mode is explicit and saved. Primary actions require readable white labels in light mode; dark mode derives a pale action color with a navy label. Accent-based selection/focus mixes retain legibility. Clinical danger and warning meaning remain independent of branding. Color always accompanies text, status, or selection state.
 
-Default page, sidebar, header, and cards are white. `muted` supplies the secondary gray surface. Shared inputs keep a stronger visible boundary than panel borders. Never introduce arbitrary CSS, scripts, external font URLs, or unvalidated property maps through settings.
+The page canvas is #F7F9FC; sidebar, header and content cards are white. `muted` supplies the secondary gray surface. Shared inputs keep a stronger visible boundary than panel borders. Never introduce arbitrary CSS, scripts, external font URLs, or unvalidated property maps through settings.
 
 ## Typography
 
-Inter Variable is the default self-hosted family. Source Sans 3 Variable and Noto Sans Variable are approved self-hosted alternatives. Standard body/control text is 14px; a saved large preset increases it to 16px. Page headings begin at 30px/600 with bounded heading presets; section headings use 20px/600. Clinical paragraphs and textareas use generous explicit leading and preserve whitespace. Keep long text within a readable measure and allow Unicode names and notes to wrap.
+Manrope headings and Plus Jakarta Sans body/UI are loaded with next/font/google and self-hosted by Next.js. The default medframe preset pairs them; Manrope-only and Jakarta-only presets are available. Explicit legacy Inter/Source Sans 3/Noto Sans choices remain accepted and loaded. Standard body/control text is 15px, secondary is 13px, and the large preset is 16px. Page headings are 28–32px with bounded heading presets; section headings use 20px/600 and metrics 34px/700. Clinical paragraphs and textareas use generous explicit leading and preserve whitespace. Keep long text within a readable measure and allow Unicode names and notes to wrap.
 
 ## Layout
 
@@ -96,7 +96,7 @@ The default base radius is 8px; the current Tailwind mapping produces 10px `roun
 
 ## Components
 
-Use the existing shadcn/Radix button, field, input, Select, Checkbox, Textarea, and AlertDialog owners. Lucide icons come only through `components/icons.ts`. Single-select popups remain authored; dates use the explicitly accepted native date input. Interactive controls retain visible keyboard focus, real labels, errors, and useful pending/disabled states.
+Use the existing shadcn/Radix button, field, input, Select, Checkbox, Textarea, and AlertDialog owners. Lucide icons come only through `components/icons.ts`. Single-select popups remain authored; dates retain the accepted typed native date input, with full shrinking control width. Interactive controls retain visible keyboard focus, real labels, errors, and useful pending/disabled states.
 
 `features/workspace/safety-provider.tsx` owns confirmations, navigation protection, and memory-only drafts. Save feedback distinguishes unsaved, saving, saved, paused/offline, conflict, completed, and finalized. Finalization and amendments preserve attributed revisions; a preview or selected image is not saved evidence.
 
@@ -109,7 +109,7 @@ Private upload controls report real transfer/scan state, preserve uncropped clin
 - Preserve clinical readability, shared tokens, predictable navigation, and grouped expected-input fields.
 - Verify default white, explicit dark, keyboard/2D, failures/conflicts, long content, and narrow layouts with synthetic data.
 - Keep proposed treatment distinct from completed evidence and draft findings distinct from finalized history.
-- Do not invent a medical symbol, anatomical validation, diagnoses, metrics, notifications, or compliance claims.
+- Do not claim the companion mark reproduces the unavailable original logo; never invent anatomical validation, diagnoses, metrics, notifications, or compliance claims.
 - Do not crop clinical imagery into avatars or expose files through public object URLs.
 
 ## Clinical Batch 2 interaction owners
@@ -137,3 +137,15 @@ The local dental-editor extension opens across the viewport: individual teeth on
 ## Reference-guided editor revision
 
 The user's supplied editor reference pins the next surrounding layout: compact real-patient header and consultation navigation; ordered jaw/FDI tooth rail with an optional Universal display; central tool/camera controls and bottom preview strip; right tooth identity, surface choices and Findings/Treatments/History/Notes. Existing navy/teal/white tokens and the 3D anatomy remain authoritative. Source-derived transparent tooth previews are attributed Dundee renders. Measurement remains unavailable without calibration. This revision is active locally after the authorized REF-001 repair. REF-003/004 viewport/mobile visual defects and detector text-size advisories remain deferred rather than canonized as design choices or new tokens. See `docs/operations/reference-editor-verification.md`.
+
+## Comprehensive visual reconstruction — October 19, 2026
+
+Authority: `docs/requirements/medframe-visual-reconstruction.txt`. This replaces conflicting old appearance choices. The app remains an Operate surface; no marketing world or invented dashboard data is introduced.
+
+The shared token owner remains globals.css, mapped to Tailwind through @theme. ThemeProvider applies validated clinic and user overrides, including separate heading/body font variables. ClinicLocaleProvider formats clinical timestamps in the authorized clinic timezone in both realms. OrganizationType and portal workspace expose this existing setting; document records expose existing uploader display names only after the existing authorization boundary.
+
+MetricCard owns numeric summary emphasis and optional truthful navigation, with icon tints for blue/teal/amber/green roles. Dashboard widgets preserve visibility/order/width preferences and use different column proportions and compact actionable summaries. Patient identity is one compact surface with circular initials, concise metadata, primary consultation action and a secondary menu. DocumentCollection owns actual table/card presentations; version history uses the existing authorized paginated record query.
+
+EntrySheet defaults to a 680px side panel, full-width on mobile. Its content is a container-query boundary. Booking and patient fields respond to panel width, not global viewport width. Shared select values truncate safely, labels remain outside controls, and actions wrap. Existing RHF owners, validation, unsaved guards and backend saves remain authoritative. Advanced record filters live in a Collapsible disclosure; applied filters are removable chips.
+
+The dental editor owns 100dvh height. Its canvas has an explicit mobile height and local stacking context; model labels/pins stay below the mobile inspector. Header actions wrap and retain 2D/keyboard alternatives. All color/status changes are presentational and imply no new clinical diagnosis.

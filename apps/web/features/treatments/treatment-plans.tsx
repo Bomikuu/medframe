@@ -81,14 +81,14 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
     }
   }
   return (
-    <section className="grid gap-5">
+    <section className="@container grid min-w-0 gap-5">
       <h2 className="text-xl font-semibold">Treatment plans</h2>
       {!remote.data ? (
         <LoadState error={remote.error} retry={remote.reload} />
       ) : plans.success ? (
         plans.data.length ? (
           plans.data.map((plan) => (
-            <div key={plan.id} data-panel className="rounded-lg border border-border p-5">
+            <div key={plan.id} data-panel className="rounded-xl border border-border bg-card p-5">
               <h3 className="font-semibold">{plan.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">
                 {plan.items.filter((item) => item.status === "completed").length} of{" "}

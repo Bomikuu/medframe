@@ -53,7 +53,7 @@ export function AnnotationPins({
     if (!mesh?.visible || pin.anchor.asset !== asset) return null;
     const position = mesh.localToWorld(new Vector3(...pin.anchor.point));
     return (
-      <Html key={pin.key} position={position} center zIndexRange={[45, 30]}>
+      <Html key={pin.key} position={position} center zIndexRange={[10, 1]}>
         <Popover
           open={interaction ? interaction.activeKey === pin.key : undefined}
           onOpenChange={(open) => interaction?.onOpen(open ? pin.key : null)}

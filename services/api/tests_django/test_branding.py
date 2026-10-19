@@ -4,10 +4,32 @@ from tests_django.test_boundaries import ClinicalFixture
 
 
 class AppearanceTests(ClinicalFixture):
-    def test_default_is_white_light_even_with_dark_system(self):
+    def test_default_is_refined_light_even_with_dark_system(self):
         appearance = services.read_appearance(self.doctor, self.organization.id)
         self.assertEqual(appearance["personal"]["settings"]["mode"], "light")
-        self.assertEqual(appearance["organization"]["settings"]["primary"], "#0F2D4A")
+        self.assertEqual(appearance["organization"]["settings"]["primary"], "#102A43")
+        self.assertEqual(appearance["organization"]["settings"]["font"], "medframe")
+
+    def test_reconstruction_fonts_preserve_legacy_choices(self):
+        for font in ["medframe", "jakarta", "manrope", "inter", "source_sans_3", "noto_sans"]:
+            with self.subTest(font=font):
+                self.assertEqual(
+                    services.validate(services.ThemeSettings, {"font": font})["font"], font
+                )
+
+    def test_workspace_returns_configured_clinic_timezone(self):
+        from django.test import RequestFactory
+
+        from api_graphql.schema import Query
+
+        request = RequestFactory().post("/graphql")
+        request.user = self.doctor
+        self.organization.timezone = "Asia/Tokyo"
+        self.organization.save(update_fields=["timezone"])
+        from types import SimpleNamespace
+
+        workspace = Query().clinic_workspace(SimpleNamespace(context=request), self.organization.id)
+        self.assertEqual(workspace.organization.timezone, "Asia/Tokyo")
 
     def test_clinician_cannot_change_organization_branding(self):
         with self.assertRaises(DomainError):

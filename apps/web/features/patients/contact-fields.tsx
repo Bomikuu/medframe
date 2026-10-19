@@ -45,13 +45,13 @@ export function ContactFields() {
     <div className="grid gap-9">
       <fieldset className="grid gap-5 border-t border-border pt-7">
         <legend className="pr-3 text-lg font-semibold">Contact information</legend>
-        <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
+        <div className="grid gap-5 @[440px]:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)]">
           <ContactField name="email" label="Email address" type="email" maxLength={254} />
           <ContactField name="phone" label="Phone number" type="tel" maxLength={40} />
         </div>
         <FormField id="address" label="Address" error={errors.address?.message}>
           <Textarea
-            className="resize-none"
+            className="resize-y"
             id="address"
             maxLength={500}
             aria-invalid={!!errors.address}
@@ -64,7 +64,7 @@ export function ContactFields() {
         <legend className="pr-3 text-lg font-semibold">Emergency contact</legend>
         <p className="text-sm text-muted-foreground">Optional contact to use in an emergency.</p>
         <ContactField name="emergencyContactName" label="Contact full name" />
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-5 @[440px]:grid-cols-2">
           <ContactField name="emergencyContactRelationship" label="Relationship to patient" />
           <ContactField
             name="emergencyContactPhone"
@@ -80,7 +80,7 @@ export function ContactFields() {
           Add when applicable. A contact entry does not grant access to medical records.
         </p>
         <ContactField name="guardianName" label="Guardian full name" />
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-5 @[440px]:grid-cols-2">
           <ContactField name="guardianRelationship" label="Guardian relationship" />
           <ContactField name="guardianPhone" label="Guardian phone" type="tel" maxLength={40} />
         </div>

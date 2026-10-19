@@ -1,5 +1,6 @@
 "use client";
 
+import { Clock3, Stethoscope } from "lucide-react";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { StatusBadge } from "@/components/application/status-badge";
 import { MetricCard } from "@/components/application/metric-card";
@@ -58,8 +59,12 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
         updated={parsed.success ? parsed.data.updated_at : undefined}
       />
       {can("queues.manage") && (
-        <EntrySheet title="Check in a walk-in">
-          <div className="pt-5">
+        <EntrySheet
+          title="Check in a walk-in"
+          triggerVariant="default"
+          description="Record arrival and assign a provider. Clinical notes are documented in the consultation."
+        >
+          <div className="min-w-0">
             <BookingForm setup={setup} reload={remote.reload} walkIn />
           </div>
         </EntrySheet>
@@ -86,8 +91,20 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
           <>
             <RemoteNotice error={remote.error} retry={remote.reload} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <MetricCard label="Waiting" value={parsed.data.waiting} />
-              <MetricCard label="In consultation" value={parsed.data.in_service} />
+              <MetricCard
+                label="Waiting"
+                value={parsed.data.waiting}
+                icon={<Clock3 />}
+                tone="amber"
+                description="Checked in and awaiting care"
+              />
+              <MetricCard
+                label="In consultation"
+                value={parsed.data.in_service}
+                icon={<Stethoscope />}
+                tone="teal"
+                description="Patients currently receiving care"
+              />
             </div>
             {!parsed.data.items.length && (
               <p className="py-6 text-sm text-muted-foreground">

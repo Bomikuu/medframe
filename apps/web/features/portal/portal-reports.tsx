@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { PortalReportsDocument, SubmitPatientReportDocument } from "@/lib/graphql/portal/generated";
@@ -10,12 +11,13 @@ import { FormSelect } from "@/features/patients/form-controls";
 import { FormField } from "@/components/form-field";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { LoadState, failureText, timeLabel } from "@/features/patients/feedback";
+import { LoadState, failureText } from "@/features/patients/feedback";
 import { recordPage } from "@/features/records/schema";
 import { PageControls } from "@/features/records/record-filters";
 import { usePortal } from "./portal-provider";
 import { reportSchema } from "./schema";
 export function PortalReports() {
+  const timeLabel = useClinicTime();
   const { linkId } = usePortal();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(PortalReportsDocument, { linkId, after }, { client: getPortalClient });
@@ -38,7 +40,7 @@ export function PortalReports() {
       </p>
       <form
         noValidate
-        className="grid max-w-2xl gap-4 rounded-lg border border-border p-5"
+        className="grid max-w-2xl gap-4 rounded-xl border border-border bg-card p-5"
         onSubmit={form.handleSubmit(async (values) => {
           const current = capture();
           setError(null);

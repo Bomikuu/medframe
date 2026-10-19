@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,7 +17,7 @@ import { useUnsavedChanges } from "@/features/workspace/safety-provider";
 import { FormField } from "@/components/form-field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LoadState, failureText, timeLabel } from "@/features/patients/feedback";
+import { LoadState, failureText } from "@/features/patients/feedback";
 import { recordPage } from "@/features/records/schema";
 import { PageControls } from "@/features/records/record-filters";
 
@@ -177,6 +178,7 @@ const revisionSchema = z.object({
   }),
 });
 export function PlanHistory({ patientId, planId }: { patientId: string; planId: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId } = useWorkspace();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(PlanRevisionsDocument, { organizationId, patientId, planId, after });
@@ -245,7 +247,7 @@ export function AddPlanItem({
       <summary className="min-h-11 font-medium">Add proposed treatment</summary>
       <form
         noValidate
-        className="grid gap-4 sm:grid-cols-[1fr_120px_auto]"
+        className="grid gap-4 @[640px]:grid-cols-[minmax(0,1fr)_120px_auto]"
         onSubmit={form.handleSubmit(async (values) => {
           const current = capture();
           setError(null);

@@ -1,5 +1,7 @@
+"use client";
+
+import { useClinicTime } from "@/components/application/clinical-locale";
 import type { ClinicalDetailsFragment } from "@/lib/graphql/generated";
-import { timeLabel } from "./feedback";
 
 export function reviewLabel(state: string, kind: "allergy" | "medication") {
   if (state === "none_reported")
@@ -10,6 +12,7 @@ export function reviewLabel(state: string, kind: "allergy" | "medication") {
 }
 
 export function ClinicalSummary({ revision }: { revision: ClinicalDetailsFragment | null }) {
+  const timeLabel = useClinicTime();
   return (
     <div className="grid gap-6 text-sm leading-6">
       {revision && (

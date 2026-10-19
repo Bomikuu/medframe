@@ -14,6 +14,8 @@ import {
   Stethoscope,
   Users,
   FileText,
+  HeartPulse,
+  ShieldCheck,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -56,8 +58,10 @@ import { useSafety } from "./safety-provider";
 import { useTheme } from "@/features/branding/theme-provider";
 import { SecureImage } from "@/features/documents/secure-image";
 import { Notifications } from "./notifications";
+import { ClinicalLocaleProvider } from "@/components/application/clinical-locale";
 
 export function ClinicShell({ children }: { children: ReactNode }) {
+  const { workspace } = useWorkspace();
   const { personal, theme } = useTheme();
   const [open, setOpen] = useState<boolean | undefined>();
   return (
@@ -71,13 +75,15 @@ export function ClinicShell({ children }: { children: ReactNode }) {
       open={open ?? !personal.sidebar_collapsed}
       onOpenChange={setOpen}
     >
-      <ClinicFrame>{children}</ClinicFrame>
+      <ClinicalLocaleProvider timezone={workspace.organization.timezone}>
+        <ClinicFrame>{children}</ClinicFrame>
+      </ClinicalLocaleProvider>
     </SidebarProvider>
   );
 }
 
 function ClinicFrame({ children }: { children: ReactNode }) {
-  const { overview, organizationId, switchOrganization, href, can } = useWorkspace();
+  const { overview, organizationId, switchOrganization, href, can, workspace } = useWorkspace();
   const { guard } = useSafety();
   const { setOpenMobile } = useSidebar();
   const { theme, personal } = useTheme();
@@ -158,28 +164,32 @@ function ClinicFrame({ children }: { children: ReactNode }) {
   return (
     <>
       <Sidebar collapsible="icon" className="border-r border-border">
-        <SidebarHeader className="gap-6 px-4 py-6 group-data-[collapsible=icon]:px-2">
+        <SidebarHeader className="gap-6 px-4 pt-7 pb-4 group-data-[collapsible=icon]:px-2">
           <div className="px-2 group-data-[collapsible=icon]:hidden">
-            {theme.logo_id ? (
-              <SecureImage id={theme.logo_id} alt="Clinic logo" className="h-10 max-w-44" />
-            ) : (
-              <Brand />
-            )}
+            <Brand />
           </div>
+          <span
+            aria-label="Medframe"
+            className="mx-auto hidden size-10 place-items-center rounded-xl bg-primary text-primary-foreground group-data-[collapsible=icon]:grid"
+          >
+            <HeartPulse className="size-6" />
+          </span>
           <div className="group-data-[collapsible=icon]:hidden">
             <OrganizationSwitcher
               organizations={overview.myOrganizations}
               value={organizationId}
               onChange={switchOrganization}
+              branch={workspace.branches.map((branch) => branch.name).join(", ")}
+              logoId={theme.logo_id ?? undefined}
             />
           </div>
         </SidebarHeader>
-        <SidebarContent className="gap-3 px-2">
+        <SidebarContent className="gap-4 px-2 pt-2">
           {groups.map(
             (group) =>
               group.links.some((link) => link.show) && (
                 <SidebarGroup key={group.label} className="py-1">
-                  <SidebarGroupLabel className="mb-1 px-2 text-[11px] font-semibold tracking-wider uppercase">
+                  <SidebarGroupLabel className="mb-2 px-3 text-xs font-semibold text-muted-foreground">
                     {group.label}
                   </SidebarGroupLabel>
                   <SidebarMenu>
@@ -191,7 +201,7 @@ function ClinicFrame({ children }: { children: ReactNode }) {
                             asChild
                             isActive={current?.path === path}
                             tooltip={label}
-                            className="gap-3 rounded-lg px-3 text-sm data-[active=true]:font-semibold"
+                            className="gap-3 rounded-lg px-3 text-sm text-muted-foreground hover:text-foreground data-[active=true]:font-semibold data-[active=true]:text-teal-ink"
                           >
                             <Link
                               href={href(path)}
@@ -210,16 +220,24 @@ function ClinicFrame({ children }: { children: ReactNode }) {
           )}
         </SidebarContent>
         <SidebarFooter className="border-t border-border p-5 group-data-[collapsible=icon]:hidden">
-          <p className="text-xs leading-5 text-muted-foreground">The Foundation of Modern Care.</p>
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <ShieldCheck className="size-4 text-teal-ink" />
+            Clinical workspace
+          </div>
+          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+            The Foundation of Modern Care.
+          </p>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="min-w-0 bg-background">
-        <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between gap-2 border-b border-border bg-card px-4 sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-20 flex min-h-[72px] items-center justify-between gap-2 border-b border-border bg-card px-4 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <SidebarTrigger className="size-11" />
             <Breadcrumb>
               <BreadcrumbList className="flex-nowrap">
-                <BreadcrumbItem className="hidden sm:block">Workspace</BreadcrumbItem>
+                <BreadcrumbItem className="hidden max-w-48 truncate text-xs sm:block">
+                  {workspace.organization.name}
+                </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden sm:block" />
                 <BreadcrumbItem>
                   <BreadcrumbPage className="truncate">{current?.label ?? "Clinic"}</BreadcrumbPage>
@@ -227,14 +245,14 @@ function ClinicFrame({ children }: { children: ReactNode }) {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center gap-2">
             <Notifications />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="ghost"
-                  className="gap-2 px-1.5"
+                  className="gap-2 rounded-xl border-l border-border px-2 sm:pl-4"
                   aria-label="Account menu"
                 >
                   {personal.avatar_id ? (
@@ -247,7 +265,7 @@ function ClinicFrame({ children }: { children: ReactNode }) {
                   ) : (
                     <PatientAvatar name={overview.currentUser.displayName} className="size-8" />
                   )}
-                  <span className="hidden max-w-40 truncate md:block">
+                  <span className="hidden max-w-28 truncate text-sm font-medium lg:block">
                     {overview.currentUser.displayName}
                   </span>
                   <ChevronDown className="size-3.5" />

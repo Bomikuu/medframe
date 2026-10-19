@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 
 import { HistoryRecords } from "@/features/records/history-records";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ClinicalRevisionsDocument, PatientHistoryDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "./use-remote";
-import { PageHeading, LoadState, timeLabel } from "./feedback";
+import { PageHeading, LoadState } from "./feedback";
 import { ClinicalSummary } from "./clinical-summary";
 
 const eventLabels: Record<string, string> = {
@@ -23,6 +24,7 @@ const eventLabels: Record<string, string> = {
 };
 
 export function PatientTimeline({ patientId }: { patientId: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId, can, href } = useWorkspace();
   const [cursors, setCursors] = useState<(string | null)[]>([null]);
   const { data, error, reload, loading } = useRemote(PatientHistoryDocument, {
@@ -123,7 +125,7 @@ function ClinicalRevisions({ patientId }: { patientId: string }) {
         <p className="text-sm text-muted-foreground">No medical history has been saved.</p>
       )}
       {page.items.map((revision) => (
-        <details key={revision.id} className="rounded-lg border border-border bg-card p-5">
+        <details key={revision.id} className="rounded-xl border border-border bg-card p-5">
           <summary className="text-sm font-medium text-primary hover:underline">
             Version {revision.version} · {revision.authorName}
           </summary>

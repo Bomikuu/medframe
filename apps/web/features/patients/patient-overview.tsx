@@ -3,6 +3,14 @@
 import { ButtonLink } from "@/components/ui/button-link";
 
 import Link from "next/link";
+import { Stethoscope, MoreHorizontal, CalendarDays, FileText, UserRound } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeftIcon, PencilSimpleIcon, ClockCounterClockwiseIcon } from "@/components/icons";
 import { PatientAvatar } from "@/components/application/patient-avatar";
@@ -13,7 +21,7 @@ import { PatientDentalChart } from "@/features/dental/patient-dental-chart";
 import { PatientRecordDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "./use-remote";
-import { PageHeading, LoadState, RemoteNotice, dateLabel } from "./feedback";
+import { LoadState, RemoteNotice, dateLabel } from "./feedback";
 import { PatientForm } from "./patient-form";
 import { ClinicalHistorySection } from "./clinical-history-form";
 import { PatientAccess } from "./patient-access";
@@ -97,7 +105,7 @@ export function PatientOverview({
     ],
   ];
   return (
-    <div className="grid gap-8 wrap-anywhere">
+    <div className="grid min-w-0 gap-6 wrap-anywhere">
       <RemoteNotice error={error} retry={reload} />
       <div>
         <Link
@@ -107,45 +115,82 @@ export function PatientOverview({
           <ArrowLeftIcon />
           All patients
         </Link>
-        <div className="mb-4 flex items-center gap-4">
-          <PatientAvatar name={patient.fullName} className="size-16 text-lg" />
-          <div>
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              Patient record
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground">{patient.reference}</p>
-          </div>
-        </div>
-        <PageHeading
-          title={patient.fullName}
-          description={`${patient.reference} · ${dateLabel(patient.dateOfBirth)}`}
+        <section
+          aria-label="Patient identity"
+          data-panel
+          className="rounded-xl border border-border bg-card p-5 sm:p-6"
         >
-          <div className="flex flex-wrap gap-2">
-            {can("encounters.write") && (
-              <ButtonLink href={`${href("/clinic/consultations/new")}&patient=${patientId}`}>
-                Start consultation
-              </ButtonLink>
-            )}
-            {clinical && (
-              <ButtonLink
-                variant="outline"
-                href={`${href(`/clinic/patients/${patientId}`)}&tab=documents`}
-              >
-                Documents
-              </ButtonLink>
-            )}
-            {can("patients.demographics.write") && (
-              <ButtonLink variant="outline" href={href(`/clinic/patients/${patientId}/edit`)}>
-                <PencilSimpleIcon />
-                Edit details
-              </ButtonLink>
-            )}
-            <ButtonLink variant="outline" href={href(`/clinic/patients/${patientId}/history`)}>
-              <ClockCounterClockwiseIcon />
-              History
-            </ButtonLink>
+          <div className="flex min-w-0 flex-wrap items-start justify-between gap-5">
+            <div className="flex min-w-0 flex-1 basis-72 items-center gap-4">
+              <PatientAvatar
+                name={patient.fullName}
+                className="size-16 border-0 text-xl sm:size-20"
+              />
+              <div className="min-w-0">
+                <h1 className="font-heading text-2xl font-bold wrap-anywhere sm:text-[30px]">
+                  {patient.fullName}
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground">{patient.reference}</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {can("encounters.write") && (
+                <ButtonLink href={`${href("/clinic/consultations/new")}&patient=${patientId}`}>
+                  <Stethoscope />
+                  Start consultation
+                </ButtonLink>
+              )}
+              {can("patients.demographics.write") && (
+                <ButtonLink variant="outline" href={href(`/clinic/patients/${patientId}/edit`)}>
+                  <PencilSimpleIcon />
+                  Edit details
+                </ButtonLink>
+              )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label="More patient actions"
+                  >
+                    <MoreHorizontal />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {clinical && (
+                    <DropdownMenuItem asChild>
+                      <Link href={`${href(`/clinic/patients/${patientId}`)}&tab=documents`}>
+                        <FileText />
+                        Documents
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem asChild>
+                    <Link href={href(`/clinic/patients/${patientId}/history`)}>
+                      <ClockCounterClockwiseIcon />
+                      History
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </PageHeading>
+          <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-4 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <CalendarDays className="size-4 text-teal-ink" />
+              Born {dateLabel(patient.dateOfBirth)}
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <UserRound className="size-4 text-teal-ink" />
+              {patient.sex === "not_recorded" ? "Sex not recorded" : patient.sex}
+            </span>
+            <span>
+              {workspace.branches.find((branch) => branch.id === patient.branchId)?.name ??
+                "Authorized branch"}
+            </span>
+          </div>
+        </section>
         {params.get("saved") === "details" && (
           <p role="status" className="text-sm text-primary">
             Patient details saved.
@@ -153,7 +198,7 @@ export function PatientOverview({
         )}
       </div>
       <Tabs value={String(active)} onValueChange={changeTab} className="min-w-0 gap-6">
-        <div className="-mx-1 overflow-x-auto border-b border-border px-1">
+        <div className="overflow-x-auto rounded-xl border border-border bg-card p-1">
           <TabsList variant="line" className="h-auto min-w-max justify-start gap-1">
             {sections.map(([id, label]) => (
               <TabsTrigger key={String(id)} value={String(id)}>
@@ -171,7 +216,7 @@ export function PatientOverview({
               <Card
                 key={String(heading)}
                 data-panel
-                className="rounded-lg border border-border py-0 ring-0"
+                className="rounded-xl border border-border py-0 ring-0"
               >
                 <CardHeader className="border-b border-border p-5">
                   <CardTitle>
@@ -185,7 +230,7 @@ export function PatientOverview({
                         key={label}
                         className={label === "Address" ? "sm:col-span-2" : undefined}
                       >
-                        <dt className="text-xs text-muted-foreground">{label}</dt>
+                        <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
                         <dd className="mt-1 text-sm leading-6 wrap-anywhere whitespace-pre-wrap">
                           {value || "Not recorded"}
                         </dd>

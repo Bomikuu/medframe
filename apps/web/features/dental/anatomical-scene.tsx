@@ -273,7 +273,12 @@ export function AnatomicalScene({
         labelPosition &&
         (anatomyOnly || !toothPresentation(findings, selected).missing) &&
         (reference || isolate || jaw === "both" || selectedMesh?.userData.jaw === jaw) && (
-          <Html position={labelPosition} center style={{ pointerEvents: "none" }}>
+          <Html
+            position={labelPosition}
+            center
+            zIndexRange={[8, 0]}
+            style={{ pointerEvents: "none" }}
+          >
             <span className="rounded-md border border-border bg-card px-2 py-1 text-xs font-semibold whitespace-nowrap text-foreground shadow-sm">
               {reference ? "Reference 26" : selected}
             </span>

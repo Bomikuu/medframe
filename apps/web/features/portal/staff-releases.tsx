@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -21,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { LoadState, failureText, timeLabel } from "@/features/patients/feedback";
+import { LoadState, failureText } from "@/features/patients/feedback";
 import { recordPage, sourceSchema } from "@/features/records/schema";
 import { PageControls } from "@/features/records/record-filters";
 import { releaseRowSchema, releasePayloadSchema } from "./schema";
@@ -48,6 +49,7 @@ const empty = {
 };
 const previewSchema = z.object({ digest: z.string(), payload: releasePayloadSchema });
 export function StaffReleases({ patientId }: { patientId: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId, can } = useWorkspace();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(PatientReleasesDocument, { organizationId, patientId, after });
@@ -76,7 +78,7 @@ export function StaffReleases({ patientId }: { patientId: string }) {
             <p className="text-sm text-muted-foreground">No clinical records have been released.</p>
           )}
           {parsed.data.items.map((item) => (
-            <details key={item.id} className="rounded-lg border border-border p-5">
+            <details key={item.id} className="rounded-xl border border-border bg-card p-5">
               <summary className="min-h-11 font-medium">
                 Release {item.sequence} · {item.state} · {timeLabel(item.created_at)}
               </summary>
@@ -153,6 +155,7 @@ export function StaffReleases({ patientId }: { patientId: string }) {
   );
 }
 function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublished: () => void }) {
+  const timeLabel = useClinicTime();
   const { organizationId } = useWorkspace();
   const { confirm } = useSafety();
   const capture = useRequestScope();
@@ -200,7 +203,7 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
   }
   return (
     <details
-      className="rounded-lg border border-border p-5"
+      className="rounded-xl border border-border bg-card p-5"
       onToggle={(event) => {
         if (event.currentTarget.open) {
           sources.reload();

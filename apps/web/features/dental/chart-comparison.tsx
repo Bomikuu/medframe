@@ -1,10 +1,11 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import { z } from "zod";
 import { ChartRevisionsDocument, DentalComparisonDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
-import { LoadState, timeLabel } from "@/features/patients/feedback";
+import { LoadState } from "@/features/patients/feedback";
 import { FormSelect } from "@/features/patients/form-controls";
 import { PageControls } from "@/features/records/record-filters";
 import { recordPage } from "@/features/records/schema";
@@ -18,6 +19,7 @@ const revisionSchema = z.object({
   author_name: z.string(),
 });
 export function ChartComparison({ patientId }: { patientId: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId } = useWorkspace();
   const [after, setAfter] = useState<string>();
   const [left, setLeft] = useState("");

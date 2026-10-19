@@ -116,13 +116,14 @@ export function PatientDirectory() {
         {can("patients.register") && (
           <EntrySheet
             title="Register patient"
+            triggerVariant="default"
             description="Create a patient record. Clinical history is reviewed separately."
           >
             <PatientForm embedded />
           </EntrySheet>
         )}
       </PageHeading>
-      <div className="mb-6 flex flex-wrap items-end gap-3 rounded-lg border border-border bg-card p-4">
+      <div className="mb-6 flex min-w-0 flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
         <form
           role="search"
           className="flex min-w-0 flex-1 basis-64 items-end gap-2"
@@ -185,10 +186,12 @@ export function PatientDirectory() {
       ) : (
         <section aria-label="Patient results" aria-busy={remote.loading}>
           <RemoteNotice error={remote.error} retry={remote.reload} />
-          <p role="status" className="mb-4 text-sm text-muted-foreground">
-            {page.totalCount.toLocaleString("en-PH")} {query ? "matching" : "available"} patients
-            {remote.loading ? " · Updating…" : ""}
-          </p>
+          {view !== "table" && (
+            <p role="status" className="mb-4 text-sm text-muted-foreground">
+              {page.totalCount.toLocaleString("en-PH")} {query ? "matching" : "available"} patients
+              {remote.loading ? " · Updating…" : ""}
+            </p>
+          )}
           {!page.items.length ? (
             <EmptyState
               title={query ? "No matching patients" : "No patients available"}
@@ -213,7 +216,12 @@ export function PatientDirectory() {
               )}
             </EmptyState>
           ) : view === "table" ? (
-            <DataTable columns={columns} data={page.items} caption="Authorized patient records" />
+            <DataTable
+              columns={columns}
+              data={page.items}
+              caption="Authorized patient records"
+              summary={`${page.totalCount.toLocaleString("en-PH")} ${query ? "matching" : "available"} patients${remote.loading ? " · Updating…" : ""}`}
+            />
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {page.items.map((patient) => (

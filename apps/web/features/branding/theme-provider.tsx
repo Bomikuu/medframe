@@ -122,11 +122,22 @@ export function useAppearanceTokens(
       "--radius": { square: "0px", subtle: "8px", rounded: "12px" }[theme.radius],
       "--sidebar-width": `${theme.sidebar_width}px`,
       "--app-font": {
+        medframe: "var(--font-jakarta), Arial, sans-serif",
+        manrope: "var(--font-manrope), Arial, sans-serif",
+        jakarta: "var(--font-jakarta), Arial, sans-serif",
         inter: '"Inter Variable", Arial, sans-serif',
         source_sans_3: '"Source Sans 3 Variable", Arial, sans-serif',
         noto_sans: '"Noto Sans Variable", Arial, sans-serif',
       }[theme.font],
-      "--app-font-size": theme.type_scale === "large" ? "16px" : "14px",
+      "--app-heading-font": {
+        medframe: "var(--font-manrope), Arial, sans-serif",
+        manrope: "var(--font-manrope), Arial, sans-serif",
+        jakarta: "var(--font-jakarta), Arial, sans-serif",
+        inter: '"Inter Variable", Arial, sans-serif',
+        source_sans_3: '"Source Sans 3 Variable", Arial, sans-serif',
+        noto_sans: '"Noto Sans Variable", Arial, sans-serif',
+      }[theme.font],
+      "--app-font-size": theme.type_scale === "large" ? "16px" : "15px",
       "--heading-scale": { small: "0.9", medium: "1", large: "1.1" }[theme.heading_scale],
     };
     Object.entries(variables).forEach(([key, value]) => root.style.setProperty(key, value));

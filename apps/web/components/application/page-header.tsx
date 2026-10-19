@@ -18,12 +18,15 @@ export function PageHeader({
 }) {
   const Heading = level === 1 ? "h1" : "h2";
   return (
-    <header className={cn("mb-6 flex flex-wrap items-start justify-between gap-4", className)}>
+    <header
+      data-page-header
+      className={cn("mb-7 flex flex-wrap items-start justify-between gap-x-6 gap-y-4", className)}
+    >
       <div className="min-w-0 flex-1 basis-56">
         <Heading
           className={cn(
             "font-semibold tracking-tight wrap-anywhere",
-            level === 1 ? "text-2xl sm:text-[1.75rem]" : "text-xl",
+            level === 1 ? "text-[1.75rem] sm:text-[2rem]" : "text-xl",
           )}
         >
           {title}

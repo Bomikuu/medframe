@@ -1,4 +1,5 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 import { StatusBadge } from "@/components/application/status-badge";
 import Link from "next/link";
 import { useRecordAuthors } from "@/features/records/use-record-authors";
@@ -6,7 +7,7 @@ import { useState } from "react";
 import { ConsultationRecordsDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
-import { LoadState, timeLabel } from "@/features/patients/feedback";
+import { LoadState } from "@/features/patients/feedback";
 import { consultationRow, recordPage } from "@/features/records/schema";
 import {
   RecordFilterForm,
@@ -15,6 +16,7 @@ import {
 } from "@/features/records/record-filters";
 
 export function FilteredConsultations({ patientId }: { patientId?: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId, href } = useWorkspace();
   const [filters, setFilters] = useState<RecordFilters>({});
   const [after, setAfter] = useState<string>();
@@ -51,7 +53,7 @@ export function FilteredConsultations({ patientId }: { patientId?: string }) {
               <li key={item.id}>
                 <Link
                   href={href(`/clinic/consultations/${item.id}`)}
-                  className="flex flex-wrap justify-between gap-3 rounded-lg border border-border bg-card p-5 hover:bg-muted/40"
+                  className="flex flex-wrap justify-between gap-3 rounded-xl border border-border bg-card p-5 hover:bg-surface-hover"
                 >
                   <div>
                     <p className="font-medium">{item.patient_name}</p>

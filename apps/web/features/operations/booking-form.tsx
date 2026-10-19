@@ -1,9 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEntrySheetActions } from "@/components/application/entry-sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { CalendarDays, Clock3, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
@@ -21,7 +24,7 @@ const valuesSchema = z.object({
   patient_id: z.string().min(1, "Choose a patient."),
   provider_id: z.string().min(1, "Choose a provider."),
   resource_id: z.string(),
-  date: z.string().min(1),
+  date: z.string().min(1, "Choose a visit date."),
   duration: z
     .string()
     .refine(
@@ -48,6 +51,7 @@ export function BookingForm({
 }) {
   const { organizationId } = useWorkspace();
   const action = useOperationsAction();
+  const sheet = useEntrySheetActions();
   const defaults: Values = {
     patient_id: appointment?.patient_id ?? setup.patients[0]?.id ?? "",
     provider_id: appointment?.provider_id ?? setup.providers[0]?.id ?? "",
@@ -55,7 +59,10 @@ export function BookingForm({
     date: localDate(setup.timezone),
     duration: appointment
       ? String((Date.parse(appointment.end) - Date.parse(appointment.start)) / 60000)
-      : String(setup.schedules.find(row => row.active && row.provider_id === setup.providers[0]?.id)?.duration ?? 30),
+      : String(
+          setup.schedules.find((row) => row.active && row.provider_id === setup.providers[0]?.id)
+            ?.duration ?? 30,
+        ),
     reason: "",
     type: "routine",
   };
@@ -66,7 +73,7 @@ export function BookingForm({
     form.formState.isDirty,
     discard,
   );
-  const watched = form.watch();
+  const watched = useWatch({ control: form.control, defaultValue: defaults });
   const [selected, setSelected] = useState("");
   const [slotError, setSlotError] = useState("");
   const duration = Number(watched.duration);
@@ -126,26 +133,31 @@ export function BookingForm({
     if (success) {
       form.reset(defaults);
       setSelected("");
-      close?.();
+      if (close) close();
+      else sheet?.complete();
     }
   });
+  const missingDetails =
+    !watched.patient_id ||
+    !watched.provider_id ||
+    !Number.isFinite(duration) ||
+    duration < 5 ||
+    duration > 240 ||
+    duration % 5 !== 0;
   return (
-    <form noValidate onSubmit={save} className="grid gap-5">
+    <form noValidate onSubmit={save} className="@container grid min-w-0 gap-6">
       <OperationNotice message={action.message} error={action.error} />
-      <fieldset disabled={action.busy} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <legend className="mb-3 font-medium">
-          {appointment
-            ? `Reschedule ${appointment.patient ?? "appointment"}`
-            : walkIn
-              ? "Walk-in arrival"
-              : "Visit details"}
-        </legend>
-        {!appointment && (
-          <>
+      {!appointment && (
+        <fieldset disabled={action.busy} className="grid min-w-0 gap-4 border-b border-border pb-6">
+          <legend className="mb-4 flex items-center gap-2 font-heading text-base font-semibold">
+            <UserRound className="size-4 text-teal-ink" />
+            Patient and provider
+          </legend>
+          <div className="grid min-w-0 gap-4 @[480px]:grid-cols-2">
             <FormSelect
               id={`booking-patient-${walkIn}`}
               label="Patient"
-              value={watched.patient_id}
+              value={watched.patient_id ?? ""}
               onChange={(value) => form.setValue("patient_id", value, { shouldDirty: true })}
               options={setup.patients.map((row) => ({
                 value: row.id,
@@ -156,16 +168,46 @@ export function BookingForm({
             <FormSelect
               id={`booking-provider-${walkIn}`}
               label="Provider"
-              value={watched.provider_id}
-              onChange={(value) => form.setValue("provider_id", value, { shouldDirty: true })}
+              value={watched.provider_id ?? ""}
+              onChange={(value) => {
+                form.setValue("provider_id", value, { shouldDirty: true });
+                setSelected("");
+              }}
               options={setup.providers.map((row) => ({ value: row.id, label: row.name }))}
               error={form.formState.errors.provider_id?.message}
             />
+          </div>
+        </fieldset>
+      )}
+      <fieldset disabled={action.busy} className="grid min-w-0 gap-4 border-b border-border pb-6">
+        <legend className="mb-4 flex items-center gap-2 font-heading text-base font-semibold">
+          <Clock3 className="size-4 text-teal-ink" />
+          Visit details
+        </legend>
+        <div className="grid min-w-0 gap-4 @[480px]:grid-cols-2">
+          {!walkIn && !appointment && (
+            <FormSelect
+              id="booking-type"
+              label="Visit type"
+              value={watched.type ?? "routine"}
+              onChange={(value) =>
+                form.setValue("type", value as Values["type"], { shouldDirty: true })
+              }
+              options={[
+                { value: "routine", label: "Routine visit" },
+                { value: "follow_up", label: "Follow-up visit" },
+              ]}
+            />
+          )}
+          {!appointment && (
             <FormSelect
               id={`booking-resource-${walkIn}`}
               label="Room or chair"
-              value={watched.resource_id}
-              onChange={(value) => form.setValue("resource_id", value, { shouldDirty: true })}
+              value={watched.resource_id ?? "none"}
+              onChange={(value) => {
+                form.setValue("resource_id", value, { shouldDirty: true });
+                setSelected("");
+              }}
               options={[
                 { value: "none", label: "No resource needed" },
                 ...setup.resources
@@ -173,106 +215,123 @@ export function BookingForm({
                   .map((row) => ({ value: row.id, label: row.name })),
               ]}
             />
-          </>
-        )}
-        {!walkIn && (
+          )}
           <FormField
-            id={`booking-date-${appointment?.id ?? "new"}`}
-            label={`Visit date (${setup.timezone})`}
+            id={`booking-duration-${appointment?.id ?? walkIn}`}
+            label="Duration (minutes)"
+            error={form.formState.errors.duration?.message}
+            hint="5–240 minutes, in five-minute increments."
           >
             <Input
-              id={`booking-date-${appointment?.id ?? "new"}`}
-              type="date"
-              {...form.register("date")}
+              id={`booking-duration-${appointment?.id ?? walkIn}`}
+              type="number"
+              min={5}
+              max={240}
+              step={5}
+              aria-invalid={!!form.formState.errors.duration}
+              aria-describedby={`booking-duration-${appointment?.id ?? walkIn}-help`}
+              {...form.register("duration", { onChange: () => setSelected("") })}
             />
           </FormField>
-        )}
-        <FormField
-          id={`booking-duration-${appointment?.id ?? walkIn}`}
-          label="Duration in minutes"
-          error={form.formState.errors.duration?.message}
-        >
-          <Input
-            id={`booking-duration-${appointment?.id ?? walkIn}`}
-            type="number"
-            min={5}
-            max={240}
-            step={5}
-            {...form.register("duration")}
-            aria-invalid={!!form.formState.errors.duration}
-          />
-        </FormField>
-        {!walkIn && !appointment && (
-          <FormSelect
-            id="booking-type"
-            label="Visit type"
-            value={watched.type}
-            onChange={(value) =>
-              form.setValue("type", value as Values["type"], { shouldDirty: true })
-            }
-            options={[
-              { value: "routine", label: "Routine visit" },
-              { value: "follow_up", label: "Follow-up visit" },
-            ]}
-          />
-        )}
+        </div>
       </fieldset>
       {!walkIn && (
         <>
-          <FormSelect
-            id={`booking-slot-${appointment?.id ?? "new"}`}
-            label="Available time"
-            value={chosen}
-            onChange={(value) => {
-              setSelected(value);
-              setSlotError("");
-            }}
-            options={slots.map((row) => ({
-              value: row.start,
-              label: clock(row.start, setup.timezone),
-            }))}
-            error={slotError}
-          />
-          {remote.loading ? (
-            <p role="status" className="text-sm text-muted-foreground">
-              Checking available times…
+          <fieldset
+            disabled={action.busy}
+            className="grid min-w-0 gap-4 border-b border-border pb-6"
+          >
+            <legend className="mb-3 flex items-center gap-2 font-heading text-base font-semibold">
+              <CalendarDays className="size-4 text-teal-ink" />
+              Schedule
+            </legend>
+            <p className="text-xs text-muted-foreground">
+              All times are shown in {setup.timezone}.
             </p>
-          ) : remote.error ? (
-            <p role="alert" className="text-sm text-destructive">
-              {failureText(remote.error)}
-            </p>
-          ) : (
-            !slots.length && (
-              <p className="text-sm text-muted-foreground">
+            <div className="grid min-w-0 gap-4 @[480px]:grid-cols-2">
+              <FormField
+                id={`booking-date-${appointment?.id ?? "new"}`}
+                label="Visit date"
+                error={form.formState.errors.date?.message}
+              >
+                <Input
+                  id={`booking-date-${appointment?.id ?? "new"}`}
+                  type="date"
+                  aria-invalid={!!form.formState.errors.date}
+                  {...form.register("date", { onChange: () => setSelected("") })}
+                />
+              </FormField>
+              <FormSelect
+                id={`booking-slot-${appointment?.id ?? "new"}`}
+                label="Available time"
+                value={chosen}
+                disabled={!slots.length || remote.loading}
+                onChange={(value) => {
+                  setSelected(value);
+                  setSlotError("");
+                }}
+                options={slots.map((row) => ({
+                  value: row.start,
+                  label: clock(row.start, setup.timezone),
+                }))}
+                error={slotError}
+              />
+            </div>
+            {remote.loading ? (
+              <p role="status" className="text-sm text-muted-foreground">
+                Checking available times…
+              </p>
+            ) : remote.error ? (
+              <p role="alert" className="text-sm text-destructive">
+                {failureText(remote.error)}
+              </p>
+            ) : !slots.length ? (
+              <p className="rounded-lg bg-warning-soft p-3 text-sm leading-6 text-warning">
                 No available times for these details. Choose another date or ask your administrator
                 to configure the provider schedule.
               </p>
-            )
-          )}
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {slots.length} available time{slots.length === 1 ? "" : "s"}. The clinic confirms
+                availability when you book.
+              </p>
+            )}
+          </fieldset>
           <FormField
             id={`booking-reason-${appointment?.id ?? "new"}`}
-            label={appointment ? "Reason for rescheduling" : "Operational reason (optional)"}
+            label={appointment ? "Reason for rescheduling" : "Operational notes (optional)"}
             hint="Do not enter diagnoses or private clinical notes here."
           >
-            <Input
+            <Textarea
               id={`booking-reason-${appointment?.id ?? "new"}`}
+              rows={3}
               maxLength={240}
               {...form.register("reason")}
             />
           </FormField>
-          <p className="text-sm text-muted-foreground">
-            {appointment && `Current booking: ${clock(appointment.start, setup.timezone)}. `}
-            {chosen && `Selected: ${clock(chosen, setup.timezone)} for ${duration} minutes. `}The
-            server confirms availability when you save.
-          </p>
+          {(chosen || appointment) && (
+            <p className="rounded-lg bg-teal-soft p-3 text-sm leading-6 text-teal-ink">
+              {appointment && `Current booking: ${clock(appointment.start, setup.timezone)}. `}
+              {chosen && `Selected: ${clock(chosen, setup.timezone)} for ${duration} minutes.`}
+            </p>
+          )}
         </>
       )}
-      <div className="flex flex-wrap gap-3">
+      <div className="sticky bottom-0 z-10 -mx-5 flex flex-wrap items-center justify-end gap-3 border-t border-border bg-card px-5 py-4 sm:-mx-7 sm:px-7">
+        {(close || sheet) && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={action.busy}
+            onClick={close ?? sheet?.cancel}
+          >
+            Cancel
+          </Button>
+        )}
         <Button
           type="submit"
-          disabled={
-            action.busy || !setup.providers.length || (!appointment && !setup.patients.length)
-          }
+          disabled={action.busy || missingDetails || (!walkIn && (!chosen || remote.loading))}
+          aria-busy={action.busy}
         >
           {action.busy
             ? "Saving…"
@@ -282,11 +341,6 @@ export function BookingForm({
                 ? "Check in walk-in"
                 : "Book appointment"}
         </Button>
-        {close && (
-          <Button type="button" variant="outline" disabled={action.busy} onClick={close}>
-            Close form
-          </Button>
-        )}
       </div>
     </form>
   );

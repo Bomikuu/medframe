@@ -56,6 +56,7 @@ class PortalQuery(PortalOperationsQuery):
         )
         return {
             "clinic_name": link.organization.name,
+            "timezone": link.organization.timezone,
             "patient_name": link.patient.full_name,
             "reference": link.patient.reference,
             "relationship": link.relationship,

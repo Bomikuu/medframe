@@ -23,7 +23,7 @@ export function TemplatePicker({
   const remote = useRemote(ConsultationTemplatesDocument, { organizationId, after });
   const parsed = recordPage(templateSchema).safeParse(remote.data?.consultationTemplates);
   return (
-    <details className="rounded-lg border border-border p-5">
+    <details className="rounded-xl border border-border bg-card p-5">
       <summary className="min-h-11 font-medium">Consultation guidance</summary>
       <p className="mb-4 text-sm text-muted-foreground">
         Apply clinic prompts to guide documentation. Enter all findings and clinical facts yourself.

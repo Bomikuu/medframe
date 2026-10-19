@@ -1,11 +1,12 @@
 "use client";
+import { useClinicTime } from "@/components/application/clinical-locale";
 
 import { useState } from "react";
 import { z } from "zod";
 import { ToothEvidenceDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
-import { LoadState, timeLabel } from "@/features/patients/feedback";
+import { LoadState } from "@/features/patients/feedback";
 import { ButtonLink } from "@/components/ui/button-link";
 import { recordPage } from "@/features/records/schema";
 import { PageControls } from "@/features/records/record-filters";
@@ -23,6 +24,7 @@ const historySchema = recordPage(
 );
 
 export function ToothHistory({ patientId, tooth }: { patientId: string; tooth: string }) {
+  const timeLabel = useClinicTime();
   const { organizationId, href } = useWorkspace();
   const [after, setAfter] = useState<string | undefined>();
   const remote = useRemote(ToothEvidenceDocument, { organizationId, patientId, tooth, after });

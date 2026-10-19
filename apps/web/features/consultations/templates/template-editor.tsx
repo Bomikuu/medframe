@@ -1,4 +1,5 @@
 "use client";
+import { EmptyState } from "@/components/application/empty-state";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import {
@@ -47,18 +48,28 @@ export function TemplateEditor() {
   useUnsavedChanges(`template:${organizationId}`, form.formState.isDirty, () => form.reset());
   if (!can("encounters.write")) return <p>Template editing requires clinical authoring access.</p>;
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(260px,0.65fr)_minmax(0,1fr)]">
-      <div className="xl:col-span-2">
+    <div className="@container grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(260px,0.65fr)_minmax(0,1fr)]">
+      <div className="xl:col-span-2 [&_[data-page-header]]:mb-0">
         <PageHeading
           title="Consultation templates"
           description="Reusable prompts guide clinician-authored notes. Patient facts are never copied into templates."
         />
       </div>
-      <section aria-label="Saved templates" className="min-w-0 rounded-lg border border-border p-5">
+      <section
+        aria-label="Saved templates"
+        className="min-w-0 rounded-xl border border-border bg-card p-5"
+      >
+        <h2 className="mb-4 text-lg font-semibold">Saved templates</h2>
         {!remote.data ? (
           <LoadState error={remote.error} retry={remote.reload} />
         ) : parsed.success ? (
           <>
+            {!parsed.data.items.length && (
+              <EmptyState
+                title="No templates yet"
+                description="Create reusable prompts with the form. Patient information stays in the consultation."
+              />
+            )}
             <ul className="grid gap-3">
               {parsed.data.items.map((item) => (
                 <li
@@ -95,7 +106,7 @@ export function TemplateEditor() {
       </section>
       <form
         noValidate
-        className="grid min-w-0 gap-5 rounded-lg border border-border p-5"
+        className="@container grid min-w-0 gap-5 rounded-xl border border-border bg-card p-5"
         onSubmit={form.handleSubmit(async (values) => {
           const current = capture();
           setError(null);
@@ -132,7 +143,7 @@ export function TemplateEditor() {
           }
         })}
       >
-        <div className="grid gap-4 sm:grid-cols-[1fr_220px]">
+        <div className="grid gap-4 @[640px]:grid-cols-[minmax(0,1fr)_220px]">
           <FormField
             id="template-name"
             label="Template name"
@@ -156,28 +167,30 @@ export function TemplateEditor() {
             ]}
           />
         </div>
-        {(["subjective", "objective", "assessment", "plan"] as const).map((section) => (
-          <FormField
-            key={section}
-            id={`prompt-${section}`}
-            label={`${section[0].toUpperCase()}${section.slice(1)} prompt`}
-          >
-            <Textarea
-              className="min-h-32 resize-none"
+        <div className="grid min-w-0 gap-4 @[560px]:grid-cols-2">
+          {(["subjective", "objective", "assessment", "plan"] as const).map((section) => (
+            <FormField
+              key={section}
               id={`prompt-${section}`}
-              maxLength={1000}
-              rows={3}
-              {...form.register(`prompts.${section}`)}
-            />
-          </FormField>
-        ))}
+              label={`${section[0].toUpperCase()}${section.slice(1)} prompt`}
+            >
+              <Textarea
+                className="min-h-28 resize-y"
+                id={`prompt-${section}`}
+                maxLength={1000}
+                rows={3}
+                {...form.register(`prompts.${section}`)}
+              />
+            </FormField>
+          ))}
+        </div>
         <FormField
           id="template-labels"
           label="Optional observation labels"
           hint="One label per line; up to 20 labels of 120 characters. No measured values."
         >
           <Textarea
-            className="min-h-32 resize-none"
+            className="min-h-28 resize-y"
             id="template-labels"
             rows={3}
             {...form.register("labels")}

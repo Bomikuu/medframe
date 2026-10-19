@@ -142,6 +142,7 @@ type Mutation {
 type OrganizationType {
   id: UUID!
   name: String!
+  timezone: String!
 }
 
 type PatientAssignee {

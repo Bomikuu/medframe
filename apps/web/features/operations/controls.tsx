@@ -16,7 +16,7 @@ export function BranchChoice({
   change: (id: string) => void;
 }) {
   return (
-    <div className="max-w-sm">
+    <div className="w-full max-w-sm min-w-0">
       <FormSelect
         id="operations-branch"
         label="Clinic branch"
@@ -51,7 +51,7 @@ export function OperationsLiveStatus({
   updated?: string;
 }) {
   return (
-    <p className="text-sm text-muted-foreground" role="status">
+    <p className="max-w-2xl text-xs leading-6 text-muted-foreground" role="status">
       <StatusBadge value={connected ? "live" : "reconnecting"} />{" "}
       <span className="ml-2">
         {connected ? "Live updates connected" : "Checking every 30 seconds"}
@@ -63,7 +63,10 @@ export function OperationsLiveStatus({
 }
 export function OperationSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="grid min-w-0 gap-5 rounded-lg border border-border bg-card p-4 sm:p-6">
+    <section
+      data-panel
+      className="@container grid min-w-0 gap-5 rounded-xl border border-border bg-card p-4 sm:p-6"
+    >
       <h2 className="text-xl font-semibold">{title}</h2>
       {children}
     </section>

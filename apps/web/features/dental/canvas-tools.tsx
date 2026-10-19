@@ -153,19 +153,14 @@ export function CanvasNavigation({
           type="button"
           variant={viewport.navigation === value ? "secondary" : "ghost"}
           aria-pressed={viewport.navigation === value}
-          className="grid h-14 gap-1 px-3 text-[11px]"
+          className="grid h-14 gap-1 px-3 text-xs"
           onClick={() => viewport.setNavigation(value)}
         >
           <Icon className="mx-auto size-4" />
           {label}
         </Button>
       ))}
-      <Button
-        type="button"
-        variant="ghost"
-        className="grid h-14 gap-1 text-[11px]"
-        onClick={onReset}
-      >
+      <Button type="button" variant="ghost" className="grid h-14 gap-1 text-xs" onClick={onReset}>
         <RotateCcw className="mx-auto size-4" />
         Reset
       </Button>
