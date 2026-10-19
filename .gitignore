@@ -70,3 +70,4 @@ apps/web/public/vendor/pdfjs/
 output/playwright/
 .next-kiosk-reception/
 .next-session-recovery/
+.next-devices-gallery/

@@ -82,7 +82,9 @@
     ".next-kiosk-reception/types/**/*.ts",
     ".next-kiosk-reception/dev/types/**/*.ts",
     ".next-session-recovery/types/**/*.ts",
-    ".next-session-recovery/dev/types/**/*.ts"
+    ".next-session-recovery/dev/types/**/*.ts",
+    ".next-devices-gallery/types/**/*.ts",
+    ".next-devices-gallery/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

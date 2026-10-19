@@ -564,3 +564,9 @@ Initial scoped backend pass: eight of nine pass; the existing form/bodyless logo
 ## SESSION-ROUTING-002 — intentional hard-navigation lint warning
 
 Scoped ESLint has zero errors and one warning for window.location.assign on Open my workspace. This recovery control deliberately performs a full document navigation to discard the rejected workspace/client-router state reported by the user. Ordinary app navigation still uses the existing router/link system. Warning is retained rather than suppressed; no broad lint repair.
+
+## DEVICES-GALLERY-001 — initial sort assertion timing and bounded responsive refinement
+
+The accumulated browser run captures desktop/tablet/phone without horizontal overflow, then passes guide/category/search/empty-state and name/contact sort checks. It immediately reads card order after choosing Newest first and stops at `Newest order changed`. A subsequent read-only control/DOM inspection shows the correct native newest order and selected sort, so the assertion needs to await the committed order. The first read-only diagnostic also targeted two existing main elements and was narrowed to the actual controls; no app/main structure repair.
+
+Visual inspection finds a cramped phone search field. One bounded refinement gives search a full phone row and corrects the new status sentence's positional word “below.” One focused confirmation covers these changes, awaited sort and the remaining separate-modal checks. No backend/auth changes or unrelated repair. Initial captures/logs retained under ignored output/playwright/devices-gallery/.
