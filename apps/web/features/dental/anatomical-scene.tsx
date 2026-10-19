@@ -17,6 +17,8 @@ import type { OrbitControls as OrbitControlsInstance } from "three-stdlib";
 import type { Finding } from "@/features/consultations/schema";
 import { isPermanentTooth, toothPresentation, type DentalView, type JawView } from "./anatomy";
 import { AnnotationPins, type AnnotationInteraction } from "./annotation-pins";
+import { dentalFitDistance, toothDirection, type ToothFocus } from "./camera-focus";
+import { placeCamera } from "@/lib/three/place-camera";
 
 type PreparedAnatomy = {
   root: Object3D;
@@ -70,6 +72,8 @@ function frameAnatomy(
   controls: OrbitControlsInstance | null,
   size: { width: number; height: number },
   view: DentalView,
+  focus: ToothFocus | null,
+  isolate: boolean,
 ) {
   if (!(camera instanceof PerspectiveCamera)) return;
   prepared.root.updateMatrixWorld(true);
@@ -82,8 +86,12 @@ function frameAnatomy(
   // An explicitly missing isolated tooth has no visible mesh; retain a valid
   // frame and explain the missing anatomy in the surrounding UI.
   if (bounds.isEmpty()) bounds.setFromObject(prepared.root);
-  const center = bounds.getCenter(new Vector3());
-  const extent = bounds.getSize(new Vector3());
+  const selectedMesh = focus
+    ? prepared.teeth.find((mesh) => mesh.visible && mesh.userData.tooth_id === focus.tooth)
+    : undefined;
+  const targetBounds = selectedMesh ? new Box3().setFromObject(selectedMesh) : bounds;
+  const center = targetBounds.getCenter(new Vector3());
+  const extent = targetBounds.getSize(new Vector3());
   const directions: Record<DentalView, [number, number, number]> = {
     front: [0, 0, 1],
     upper: [0, -1, 0],
@@ -91,32 +99,23 @@ function frameAnatomy(
     left: [1, 0, 0],
     right: [-1, 0, 0],
   };
-  const direction = new Vector3(...directions[view]);
-  const vertical = view === "upper" || view === "lower" ? extent.z : extent.y;
-  const horizontal = view === "left" || view === "right" ? extent.z : extent.x;
-  const depth =
-    view === "front" ? extent.z : view === "left" || view === "right" ? extent.x : extent.y;
-  const tangent = Math.tan((camera.fov * Math.PI) / 360);
+  const direction =
+    selectedMesh && focus
+      ? toothDirection(focus.tooth, focus.surface)
+      : new Vector3(...directions[view]);
+  const up = Math.abs(direction.y) > 0.9 ? new Vector3(0, 0, 1) : new Vector3(0, 1, 0);
+  const aspect = size.width / size.height;
+  const fullDistance = dentalFitDistance(bounds, direction, up, aspect, camera.fov);
+  const selectedDistance = dentalFitDistance(targetBounds, direction, up, aspect, camera.fov);
   const distance =
-    (Math.max(vertical / (2 * tangent), horizontal / ((2 * tangent * size.width) / size.height)) +
-      depth / 2) *
-    1.12;
-  camera.position.copy(center).addScaledVector(direction, Math.max(distance, 0.1));
-  camera.up.set(
-    0,
-    view === "upper" || view === "lower" ? 0 : 1,
-    view === "upper" || view === "lower" ? 1 : 0,
-  );
+    selectedMesh && !isolate ? Math.max(fullDistance * 0.65, selectedDistance) : fullDistance;
   camera.near = Math.max(0.001, distance / 100);
   camera.far = Math.max(100, distance * 20);
-  camera.updateProjectionMatrix();
-  camera.lookAt(center);
   if (controls) {
-    controls.target.copy(center);
-    controls.minDistance = Math.max(0.08, extent.length() * 0.35);
-    controls.maxDistance = Math.max(1, extent.length() * 6);
-    controls.update();
+    controls.minDistance = Math.min(distance * 0.5, Math.max(0.01, extent.length() * 0.15));
+    controls.maxDistance = Math.max(fullDistance * 6, 1);
   }
+  placeCamera(camera, controls, center, direction, distance, up);
 }
 
 export function AnatomicalScene({
@@ -128,6 +127,7 @@ export function AnatomicalScene({
   isolate,
   view,
   reset,
+  focus = null,
   anatomyOnly,
   reference,
   controls,
@@ -143,6 +143,7 @@ export function AnatomicalScene({
   isolate: boolean;
   view: DentalView;
   reset: number;
+  focus?: ToothFocus | null;
   anatomyOnly: boolean;
   reference: boolean;
   controls: RefObject<OrbitControlsInstance | null>;
@@ -213,7 +214,7 @@ export function AnatomicalScene({
   }, [prepared, selected, jaw, isolate, findings, anatomyOnly, reference, invalidate]);
 
   useLayoutEffect(() => {
-    frameAnatomy(prepared, camera, controls.current, size, view);
+    frameAnatomy(prepared, camera, controls.current, size, view, focus, isolate);
     invalidate();
   }, [
     prepared,
@@ -222,6 +223,7 @@ export function AnatomicalScene({
     size,
     view,
     reset,
+    focus,
     jaw,
     isolate,
     frameSelection,

@@ -115,6 +115,7 @@ export function DentalEditor({
     setSelected(id);
     setSelectedSurface(null);
     setActivePin(null);
+    viewport.focusTooth(id);
   }
   function changeDentition(value: "permanent" | "primary") {
     setDentition(value);
@@ -341,8 +342,7 @@ export function DentalEditor({
                   selected={selected}
                   findings={displayFindings}
                   onSelect={(id) => {
-                    setSelected(id);
-                    setSelectedSurface(null);
+                    selectTooth(id);
                   }}
                 />
               </div>
@@ -421,7 +421,10 @@ export function DentalEditor({
                 <ToothSurfacePicker
                   tooth={current}
                   value={selectedSurface}
-                  onChange={setSelectedSurface}
+                  onChange={(surface) => {
+                    setSelectedSurface(surface);
+                    viewport.focusTooth(selected, surface);
+                  }}
                 />
                 {!values.some((finding) => finding.tooth === selected) && (
                   <p className="text-sm text-muted-foreground">

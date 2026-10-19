@@ -47,3 +47,5 @@ apps/web/public/vendor/pdfjs/
 
 .next-anatomy-reference/
 .next-anatomy-focus/
+
+.next-selection-focus/

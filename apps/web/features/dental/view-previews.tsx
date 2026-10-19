@@ -31,12 +31,12 @@ export function ViewPreviews({
         <button
           type="button"
           key={value}
-          aria-pressed={viewport.view === value && !viewport.isolate}
+          aria-pressed={viewport.view === value && !viewport.isolate && !viewport.focus}
           onClick={() => {
             viewport.chooseView(value);
             onChoose();
           }}
-          className={`grid min-w-[100px] flex-1 place-items-center gap-1 rounded-lg border bg-card p-2 text-xs font-medium outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary ${viewport.view === value && !viewport.isolate ? "border-primary ring-1 ring-primary" : "border-border hover:bg-muted"}`}
+          className={`grid min-w-[100px] flex-1 place-items-center gap-1 rounded-lg border bg-card p-2 text-xs font-medium outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary ${viewport.view === value && !viewport.isolate && !viewport.focus ? "border-primary ring-1 ring-primary" : "border-border hover:bg-muted"}`}
         >
           <Image
             src={`/models/dental-previews/view-${value}.png`}

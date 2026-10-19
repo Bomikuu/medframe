@@ -96,12 +96,18 @@ export function CanvasToolbar({
           <FormSelect
             id={`camera-${id}`}
             label="Camera view"
-            value={viewport.view}
+            value={viewport.focus ? "selected" : viewport.view}
             onChange={(value) => {
-              viewport.chooseView(value as DentalView);
+              if (value === "selected" && viewport.focus)
+                viewport.focusTooth(viewport.focus.tooth, viewport.focus.surface);
+              else viewport.chooseView(value as DentalView);
               annotations?.onOpen(null);
             }}
-            options={VIEW_OPTIONS}
+            options={
+              viewport.focus
+                ? [{ value: "selected", label: "Selected tooth" }, ...VIEW_OPTIONS]
+                : VIEW_OPTIONS
+            }
           />
         </div>
         <Button

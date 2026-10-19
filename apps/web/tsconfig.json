@@ -56,7 +56,9 @@
     ".next-anatomy-reference/types/**/*.ts",
     ".next-anatomy-reference/dev/types/**/*.ts",
     ".next-anatomy-focus/types/**/*.ts",
-    ".next-anatomy-focus/dev/types/**/*.ts"
+    ".next-anatomy-focus/dev/types/**/*.ts",
+    ".next-selection-focus/types/**/*.ts",
+    ".next-selection-focus/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

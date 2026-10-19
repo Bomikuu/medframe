@@ -1,5 +1,15 @@
 # Deferred issue log
 
+## 2026-10-19 — Tooth/anatomy selection focus
+
+### SELECT-FOCUS-001 — Dental dialog harness name (resolved harness gap)
+
+The scoped browser run queried a dialog named “Dental editor”; the current DialogTitle supplies the synthetic patient's name instead. Reproduce by running the initial harness in `.impeccable/review/selection-focus/browser.json`: it times out before dental assertions despite the screenshot showing a loaded model and no page errors. The harness now uses the existing `data-dental-editor` attribute. One remaining-step continuation passed desktop centering/surface/reset assertions. No product repair followed.
+
+### SELECT-FOCUS-002 — Phone 2D-summary locator (deferred acceptance gap)
+
+The desktop continuation then attempted `dental.locator('details').filter({has: dental.locator('summary')...})`; the nested locator retains the outer editor scope and cannot match within each details element. It timed out before phone selection. Evidence: `scripts/review-selection-focus.mjs`, `.impeccable/review/selection-focus/browser-remaining.json` and `failure.png`. Impact: phone tooth-centering and the final persisted before/after comparison remain unverified. Desktop real mesh centers, numeric framing, zero page errors and zero mutation requests were observed. Per the bounded-testing preference, no further harness repair or browser retry was attempted. No mobile product defect is established by this locator failure.
+
 ## 2026-10-19 — Dental-chart discoverability
 
 - Report: the user could not find the teeth section after Batch 2 delivery.

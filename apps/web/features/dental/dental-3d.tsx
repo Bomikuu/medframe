@@ -124,6 +124,7 @@ export default function Dental3D({
                 isolate={viewport.isolate}
                 view={viewport.view}
                 reset={viewport.reset}
+                focus={viewport.focus}
                 anatomyOnly={viewport.anatomyOnly}
                 reference={detailed}
                 controls={controls}
@@ -135,12 +136,14 @@ export default function Dental3D({
           </Canvas>
           <CanvasNavigation viewport={viewport} onReset={resetCamera} />
           <div className="pointer-events-none absolute right-3 bottom-3 left-3 flex flex-wrap justify-between gap-2 text-xs text-muted-foreground">
-            <span>
-              {detailed
-                ? "Detailed upper-left first molar · FDI 26"
-                : viewport.view === "front"
-                  ? "Patient right ← Front view → Patient left"
-                  : VIEW_OPTIONS.find((option) => option.value === viewport.view)?.label}
+            <span role="status">
+              {viewport.focus
+                ? `Focused on tooth ${viewport.focus.tooth}${viewport.focus.surface ? ` · ${viewport.focus.surface}` : ""}`
+                : detailed
+                  ? "Detailed upper-left first molar · FDI 26"
+                  : viewport.view === "front"
+                    ? "Patient right ← Front view → Patient left"
+                    : VIEW_OPTIONS.find((option) => option.value === viewport.view)?.label}
             </span>
             <span>{ready ? "Anatomical model ready" : ""}</span>
           </div>

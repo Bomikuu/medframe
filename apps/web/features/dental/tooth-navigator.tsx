@@ -136,6 +136,7 @@ export function ToothNavigator({
               viewport.setJaw(value);
               viewport.setIsolate(false);
               viewport.setReference(false);
+              viewport.setFocus(null);
             }}
           >
             {label}

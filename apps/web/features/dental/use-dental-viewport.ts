@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { DentalView, JawView } from "./anatomy";
+import type { ToothFocus } from "./camera-focus";
 
 export function useDentalViewport() {
   const [jaw, setJaw] = useState<JawView>("both");
@@ -13,7 +14,17 @@ export function useDentalViewport() {
   const [expandedCanvas, setExpandedCanvas] = useState(false);
   const [navigation, setNavigation] = useState<"rotate" | "zoom" | "pan">("rotate");
   const [reset, setReset] = useState(0);
+  const [focus, setFocus] = useState<ToothFocus | null>(null);
+  function focusTooth(tooth: string, surface: string | null = null) {
+    const upper = Number(tooth[0]) <= 2;
+    const occlusal = surface === "occlusal" || surface === "incisal";
+    setFocus({ tooth, surface });
+    setJaw(occlusal ? (upper ? "upper" : "lower") : "both");
+    setReference(false);
+    setReset((value) => value + 1);
+  }
   function chooseView(next: DentalView) {
+    setFocus(null);
     setView(next);
     setJaw(next === "upper" || next === "lower" ? next : "both");
     setIsolate(false);
@@ -21,6 +32,7 @@ export function useDentalViewport() {
     setReset((value) => value + 1);
   }
   function resetCamera() {
+    setFocus(null);
     setView("front");
     setJaw("both");
     setIsolate(false);
@@ -48,6 +60,9 @@ export function useDentalViewport() {
     setReset,
     chooseView,
     resetCamera,
+    focus,
+    setFocus,
+    focusTooth,
   };
 }
 export type DentalViewport = ReturnType<typeof useDentalViewport>;

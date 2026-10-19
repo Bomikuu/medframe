@@ -15,6 +15,7 @@ import type { OrbitControls as OrbitControlsHandle } from "three-stdlib";
 import type { AnatomyAnchor, AnatomyCamera, AnatomyFinding, AnatomyLayer } from "./schema";
 import { anatomyAsset, structures } from "./asset-registry";
 import { boundsCenter, fitDistance, focusDistance } from "./camera-focus";
+import { placeCamera } from "@/lib/three/place-camera";
 
 function Camera({
   view,
@@ -59,15 +60,13 @@ function Camera({
     const direction = { front: [0, 0, 1], back: [0, 0, -1], left: [1, 0, 0], right: [-1, 0, 0] }[
       view
     ];
-    camera.position
-      .copy(framing.center)
-      .addScaledVector(new Vector3(...direction), Math.max(distance, 0.12));
-    camera.lookAt(framing.center);
-    camera.updateProjectionMatrix();
-    if (controls) {
-      controls.target.copy(framing.center);
-      controls.update();
-    }
+    placeCamera(
+      camera,
+      controls,
+      framing.center,
+      new Vector3(...direction),
+      Math.max(distance, 0.12),
+    );
     invalidate();
   }, [camera, controls, framing, isolate, view, reset, size.width, size.height, invalidate]);
   const priorZoom = useRef(zoom);
