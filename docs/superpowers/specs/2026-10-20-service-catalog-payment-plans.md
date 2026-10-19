@@ -1,6 +1,6 @@
 # Services, patient workflows and installment plans
 
-Status: written specification for user review. The user approved the proposed scope on October 20, 2026. This document has not yet been approved for implementation. Execution remains native in this chat, without subagents or separate chats.
+Status: written specification approved by the user on October 20, 2026; native implementation plan awaiting review. Execution remains native in this chat, without subagents or separate chats.
 
 ## Intent and approved scope
 
