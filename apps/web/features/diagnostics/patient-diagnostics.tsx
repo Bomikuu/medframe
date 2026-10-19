@@ -144,7 +144,7 @@ function PatientRequest({ id }: { id: string }) {
                 </div>
               ))}
             <p className="text-sm leading-6 text-muted-foreground">
-              Selection shares the clinic's referral package with this center. You can change
+              Selection shares the clinic’s referral package with this center. You can change
               centers before acceptance. Contact your clinic afterwards.
             </p>
             <Button disabled={busy || !center}>

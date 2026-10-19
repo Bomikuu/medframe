@@ -16,7 +16,8 @@ AND (d.purpose='clinical' OR (d.purpose='diagnostic' AND EXISTS(
  JOIN diagnostics_resultrevision s ON s.id::text=x->>'id'
  JOIN diagnostics_resultattachment a ON a.result_id=s.id
  JOIN diagnostics_resultreview w ON w.result_id=s.id
- WHERE a.version_id=v.id AND s.request_id IN (SELECT id FROM diagnostics_diagnosticrequest WHERE organization_id=r.organization_id AND patient_id=r.patient_id)
+WHERE a.version_id=v.id AND s.request_id IN (SELECT id FROM diagnostics_diagnosticrequest WHERE
+ organization_id=r.organization_id AND patient_id=r.patient_id)
 )))) THEN RAISE EXCEPTION 'Release document scope mismatch'; END IF;
  ELSE
   IF NEW.history_revision_id IS NOT NULL AND NOT EXISTS(SELECT 1 FROM portal_patientreport r

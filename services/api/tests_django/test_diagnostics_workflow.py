@@ -1,11 +1,16 @@
+from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
 
-from django.db import DatabaseError, transaction
+from django.db import DatabaseError, close_old_connections, transaction
+from django.test import TransactionTestCase
 
 from config.errors import DomainError
+from medframe_apps.accounts.models import User
 from medframe_apps.diagnostics.models import DiagnosticRequest
 from medframe_apps.diagnostics.services import diagnostic_action
-from tests_django.diagnostics_fixture import DiagnosticFixture
+from medframe_apps.organizations.models import Branch, Membership, Organization
+from medframe_apps.organizations.policy import seed_roles
+from tests_django.diagnostics_fixture import DiagnosticFixture, staff
 
 
 class DiagnosticWorkflowTests(DiagnosticFixture):
@@ -61,17 +66,6 @@ class DiagnosticWorkflowTests(DiagnosticFixture):
                 {"id": str(row.id), "expected_version": 999},
                 uuid4(),
             )
-
-
-from concurrent.futures import ThreadPoolExecutor
-
-from django.db import close_old_connections
-from django.test import TransactionTestCase
-
-from medframe_apps.accounts.models import User
-from medframe_apps.organizations.models import Branch, Membership, Organization
-from medframe_apps.organizations.policy import seed_roles
-from tests_django.diagnostics_fixture import staff
 
 
 class DiagnosticConcurrencyTests(TransactionTestCase):

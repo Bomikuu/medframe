@@ -144,13 +144,15 @@ def request_history(request, organization_id, request_id, *, context, kind="even
         serialize = result_summary
     elif kind == "events":
         query = DiagnosticEvent.objects.filter(request=row).select_related("actor")
-        serialize = lambda item: {
-            "id": str(item.id),
-            "action": item.action,
-            "reason": item.reason,
-            "author": item.actor.display_name,
-            "created_at": item.created_at.isoformat(),
-        }
+
+        def serialize(item):
+            return {
+                "id": str(item.id),
+                "action": item.action,
+                "reason": item.reason,
+                "author": item.actor.display_name,
+                "created_at": item.created_at.isoformat(),
+            }
     else:
         raise DomainError("INVALID_INPUT", "Choose events or results.")
     return page_records(

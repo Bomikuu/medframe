@@ -8,7 +8,10 @@ from tests_django.diagnostics_fixture import DiagnosticFixture
 class DiagnosticApiTests(DiagnosticFixture):
     def test_schema_scope_and_patient_realm_separation(self):
         row = self.sent_request()
-        query = 'query($org: UUID!, $id: UUID!) { diagnosticRequest(organizationId: $org, requestId: $id, context: "center") }'
+        query = (
+            "query($org: UUID!, $id: UUID!) { "
+            'diagnosticRequest(organizationId: $org, requestId: $id, context: "center") }'
+        )
         result = schema.execute_sync(
             query,
             variable_values={"org": str(self.center_org.id), "id": str(row.id)},

@@ -78,6 +78,13 @@ else:
     for table, before in expected["tables"].items():
         missing = Counter(before) - Counter(result[table])
         unexpected = Counter(result[table]) - Counter(before)
+        # Batch 5 introduces exactly this role; existing role fingerprints still must match.
+        if table == "organizations_role" and unexpected:
+            role = json.dumps(
+                {"name": "diagnostic_operator"}, sort_keys=True, separators=(",", ":")
+            )
+            permitted = Counter({hashlib.sha256(role.encode()).hexdigest(): 1})
+            unexpected -= permitted
         if missing or (unexpected and table not in allowed_additions):
             raise SystemExit(
                 f"Original-row preservation failed in {table}; stop activation."

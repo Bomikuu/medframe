@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,7 +50,9 @@ export function DiagnosticRequestForm({
       instructions: "",
     },
   });
-  const selectedPatient = form.watch("patient_id");
+  const modality = useWatch({ control: form.control, name: "modality" });
+  const urgency = useWatch({ control: form.control, name: "urgency" });
+  const selectedPatient = useWatch({ control: form.control, name: "patient_id" });
   const remote = useRemote(DiagnosticSetupDocument, {
     organizationId,
     search: query,
@@ -120,7 +122,7 @@ export function DiagnosticRequestForm({
         <FormSelect
           id="diagnostic-modality"
           label="Modality"
-          value={form.watch("modality")}
+          value={modality}
           onChange={(v) => form.setValue("modality", v, { shouldDirty: true })}
           options={modalities}
         />
@@ -151,7 +153,7 @@ export function DiagnosticRequestForm({
           <FormSelect
             id="diagnostic-urgency"
             label="Priority"
-            value={form.watch("urgency")}
+            value={urgency}
             onChange={(v) => form.setValue("urgency", v, { shouldDirty: true })}
             options={[
               { value: "routine", label: "Routine" },
