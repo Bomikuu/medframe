@@ -14,6 +14,34 @@ The previous implementation and database are preserved: commit `77bf229`, tag `c
 
 Requires Node.js 22.13+ or a supported newer release, Python 3.12+, uv, and Docker Compose. Use synthetic data during development.
 
+Use the executable launcher at the project root (Linux):
+
+```bash
+./medframe setup                 # First run: install dependencies, infrastructure, database setup
+./medframe                      # Start frontend, Django API, Celery worker and scheduler
+./medframe status               # Show running services
+./medframe logs api             # Follow api / web / worker / scheduler logs
+./medframe stop                 # Stop app processes; keep infrastructure and data
+./medframe migrate              # Apply pending migrations while the app is stopped
+```
+
+`setup` uses the existing setup helpers, `npm ci` and `uv sync --locked`. It keeps an existing `.env`, passwords, MFA and database contents. Pending migrations create an encrypted checkpoint and verify a restore into a **new isolated database** before applying. The checkpoint databases remain available for recovery. Setup does not provision accounts or import test records. Install Node, Python, uv and Docker yourself before running it.
+
+Start uses a separate `.next-local-dev` artifact and runs in the background. It checks migrations without applying them; if pending, stop the app and run `./medframe migrate`. Use `./medframe start --only frontend` or `--only backend` to run one side. Logs and process metadata are private and Git-ignored under `.medframe-runtime/`. Stop targets launcher-owned processes using PID/start-time checks; it does not kill an existing manually launched server or stop Docker infrastructure.
+
+For a local production build:
+
+```bash
+./medframe build
+./medframe start --production
+# Or serve a particular already-built artifact:
+./medframe start --production --dist-dir .next-devices-gallery
+```
+
+The default production artifact is `.next-local-production`. Stop the frontend before building into its active directory. Explicitly serving an older artifact changes only the UI; it does not revert the database schema. All launcher services bind locally, use local email capture, and disable live SMS. This launcher is for local development, not public deployment.
+
+The individual commands below remain available for manual operation.
+
 ```bash
 python3 scripts/setup-local.py
 # Existing installations keep .env and run this only for missing storage credentials:

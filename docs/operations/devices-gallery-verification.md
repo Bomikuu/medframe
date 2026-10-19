@@ -24,4 +24,6 @@ Jev 1.13.0 received sanitized architecture/reference adaptation choices only. Se
 
 ## Local activation
 
-Pending fresh encrypted checkpoint/isolated restore, original fingerprints and runtime switch. No schema migrations or review-fixture imports. Existing identity/clinical permissions, prior artifacts and all original data remain preserved. No public deployment, external message or money movement.
+Active locally on October 20 after completing the interrupted activation through the new root launcher. Encrypted checkpoint `pre-batch2-20261019-224609-a160309` verified a new isolated restore `medframe_django_devices_gallery_activation_20261019`; the follow-up fingerprint check confirms all 6,030 original rows across 139 tables preserved. The fresh storage checkpoint `devices-gallery-storage-20261019` verified all 51 objects in the isolated review bucket. No schema migrations or review-fixture imports.
+
+Runtime is `.next-devices-gallery` on port 3000 with original `medframe_django`, Django API 8000, worker and scheduler, now managed by `./medframe`. Frontend login and backend readiness both return HTTP 200. Existing identity/clinical permissions, prior artifacts and all original data remain preserved. No public deployment, external message or money movement. See [launcher evidence](local-launcher-verification.md) for native commands and bounded runtime checks.

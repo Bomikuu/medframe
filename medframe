@@ -1,0 +1,446 @@
+#!/usr/bin/env python3
+"""Run Medframe's existing native development stack (Linux, Python 3.12+)."""
+
+import argparse
+import fcntl
+import json
+import os
+import shutil
+import signal
+import socket
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from datetime import UTC, datetime
+from pathlib import Path
+from uuid import uuid4
+
+ROOT = Path(__file__).resolve().parent
+STATE = ROOT / ".medframe-runtime"
+SERVICES = ("api", "worker", "scheduler", "web")
+INFRA = ("db", "redis", "mail", "storage", "scanner")
+UV = ["uv", "run", "--locked", "--project", "services/api"]
+MANAGE = [*UV, "python", "services/api/manage.py"]
+COMPOSE = [
+    "docker",
+    "compose",
+    "--env-file",
+    ".env",
+    "-f",
+    "infrastructure/compose.yaml",
+]
+
+
+def run(command, **kwargs):
+    return subprocess.run(command, cwd=ROOT, check=True, **kwargs)
+
+
+def require(*commands):
+    missing = [command for command in commands if not shutil.which(command)]
+    if missing:
+        raise RuntimeError("Install these prerequisites first: " + ", ".join(missing))
+
+
+def environment():
+    if not (ROOT / ".env").is_file():
+        raise RuntimeError("Missing .env. Run ./medframe setup first.")
+    # Django reads .env itself. Never evaluate it as shell code or print its secrets.
+    return {
+        **os.environ,
+        "WEB_ORIGIN": "http://localhost:3000",
+        "BACKEND_URL": "http://127.0.0.1:8000",
+        "SMTP_HOST": "127.0.0.1",
+        "SMTP_PORT": "51025",
+        "SMS_LIVE_ENABLED": "false",
+        "PYTHONPATH": str(ROOT / "services/api"),
+    }
+
+
+def dependencies():
+    require("uv", "npm", "node", "docker")
+    version = run(
+        ["node", "-p", "JSON.stringify(process.versions.node.split('.').map(Number))"],
+        capture_output=True,
+        text=True,
+    )
+    if tuple(json.loads(version.stdout)) < (22, 13, 0):
+        raise RuntimeError("Node.js 22.13+ is required.")
+    if (
+        not (ROOT / "services/api/.venv").is_dir()
+        or not (ROOT / "node_modules").is_dir()
+    ):
+        raise RuntimeError("Dependencies are missing. Run ./medframe setup first.")
+
+
+def infrastructure():
+    require("docker")
+    environment()
+    run([*COMPOSE, "up", "-d", "--wait", "--wait-timeout", "600", *INFRA])
+
+
+def process_identity(pid):
+    """Linux start time distinguishes an owned process from a recycled PID."""
+    try:
+        fields = Path(f"/proc/{pid}/stat").read_text().rsplit(") ", 1)[1].split()
+        return None if fields[0] == "Z" else fields[19]
+    except (FileNotFoundError, ProcessLookupError):
+        return None
+
+
+def saved_process(name):
+    path = STATE / f"{name}.json"
+    if not path.exists():
+        return None
+    data = json.loads(path.read_text())
+    if data.get("identity") and process_identity(data["pid"]) == data["identity"]:
+        return data
+    return None
+
+
+def available(port):
+    with socket.socket() as connection:
+        try:
+            connection.bind(("127.0.0.1", port))
+        except OSError:
+            raise RuntimeError(
+                f"Port {port} is occupied. Stop its existing server first; "
+                "the launcher will not terminate an unmanaged process."
+            ) from None
+
+
+def require_stopped():
+    if any(saved_process(name) for name in SERVICES):
+        raise RuntimeError(
+            "Stop the app with ./medframe stop before setup or migrations."
+        )
+    available(3000)
+    available(8000)
+
+
+def migrate():
+    require_stopped()
+    env = environment()
+    plan = run(
+        [*MANAGE, "showmigrations", "--plan"], env=env, capture_output=True, text=True
+    )
+    if "[ ]" not in plan.stdout:
+        print("All Django migrations are already applied.", flush=True)
+        return
+    # Restore only to a NEW isolated database. Never reset or import into the original.
+    stamp = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
+    clone = f"medframe_django_launcher_{stamp}_{uuid4().hex[:6]}"
+    print(
+        "Creating an encrypted checkpoint and verifying an isolated restore...",
+        flush=True,
+    )
+    run([*UV, "python", "scripts/checkpoint-django.py", "--clone", clone], env=env)
+    run([*MANAGE, "migrate", "--noinput"], env=env)
+
+
+def setup():
+    require("uv", "npm", "node", "docker")
+    require_stopped()
+    if not (ROOT / ".env").exists():
+        run([sys.executable, "scripts/setup-local.py"])
+    run([sys.executable, "scripts/setup-storage.py"])
+    run(["uv", "sync", "--project", "services/api", "--locked"])
+    run(["npm", "ci"])
+    dependencies()
+    infrastructure()
+    env = environment()
+    run([*UV, "python", "scripts/setup-django.py"], env=env)
+    migrate()
+    run([*MANAGE, "collectstatic", "--noinput"], env=env)
+    run([*MANAGE, "initialize_private_storage"], env=env)
+    print(
+        "Setup complete. Run ./medframe start. Existing accounts and secrets are retained."
+    )
+
+
+def launch(name, command, env, metadata):
+    with (STATE / f"{name}.log").open("a") as log:
+        process = subprocess.Popen(
+            command,
+            cwd=ROOT,
+            env=env,
+            stdin=subprocess.DEVNULL,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
+    data = {
+        "pid": process.pid,
+        "identity": process_identity(process.pid),
+        **metadata,
+    }
+    (STATE / f"{name}.json").write_text(json.dumps(data) + "\n")
+    print(f"Started {name} (PID {process.pid}).", flush=True)
+
+
+def stop(names):
+    for name in reversed(names):
+        data = saved_process(name)
+        if data:
+            try:
+                os.killpg(data["pid"], signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            deadline = time.monotonic() + 15
+            while saved_process(name) and time.monotonic() < deadline:
+                time.sleep(0.2)
+            if saved_process(name):
+                raise RuntimeError(
+                    f"{name} is still shutting down. See ./medframe logs {name}."
+                )
+            print(f"Stopped {name}.", flush=True)
+        (STATE / f"{name}.json").unlink(missing_ok=True)
+
+
+def wait_http(name, url, timeout):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if not saved_process(name):
+            break
+        try:
+            with urllib.request.urlopen(url, timeout=2) as response:
+                if response.status == 200:
+                    return
+        except (OSError, urllib.error.URLError):
+            pass
+        time.sleep(0.5)
+    raise RuntimeError(f"{name} did not become ready. See ./medframe logs {name}.")
+
+
+def dist_directory(args):
+    directory = args.dist_dir or (
+        ".next-local-production"
+        if args.production or args.command == "build"
+        else ".next-local-dev"
+    )
+    if not directory.startswith(".next") or Path(directory).name != directory:
+        raise RuntimeError("--dist-dir must be a directory name beginning with .next.")
+    return directory
+
+
+def start(args):
+    dependencies()
+    env = environment()
+    names = selected(args.only)
+    current_web = saved_process("web")
+    if current_web and args.dist_dir is None and not args.production:
+        # A plain start is idempotent, including an already-running saved build.
+        args.dist_dir = current_web["dist_dir"]
+        args.production = current_web["production"]
+    directory = dist_directory(args)
+    if (
+        "web" in names
+        and args.production
+        and not (ROOT / "apps/web" / directory / "BUILD_ID").is_file()
+    ):
+        raise RuntimeError(
+            f"No production build in {directory}. Run ./medframe build first."
+        )
+    for name, port in (("api", 8000), ("web", 3000)):
+        if name in names and not saved_process(name):
+            available(port)
+    infrastructure()
+    if "api" in names:
+        run([*MANAGE, "migrate", "--check"], env=env)
+    commands = {
+        "api": [
+            *UV,
+            "uvicorn",
+            "config.asgi:application",
+            "--app-dir",
+            "services/api",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8000",
+            "--no-access-log",
+        ],
+        "worker": [
+            *UV,
+            "celery",
+            "--workdir",
+            "services/api",
+            "-A",
+            "config.celery",
+            "worker",
+            "--loglevel=warning",
+            "--concurrency=2",
+            "--without-gossip",
+            "--without-mingle",
+        ],
+        "scheduler": [
+            *UV,
+            "celery",
+            "--workdir",
+            "services/api",
+            "-A",
+            "config.celery",
+            "beat",
+            "--loglevel=warning",
+            "--schedule",
+            str(STATE / "celerybeat"),
+        ],
+        "web": [
+            "npm",
+            "--workspace",
+            "apps/web",
+            "run",
+            "start" if args.production else "dev",
+            "--",
+            "--hostname",
+            "127.0.0.1",
+            "--port",
+            "3000",
+        ],
+    }
+    added = []
+    try:
+        for name in names:
+            current = saved_process(name)
+            if current:
+                if name == "web" and (
+                    current["dist_dir"] != directory
+                    or current["production"] != args.production
+                ):
+                    raise RuntimeError(
+                        "Web is running with another build/mode. Stop it first."
+                    )
+                print(f"{name} is already running.", flush=True)
+                continue
+            launch(
+                name,
+                commands[name],
+                {**env, "NEXT_DIST_DIR": directory},
+                {
+                    "dist_dir": directory,
+                    "production": args.production,
+                },
+            )
+            added.append(name)
+            if name == "api":
+                wait_http(name, "http://127.0.0.1:8000/health/ready", 60)
+            elif name == "web":
+                wait_http(name, "http://127.0.0.1:3000/login", 120)
+        time.sleep(1)
+        if any(not saved_process(name) for name in names):
+            raise RuntimeError(
+                "A service exited during startup. Inspect ./medframe logs."
+            )
+    except BaseException:
+        stop(added)
+        raise
+    print("Ready: http://localhost:3000 | API: http://127.0.0.1:8000", flush=True)
+    print("Services run in the background. Use ./medframe stop to end them.")
+
+
+def selected(only):
+    return {"all": SERVICES, "backend": SERVICES[:3], "frontend": ("web",)}[only]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest="command")
+    sub.add_parser(
+        "setup", help="Install locked dependencies, infrastructure and migrations"
+    )
+    sub.add_parser(
+        "migrate", help="Checkpoint pending migrations, then apply them (app stopped)"
+    )
+    for command in ("start", "build"):
+        child = sub.add_parser(
+            command,
+            help="Start native services" if command == "start" else "Build frontend",
+        )
+        child.add_argument(
+            "--dist-dir", help="Next build directory; existing artifacts are preserved"
+        )
+        child.add_argument(
+            "--production",
+            action="store_true",
+            help="Serve a previously built frontend",
+        )
+        child.add_argument(
+            "--only", choices=("all", "backend", "frontend"), default="all"
+        )
+    child = sub.add_parser(
+        "stop",
+        help="Stop only launcher-owned app processes; retain infrastructure/data",
+    )
+    child.add_argument("--only", choices=("all", "backend", "frontend"), default="all")
+    sub.add_parser("status", help="Show owned process state and infrastructure")
+    child = sub.add_parser(
+        "logs", help="Follow a service log (Ctrl+C ends log viewing only)"
+    )
+    child.add_argument("service", choices=SERVICES, nargs="?", default="api")
+    args = parser.parse_args()
+    args.command = args.command or "start"
+    if not hasattr(args, "only"):
+        args.only, args.production, args.dist_dir = "all", False, None
+    STATE.mkdir(mode=0o700, exist_ok=True)
+    STATE.chmod(0o700)
+    os.umask(0o077)
+    if args.command == "logs":
+        path = STATE / f"{args.service}.log"
+        if not path.exists():
+            raise RuntimeError(f"No log for {args.service} yet.")
+        run(["tail", "-n", "60", "-f", str(path)])
+        return
+    with (STATE / "launcher.lock").open("w") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError(
+                "Another launcher command is running. Wait for it to finish."
+            ) from None
+        if args.command == "setup":
+            setup()
+        elif args.command == "migrate":
+            dependencies()
+            require_stopped()
+            infrastructure()
+            migrate()
+        elif args.command == "start":
+            start(args)
+        elif args.command == "stop":
+            stop(selected(args.only))
+        elif args.command == "build":
+            dependencies()
+            directory = dist_directory(args)
+            current = saved_process("web")
+            if current and current["dist_dir"] == directory:
+                raise RuntimeError(
+                    "Stop the frontend before rebuilding its active artifact."
+                )
+            run(
+                ["npm", "--workspace", "apps/web", "run", "build"],
+                env={
+                    **environment(),
+                    "NEXT_DIST_DIR": directory,
+                },
+            )
+        elif args.command == "status":
+            for name in SERVICES:
+                data = saved_process(name)
+                print(
+                    f"{name}: "
+                    + (f"running (PID {data['pid']})" if data else "stopped")
+                )
+            if (ROOT / ".env").exists():
+                run([*COMPOSE, "ps"])
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nCommand interrupted.", file=sys.stderr)
+        sys.exit(130)
+    except (RuntimeError, OSError, subprocess.CalledProcessError) as error:
+        print(f"Medframe: {error}", file=sys.stderr)
+        sys.exit(1)

@@ -71,3 +71,7 @@ output/playwright/
 .next-kiosk-reception/
 .next-session-recovery/
 .next-devices-gallery/
+
+.medframe-runtime/
+.next-local-dev/
+.next-local-production/
