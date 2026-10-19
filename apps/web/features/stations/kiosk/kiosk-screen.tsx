@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
+import { LoadingInformation } from "@/components/application/loading-information";
+import { AssistedKiosk } from "./assisted-kiosk";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -74,6 +76,7 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
   const [notice, setNotice] = useState("");
   const [help, setHelp] = useState(false);
   const onError = useCallback((message: string) => setNotice(message), []);
+  const exitStaff = useCallback(() => kiosk.setView("waiting"), [kiosk.setView]);
   function clearFields() {
     setSelection(empty);
     setCode("");
@@ -109,7 +112,8 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
     const result = await kiosk.run<Result>({ action, ...selection, request_id: requestId });
     if (result) kiosk.complete(result);
   }
-  const timed = (kiosk.view !== "home" || !!kiosk.session) && kiosk.remaining <= 30;
+  const timed =
+    kiosk.view !== "staff" && (kiosk.view !== "home" || !!kiosk.session) && kiosk.remaining <= 30;
   return (
     <main
       id="main"
@@ -132,10 +136,16 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
             <h1 className="text-2xl font-semibold">
               {kiosk.busy ? "Opening the kiosk…" : "This kiosk needs attention"}
             </h1>
-            <p role="status" className="leading-7 text-muted-foreground">
-              {kiosk.error ||
-                "Checking this device's approval and clearing any earlier patient session."}
-            </p>
+            {kiosk.busy ? (
+              <LoadingInformation
+                title="Checking this kiosk"
+                detail="Checking device approval, clinic services and the secure connection. Earlier patient information is cleared before this screen opens."
+              />
+            ) : (
+              <p role="alert" className="leading-7 text-muted-foreground">
+                {kiosk.error}
+              </p>
+            )}
             {!kiosk.busy && (
               <>
                 <Button type="button" onClick={() => void home()}>
@@ -149,7 +159,7 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
           </section>
         ) : (
           <>
-            {kiosk.view !== "home" && (
+            {kiosk.view !== "home" && kiosk.view !== "staff" && (
               <nav
                 aria-label="Kiosk navigation"
                 className="mb-7 flex flex-wrap items-center justify-between gap-3 print:hidden"
@@ -220,7 +230,9 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                 ) : (
                   !setup.strict_verification && (
                     <p className="mb-6 rounded-xl border border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
-                      Reception will open your patient session on this kiosk. No code is needed.
+                      Enter your name and contact details to get started. Reception verifies your
+                      identity before opening your record. No patient search is shown on this
+                      screen.
                     </p>
                   )
                 )}
@@ -248,7 +260,19 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                   <ShieldCheck className="mt-0.5 size-5 shrink-0 text-teal-ink" />
                   Your information is cleared when you finish or leave the kiosk inactive.
                 </p>
+                {!kiosk.session && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-6 min-h-12"
+                    onClick={() => kiosk.setView("staff")}
+                  >
+                    Staff-assisted mode
+                  </Button>
+                )}
               </>
+            ) : kiosk.view === "staff" ? (
+              <AssistedKiosk onExit={exitStaff} />
             ) : (
               <section className="mx-auto max-w-3xl">
                 <div className="mb-8">
@@ -256,7 +280,7 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                     {kiosk.view === "done"
                       ? "You're all set"
                       : kiosk.view === "register"
-                        ? "New to this clinic?"
+                        ? "Tell us who you are"
                         : kiosk.view === "waiting"
                           ? "Reception will open your session"
                           : kiosk.view === "verify"
@@ -273,6 +297,15 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                 </div>
                 {kiosk.view === "waiting" && (
                   <div className="grid gap-5">
+                    {kiosk.result?.kind === "intake" && (
+                      <p
+                        role="status"
+                        className="rounded-lg bg-teal-soft p-5 text-sm leading-6 text-teal-ink"
+                      >
+                        Identity details sent to reception · Reference {kiosk.result.reference}.
+                        Please wait while staff verify your information.
+                      </p>
+                    )}
                     <p role="status" className="max-w-xl leading-7 text-muted-foreground">
                       Ask reception to select your patient record and send it to this kiosk. This
                       screen will continue automatically. You do not need to enter a code.
@@ -281,10 +314,22 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                       type="button"
                       variant="outline"
                       className="min-h-12 justify-self-start"
-                      onClick={() => kiosk.setView("register")}
+                      onClick={() => {
+                        setRequestId(crypto.randomUUID());
+                        kiosk.setView("register");
+                      }}
                     >
-                      I need to register as a new patient
+                      Enter or update my identity details
                     </Button>
+                    {setup.strict_verification && (
+                      <Button
+                        type="button"
+                        className="min-h-12 justify-self-start"
+                        onClick={() => kiosk.setView("verify")}
+                      >
+                        Enter my verification code
+                      </Button>
+                    )}
                   </div>
                 )}
                 {kiosk.view === "verify" && (
@@ -346,8 +391,9 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                     }}
                   >
                     <p className="leading-7 text-muted-foreground">
-                      Reception will verify these details and check for an existing record before
-                      creating an account or patient record.
+                      Enter your details whether you are an existing or new patient. Reception will
+                      verify your identity and check for an existing record. Submitting this form
+                      does not automatically open a record or create an account.
                     </p>
                     <FormField id="intake-name" label="Full name">
                       <Input

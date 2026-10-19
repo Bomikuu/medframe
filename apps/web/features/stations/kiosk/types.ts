@@ -1,4 +1,4 @@
-import { stationRequest } from "../client";
+import { requestWithCsrf } from "@/lib/auth/client";
 
 export type Task = "booking" | "check_in" | "walk_in" | "payments";
 export type Department = {
@@ -79,7 +79,8 @@ export type Selection = {
   start: string;
   appointment_id: string;
 };
-export const kioskRequest = <T>(body: unknown) => stationRequest<T>("kiosk", body);
+export const kioskRequest = <T>(body: unknown) =>
+  requestWithCsrf<T>("stations/kiosk", body, { signal: AbortSignal.timeout(20000) });
 export const taskNames: Record<Task, string> = {
   booking: "Book an appointment",
   check_in: "Check in",

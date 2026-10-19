@@ -15,9 +15,11 @@ type Step = "login" | "enroll" | "verify" | "recovery";
 export function AuthFlow({
   portal = false,
   invitation = false,
+  onAuthenticated,
 }: {
   portal?: boolean;
   invitation?: boolean;
+  onAuthenticated?: () => void;
 }) {
   const prefix = portal ? "portal/auth" : "auth";
   const router = useRouter();
@@ -28,6 +30,10 @@ export function AuthFlow({
   const [codes, setCodes] = useState<string[]>([]);
   function enterWorkspace() {
     setCodes([]);
+    if (onAuthenticated) {
+      onAuthenticated();
+      return;
+    }
     router.replace(portal ? "/portal" : "/clinic");
     router.refresh();
   }
@@ -47,7 +53,7 @@ export function AuthFlow({
     await run(async () => {
       const result = await requestWithCsrf<{ nextStep: "enroll" | "verify" }>(
         `${prefix}/login`,
-        values,
+        onAuthenticated ? { ...values, remember: false } : values,
       );
       if (result.nextStep === "enroll") {
         const enrollment = await requestWithCsrf<{ otpauthUri: string }>(
@@ -78,7 +84,7 @@ export function AuthFlow({
     await run(async () => {
       const result = await requestWithCsrf<{ nextStep: "verify" }>(`${prefix}/google/login`, {
         credential,
-        remember,
+        remember: onAuthenticated ? false : remember,
       });
       setStep(result.nextStep);
     });
@@ -133,7 +139,13 @@ export function AuthFlow({
             }}
           />
         ) : (
-          <LoginForm onSubmit={login} onGoogleSubmit={googleLogin} busy={busy} portal={portal} />
+          <LoginForm
+            onSubmit={login}
+            onGoogleSubmit={googleLogin}
+            busy={busy}
+            portal={portal}
+            sharedDevice={!!onAuthenticated}
+          />
         ))}
       {(step === "enroll" || step === "verify") && (
         <MfaVerificationForm

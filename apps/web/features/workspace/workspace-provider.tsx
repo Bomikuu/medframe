@@ -32,7 +32,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   if (!data)
     return (
       <main className="p-8">
-        <LoadState error={error} retry={reload} />
+        <LoadState
+          error={error}
+          retry={reload}
+          title="Finding your clinics"
+          detail="Retrieving the clinics assigned to your account and checking your current membership."
+        />
       </main>
     );
   if (!data.myOrganizations.length)
@@ -109,7 +114,12 @@ function OrganizationWorkspace({
   if (!value)
     return (
       <main id="main" className="p-8">
-        <LoadState error={error} retry={reload} />
+        <LoadState
+          error={error}
+          retry={reload}
+          title="Opening the selected clinic"
+          detail="Loading your permitted branches, role and workspace tools. This check does not change your access."
+        />
       </main>
     );
   return (

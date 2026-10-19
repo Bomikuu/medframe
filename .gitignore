@@ -81,3 +81,5 @@ output/playwright/
 .next-patient-profile/
 
 .next-clinic-workspace/
+
+.next-kiosk-recovery/

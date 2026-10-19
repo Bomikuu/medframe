@@ -63,7 +63,12 @@ def manage(request):
             return JsonResponse({"patients": []})
         rows = (
             Patient.objects.filter(branch=branch)
-            .filter(Q(full_name__icontains=query) | Q(reference__icontains=query))
+            .filter(
+                Q(full_name__icontains=query)
+                | Q(reference__icontains=query)
+                | Q(phone__icontains=query)
+                | Q(email__icontains=query)
+            )
             .order_by("full_name")[:20]
         )
         return JsonResponse(

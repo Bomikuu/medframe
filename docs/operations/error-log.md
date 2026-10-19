@@ -589,3 +589,18 @@ The initial patient-summary run passes seven of eight cases; its billing fixture
 ## CLINIC-WORKSPACE-UI-002 — browser empty-state role mismatch (corrected harness)
 
 The accumulated seven-page/three-width browser pass confirms 21 no-overflow captures and profile navigation/saved-note/editor-link/reload, then times out looking for the heading role `No matching patients`. Shared shadcn EmptyTitle renders a div. A single focused continuation uses exact visible text, confirms table/card/search recovery, finance period/keyboard/data-table controls, directory-only clinical exclusion and settled dashboard widgets, with no page exceptions. No product repair or third browser run. Older deferred findings remain unchanged. Evidence: ignored `output/playwright/clinic-workspace-ui/browser-initial.log` and `browser-confirmation.log`; scope/limits in `clinic-workspace-ui-verification.md`.
+## KIOSK-RECOVERY-001 — Diagnostics timestamp rendering (repaired)
+
+Reported Diagnostics list with records renders a full created_at timestamp through a date-only formatter. Its numeric day becomes NaN, yielding RangeError Invalid time value. Direct reproduction confirms it; the list now uses clinic-timezone timestamp formatting, shared calendar labels validate inputs, and malformed responses no longer remain in loading indefinitely. Three pure date cases and the bounded native Diagnostics browser list/filter pass. No authorization bypass or original record changes.
+
+## KIOSK-RECOVERY-002 — automatic patient reset on polling failure (repaired)
+
+Source trace shows transient activity/status failures invoke reset/end; stale receive generations also invoke end and advance the boundary again. Network failures can clear forms, and shared-device tabs can invalidate one another repeatedly. Transient failures now preserve input/journey; stale receiving clients halt without automatic end/setup. Explicit Finish/expiry still clear identity. Browser evidence confirms retained identity after a failed submission, retained patient journey after a failed status poll, and one initial end/one rejected receive without repetition under simulated time. Broader physical multi-tab and hard server idle acceptance are not claimed.
+
+## KIOSK-RECOVERY-003 — paired-kiosk staff policy blocker (activation repair)
+
+The initial new backend cases use direct request objects without the middleware ContextVar and pass, while the first actual native browser staff-context request correctly hits the old clinician-only device gate. One narrow policy repair permits only native staff operations.read/appointments.manage on the kiosk endpoints, with active matching device and existing membership/MFA/branch requirements. Two focused real-context boundary cases and one staff browser continuation pass; clinical/financial/GraphQL paths remain denied. No repeated broad test/polish run. The initial fixture also rejects an assumed device/organization match; corrected synthetic setup is isolated rather than weakening scope.
+
+## KIOSK-RECOVERY-004 — retained diagnostics and coverage limits
+
+Scoped ESLint reports zero errors/two warnings (new callback member dependency and existing epoch cleanup ref). Node's direct TypeScript test import emits a module-type warning; all three cases pass. Existing original API logs also show Redis channel receive timeouts and streaming-response warnings; these are separate from the confirmed date formatter and kiosk HTTP reset paths and remain deferred without repair. The shared empty-value select's blank display and broad slow-network/idle/sign-out-failure/Google-MFA/physical-device acceptance remain outside this bounded pass. Exact evidence and limits are in `docs/operations/diagnostics-kiosk-recovery-verification.md`.

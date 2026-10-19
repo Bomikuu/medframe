@@ -90,7 +90,9 @@
     ".next-patient-profile/types/**/*.ts",
     ".next-patient-profile/dev/types/**/*.ts",
     ".next-clinic-workspace/types/**/*.ts",
-    ".next-clinic-workspace/dev/types/**/*.ts"
+    ".next-clinic-workspace/dev/types/**/*.ts",
+    ".next-kiosk-recovery/types/**/*.ts",
+    ".next-kiosk-recovery/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

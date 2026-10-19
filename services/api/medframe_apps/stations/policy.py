@@ -23,6 +23,18 @@ def check_membership_device(organization_id, permission):
     if not credential:
         return
     device = credential.device
+    # A kiosk may host native staff assistance, never a clinical workstation.
+    if (
+        device.mode == "kiosk"
+        and device.state == "active"
+        and device.organization_id == organization_id
+        and not credential.revoked
+        and credential.expires_at > timezone.now()
+        and request.path in {"/stations/kiosk", "/stations/kiosk/manage"}
+        and permission in {"operations.read", "appointments.manage"}
+    ):
+        require_session_realm(request, "staff")
+        return
     if (
         device.state != "active"
         or device.mode != "clinician"

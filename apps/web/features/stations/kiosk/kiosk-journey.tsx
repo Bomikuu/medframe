@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { LoadingInformation } from "@/components/application/loading-information";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
@@ -48,6 +49,8 @@ export function KioskJourney({
     availability.key !== slotKey;
   const slots = availability.key === slotKey ? availability.slots : [];
   const [bills, setBills] = useState<Balances | null>(null);
+  const [billError, setBillError] = useState("");
+  const [billAttempt, setBillAttempt] = useState(0);
   const change = (value: Partial<Selection>) => onSelection({ ...selection, ...value });
   const department = setup.departments.find((item) => item.id === selection.department_id);
   useEffect(() => {
@@ -75,12 +78,15 @@ export function KioskJourney({
         if (!cancelled) setBills(value);
       })
       .catch((cause) => {
-        if (!cancelled) onError(cause.message);
+        if (!cancelled) {
+          setBillError(cause.message);
+          onError(cause.message);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [task, onError]);
+  }, [task, onError, billAttempt]);
   const departments = setup.departments.filter((item) =>
     task === "booking" || task === "check_in"
       ? item.kind === "consultation"
@@ -103,7 +109,28 @@ export function KioskJourney({
             on this kiosk are not configured.
           </p>
           {!bills ? (
-            <p role="status">Loading your bills…</p>
+            billError ? (
+              <div className="grid gap-3">
+                <p role="alert" className="text-sm">
+                  Your bills could not be loaded. Your current task is still open.
+                </p>
+                <Button
+                  variant="outline"
+                  className="justify-self-start"
+                  onClick={() => {
+                    setBillError("");
+                    setBillAttempt((value) => value + 1);
+                  }}
+                >
+                  Retry bills
+                </Button>
+              </div>
+            ) : (
+              <LoadingInformation
+                title="Loading your bills"
+                detail="Retrieving issued bills and recorded outstanding amounts for your verified patient session."
+              />
+            )
           ) : !bills.invoices.length ? (
             <p>No issued bills to show.</p>
           ) : (
@@ -210,7 +237,10 @@ export function KioskJourney({
             window.
           </p>
           {!snapshot ? (
-            <p role="status">Loading your appointments…</p>
+            <LoadingInformation
+              title="Finding your appointments"
+              detail="Retrieving booked appointments for your verified patient session. Reception can help if your booking is missing or outside its arrival window."
+            />
           ) : !snapshot.appointments.length ? (
             <p>No booked appointments were found.</p>
           ) : (

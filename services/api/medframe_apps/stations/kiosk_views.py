@@ -43,6 +43,19 @@ def kiosk(request):
     credential = kiosk_device(request)
     branch = credential.device.branch
     throttle(request, "kiosk.request", str(credential.id), 120, 60)
+    if action == "staff_context":
+        from medframe_apps.operations.policy import require_operations
+
+        require_operations(request, branch.organization_id, "appointments.manage", branch.id)
+        return private_response(
+            {
+                "organization_id": str(branch.organization_id),
+                "branch_id": str(branch.id),
+                "staff": request.user.display_name,
+                "timezone": branch.organization.timezone,
+                "kiosks": reception.devices(branch),
+            }
+        )
     if action == "setup":
         boundary, _ = KioskBoundary.objects.get_or_create(credential=credential)
         return private_response(

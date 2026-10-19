@@ -10,7 +10,7 @@ import {
   type Result,
 } from "./types";
 
-type View = "home" | "waiting" | "verify" | "register" | "choose" | "review" | "done";
+type View = "home" | "waiting" | "verify" | "register" | "choose" | "review" | "done" | "staff";
 export function useKiosk() {
   const [cycle, setCycle] = useState(0);
   const [setup, setSetup] = useState<Setup | null>(null);
@@ -20,6 +20,7 @@ export function useKiosk() {
   const [view, setView] = useState<View>("home");
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
+  const [connectionError, setConnectionError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [remaining, setRemaining] = useState(120);
   const epoch = useRef(0);
@@ -27,8 +28,24 @@ export function useKiosk() {
   const lastPing = useRef(0);
   const mounted = useRef(true);
   const active = useRef<PatientSession | null>(null);
-  const reset = useCallback(async (message = "") => {
+  const resetting = useRef(false);
+  const halt = useCallback((message: string) => {
     epoch.current++;
+    active.current = null;
+    setCycle((value) => value + 1);
+    setSession(null);
+    setSnapshot(null);
+    setResult(null);
+    setSetup(null);
+    setView("home");
+    setError(message);
+    setConnectionError("");
+    setBusy(false);
+  }, []);
+  const reset = useCallback(async (message = "") => {
+    if (resetting.current) return;
+    resetting.current = true;
+    const current = ++epoch.current;
     setCycle((value) => value + 1);
     active.current = null;
     setSession(null);
@@ -36,18 +53,21 @@ export function useKiosk() {
     setResult(null);
     setView("home");
     setError(message);
+    setConnectionError("");
     setBusy(true);
     lastActivity.current = Date.now();
     try {
       await kioskRequest({ action: "end" });
-      if (mounted.current) setSetup(await kioskRequest<Setup>({ action: "setup" }));
+      const value = await kioskRequest<Setup>({ action: "setup" });
+      if (mounted.current && current === epoch.current) setSetup(value);
     } catch (cause) {
-      if (mounted.current) {
+      if (mounted.current && current === epoch.current) {
         setSetup(null);
         setError(errorMessage(cause));
       }
     } finally {
-      if (mounted.current) setBusy(false);
+      resetting.current = false;
+      if (mounted.current && current === epoch.current) setBusy(false);
     }
   }, []);
   useEffect(() => {
@@ -74,7 +94,11 @@ export function useKiosk() {
         return current === epoch.current && mounted.current ? value : undefined;
       } catch (cause) {
         if (current === epoch.current && mounted.current) {
-          if (cause instanceof ApiError && cause.status === 403) void reset(errorMessage(cause));
+          if (
+            cause instanceof ApiError &&
+            ["PATIENT_SESSION_ENDED", "DEVICE_UNAVAILABLE"].includes(cause.code)
+          )
+            halt(errorMessage(cause));
           else setError(errorMessage(cause));
         }
         return undefined;
@@ -82,7 +106,7 @@ export function useKiosk() {
         if (current === epoch.current && mounted.current) setBusy(false);
       }
     },
-    [reset],
+    [halt],
   );
   async function verify(code: string) {
     const value = await run<PatientSession>({
@@ -109,14 +133,19 @@ export function useKiosk() {
           setSession(value);
         }
       })
-      .catch(() => {
-        if (current === epoch.current)
-          void reset("Your kiosk session ended. Ask reception to continue.");
+      .catch((cause) => {
+        if (current === epoch.current) {
+          if (cause instanceof ApiError && cause.status === 403) halt(errorMessage(cause));
+          else
+            setConnectionError(
+              "Connection interrupted. Your selections are still here. Reconnecting…",
+            );
+        }
       });
-  }, [reset]);
+  }, [halt]);
   const hasSession = !!session;
   useEffect(() => {
-    if (view === "home" && !hasSession) return;
+    if (view === "staff" || (view === "home" && !hasSession)) return;
     const timer = window.setInterval(() => {
       const absolute = active.current ? new Date(active.current.expires_at).getTime() : Infinity;
       const idle = active.current
@@ -135,10 +164,19 @@ export function useKiosk() {
     const refresh = () =>
       void kioskRequest<Snapshot>({ action: "status" })
         .then((value) => {
-          if (!cancelled && current === epoch.current) setSnapshot(value);
+          if (!cancelled && current === epoch.current) {
+            setSnapshot(value);
+            setConnectionError("");
+          }
         })
         .catch((cause) => {
-          if (!cancelled && current === epoch.current) void reset(errorMessage(cause));
+          if (!cancelled && current === epoch.current) {
+            if (cause instanceof ApiError && cause.status === 403) halt(errorMessage(cause));
+            else
+              setConnectionError(
+                "Connection interrupted. Your selections are still here. Reconnecting…",
+              );
+          }
         });
     refresh();
     const timer = window.setInterval(refresh, 15000);
@@ -146,7 +184,7 @@ export function useKiosk() {
       cancelled = true;
       window.clearInterval(timer);
     };
-  }, [hasSession, reset]); // Polling never renews the patient's inactivity deadline.
+  }, [hasSession, halt]); // Polling never renews the patient's inactivity deadline.
   useEffect(() => {
     if (!setup || setup.strict_verification || hasSession || !["home", "waiting"].includes(view))
       return;
@@ -170,8 +208,11 @@ export function useKiosk() {
         }
       } catch (cause) {
         if (!cancelled && current === epoch.current) {
-          if (cause instanceof ApiError && cause.status === 403) void reset(errorMessage(cause));
-          else setError(errorMessage(cause));
+          if (cause instanceof ApiError && cause.status === 403) halt(errorMessage(cause));
+          else
+            setConnectionError(
+              "Waiting for a connection to reception. Your details have been kept.",
+            );
         }
       } finally {
         pending = false;
@@ -184,7 +225,7 @@ export function useKiosk() {
       window.clearTimeout(initial);
       window.clearInterval(timer);
     };
-  }, [setup, hasSession, view, reset]);
+  }, [setup, hasSession, view, halt]);
   function home() {
     if (!active.current || setup?.strict_verification) return reset();
     setView("home");
@@ -199,7 +240,7 @@ export function useKiosk() {
       setSession(null);
       setSnapshot(null);
       setView("verify");
-    } else setView(active.current ? "choose" : "waiting");
+    } else setView(active.current ? "choose" : "register");
     setResult(null);
     setError("");
     lastActivity.current = Date.now();
@@ -207,7 +248,7 @@ export function useKiosk() {
   }
   function complete(value: Result) {
     setResult(value);
-    setView("done");
+    setView(value.kind === "intake" ? "waiting" : "done");
   }
   return {
     cycle,
@@ -218,7 +259,7 @@ export function useKiosk() {
     view,
     setView,
     busy,
-    error,
+    error: error || connectionError,
     remaining,
     reset,
     home,

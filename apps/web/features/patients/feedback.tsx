@@ -1,7 +1,6 @@
 "use client";
 
 import { PageHeader } from "@/components/application/page-header";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { ClientError } from "graphql-request";
@@ -9,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { SessionRecovery } from "@/features/auth/session-recovery";
 import { ArrowLeft } from "lucide-react";
+import { LoadingInformation } from "@/components/application/loading-information";
+export { dateLabel } from "./calendar-date";
 
 export function failureCode(error: unknown): string {
   if (error instanceof ClientError) {
@@ -36,7 +37,17 @@ export function failureText(error: unknown) {
   return "The request could not be completed. Check your connection and try again. Your entered values have been kept.";
 }
 
-export function LoadState({ error, retry }: { error: unknown; retry: () => void }) {
+export function LoadState({
+  error,
+  retry,
+  title,
+  detail,
+}: {
+  error: unknown;
+  retry: () => void;
+  title?: string;
+  detail?: string;
+}) {
   const { clearDirty } = useSafety();
   const pathname = usePathname();
   const router = useRouter();
@@ -83,12 +94,18 @@ export function LoadState({ error, retry }: { error: unknown; retry: () => void 
           )}
         </>
       ) : (
-        <div role="status" className="grid w-full gap-4">
-          <span className="sr-only">Loading workspace information…</span>
-          <Skeleton className="h-5 w-2/5" />
-          <Skeleton className="h-4 w-4/5" />
-          <Skeleton className="h-16 w-full" />
-        </div>
+        <LoadingInformation
+          title={
+            title ??
+            (pathname.includes("diagnostic")
+              ? "Loading diagnostic requests"
+              : pathname.includes("station")
+                ? "Opening Patient Stations"
+                : "Loading your workspace")
+          }
+          detail={detail}
+          retry={retry}
+        />
       )}
     </div>
   );
@@ -106,16 +123,6 @@ export function PageHeading({
   level?: 1 | 2;
 }) {
   return <PageHeader title={title} description={description} actions={children} level={level} />;
-}
-
-export function dateLabel(date: string | null | undefined) {
-  if (!date) return "Not recorded";
-  const [year, month, day] = date.split("-").map(Number);
-  return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "UTC" }).format(
-    new Date(
-      `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T00:00:00.000Z`,
-    ),
-  );
 }
 
 export function timeLabel(value: string) {
