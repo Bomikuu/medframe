@@ -82,7 +82,7 @@ def validate_upload_metadata(purpose, metadata):
         raise DomainError(
             "INVALID_FILE", "Choose JPEG, PNG, WebP or PDF; DICOM is not supported yet."
         )
-    if purpose not in {"clinical", "diagnostic", "logo", "avatar"}:
+    if purpose not in {"clinical", "diagnostic", "logo", "avatar", "website"}:
         raise DomainError("INVALID_INPUT", "Unsupported file purpose.")
     limit = 20 * 1024 * 1024 if purpose in {"clinical", "diagnostic"} else 2 * 1024 * 1024
     if (

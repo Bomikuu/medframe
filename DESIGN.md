@@ -177,3 +177,7 @@ The user's October19 anatomy reference supersedes the earlier anatomy compositio
 ## Shared toggle appearance
 
 The October 20 explicit global-toggle request uses one shared pill track/thumb appearance for form Checkbox and Switch primitives, with the incumbent navy selection, input-border neutral, visible keyboard focus and disabled/invalid states. Checkbox retains its checkbox and indeterminate/form behavior; Switch retains switch semantics. Selection menus and mutually exclusive radio choices keep their native patterns. Appearance settings use the same shared control rather than raw native checkboxes. Device/department form state continues to save through its existing owner. See docs/operations/device-station-refinement-verification.md for actual scope and verification limits.
+
+### Clinic websites — Batch 7
+
+The builder remains an Operate surface in the clinical design system. Public clinic pages are a separate Persuade surface with explicitly authored copy, bounded navy/teal/forest/clay palettes, modern sans or editorial serif typography, generous section spacing and optional approved clinic imagery. Preview uses container responsiveness; the public hero overrides the dashboard-only h1 scale. Empty sections stay hidden publicly. No automatic patient/provider-record content, fabricated social proof, clinical images, arbitrary HTML/CSS or tracking scripts. See the Batch 7 spec and actual verification for publication/privacy and custom-domain limits.

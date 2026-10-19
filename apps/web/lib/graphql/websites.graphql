@@ -1,0 +1,17 @@
+query WebsiteSetup($organizationId: UUID!) {
+  websiteSetup(organizationId: $organizationId)
+}
+
+mutation WebsiteAction(
+  $organizationId: UUID!
+  $action: String!
+  $data: JSON!
+  $expectedVersion: Int!
+) {
+  websiteAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    expectedVersion: $expectedVersion
+  )
+}

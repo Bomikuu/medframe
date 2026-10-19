@@ -604,3 +604,22 @@ The initial new backend cases use direct request objects without the middleware 
 ## KIOSK-RECOVERY-004 — retained diagnostics and coverage limits
 
 Scoped ESLint reports zero errors/two warnings (new callback member dependency and existing epoch cleanup ref). Node's direct TypeScript test import emits a module-type warning; all three cases pass. Existing original API logs also show Redis channel receive timeouts and streaming-response warnings; these are separate from the confirmed date formatter and kiosk HTTP reset paths and remain deferred without repair. The shared empty-value select's blank display and broad slow-network/idle/sign-out-failure/Google-MFA/physical-device acceptance remain outside this bounded pass. Exact evidence and limits are in `docs/operations/diagnostics-kiosk-recovery-verification.md`.
+## B7-001 — website image SQL purpose constraint (activation repair)
+
+Initial scoped run passes nine/thirteen; four image cases hit the existing document_purpose constraint. Additive websites.0003 permits website images only with no patient/encounter, retaining clinical/diagnostic and other asset rules. Historical migrations and original records are unchanged. Staged focused cases pass after the fixture corrections below; no clean repeated-suite claim.
+
+## B7-002 — image response/scan fixture assumptions (corrected)
+
+First four-case confirmation passes one, then FileResponse.close signals request_finished inside the direct TestCase transaction and closes its DB connection, preventing three cases. Close the fixture's in-memory stream instead. The next three-case confirmation passes two and correctly rejects clean→rejected mutation under the native conclusive-scan immutable guard. The last fixture asserts that guard and uses native unpublish for withdrawal; its one-case confirmation passes. No scan trigger or production document integrity was weakened.
+
+## B7-003 — RHF generic and custom-host routing (activation repairs)
+
+The first build fails on RHF's generic field-value conditional; FieldPathValue corrects the typed helper. Production build/TS passes. The accumulated browser establishes six publisher groups, then discovers nextUrl.hostname is normalized to the internal app host and an unknown Host receives the private-route login redirect instead of404. The proxy now parses/validates the incoming Host and maps only verified published aliases; a bounded read-only HTTP confirmation establishes unknown/verified host private-route404 and verified public root200. Same-batch visual refinement prevents global clinic h1 rules shrinking public headings, uses preview container responsiveness and hides empty public sections. No third browser round or unrelated UI repair.
+
+## B7-004 — focused phone-preview locator mismatch (deferred acceptance)
+
+The focused continuation selects the editorial/dental template and forest palette, then waits for capitalized Phone; its actual accessible text is lowercase phone with visual capitalization. Final phone-preview capture/save/republication/style assertions remain unexecuted. Initial desktop/phone captures and six core groups remain evidence; final build/TS/lint pass, but no complete post-refinement responsive or template-control browser acceptance is claimed. No further browser run.
+
+## B7-005 — custom alias canonical remains application clinic URL (deferred)
+
+Verified local alias root serves the published page, but its canonical points to the stable Medframe /clinics/[slug] URL rather than the alias root. The focused custom-domain canonical assertion fails; HTTP inspection records that actual canonical. Mapping/private-route denial/robots/domain sitemap checks pass separately. Primary custom-domain canonical selection is deferred; real domain DNS/TLS/hosting is operator setup and was not changed or accepted. Unrelated older findings remain deferred.

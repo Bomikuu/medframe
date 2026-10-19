@@ -25,7 +25,7 @@ export function UploadControl({
 }: {
   patientId?: string;
   encounterId?: string;
-  purpose?: "clinical" | "avatar" | "logo";
+  purpose?: "clinical" | "avatar" | "logo" | "website";
   profileImage?: boolean;
   onUploaded: (versionId?: string) => void;
   documentId?: string;
@@ -234,7 +234,11 @@ export function UploadControl({
           maxLength={120}
           disabled={progress !== null}
           placeholder={
-            purpose === "clinical" ? "For example, consultation image" : "For example, clinic logo"
+            purpose === "clinical"
+              ? "For example, consultation image"
+              : purpose === "website"
+                ? "For example, clinic reception photo"
+                : "For example, clinic logo"
           }
         />
       </FormField>

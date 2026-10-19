@@ -92,7 +92,9 @@
     ".next-clinic-workspace/types/**/*.ts",
     ".next-clinic-workspace/dev/types/**/*.ts",
     ".next-kiosk-recovery/types/**/*.ts",
-    ".next-kiosk-recovery/dev/types/**/*.ts"
+    ".next-kiosk-recovery/dev/types/**/*.ts",
+    ".next-websites-batch7/types/**/*.ts",
+    ".next-websites-batch7/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

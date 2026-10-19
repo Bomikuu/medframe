@@ -46,11 +46,13 @@ def require_document(user, organization_id, version_id, *, write=False):
         )
         if write:
             require_membership(user, organization_id, "documents.write")
-    elif document.purpose in {"logo", "avatar"}:
+    elif document.purpose in {"logo", "avatar", "website"}:
         require_membership(
             user,
             organization_id,
-            "organization.manage" if write and document.purpose == "logo" else "workspace.read",
+            "organization.manage"
+            if document.purpose == "website" or (write and document.purpose == "logo")
+            else "workspace.read",
         )
         if document.purpose == "avatar" and document.uploaded_by_id != user.id:
             raise DomainError("NOT_FOUND", "Profile image is unavailable.", 404)
@@ -79,7 +81,7 @@ def begin_document_upload(user, organization_id, patient_id, encounter_id, purpo
     access = scope()
     if access and (purpose != "clinical" or str(encounter_id) != str(access.handoff.encounter_id)):
         deny()
-    if purpose not in {"clinical", "logo", "avatar"}:
+    if purpose not in {"clinical", "logo", "avatar", "website"}:
         raise DomainError("INVALID_INPUT", "Choose a supported upload purpose.")
     if purpose == "clinical":
         require_membership(user, organization_id, "documents.write")
@@ -92,7 +94,9 @@ def begin_document_upload(user, organization_id, patient_id, encounter_id, purpo
                 raise DomainError("INVALID_INPUT", "Choose the patient's editable consultation.")
     else:
         require_membership(
-            user, organization_id, "organization.manage" if purpose == "logo" else "workspace.read"
+            user,
+            organization_id,
+            "organization.manage" if purpose in {"logo", "website"} else "workspace.read",
         )
         if patient_id or encounter_id:
             raise DomainError(

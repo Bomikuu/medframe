@@ -94,6 +94,7 @@ input MedicationInput {
 }
 
 type Mutation {
+  websiteAction(organizationId: UUID!, action: String!, data: JSON!, expectedVersion: Int!): JSON!
   inviteClinic(data: JSON!, requestId: UUID!): JSON!
   resendClinicInvitation(invitationId: UUID!, expectedVersion: Int!): JSON!
   revokeClinicInvitation(invitationId: UUID!, expectedVersion: Int!): JSON!
@@ -229,6 +230,7 @@ type ProviderType {
 }
 
 type Query {
+  websiteSetup(organizationId: UUID!): JSON!
   platformCapabilities: JSON!
   clinicInvitations(offset: Int! = 0, status: String! = ""): JSON!
   clinicSetupChecklist(organizationId: UUID!): JSON!

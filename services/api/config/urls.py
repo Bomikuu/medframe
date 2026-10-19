@@ -18,8 +18,13 @@ from medframe_apps.stations import views as stations
 from medframe_apps.stations.kiosk_management import manage as kiosk_manage
 from medframe_apps.stations.kiosk_management import portal_code
 from medframe_apps.stations.kiosk_views import kiosk
+from medframe_apps.websites import public as websites_public
 
 urlpatterns = [
+    path("websites/index", websites_public.index),
+    path("websites/resolve", websites_public.resolve),
+    path("websites/<slug:slug>", websites_public.page),
+    path("websites/<slug:slug>/assets/<uuid:asset_id>", websites_public.asset),
     path("stations/kiosk", kiosk),
     path("stations/kiosk/manage", kiosk_manage),
     path("portal/kiosk-code", portal_code),

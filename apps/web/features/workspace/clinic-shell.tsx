@@ -185,6 +185,12 @@ function ClinicFrame({ children }: { children: ReactNode }) {
           Icon: FileText,
           show: can("encounters.write"),
         },
+        {
+          path: "/clinic/settings/website",
+          label: "Clinic website",
+          Icon: Palette,
+          show: can("organization.manage"),
+        },
         { path: "/clinic/settings/appearance", label: "Appearance", Icon: Palette, show: true },
       ],
     },

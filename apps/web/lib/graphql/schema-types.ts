@@ -162,6 +162,7 @@ export type Mutation = {
   updateTreatmentStatus: Scalars['JSON']['output'];
   updateUserPreferences: Scalars['JSON']['output'];
   uploadMedicalDocument: DocumentType;
+  websiteAction: Scalars['JSON']['output'];
   withdrawPortalRelease: Scalars['JSON']['output'];
 };
 
@@ -579,6 +580,14 @@ export type MutationUploadMedicalDocumentArgs = {
 };
 
 
+export type MutationWebsiteActionArgs = {
+  action: Scalars['String']['input'];
+  data: Scalars['JSON']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
 export type MutationWithdrawPortalReleaseArgs = {
   expectedVersion: Scalars['Int']['input'];
   organizationId: Scalars['UUID']['input'];
@@ -746,6 +755,7 @@ export type Query = {
   toothHistory: Scalars['JSON']['output'];
   treatmentPlans: Scalars['JSON']['output'];
   userPreferences: Scalars['JSON']['output'];
+  websiteSetup: Scalars['JSON']['output'];
 };
 
 
@@ -1225,6 +1235,11 @@ export type QueryTreatmentPlansArgs = {
 
 
 export type QueryUserPreferencesArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryWebsiteSetupArgs = {
   organizationId: Scalars['UUID']['input'];
 };
 
