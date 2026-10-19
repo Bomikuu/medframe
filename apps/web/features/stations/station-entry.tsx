@@ -8,6 +8,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { errorMessage } from "@/lib/auth/client";
 import { StationCode } from "./code-input";
 import { modeLabels, stationRequest, type StationContext } from "./client";
+import { SessionRecovery } from "@/features/auth/session-recovery";
 import { AccessCodeForm } from "./access-code-form";
 
 export function StationEntry() {
@@ -79,6 +80,9 @@ export function StationEntry() {
           className="rounded-2xl border border-border bg-card p-6 sm:p-8"
           aria-label="Connect this device"
         >
+          <div className="mb-6">
+            <SessionRecovery />
+          </div>
           {device && !context?.error && device.state === "active" ? (
             <div className="grid gap-5">
               <ShieldCheck className="size-8 text-teal-ink" />

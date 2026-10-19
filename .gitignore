@@ -69,3 +69,4 @@ apps/web/public/vendor/pdfjs/
 .playwright-cli/
 output/playwright/
 .next-kiosk-reception/
+.next-session-recovery/

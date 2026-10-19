@@ -556,3 +556,11 @@ The one browser journey confirms the direct collection return, native reception 
 ## KIOSK-RECEPTION-004 — strict-mode in-flight activity isolation (activation repair)
 
 Final source review found that a strict-mode task switch cleared local identity without advancing the request epoch. A prior task's late activity response could restore its old session summary after the code screen opened. Strict task switches now advance the epoch before clearing identity; normal task switches retain the epoch so their live snapshot poll remains usable. This is a direct new-mode activation blocker repair. No further broad browser run; strict UI race acceptance remains unverified.
+
+## SESSION-ROUTING-001 — ordinary form logout compatibility (activation repair)
+
+Initial scoped backend pass: eight of nine pass; the existing form/bodyless logout contract returns 400 because the new optional clear_device flag attempted to parse multipart form content as JSON. Restrict optional flag parsing to JSON requests; ordinary logout keeps its original form contract and does not detach pairing. Rerun only that compatibility case as a focused activation confirmation. No password/MFA or authorization change.
+
+## SESSION-ROUTING-002 — intentional hard-navigation lint warning
+
+Scoped ESLint has zero errors and one warning for window.location.assign on Open my workspace. This recovery control deliberately performs a full document navigation to discard the rejected workspace/client-router state reported by the user. Ordinary app navigation still uses the existing router/link system. Warning is retained rather than suppressed; no broad lint repair.

@@ -2,13 +2,14 @@ import { Suspense } from "react";
 import { SafetyProvider } from "@/features/workspace/safety-provider";
 import { WorkspaceProvider } from "@/features/workspace/workspace-provider";
 import { ClinicShell } from "@/features/workspace/clinic-shell";
-import { cookies } from "next/headers";
+import { readBrowserSession } from "@/lib/server/session-route";
+import { SessionUnavailable } from "@/features/auth/session-recovery";
 import { redirect } from "next/navigation";
 
 export default async function ClinicLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  if (!cookieStore.has("medframe_django_session")) redirect("/login");
-  // Cookie presence only avoids a useless loading state. The API authorizes all data.
+  const session = await readBrowserSession();
+  if (!session) return <SessionUnavailable />;
+  if (session.kind !== "staff") redirect(session.destination);
   return (
     <Suspense
       fallback={

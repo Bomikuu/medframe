@@ -60,6 +60,7 @@ class StationMiddleware:
                 request.station_doctor = None
                 if request.path not in {
                     "/auth/csrf",
+                    "/auth/session",
                     "/auth/logout",
                     "/stations/context",
                     "/stations/doctor",
@@ -71,6 +72,7 @@ class StationMiddleware:
             elif request.path not in {
                 "/graphql",
                 "/auth/csrf",
+                "/auth/session",
                 "/auth/logout",
                 "/stations/context",
                 "/stations/encounter",
@@ -101,6 +103,7 @@ class StationMiddleware:
                 logout(request)
                 if request.path not in {
                     "/auth/csrf",
+                    "/auth/session",
                     "/auth/logout",
                     "/stations/context",
                     "/stations/access",
@@ -117,6 +120,7 @@ class StationMiddleware:
             elif request.path not in {
                 "/graphql",
                 "/auth/csrf",
+                "/auth/session",
                 "/auth/logout",
                 "/stations/context",
                 "/stations/encounter",

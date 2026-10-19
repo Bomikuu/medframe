@@ -80,7 +80,9 @@
     ".next-device-code-modals/types/**/*.ts",
     ".next-device-code-modals/dev/types/**/*.ts",
     ".next-kiosk-reception/types/**/*.ts",
-    ".next-kiosk-reception/dev/types/**/*.ts"
+    ".next-kiosk-reception/dev/types/**/*.ts",
+    ".next-session-recovery/types/**/*.ts",
+    ".next-session-recovery/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

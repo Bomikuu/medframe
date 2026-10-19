@@ -52,11 +52,32 @@ def verify_view(request):
 @require_POST
 @domain_view
 def logout_view(request):
+    clear_device = (
+        request.content_type == "application/json"
+        and bool(request.body)
+        and json_object(request).get("clear_device") is True
+    )
     if request.user.is_authenticated:
         ClinicalSession.objects.filter(session_key=request.session.session_key).update(revoked=True)
         audit(request.user, "auth.logout")
     logout(request)
-    return JsonResponse({"ok": True})
+    response = JsonResponse({"ok": True})
+    if clear_device:
+        # Explicit local recovery: keep clinic registration/approval intact.
+        from django.utils import timezone
+
+        from medframe_apps.stations.context import DEVICE_COOKIE, digest
+        from medframe_apps.stations.kiosk_identity import PATIENT_COOKIE
+        from medframe_apps.stations.models import KioskPatientSession
+
+        secret = request.COOKIES.get(PATIENT_COOKIE)
+        if secret:
+            KioskPatientSession.objects.filter(digest=digest(secret), ended_at__isnull=True).update(
+                ended_at=timezone.now()
+            )
+        response.delete_cookie(DEVICE_COOKIE, path="/", samesite="Strict")
+        response.delete_cookie(PATIENT_COOKIE, path="/", samesite="Strict")
+    return response
 
 
 @require_POST

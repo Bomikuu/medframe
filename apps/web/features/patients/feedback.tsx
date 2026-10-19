@@ -7,6 +7,7 @@ import { useSafety } from "@/features/workspace/safety-provider";
 import { ClientError } from "graphql-request";
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from "next/navigation";
+import { SessionRecovery } from "@/features/auth/session-recovery";
 import { ArrowLeft } from "lucide-react";
 
 export function failureCode(error: unknown): string {
@@ -72,6 +73,9 @@ export function LoadState({ error, retry }: { error: unknown; retry: () => void 
           <Button type="button" variant="ghost" onClick={returnToCollection}>
             <ArrowLeft /> {station ? "Back to Station" : "Back to collection"}
           </Button>
+          {["FORBIDDEN", "NOT_FOUND", "UNAUTHENTICATED"].includes(failureCode(error)) && (
+            <SessionRecovery />
+          )}
           {failureCode(error) === "UNAUTHENTICATED" && (
             <a href="/login" className="text-sm text-primary underline">
               Sign in

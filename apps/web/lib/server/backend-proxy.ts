@@ -30,6 +30,7 @@ const allowedPaths = new Set([
   "portal/auth/recovery/request",
   "portal/auth/recovery/reset",
   "auth/csrf",
+  "auth/session",
   "auth/login",
   "auth/google/prepare",
   "auth/google/login",
@@ -52,7 +53,8 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
     ["documents/download", "portal/documents/download", "diagnostics/documents/download"].includes(
       path,
     );
-  const expectedMethod = path.endsWith("auth/csrf") || download ? "GET" : "POST";
+  const expectedMethod =
+    path.endsWith("auth/csrf") || path === "auth/session" || download ? "GET" : "POST";
   if ((!allowedPaths.has(path) && !upload && !download) || request.method !== expectedMethod) {
     return Response.json({ message: "This endpoint is unavailable." }, { status: 404 });
   }

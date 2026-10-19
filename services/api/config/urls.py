@@ -7,6 +7,7 @@ from config import views
 from config.admin import site
 from medframe_apps.accounts import google_views
 from medframe_apps.accounts import views as auth
+from medframe_apps.accounts.session_routing import session_route
 from medframe_apps.communications.views import sms_status
 from medframe_apps.diagnostics import views as diagnostics
 from medframe_apps.documents import views as documents
@@ -58,6 +59,7 @@ urlpatterns = [
     path("health", views.health),
     path("health/ready", views.ready),
     path("auth/csrf", auth.csrf),
+    path("auth/session", session_route),
     path("auth/login", auth.login_view),
     path("auth/google/prepare", google_views.prepare),
     path("auth/google/login", google_views.login),

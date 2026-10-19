@@ -13,6 +13,7 @@ import { LoadState, RemoteNotice } from "@/features/patients/feedback";
 import { useSafety } from "./safety-provider";
 import { ThemeProvider } from "@/features/branding/theme-provider";
 
+import { SessionRecovery } from "@/features/auth/session-recovery";
 import { PlatformLink } from "@/features/platform/clinic-invitations";
 
 type Workspace = {
@@ -44,9 +45,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         <div className="mt-6">
           <PlatformLink />
         </div>
-        <a href="/login" className="mt-6 inline-block text-primary underline">
-          Return to sign in
-        </a>
+        <div className="mt-6">
+          <SessionRecovery />
+        </div>
       </main>
     );
   const requested = params.get("organization");
