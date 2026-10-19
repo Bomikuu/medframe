@@ -1,0 +1,198 @@
+Extend Medframe with “Medframe Station”: a unified device workspace that reduces navigation and lets clinics continue work across desktop computers, clinician tablets, patient kiosks and TV displays.
+
+The objective is one connected patient visit across devices, with focused interfaces for each user. Reuse the existing Django clinical, appointment, queue, billing and authentication systems.
+
+1. DEVICE SETUP AND PAIRING
+
+Add a Devices & Stations area for authorized clinic staff.
+
+Staff can create and manage:
+- Clinician tablets
+- Patient kiosks
+- Queue displays
+
+Each device has a name, clinic, branch, mode, permitted functions, connection status and revocation control.
+
+An authorized staff member generates a short-lived, single-use pairing code or QR code. The receiving device opens a public pairing page, enters or scans the code, and receives its assigned mode after approval.
+
+The pairing page itself must expose no patient information.
+
+Pairing identifies and configures the device. Clinical access must still require a named, authenticated staff identity and existing clinical permissions. Patient kiosks and TV displays must never inherit staff permissions.
+
+Use server-enforced expiry, attempt limits, secure sessions and immediate revocation. Never use a permanent shared code as unrestricted access to the clinic.
+
+2. CLINICIAN TABLET: ONE CONSULTATION WORKSPACE
+
+Create a touchscreen-friendly, full-screen workspace inspired by the existing dental editor.
+
+Keep the active patient and visit visible, with:
+- Patient identity and visit status
+- Relevant allergies and medical alerts
+- Dental chart and individual tooth/surface selection
+- Anatomical chart where applicable
+- Point annotations and clinical notes
+- SOAP notes, diagnoses, procedures and treatment plan
+- Clinical documents and images
+- Queue/service status
+- Bill summary and authorized payment actions
+- Save, finish consultation, lock and handoff controls
+
+Use a central chart/editor with contextual panels and accessible tabs or drawers. Keep essential actions visible without navigating through several application pages.
+
+Differentiate draft, saving, saved, failed and finalized states clearly. Preserve entered work during connection failures.
+
+The tablet must edit the existing consultation draft using its existing version/conflict controls. It must not create a separate consultation or competing clinical data store.
+
+Finalized records remain immutable; corrections use attributed amendments.
+
+3. CONTINUE ON ANOTHER DEVICE / HAND OVER RESPONSIBILITY
+
+From the desktop or tablet, provide “Continue on another device”.
+
+Before transfer:
+- Save and acknowledge the current draft.
+- Clearly identify any unsaved changes.
+- Generate a temporary handoff code or QR code.
+
+The receiving authorized device opens the same patient, visit, chart selection and saved draft.
+
+Use one active editing device by default. After an accepted transfer, the previous device becomes read-only for that consultation. Expired or abandoned transfers leave ownership clear.
+
+Also support handing responsibility to another authorized clinician:
+- Identify the receiving clinician.
+- Show a concise handoff summary and outstanding tasks.
+- Require acceptance.
+- Record who handed over, who accepted and when.
+- Apply any responsible-provider changes through existing authorization rules.
+
+Device transfer must not silently change clinical responsibility, finalize care or confirm payment.
+
+4. PATIENT KIOSK HOME
+
+Provide four large actions:
+- Book an appointment
+- Check in for an existing appointment
+- Join the walk-in queue
+- Pay for clinic services
+
+Use readable text, large touch targets, minimal typing and clear progress.
+
+Include Back, Home, Cancel and staff assistance.
+
+After completion, cancellation or inactivity, clear patient-specific state and return home. Warn before timeout and allow an accessible extension.
+
+Never expose the previous patient’s information through Back navigation, cached screens or persistent form state.
+
+5. PATIENT IDENTIFICATION, BOOKING AND CHECK-IN
+
+Reuse supported patient verification methods. A device-pairing code is not patient verification.
+
+Do not reveal existing records or balances based only on a matching name or date of birth.
+
+Support minimal new-patient registration. Route uncertain identity matches to staff review rather than automatically linking records or creating duplicates.
+
+Booking:
+- Choose service.
+- Choose doctor when applicable.
+- Select an available date and time.
+- Review a summary before confirming.
+- Prevent duplicate submissions and overlapping reservations in the backend.
+
+Check-in:
+- Verify the appointment and permitted arrival window.
+- Confirm arrival.
+- Admit the patient to the appropriate same-day queue according to clinic rules.
+- Issue the queue number and next instruction.
+
+Clearly distinguish a future appointment confirmation from same-day queue admission.
+
+6. WALK-INS AND DEPARTMENT QUEUES
+
+Support consultation, laboratory, cashier and other configured departments.
+
+Maintain one visit with linked department queue stages. Transfers must preserve history without creating duplicate patient visits or duplicate clinical encounters.
+
+Extend the current provider-linked queue model where necessary; cashier and laboratory queues must not require a fictitious doctor.
+
+Authorized staff can call, recall, skip, prioritize, transfer, cancel and complete tickets. Record reasons and actors where appropriate.
+
+Issue a unique ticket showing:
+- Queue number
+- Department
+- Issue time
+- Next step
+
+Support on-screen tickets and optional printing when a printer is configured. A printer failure must not create a second ticket.
+
+Show waiting estimates only when reliable data exists. Otherwise show queue position or an honest unavailable state.
+
+7. PAYMENTS
+
+After patient verification, show the selected patient’s outstanding bills, service descriptions, existing payments and current balance.
+
+Support:
+- Digital payment through a configured payment provider
+- Cash payment at an authorized cashier
+- Kiosk cash acceptance only with compatible configured hardware
+
+Treat digital payment integration as a new integration where it is not already implemented. Do not simulate a successful charge or label an unconfigured provider as available.
+
+Verify payment through trusted backend/provider confirmation before recording success. A browser redirect, screenshot or patient button press is not payment confirmation.
+
+Handle pending, failed, cancelled and successful payments. Use idempotency and reconciliation so retries do not create duplicate charges or ledger entries.
+
+Generate a receipt after confirmed payment.
+
+Clinician tablets may display payment status. Recording cash or other manual financial actions requires the appropriate billing permission; being a doctor does not automatically grant it.
+
+Make payment-before-service and payment-after-service configurable by service or department, with explicit, audited staff exceptions.
+
+8. TV QUEUE DISPLAY
+
+Create a dedicated read-only display with no staff navigation.
+
+Show:
+- Currently called queue numbers
+- Assigned doctor, room or counter
+- Upcoming queue numbers
+- Clinic announcements
+- Current clinic time
+
+Do not show patient names, contact information, diagnoses, balances or internal record identifiers.
+
+Use a dedicated minimal public-display response rather than reusing staff record serializers.
+
+Update automatically after queue changes. Support reconnection, a visible stale/offline indication, optional sound and spoken queue-number announcements.
+
+Provide an “Enable announcements” control and prevent duplicate announcements after reconnection.
+
+9. DEVICE AND CONNECTION BEHAVIOR
+
+Make clinician tablets, shared kiosks and displays independently lockable and revocable.
+
+Keep staff identity, patient identity, device identity and visit ownership distinct.
+
+During disconnection:
+- Do not claim an unsaved draft is saved.
+- Do not confirm an appointment or payment locally.
+- Preserve recoverable clinician input appropriately.
+- Tell patients when staff assistance is required.
+- Mark TV information as stale.
+
+Provide a browser-based focused mode first. Describe any operating-system kiosk lockdown or printer/payment hardware setup as separate configuration requirements.
+
+10. IMPLEMENTATION AND DELIVERY
+
+First inspect the current implementation and produce a written design and implementation plan identifying reused features, required extensions and unresolved provider/hardware dependencies.
+
+Use Graphify for impact tracing, Jev for sanitized architectural judgments and Impeccable for interface design.
+
+Implement natively without subagents. Preserve existing data, accounts, MFA, clinical authorization and rollback checkpoints.
+
+Use actual shared shadcn components, Tailwind, readable focused modules, Prettier and Ruff.
+
+Deliver connected features per phase. Prioritize device pairing plus clinician handoff, then patient self-service and department queues, then payment integration and TV display.
+
+Use synthetic data and one accumulated, proportional verification pass per phase. Log unrelated findings; repair necessary activation blockers with focused confirmation. Activate completed, approved phases locally.
+
+Report actual functionality, remaining gaps and external configuration requirements honestly.

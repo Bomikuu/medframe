@@ -13,7 +13,7 @@ Entry points:
 
 The connected feature includes a distinct five-slide introduction, six-block email code, saved clinic/specialty/branding/practice steps, private raster logo quarantine/scan/promotion, existing/new native account and MFA handling, editable review, atomic idempotent clinic creation, platform invitation list/create/resend/revoke, real initial configuration and a dismissible first-run checklist. Clinical roles/ProviderProfile are not inferred from selections. Patient invitations and existing clinical workflows retain their original authorization paths.
 
-One operational setup choice remains: a read-only check found **zero active native superusers and zero platform-administrator memberships** in the original database. Existing clinic accounts were deliberately not elevated. The user has been asked which existing email should receive the platform-administrator role. Until that target is supplied, the route correctly denies existing clinic-only administrators. This is distinct from the synthetic platform operator used in the isolated review; that review account was not copied into original data.
+After activation, the user explicitly selected `admin@medframe.example.com` for platform-administrator access. Its existing active membership received that role in an atomic audited operation, preserving its password, MFA, native account flags and clinical permissions. This authorized role addition happened after the cutover fingerprint comparison; no synthetic review account was copied into original data.
 
 ## Preservation and activation
 
