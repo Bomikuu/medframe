@@ -6,6 +6,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
 import { PageHeading, failureText } from "@/features/patients/feedback";
@@ -328,10 +329,11 @@ function PersonalAppearance({ setPending }: { setPending: (value: boolean) => vo
           />
         </div>
         <label className="flex min-h-11 items-center gap-3 text-sm">
-          <input
-            type="checkbox"
-            {...form.register("sidebar_collapsed")}
-            className="size-5 accent-primary"
+          <Switch
+            checked={values.sidebar_collapsed ?? false}
+            onCheckedChange={(checked) =>
+              form.setValue("sidebar_collapsed", checked, { shouldDirty: true })
+            }
           />
           Collapse sidebar
         </label>
@@ -439,15 +441,11 @@ function DashboardLayout({ setPending }: { setPending: (value: boolean) => void 
               className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3"
             >
               <label className="flex min-h-11 items-center gap-3 text-sm">
-                <input
-                  type="checkbox"
+                <Switch
                   checked={widget.visible}
-                  onChange={(event) =>
-                    form.setValue(`widgets.${index}.visible`, event.target.checked, {
-                      shouldDirty: true,
-                    })
+                  onCheckedChange={(checked) =>
+                    form.setValue(`widgets.${index}.visible`, checked, { shouldDirty: true })
                   }
-                  className="size-5 accent-primary"
                 />
                 {label(widget.id)}
               </label>

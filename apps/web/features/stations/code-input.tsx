@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Clock3, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
@@ -72,29 +72,48 @@ function CopyableCode({ code, expiresAt }: { code: string; expiresAt: string }) 
   }
 
   return (
-    <div className="rounded-xl border border-border bg-muted/40 p-5">
-      <p className="text-xs text-muted-foreground">
-        Single-use code · expires{" "}
-        {new Date(expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-      </p>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p
-          className="text-3xl font-semibold tracking-[0.12em] text-primary select-all"
-          aria-label={expired ? "Code expired" : `Code ${code}`}
-        >
-          {expired ? "Code expired" : `${code.slice(0, 4)} ${code.slice(4)}`}
-        </p>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={expired || copyState === "copying"}
-          onClick={() => void copy()}
-        >
-          {copyState === "copied" ? <Check /> : <Copy />}
-          {copyState === "copied" ? "Copied" : copyState === "copying" ? "Copying…" : "Copy code"}
-        </Button>
+    <section
+      aria-label="Temporary access code"
+      className="rounded-xl border border-border bg-muted/40 p-4 sm:p-5"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span>Single-use code</span>
+        <span className="inline-flex items-center gap-1.5 tabular-nums">
+          <Clock3 className="size-3.5" aria-hidden="true" />
+          Expires{" "}
+          {new Date(expiresAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+        </span>
       </div>
+      {expired ? (
+        <p role="status" className="py-6 text-center text-lg font-semibold">
+          Code expired
+        </p>
+      ) : (
+        <p
+          className="my-5 grid grid-cols-8 gap-1 font-mono text-lg font-semibold text-primary select-all sm:gap-2 sm:text-2xl"
+          aria-label={`Code ${code}`}
+        >
+          {Array.from(code).map((character, index) => (
+            <span
+              key={index}
+              aria-hidden="true"
+              className="flex h-12 min-w-0 items-center justify-center rounded-md border border-border bg-background sm:h-14"
+            >
+              {character}
+            </span>
+          ))}
+        </p>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full bg-background"
+        disabled={expired || copyState === "copying"}
+        onClick={() => void copy()}
+      >
+        {copyState === "copied" ? <Check /> : <Copy />}
+        {copyState === "copied" ? "Copied" : copyState === "copying" ? "Copying…" : "Copy code"}
+      </Button>
       <p className="sr-only" role="status">
         {!expired && copyState === "copied" ? "Code copied to clipboard." : ""}
       </p>
@@ -103,11 +122,11 @@ function CopyableCode({ code, expiresAt }: { code: string; expiresAt: string }) 
           Couldn’t copy the code. Select it and copy manually.
         </p>
       )}
-      <p className="mt-3 text-sm text-muted-foreground">
+      <p className="mt-3 text-center text-xs leading-5 text-muted-foreground">
         {expired
           ? "Generate a new code to continue."
-          : "Share directly with the receiving device. Keep this code private."}
+          : "Keep this code private. It works on one receiving device."}
       </p>
-    </div>
+    </section>
   );
 }

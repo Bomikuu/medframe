@@ -84,7 +84,9 @@
     ".next-session-recovery/types/**/*.ts",
     ".next-session-recovery/dev/types/**/*.ts",
     ".next-devices-gallery/types/**/*.ts",
-    ".next-devices-gallery/dev/types/**/*.ts"
+    ".next-devices-gallery/dev/types/**/*.ts",
+    ".next-device-modal-toggles/types/**/*.ts",
+    ".next-device-modal-toggles/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

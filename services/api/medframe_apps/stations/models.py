@@ -40,6 +40,13 @@ class PairingChallenge(Record):
     issued_by = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
 
 
+class PairingCodeReveal(models.Model):
+    """Short-lived encrypted display copy; challenge digest remains redemption authority."""
+
+    challenge = models.OneToOneField(PairingChallenge, primary_key=True, on_delete=models.PROTECT)
+    encrypted_code = models.TextField()
+
+
 class DeviceCredential(Record):
     device = models.ForeignKey(StationDevice, on_delete=models.PROTECT)
     digest = models.CharField(max_length=64, unique=True)

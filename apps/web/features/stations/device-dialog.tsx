@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Monitor, ShieldCheck, SlidersHorizontal, Tablet, Tv } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -17,6 +18,25 @@ import {
   type Device,
   type Mode,
 } from "./client";
+
+const modeIcons = { clinician: Tablet, kiosk: Monitor, display: Tv };
+const stateLabels = {
+  setup: "Setup in progress",
+  pending: "Awaiting approval",
+  active: "Approved",
+  revoked: "Access revoked",
+};
+const functionDescriptions: Record<string, string> = {
+  "clinical.read": "Required for the clinician workspace.",
+  "clinical.write": "Document and save consultations within staff permissions.",
+  "billing.read": "Review bills permitted by the signed-in staff role.",
+  "payments.record": "Requires the staff member’s existing billing permission.",
+  booking: "Book available clinic appointments.",
+  check_in: "Confirm arrival for an existing appointment.",
+  walk_in: "Join the configured service queue.",
+  payments: "Review bills and continue to the cashier.",
+  "queue.display": "Queue display content is planned for a later phase.",
+};
 
 type Branch = { id: string; name: string };
 export function DeviceDialog({
@@ -154,6 +174,7 @@ export function DeviceDialog({
       setBusy(false);
     }
   }
+  const ModeIcon = modeIcons[mode];
   return (
     <Dialog
       open
@@ -161,55 +182,86 @@ export function DeviceDialog({
         if (!open && !busy) void close();
       }}
     >
-      <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-xl">
-        <DialogTitle>{device ? "Manage device" : "Add clinic device"}</DialogTitle>
-        <DialogDescription>
-          Edit device settings and manage access. Generate pairing codes separately from the device
-          list.
-        </DialogDescription>
+      <DialogContent className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
+        <header className="shrink-0 border-b border-border px-5 py-5 sm:px-6">
+          <div className="mb-3 flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-secondary text-primary">
+              <ModeIcon className="size-5" aria-hidden="true" />
+            </span>
+            {device && (
+              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                {stateLabels[device.state]}
+              </span>
+            )}
+          </div>
+          <DialogTitle>{device ? "Manage device" : "Add clinic device"}</DialogTitle>
+          <DialogDescription className="mt-1 pr-6">
+            {device ? device.name : "Give your device a name and choose how it will be used."}
+          </DialogDescription>
+        </header>
         <form
-          className="grid gap-5"
+          id="device-settings"
+          className="min-h-0 space-y-6 overflow-y-auto px-5 py-5 sm:px-6"
           onSubmit={(event) => {
             event.preventDefault();
             void save();
           }}
         >
-          <FormField id="deviceName" label="Device name">
-            <Input
-              id="deviceName"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={80}
-              required
-            />
-          </FormField>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormSelect
-              id="deviceBranch"
-              label="Branch"
-              value={branch}
-              onChange={setBranch}
-              options={branches.map((b) => ({ value: b.id, label: b.name }))}
-            />
-            <FormSelect
-              id="deviceMode"
-              label="Device purpose"
-              value={mode}
-              onChange={(value) => {
-                const next = value as Mode;
-                setMode(next);
-                setFunctions(
-                  next === "clinician" ? ["clinical.read", "clinical.write"] : modeFunctions[next],
-                );
-              }}
-              options={Object.entries(modeLabels).map(([value, label]) => ({ value, label }))}
-            />
-          </div>
-          <fieldset className="grid gap-3">
-            <legend className="mb-3 text-sm font-semibold">Available functions</legend>
+          <section className="space-y-4" aria-label="Device details">
+            <FormField id="deviceName" label="Device name">
+              <Input
+                id="deviceName"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                maxLength={80}
+                required
+              />
+            </FormField>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormSelect
+                id="deviceBranch"
+                label="Branch"
+                value={branch}
+                onChange={setBranch}
+                options={branches.map((b) => ({ value: b.id, label: b.name }))}
+              />
+              <FormSelect
+                id="deviceMode"
+                label="Device purpose"
+                value={mode}
+                onChange={(value) => {
+                  const next = value as Mode;
+                  setMode(next);
+                  setFunctions(
+                    next === "clinician"
+                      ? ["clinical.read", "clinical.write"]
+                      : modeFunctions[next],
+                  );
+                }}
+                options={Object.entries(modeLabels).map(([value, label]) => ({ value, label }))}
+              />
+            </div>
+          </section>
+          <fieldset className="border-t border-border pt-5">
+            <legend className="sr-only">Available functions</legend>
+            <h3 className="mb-1 flex items-center gap-2 font-semibold">
+              <SlidersHorizontal className="size-4" aria-hidden="true" /> Available functions
+            </h3>
+            <p className="mb-2 text-xs leading-5 text-muted-foreground">
+              Enable what this device can do. Staff permissions still apply.
+            </p>
             {modeFunctions[mode].map((value) => (
-              <label key={value} className="flex min-h-10 items-center gap-3 text-sm">
-                <Checkbox
+              <label
+                key={value}
+                className="flex min-h-16 cursor-pointer items-center justify-between gap-5 border-b border-border/60 py-3 text-sm last:border-0"
+              >
+                <span>
+                  <span className="block font-medium">{functionLabels[value]}</span>
+                  <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                    {functionDescriptions[value]}
+                  </span>
+                </span>
+                <Switch
                   checked={functions.includes(value)}
                   onCheckedChange={(checked) =>
                     setFunctions(
@@ -218,15 +270,14 @@ export function DeviceDialog({
                   }
                   disabled={mode === "clinician" && value === "clinical.read"}
                 />
-                {functionLabels[value]}
               </label>
             ))}
           </fieldset>
           {mode === "kiosk" && (
             <div className="grid gap-2 border-t border-border pt-4">
-              <label className="flex min-h-11 items-center gap-3 text-sm font-semibold">
-                <Checkbox checked={strict} onCheckedChange={(value) => setStrict(value === true)} />
+              <label className="flex min-h-11 cursor-pointer items-center justify-between gap-5 text-sm font-semibold">
                 Strict patient verification
+                <Switch checked={strict} onCheckedChange={setStrict} />
               </label>
               <p className="text-sm leading-6 text-muted-foreground">
                 {strict
@@ -245,76 +296,82 @@ export function DeviceDialog({
             Changing branch, purpose or functions ends existing access and requires pairing again.
             Renaming keeps the connection.
           </p>
-          <Button
-            disabled={busy || !dirty || !name.trim() || !branch || !functions.length}
-            className="justify-self-start"
-          >
-            {busy ? "Working…" : device ? "Save changes" : "Create device"}
-          </Button>
-        </form>
-        {device && (
-          <section
-            className="grid gap-4 border-t border-border pt-5"
-            aria-label="Device connection"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="font-semibold">Connection</h3>
-              <span className="text-sm capitalize">
-                {device.state === "pending" ? "Awaiting approval" : device.state}
-              </span>
-            </div>
-            {device.state === "pending" && (
-              <p className="rounded-lg bg-muted p-4 text-center font-mono text-xl tracking-widest">
-                {device.verification_phrase ??
-                  "Refresh the device list to see its verification phrase."}
-              </p>
-            )}
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                disabled={busy || dirty}
-                onClick={() => void refreshConnection()}
-              >
-                Refresh connection
-              </Button>
+          {device && (
+            <section
+              className="grid gap-4 border-t border-border pt-5"
+              aria-label="Device connection"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="flex items-center gap-2 font-semibold">
+                  <ShieldCheck className="size-4" aria-hidden="true" /> Connection
+                </h3>
+                <span className="text-xs text-muted-foreground">{stateLabels[device.state]}</span>
+              </div>
               {device.state === "pending" && (
-                <Button
-                  type="button"
-                  disabled={busy || dirty}
-                  onClick={() => void manage("approve")}
-                >
-                  Approve device
-                </Button>
+                <p className="rounded-lg bg-muted p-4 text-center font-mono text-xl tracking-widest">
+                  {device.verification_phrase ??
+                    "Refresh the device list to see its verification phrase."}
+                </p>
               )}
-              {device.state !== "revoked" && (
+              <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
                   variant="ghost"
                   disabled={busy || dirty}
-                  onClick={() => void manage("revoke")}
+                  onClick={() => void refreshConnection()}
                 >
-                  Revoke device
+                  Refresh connection
                 </Button>
+                {device.state === "pending" && (
+                  <Button
+                    type="button"
+                    disabled={busy || dirty}
+                    onClick={() => void manage("approve")}
+                  >
+                    Approve device
+                  </Button>
+                )}
+                {device.state !== "revoked" && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    disabled={busy || dirty}
+                    onClick={() => void manage("revoke")}
+                  >
+                    Revoke device
+                  </Button>
+                )}
+              </div>
+              {dirty && (
+                <p className="text-xs text-muted-foreground">
+                  Save your changes before changing the connection.
+                </p>
               )}
-            </div>
-            {dirty && (
-              <p className="text-xs text-muted-foreground">
-                Save your changes before changing the connection.
-              </p>
-            )}
-          </section>
-        )}
-        {notice && (
-          <p role="status" className="text-sm text-teal-ink">
-            {notice}
-          </p>
-        )}
-        {error && (
-          <p role="alert" className="text-sm text-destructive">
-            {error} Close and reopen the device if its version has changed.
-          </p>
-        )}
+            </section>
+          )}
+          {notice && (
+            <p role="status" className="text-sm text-teal-ink">
+              {notice}
+            </p>
+          )}
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error} Close and reopen the device if its version has changed.
+            </p>
+          )}
+        </form>
+        <footer className="flex shrink-0 items-center justify-end gap-2 border-t border-border px-5 py-4 sm:px-6">
+          <Button type="button" variant="outline" disabled={busy} onClick={() => void close()}>
+            Done
+          </Button>
+          <Button
+            type="submit"
+            form="device-settings"
+            disabled={busy || !dirty || !name.trim() || !branch || !functions.length}
+          >
+            {busy ? "Working…" : device ? "Save changes" : "Create device"}
+          </Button>
+        </footer>
       </DialogContent>
     </Dialog>
   );

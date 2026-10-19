@@ -149,6 +149,10 @@ def manage(request):
                 "branches": [{"id": str(b.id), "name": b.name} for b in branches],
             }
         )
+    if action == "current_code":
+        return JsonResponse(
+            pairing.current_code(request, organization_id, identifier(data, "device_id"))
+        )
     if action == "create":
         device = pairing.create(request, organization_id, parsed(DeviceInput, data["device"]))
         return JsonResponse({"device": pairing.device_data(device)})

@@ -1,9 +1,11 @@
 import secrets
 from datetime import timedelta
 
+from cryptography.fernet import InvalidToken
 from django.db import transaction
 from django.utils import timezone
 
+from config.crypto import cipher
 from config.errors import DomainError
 from medframe_apps.common import check_version
 from medframe_apps.stations.context import digest
@@ -11,6 +13,7 @@ from medframe_apps.stations.models import (
     DeviceCredential,
     KioskPolicy,
     PairingChallenge,
+    PairingCodeReveal,
     StationDevice,
 )
 from medframe_apps.stations.policy import administrator, event
@@ -91,6 +94,45 @@ def scoped_device(request, organization_id, identifier):
     return device
 
 
+def clear_reveals(device):
+    PairingCodeReveal.objects.filter(challenge__device=device).exclude(encrypted_code="").update(
+        encrypted_code=""
+    )
+
+
+@transaction.atomic
+def current_code(request, organization_id, identifier):
+    device = scoped_device(request, organization_id, identifier)
+    result = {"device": device_data(device), "transfer": None, "status": device.state}
+    if device.state != "setup":
+        return result
+    challenge = PairingChallenge.objects.filter(device=device).order_by("-created_at").first()
+    if not challenge:
+        return {**result, "status": "not_created"}
+    if challenge.consumed_at:
+        return {**result, "status": "used"}
+    if challenge.expires_at <= timezone.now():
+        clear_reveals(device)
+        return {**result, "status": "expired"}
+    reveal = PairingCodeReveal.objects.filter(challenge=challenge).first()
+    if not reveal or not reveal.encrypted_code:
+        return {**result, "status": "legacy"}
+    try:
+        secret = cipher().decrypt(reveal.encrypted_code.encode()).decode()
+    except (InvalidToken, UnicodeDecodeError):
+        raise DomainError(
+            "CODE_UNAVAILABLE", "This code cannot be displayed. Generate a new pairing code.", 409
+        ) from None
+    if digest(secret) != challenge.digest:
+        raise DomainError("CODE_UNAVAILABLE", "Generate a new pairing code.", 409)
+    event(request.user, organization_id, "device.code_viewed", device=device)
+    return {
+        **result,
+        "status": "available",
+        "transfer": {"code": secret, "expires_at": challenge.expires_at.isoformat()},
+    }
+
+
 @transaction.atomic
 def manage(request, organization_id, identifier, action, expected_version):
     device = scoped_device(request, organization_id, identifier)
@@ -98,6 +140,7 @@ def manage(request, organization_id, identifier, action, expected_version):
     result = {}
     now = timezone.now()
     if action == "pair":
+        clear_reveals(device)
         DeviceCredential.objects.filter(device=device).update(revoked=True)
         PairingChallenge.objects.filter(device=device, consumed_at__isnull=True).update(
             expires_at=now
@@ -108,6 +151,9 @@ def manage(request, organization_id, identifier, action, expected_version):
             digest=digest(secret),
             expires_at=now + timedelta(minutes=5),
             issued_by=request.user,
+        )
+        PairingCodeReveal.objects.create(
+            challenge=challenge, encrypted_code=cipher().encrypt(secret.encode()).decode()
         )
         device.state = "setup"
         device.approved_by = None
@@ -123,6 +169,7 @@ def manage(request, organization_id, identifier, action, expected_version):
             raise DomainError("EXPIRED", "The approval window expired. Generate a new code.", 409)
         device.state, device.approved_by, device.approved_at = "active", request.user, now
     elif action == "revoke":
+        clear_reveals(device)
         device.state = "revoked"
         DeviceCredential.objects.filter(device=device).update(revoked=True)
         PairingChallenge.objects.filter(device=device, consumed_at__isnull=True).update(
@@ -166,6 +213,7 @@ def redeem(request, value):
         verification_phrase=code()[:6],
         expires_at=timezone.now() + timedelta(days=30),
     )
+    clear_reveals(device)
     challenge.consumed_at = timezone.now()
     challenge.save(update_fields=["consumed_at"])
     device.state = "pending"
@@ -196,6 +244,7 @@ def update(request, organization_id, identifier, expected_version, data):
     device.mode = data.mode
     device.functions = sorted(set(data.functions))
     if scope_changed:
+        clear_reveals(device)
         DeviceCredential.objects.filter(device=device).update(revoked=True)
         PairingChallenge.objects.filter(device=device, consumed_at__isnull=True).update(
             expires_at=timezone.now()

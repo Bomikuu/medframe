@@ -75,3 +75,5 @@ output/playwright/
 .medframe-runtime/
 .next-local-dev/
 .next-local-production/
+
+.next-device-modal-toggles/
