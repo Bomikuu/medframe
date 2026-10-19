@@ -559,7 +559,7 @@ Final source review found that a strict-mode task switch cleared local identity 
 
 ## SESSION-ROUTING-001 — ordinary form logout compatibility (activation repair)
 
-Initial scoped backend pass: eight of nine pass; the existing form/bodyless logout contract returns 400 because the new optional clear_device flag attempted to parse multipart form content as JSON. Restrict optional flag parsing to JSON requests; ordinary logout keeps its original form contract and does not detach pairing. Rerun only that compatibility case as a focused activation confirmation. No password/MFA or authorization change.
+Initial scoped backend pass: eight of nine pass; the existing form/bodyless logout contract returns 400 because the new optional clear_device flag attempted to parse multipart form content as JSON. Restrict optional flag parsing to JSON requests; ordinary logout keeps its original form contract and does not detach pairing. That one compatibility case passes in the focused activation confirmation; final scoped Ruff/format passes. No password/MFA or authorization change.
 
 ## SESSION-ROUTING-002 — intentional hard-navigation lint warning
 

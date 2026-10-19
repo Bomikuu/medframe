@@ -28,4 +28,8 @@ Jev 1.13.0 received sanitized architecture only. Planning choice `route` versus 
 
 ## Local activation and preservation
 
-Pending fresh encrypted checkpoint/isolated restore, original fingerprints and service activation. No migrations required; existing records/accounts/passwords/MFA/roles and prior artifacts retained. No clone import, database reset, public deployment, external messaging or money movement.
+Active locally from implementation `5da89dc`, original `medframe_django`, `.next-session-recovery`. No migrations or credential/MFA/role changes. Fresh encrypted checkpoint `/home/micxsz/.local/share/medframe/checkpoints/pre-batch2-20261019-222437-5da89dc` restored into new isolated `medframe_django_session_recovery_activation_20261019` with all 139 table counts verified. Capture/check fingerprints preserve all 6,018 original rows across 139 tables before traffic resumed. The encrypted storage checkpoint `/home/micxsz/.local/share/medframe/checkpoints/session-recovery-storage-20261019` verified 51 original objects into new isolated bucket `medframe-review-session-recovery-20261019`; originals were not written. No synthetic review data/session was imported.
+
+Runtime: web PID 1141058 on 3000 (tool session 84449), API 1141048 on 8000 (83527), worker 1141049 concurrency 2 (63296), beat 1141051 (44219). Logs `/tmp/medframe-session-recovery-{web,api,worker,beat}-runtime.log`; beat state `/tmp/medframe-session-recovery-original-beat`. Login and proxied session endpoint return 200; anonymous root returns 307 to local /login. Review services on 3001/8001 are stopped. Local mail capture/SMS preview configuration retained.
+
+Rollback: use preserved prior source and `.next-kiosk-reception` together with original data. No schema downgrade or review-clone restoration. Prior source/UI artifacts and native accounts remain intact. No public deployment, external messaging, online money movement or unrelated deferred repair.
