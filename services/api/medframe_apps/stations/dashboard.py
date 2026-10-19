@@ -166,7 +166,15 @@ def snapshot(request, organization_id, branch_id, *, view="today", before=None):
                 now=now,
             )
         )
-    agenda.sort(key=lambda row: (row["status"] != "in_service", row["time"], row["id"]))
+    queue_rank = {str(row.id): index for index, row in enumerate(tickets)}
+    agenda.sort(
+        key=lambda row: (
+            0 if row["status"] == "in_service" else 1 if row["ticket_id"] in queue_rank else 2,
+            queue_rank.get(row["ticket_id"], 0),
+            row["time"],
+            row["id"],
+        )
+    )
     if view == "all":
         if before:
             encounters = encounters.filter(id__lt=before)

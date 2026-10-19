@@ -225,3 +225,25 @@ class StationGalleryTests(ClinicalFixture):
         self.assertEqual(StationAccessTests.redeem(self, code).status_code, 200)
         self.assertEqual(self.feed().status_code, 403)
         self.assertEqual(self.select_photo(self.image()).status_code, 403)
+
+    def test_agenda_preserves_staff_queue_priority_before_scheduled_slots(self):
+        first = self.ticket(created_at=self.day() - timedelta(minutes=20))
+        priority_patient = self.register()
+        priority = QueueTicket.objects.create(
+            day=first.day,
+            patient=priority_patient,
+            provider=self.provider,
+            number=2,
+            order=512,
+            created_by=self.doctor,
+            created_at=self.day(),
+        )
+        self.appointment(
+            start=self.day() + timedelta(minutes=5), end=self.day() + timedelta(minutes=35)
+        )
+        self.assertEqual(self.open().status_code, 200)
+        agenda = self.feed().json()["agenda"]
+        self.assertEqual(
+            [row["ticket_id"] for row in agenda[:2]], [str(priority.id), str(first.id)]
+        )
+        self.assertIsNone(agenda[2]["ticket_id"])
