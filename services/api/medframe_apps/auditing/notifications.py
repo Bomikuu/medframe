@@ -31,7 +31,10 @@ def target(request, row):
         if row.kind.startswith("document_"):
             version = require_document(request.user, row.organization_id, row.resource_id)
             if version.document.patient_id:
-                return f"/clinic/patients/{version.document.patient_id}?organization={row.organization_id}&tab=documents"
+                return (
+                    f"/clinic/patients/{version.document.patient_id}"
+                    f"?organization={row.organization_id}&tab=documents"
+                )
         if row.kind == "encounter_finalized":
             revision = (
                 EncounterRevision.objects.select_related("encounter")
@@ -45,7 +48,10 @@ def target(request, row):
                     revision.encounter.patient_id,
                     "patients.clinical.read",
                 )
-                return f"/clinic/consultations/{revision.encounter_id}?organization={row.organization_id}"
+                return (
+                    f"/clinic/consultations/{revision.encounter_id}"
+                    f"?organization={row.organization_id}"
+                )
     except DomainError:
         return None
     return None

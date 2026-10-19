@@ -32,10 +32,19 @@ PURPOSE = {"appointment": "appointments", "follow_up": "follow_ups", "invoice": 
 def safe_message(source, kind, zone):
     if kind == "appointment":
         moment = source.start.astimezone(ZoneInfo(zone)).strftime("%d %b %Y, %I:%M %p")
-        return f"Medframe: Your clinic appointment is on {moment} ({zone}). Contact your clinic for changes."
+        return (
+            f"Medframe: Your clinic appointment is on {moment} ({zone}). "
+            "Contact your clinic for changes."
+        )
     if kind == "follow_up":
-        return "Medframe: Please contact your clinic about a follow-up. Sign in to your patient portal for shared information."
-    return "Medframe: A billing update is available. Sign in to your patient portal or contact your clinic."
+        return (
+            "Medframe: Please contact your clinic about a follow-up. "
+            "Sign in to your patient portal for shared information."
+        )
+    return (
+        "Medframe: A billing update is available. "
+        "Sign in to your patient portal or contact your clinic."
+    )
 
 
 def eligible_preference(patient_id, kind, channel):
