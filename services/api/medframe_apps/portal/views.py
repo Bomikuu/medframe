@@ -15,7 +15,12 @@ def login(request):
     email = str(data.get("email", "")).strip().lower()
     throttle(request, "portal-login", email, 5, 900)
     step = services.begin_login(
-        request, email, data.get("password", ""), realm="patient", eligibility=eligible_patient
+        request,
+        email,
+        data.get("password", ""),
+        realm="patient",
+        eligibility=eligible_patient,
+        remember=data.get("remember", False),
     )
     refund_attempt(request, "portal-login", email)
     return JsonResponse({"nextStep": step})

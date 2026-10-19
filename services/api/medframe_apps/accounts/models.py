@@ -36,6 +36,11 @@ class MfaCredential(models.Model):
     last_step = models.BigIntegerField(default=-1)
 
 
+class GoogleIdentity(Record):
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    subject = models.CharField(max_length=255, unique=True)
+
+
 class RecoveryCode(Record):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     code_hash = models.CharField(max_length=64, unique=True)

@@ -74,6 +74,15 @@ export function AuthFlow({
       }
     });
   }
+  async function googleLogin(credential: string, remember: boolean) {
+    await run(async () => {
+      const result = await requestWithCsrf<{ nextStep: "verify" }>(`${prefix}/google/login`, {
+        credential,
+        remember,
+      });
+      setStep(result.nextStep);
+    });
+  }
   const heading = {
     login: invitation ? "Accept your invitation" : portal ? "Patient sign in" : "Welcome back",
     enroll: "Protect your account",
@@ -124,7 +133,7 @@ export function AuthFlow({
             }}
           />
         ) : (
-          <LoginForm onSubmit={login} busy={busy} portal={portal} />
+          <LoginForm onSubmit={login} onGoogleSubmit={googleLogin} busy={busy} portal={portal} />
         ))}
       {(step === "enroll" || step === "verify") && (
         <MfaVerificationForm

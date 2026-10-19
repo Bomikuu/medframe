@@ -26,7 +26,9 @@ def login_view(request):
     data = json_object(request)
     identity = data.get("email", "")
     throttle(request, "login", str(identity).strip().lower(), 5, 900)
-    next_step = services.begin_login(request, identity, data.get("password", ""))
+    next_step = services.begin_login(
+        request, identity, data.get("password", ""), remember=data.get("remember", False)
+    )
     refund_attempt(request, "login", str(identity).strip().lower())
     return JsonResponse({"nextStep": next_step})
 

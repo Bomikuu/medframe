@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     web_origin: str = "http://localhost:3000"
     cookie_secure: bool = False
+    google_client_id: str = ""
     smtp_host: str = "127.0.0.1"
     smtp_port: int = 51025
     smtp_username: str = ""

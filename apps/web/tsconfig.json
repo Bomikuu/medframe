@@ -42,7 +42,9 @@
     ".next-dental-editor/types/**/*.ts",
     ".next-dental-editor/dev/types/**/*.ts",
     ".next-dental-reference/types/**/*.ts",
-    ".next-dental-reference/dev/types/**/*.ts"
+    ".next-dental-reference/dev/types/**/*.ts",
+    ".next-login-enhancements/types/**/*.ts",
+    ".next-login-enhancements/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

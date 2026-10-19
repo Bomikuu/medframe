@@ -29,7 +29,9 @@ from medframe_apps.organizations.models import Membership
 
 
 @transaction.atomic
-def begin_login(request, email, password, *, realm: SessionRealm = "staff", eligibility=None):
+def begin_login(
+    request, email, password, *, realm: SessionRealm = "staff", eligibility=None, remember=False
+):
     if (
         not isinstance(email, str)
         or not isinstance(password, str)
@@ -58,14 +60,16 @@ def begin_login(request, email, password, *, realm: SessionRealm = "staff", elig
     )
     if realm not in {"staff", "patient"} or not allowed:
         raise DomainError("INVALID_CREDENTIALS", "Email or password is incorrect.", 401)
-    start_challenge(request, user, realm)
+    start_challenge(request, user, realm, remember=remember)
     audit(user, "auth.password_verified", resource_id=user.id)
     return (
         "verify" if MfaCredential.objects.filter(user=user, confirmed=True).exists() else "enroll"
     )
 
 
-def start_challenge(request, user, realm: SessionRealm):
+def start_challenge(request, user, realm: SessionRealm, *, remember=False):
+    if not isinstance(remember, bool):
+        raise DomainError("INVALID_INPUT", "Choose whether to stay logged in.")
     ClinicalSession.objects.filter(session_key=request.session.session_key).update(revoked=True)
     logout(request)
     request.session.cycle_key()
@@ -73,6 +77,7 @@ def start_challenge(request, user, realm: SessionRealm):
     request.session["challenge_user"] = str(user.id)
     request.session["challenge_epoch"] = user.auth_epoch
     request.session["challenge_expires"] = time.time() + 300
+    request.session["challenge_remember"] = remember
     request.session.set_expiry(300)
 
 
@@ -151,18 +156,23 @@ def verify_mfa(
     credential.save()
     if activation is not None:
         activation.complete(user, request)
+    from medframe_apps.accounts.google_signin import complete_google_link
+
+    complete_google_link(request, user, realm)
+    remember = request.session.get("challenge_remember") is True
+    duration = timedelta(days=30) if remember else timedelta(hours=8)
     request.session.flush()
     login(request, user, backend="django.contrib.auth.backends.ModelBackend")
     request.session["mfa_verified"] = True
     request.session["auth_realm"] = realm
-    request.session.set_expiry(8 * 3600)
+    request.session.set_expiry(int(duration.total_seconds()) if remember else 0)
     request.session.save()
     now = timezone.now()
     ClinicalSession.objects.create(
         user=user,
         realm=realm,
         session_key=request.session.session_key,
-        expires_at=now + timedelta(hours=8),
+        expires_at=now + duration,
         last_seen_at=now,
     )
     audit(user, "auth.mfa_verified", resource_id=user.id)

@@ -57,6 +57,13 @@ components:
 
 ## Overview
 
+Authentication keeps the existing white, navy and Inter form system. Staff and patient sign-in
+share an unchecked Stay logged in checkbox and disclose the existing inactivity limit. MFA uses
+the official shadcn Input OTP with six separate slots, numeric keyboard, full-code paste and
+one-time-code autofill; recovery codes use an explicit alternate text field. Google uses its own
+Identity Services button when configured, with clear loading/unavailable/error states and the
+existing Medframe MFA step after Google identity verification.
+
 **Creative North Star: A focused clinical desk.** Medframe is an Operate surface for clinicians documenting patient care. A predominantly white workspace, restrained navy actions, slate text, and teal interaction feedback keep clinical content prominent. The existing identity and shared primitives remain; the approved Django Edition changes defaults and adds persisted, validated customization.
 
 The local Django application implements these tokens; production-build, browser, visual self-review, and local cutover evidence are recorded in `docs/operations/django-batch-1-verification.md`. The concept-11 Medframe symbol is unavailable, so the product retains its text name. A saved clinic logo identifies that organization without inventing a substitute product symbol.

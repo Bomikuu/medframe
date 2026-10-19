@@ -204,3 +204,28 @@ The one focused browser confirmation records five passed assertion groups and ze
 - Evidence: `.impeccable/review/reference-editor/mobile.png`, `mobile-inspector.png` and the final browser report. No mobile repair, second browser round or broader test sweep was run.
 
 REF-002 text-size advisories and older EDITOR-001 test import ordering remain deferred. The new confirmation used the editor's explicit data marker and successfully exercised the note save/reload coverage previously blocked by EDITOR-002; the older harness itself was not changed.
+
+## Login enhancements — October 19, 2026
+
+### AUTH-001 — React Hook Form memoization advisory (deferred)
+
+- Scoped ESLint reports zero errors and one `react-hooks/incompatible-library` warning for
+  `watch("remember")` in `features/auth/login-form.tsx`. React Compiler skips memoizing that
+  component; the warning describes a potential stale-state risk when passing watched values to
+  memoized consumers.
+- The focused browser check did pass the checked remember value through the mocked Google callback,
+  and real password/MFA flows produced the expected persistent and browser-session cookies. These
+  assertions do not remove the compiler advisory.
+- Evidence: `.impeccable/review/login-enhancements/medframe-login-lint-scoped.log` and browser report.
+  No source repair or repeat lint/build/browser pass was made after discovery.
+
+### AUTH-002 — Dependency audit output needs triage (deferred)
+
+- The `npm install input-otp --workspace apps/web` command reported **12 high-severity vulnerabilities**
+  across the installed dependency tree. No package-level audit or baseline comparison was performed;
+  this count does not establish that `input-otp` introduced them.
+- No `npm audit fix`, forced upgrade, unrelated package replacement, or second audit was run.
+
+The initial lint command ran from the repository root, where there is no ESLint config. It did not
+inspect product code. The single valid scoped lint invocation ran from `apps/web`; its result is
+AUTH-001 above. This was a command-location correction, with no product repair.

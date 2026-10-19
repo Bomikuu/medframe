@@ -1,28 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/form-field";
 import { PasswordInput } from "@/components/password-input";
 import { loginSchema, type LoginValues } from "@/lib/auth/schemas";
+import { GoogleSignIn } from "./google-sign-in";
 
 export function LoginForm({
   onSubmit,
+  onGoogleSubmit,
   busy,
   portal = false,
 }: {
   onSubmit: (values: LoginValues) => Promise<void>;
+  onGoogleSubmit: (credential: string, remember: boolean) => Promise<void>;
   busy: boolean;
   portal?: boolean;
 }) {
   const {
     register,
+    control,
+    watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+  } = useForm<LoginValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "", remember: false },
+  });
   return (
     <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
       <FormField
@@ -50,15 +59,51 @@ export function LoginForm({
           {...register("password")}
         />
       </FormField>
-      <Link
-        href={portal ? "/portal/recover" : "/auth/recover"}
-        className="-mt-2 justify-self-end text-sm font-medium text-primary underline-offset-4 hover:underline"
-      >
-        Forgot password?
-      </Link>
+      <div className="grid gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+          <label
+            htmlFor="remember"
+            className="flex min-h-8 cursor-pointer items-center gap-2 text-sm"
+          >
+            <Controller
+              name="remember"
+              control={control}
+              render={({ field }) => (
+                <Checkbox
+                  id="remember"
+                  name={field.name}
+                  checked={field.value}
+                  onCheckedChange={(checked) => field.onChange(checked === true)}
+                  onBlur={field.onBlur}
+                  ref={field.ref}
+                  disabled={busy}
+                  aria-describedby="remember-help"
+                />
+              )}
+            />
+            Stay logged in
+          </label>
+          <Link
+            href={portal ? "/portal/recover" : "/auth/recover"}
+            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <p id="remember-help" className="text-xs leading-5 text-muted-foreground">
+          Stay signed in on this browser for up to 30 days. The 30-minute inactivity limit still
+          applies.
+        </p>
+      </div>
       <Button type="submit" disabled={busy} aria-busy={busy} className="mt-1 w-full">
         {busy ? "Signing in…" : "Sign in"}
       </Button>
+      <GoogleSignIn
+        portal={portal}
+        busy={busy}
+        remember={watch("remember")}
+        onSubmit={onGoogleSubmit}
+      />
     </form>
   );
 }
