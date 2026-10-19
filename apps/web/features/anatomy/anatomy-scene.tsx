@@ -14,6 +14,7 @@ import { Mesh, MeshStandardMaterial, Vector3, PerspectiveCamera } from "three";
 import type { OrbitControls as OrbitControlsHandle } from "three-stdlib";
 import type { AnatomyAnchor, AnatomyCamera, AnatomyFinding, AnatomyLayer } from "./schema";
 import { anatomyAsset, structures } from "./asset-registry";
+import { boundsCenter, fitDistance, focusDistance } from "./camera-focus";
 
 function Camera({
   view,
@@ -22,44 +23,39 @@ function Camera({
   layer,
   selected,
   isolate,
-}: Pick<SceneProps, "layer" | "selected" | "isolate"> & {
+  focus,
+}: Pick<SceneProps, "layer" | "selected" | "isolate" | "focus"> & {
   view: AnatomyCamera;
   reset: number;
   zoom?: number;
 }) {
   const { camera, controls: genericControls, invalidate, size } = useThree();
   const controls = genericControls as OrbitControlsHandle | undefined;
-  const targetId = isolate ? selected : undefined;
+  const targetId = isolate ? selected : focus;
   const framing = useMemo(() => {
-    const entries = structures.filter(
-      (value) => value.layer === layer && (!targetId || value.id === targetId),
-    );
+    const entries = structures.filter((value) => value.layer === layer);
     const lower = [0, 1, 2].map((axis) =>
       Math.min(...entries.map((value) => value.bounds.min[axis])),
     );
     const upper = [0, 1, 2].map((axis) =>
       Math.max(...entries.map((value) => value.bounds.max[axis])),
     );
-    return {
-      center: new Vector3(
-        ...(lower.map((value, axis) => (value + upper[axis]) / 2) as [number, number, number]),
-      ).sub(new Vector3(0, 0.9, 0)),
-      extent: new Vector3(
-        ...(upper.map((value, axis) => value - lower[axis]) as [number, number, number]),
-      ),
-    };
+    const full = { min: lower, max: upper };
+    const target = entries.find((value) => value.id === targetId)?.bounds;
+    return { full, target, center: new Vector3(...boundsCenter(target ?? full)) };
   }, [layer, targetId]);
   useLayoutEffect(() => {
     if (!(camera instanceof PerspectiveCamera)) return;
-    const lateral = view === "left" || view === "right";
-    const tangent = Math.tan((camera.fov * Math.PI) / 360);
-    const vertical = framing.extent.y;
-    const horizontal = lateral ? framing.extent.z : framing.extent.x;
-    const depth = lateral ? framing.extent.x : framing.extent.z;
-    const distance =
-      Math.max(vertical / (2 * tangent), horizontal / ((2 * tangent * size.width) / size.height)) *
-        1.16 +
-      depth / 2;
+    const aspect = size.width / size.height;
+    const fullDistance = fitDistance(framing.full, view, aspect, camera.fov);
+    const selectedDistance = framing.target
+      ? fitDistance(framing.target, view, aspect, camera.fov)
+      : fullDistance;
+    const distance = isolate
+      ? selectedDistance
+      : framing.target
+        ? focusDistance(fullDistance, selectedDistance)
+        : fullDistance;
     const direction = { front: [0, 0, 1], back: [0, 0, -1], left: [1, 0, 0], right: [-1, 0, 0] }[
       view
     ];
@@ -73,7 +69,7 @@ function Camera({
       controls.update();
     }
     invalidate();
-  }, [camera, controls, framing, view, reset, size.width, size.height, invalidate]);
+  }, [camera, controls, framing, isolate, view, reset, size.width, size.height, invalidate]);
   const priorZoom = useRef(zoom);
   useEffect(() => {
     const delta = zoom - priorZoom.current;
@@ -208,6 +204,7 @@ export type SceneProps = {
   layer: AnatomyLayer;
   selected: string;
   isolate: boolean;
+  focus?: string;
   findings: AnatomyFinding[];
   annotate?: boolean;
   onSelect?: (id: string) => void;
@@ -247,6 +244,7 @@ export default function AnatomyScene(
           layer={props.layer}
           selected={props.selected}
           isolate={props.isolate}
+          focus={props.focus}
         />
         <ContextLoss onFailure={props.onFailure} />
         <OrbitControls makeDefault enableDamping={false} minDistance={0.06} maxDistance={12} />

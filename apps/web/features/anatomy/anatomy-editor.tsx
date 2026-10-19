@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import type { EncounterForm } from "@/features/consultations/schema";
 import { structures } from "./asset-registry";
 import { navigationGroup, type RegionGroup } from "./navigation";
+import { structureView } from "./camera-focus";
 import type { AnatomyAnchor, AnatomyCamera, AnatomyFinding, AnatomyLayer } from "./schema";
 import { AnatomyViewport } from "./anatomy-viewport";
 import { AnatomyMap } from "./anatomy-map";
@@ -50,6 +51,7 @@ export function AnatomyEditor({
   const [isolate, setIsolate] = useState(false);
   const [reset, setReset] = useState(0);
   const [zoom, setZoom] = useState(0);
+  const [cameraFocus, setCameraFocus] = useState<string>();
   const [assistantOpen, setAssistantOpen] = useState(true);
   const [assistantDrawer, setAssistantDrawer] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
@@ -93,6 +95,16 @@ export function AnatomyEditor({
     setInspectorTab("findings");
     setInspectorOpen(true);
   }
+  function navigateToStructure(id: string) {
+    const structure = structures.find((value) => value.id === id);
+    if (!structure) return;
+    select(id);
+    setView(structureView(structure));
+    setCameraFocus(id);
+    // Re-selecting the same entry restores its view after manual orbit/zoom.
+    setReset((value) => value + 1);
+    setNavigatorOpen(false);
+  }
   function add(id = selection, anchor?: AnatomyAnchor) {
     const item = structures.find((value) => value.id === id);
     if (readOnly || !item || findings.length >= 60) return;
@@ -132,9 +144,11 @@ export function AnatomyEditor({
     setGroup(null);
     setQuery("");
     setIsolate(false);
+    setCameraFocus(undefined);
   }
   function resetView() {
     setIsolate(false);
+    setCameraFocus(undefined);
     setReset((value) => value + 1);
   }
   function failure() {
@@ -184,7 +198,7 @@ export function AnatomyEditor({
             layer={layer}
             onLayer={changeLayer}
             selected={selection}
-            onSelect={select}
+            onSelect={navigateToStructure}
             query={query}
             onQuery={setQuery}
             group={group}
@@ -232,6 +246,7 @@ export function AnatomyEditor({
                   layer={layer}
                   selected={selection}
                   isolate={isolate}
+                  focus={cameraFocus}
                   findings={findings}
                   annotate={annotate && !readOnly}
                   onSelect={select}
@@ -285,7 +300,7 @@ export function AnatomyEditor({
                     variant="ghost"
                     size="icon-sm"
                     aria-label="Fit model to view"
-                    onClick={() => setReset((value) => value + 1)}
+                    onClick={resetView}
                   >
                     <LocateFixed />
                   </Button>
@@ -293,6 +308,11 @@ export function AnatomyEditor({
               )}
               <div className="pointer-events-none absolute top-5 right-4 z-10 rounded-md bg-card/90 px-2.5 py-1.5 text-[10px] text-muted-foreground">
                 <span className="capitalize">{view}</span> view · patient sides
+                {cameraFocus && (
+                  <span role="status" className="mt-1 block max-w-44 text-foreground">
+                    Focused on {structures.find((value) => value.id === cameraFocus)?.label}
+                  </span>
+                )}
               </div>
               {annotate && (
                 <p
