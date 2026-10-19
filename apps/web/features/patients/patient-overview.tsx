@@ -1,5 +1,6 @@
 "use client";
 
+import { PatientBilling } from "@/features/billing/patient-billing";
 import { ButtonLink } from "@/components/ui/button-link";
 
 import Link from "next/link";
@@ -51,6 +52,7 @@ export function PatientOverview({
     ["dental", "Dental chart", clinical],
     ["treatments", "Treatments", clinical],
     ["documents", "Documents", clinical],
+    ["billing", "Billing", can("billing.read")],
     ["shared", "Shared records", clinical],
     ["access", "Access", can("portal.manage") || can("patients.access.manage")],
   ].filter(([, , visible]) => visible);
@@ -207,6 +209,11 @@ export function PatientOverview({
             ))}
           </TabsList>
         </div>
+        <TabsContent value="billing">
+          {active === "billing" && can("billing.read") && (
+            <PatientBilling patientId={patientId} branchId={patient.branchId} />
+          )}
+        </TabsContent>
         <TabsContent value="overview">
           <div className="grid items-start gap-6 xl:grid-cols-2">
             {[

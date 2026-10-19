@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     "medframe_apps.documents",
     "medframe_apps.portal",
     "medframe_apps.operations",
+    "medframe_apps.billing",
+    "medframe_apps.communications",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -172,3 +174,22 @@ CHANNEL_LAYERS = {
         },
     }
 }
+
+# External SMS is disabled unless explicitly configured and enabled.
+SMS_LIVE_ENABLED = runtime.sms_live_enabled
+TWILIO_ACCOUNT_SID = runtime.twilio_account_sid
+TWILIO_AUTH_TOKEN = runtime.twilio_auth_token.get_secret_value()
+TWILIO_FROM = runtime.twilio_from
+TWILIO_STATUS_CALLBACK_URL = runtime.twilio_status_callback_url
+CELERY_BEAT_SCHEDULE.update(
+    {
+        "reminder-dispatch": {
+            "task": "medframe_apps.communications.tasks.deliver_reminders",
+            "schedule": 15.0,
+        },
+        "reminder-scheduling": {
+            "task": "medframe_apps.communications.tasks.schedule_automatic",
+            "schedule": 60.0,
+        },
+    }
+)

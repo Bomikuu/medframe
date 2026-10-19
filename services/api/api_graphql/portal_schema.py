@@ -7,6 +7,7 @@ from django.db import transaction
 from strawberry.scalars import JSON
 from strawberry.types import Info
 
+from api_graphql.portal_billing import PortalBillingMutation, PortalBillingQuery
 from api_graphql.portal_operations import PortalOperationsMutation, PortalOperationsQuery
 from config.errors import DomainError
 from medframe_apps.accounts.session_realms import require_session_realm
@@ -22,7 +23,7 @@ from medframe_apps.record_filters import page_records
 
 
 @strawberry.type
-class PortalQuery(PortalOperationsQuery):
+class PortalQuery(PortalOperationsQuery, PortalBillingQuery):
     @strawberry.field
     def portal_session(self, info: Info) -> JSON:
         user = require_session_realm(info.context, "patient")
@@ -89,7 +90,7 @@ class PortalQuery(PortalOperationsQuery):
 
 
 @strawberry.type
-class PortalMutation(PortalOperationsMutation):
+class PortalMutation(PortalOperationsMutation, PortalBillingMutation):
     @strawberry.mutation
     def submit_patient_report(
         self, info: Info, link_id: UUID, category: str, text: str, request_id: UUID

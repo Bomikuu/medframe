@@ -216,6 +216,18 @@ function PortalShell({
                 My appointments
               </Link>
               <Link
+                href={href("/portal/reminders")}
+                aria-current={pathname === "/portal/reminders" ? "page" : undefined}
+              >
+                Reminders
+              </Link>
+              <Link
+                href={href("/portal/billing")}
+                aria-current={pathname === "/portal/billing" ? "page" : undefined}
+              >
+                Billing
+              </Link>
+              <Link
                 href={href("/portal/queue")}
                 aria-current={pathname === "/portal/queue" ? "page" : undefined}
                 className="text-primary hover:underline"

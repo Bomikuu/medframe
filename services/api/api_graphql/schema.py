@@ -5,7 +5,9 @@ from django.db import transaction
 from strawberry.types import Info
 from strawberry_django.optimizer import DjangoOptimizerExtension
 
+from api_graphql.billing import BillingMutation, BillingQuery
 from api_graphql.clinical import ClinicalMutation, ClinicalQuery
+from api_graphql.communications import CommunicationsMutation, CommunicationsQuery
 from api_graphql.consultation_templates import TemplateMutation, TemplateQuery
 from api_graphql.contract_aliases import ContractMutation, ContractQuery
 from api_graphql.dental_history import DentalHistoryQuery
@@ -48,6 +50,8 @@ class WorkspaceType:
 
 @strawberry.type
 class Query(
+    BillingQuery,
+    CommunicationsQuery,
     OperationsQuery,
     PatientQuery,
     ClinicalQuery,
@@ -101,6 +105,8 @@ class PrivateSchema(strawberry.Schema):
 
 @strawberry.type
 class Mutation(
+    BillingMutation,
+    CommunicationsMutation,
     OperationsMutation,
     PatientMutation,
     ClinicalMutation,

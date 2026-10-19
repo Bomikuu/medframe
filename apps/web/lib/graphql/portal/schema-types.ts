@@ -16,6 +16,8 @@ export type PortalMutation = {
   __typename?: 'PortalMutation';
   authorizePortalDownload: Scalars['String']['output'];
   myAppointmentAction: Scalars['JSON']['output'];
+  readMyNotifications: Scalars['Boolean']['output'];
+  revokeMyReminders: Scalars['JSON']['output'];
   savePortalPreferences: Scalars['JSON']['output'];
   submitPatientReport: Scalars['JSON']['output'];
 };
@@ -33,6 +35,18 @@ export type PortalMutationMyAppointmentActionArgs = {
   data: Scalars['JSON']['input'];
   linkId: Scalars['UUID']['input'];
   requestId: Scalars['UUID']['input'];
+};
+
+
+export type PortalMutationReadMyNotificationsArgs = {
+  ids: Array<Scalars['UUID']['input']>;
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalMutationRevokeMyRemindersArgs = {
+  expectedVersion: Scalars['Int']['input'];
+  linkId: Scalars['UUID']['input'];
 };
 
 
@@ -55,6 +69,10 @@ export type PortalQuery = {
   __typename?: 'PortalQuery';
   myAppointmentAvailability: Scalars['JSON']['output'];
   myAppointments: Scalars['JSON']['output'];
+  myBilling: Scalars['JSON']['output'];
+  myCommunicationPreferences: Scalars['JSON']['output'];
+  myInvoice: Scalars['JSON']['output'];
+  myNotifications: Scalars['JSON']['output'];
   myQueue: Scalars['JSON']['output'];
   portalLinks: Scalars['JSON']['output'];
   portalRecord: Scalars['JSON']['output'];
@@ -72,6 +90,29 @@ export type PortalQueryMyAppointmentAvailabilityArgs = {
 
 
 export type PortalQueryMyAppointmentsArgs = {
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyBillingArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyCommunicationPreferencesArgs = {
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyInvoiceArgs = {
+  invoiceId: Scalars['UUID']['input'];
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
   linkId: Scalars['UUID']['input'];
 };
 

@@ -93,6 +93,8 @@ input MedicationInput {
 }
 
 type Mutation {
+  billingAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
+  communicationAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   operationsAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   registerPatient(organizationId: UUID!, data: RegisterPatientInput!): PatientDemographics!
   updatePatientDemographics(organizationId: UUID!, patientId: UUID!, data: UpdateDemographicsInput!): PatientDemographics!
@@ -218,6 +220,12 @@ type ProviderType {
 }
 
 type Query {
+  billingSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
+  billingInvoices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
+  billingInvoice(organizationId: UUID!, invoiceId: UUID!): JSON!
+  billingPreview(organizationId: UUID!, data: JSON!): JSON!
+  communicationSetup(organizationId: UUID!, branchId: UUID!, patientId: UUID = null, search: String! = ""): JSON!
+  communicationReminders(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null): JSON!
   operationsSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
   appointmentAvailability(organizationId: UUID!, data: JSON!): JSON!
   appointments(organizationId: UUID!, filters: JSON!, after: String = null): JSON!
@@ -241,6 +249,7 @@ type Query {
   treatmentPlans(organizationId: UUID!, patientId: UUID!, first: Int! = 20): JSON!
   documents(organizationId: UUID!, patientId: UUID = null, purpose: String! = "clinical", first: Int! = 20, before: UUID = null): [DocumentType!]!
   documentVersions(organizationId: UUID!, versionIds: [UUID!]!, patientId: UUID = null): [DocumentType!]!
+  notificationInbox(organizationId: UUID!, unread: Boolean! = false, after: String = null): JSON!
   clinicAppearance(organizationId: UUID!): JSON!
   organizationBranding(organizationId: UUID!): JSON!
   userPreferences(organizationId: UUID!): JSON!

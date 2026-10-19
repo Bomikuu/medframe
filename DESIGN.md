@@ -149,3 +149,11 @@ MetricCard owns numeric summary emphasis and optional truthful navigation, with 
 EntrySheet defaults to a 680px side panel, full-width on mobile. Its content is a container-query boundary. Booking and patient fields respond to panel width, not global viewport width. Shared select values truncate safely, labels remain outside controls, and actions wrap. Existing RHF owners, validation, unsaved guards and backend saves remain authoritative. Advanced record filters live in a Collapsible disclosure; applied filters are removable chips.
 
 The dental editor owns 100dvh height. Its canvas has an explicit mobile height and local stacking context; model labels/pins stay below the mobile inspector. Header actions wrap and retain 2D/keyboard alternatives. All color/status changes are presentational and imply no new clinical diagnosis.
+
+## Batch 4 financial communication surfaces
+
+Billing uses a branch-scoped ledger list and a statement/action split on wide screens, stacking on narrow screens. Financial fields keep decimal-string entry with explicit PHP units, separate charge descriptions, quantities, discount and dates. Issuance, manual receipts, credits and refunds use distinct actions and confirmations; issued lines remain presentation-only. The patient statement shares the authoritative renderer while omitting staff reasons and internal fields.
+
+Communications uses explicit patient/recipient selection before consent or reminder entry, safe fixed-message previews, purpose/channel choices and a real delivery queue. Preview is visibly labeled not sent; accepted and delivered remain separate. Unknown outcomes instruct reconciliation and have no automatic retry action. Patient reminders provide a separate opt-out destination. Existing semantic tokens, typography, shadcn/Radix primitives, Sheet geometry and profile/clinical-media rules are retained.
+
+These surfaces have an inactive `.next-batch4` build with a blocked financial posting trigger and bounded browser limitations; see `docs/operations/django-batch-4-verification.md`.

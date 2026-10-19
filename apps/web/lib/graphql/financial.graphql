@@ -1,0 +1,74 @@
+query BillingSetup($organizationId: UUID!, $branchId: UUID, $search: String!) {
+  billingSetup(organizationId: $organizationId, branchId: $branchId, search: $search)
+}
+query BillingInvoices(
+  $organizationId: UUID!
+  $branchId: UUID!
+  $filters: JSON
+  $after: String
+  $patientId: UUID
+) {
+  billingInvoices(
+    organizationId: $organizationId
+    branchId: $branchId
+    filters: $filters
+    after: $after
+    patientId: $patientId
+  )
+}
+query BillingInvoice($organizationId: UUID!, $invoiceId: UUID!) {
+  billingInvoice(organizationId: $organizationId, invoiceId: $invoiceId)
+}
+query BillingPreview($organizationId: UUID!, $data: JSON!) {
+  billingPreview(organizationId: $organizationId, data: $data)
+}
+mutation BillingAction($organizationId: UUID!, $action: String!, $data: JSON!, $requestId: UUID!) {
+  billingAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    requestId: $requestId
+  )
+}
+query CommunicationSetup(
+  $organizationId: UUID!
+  $branchId: UUID!
+  $patientId: UUID
+  $search: String!
+) {
+  communicationSetup(
+    organizationId: $organizationId
+    branchId: $branchId
+    patientId: $patientId
+    search: $search
+  )
+}
+query CommunicationReminders(
+  $organizationId: UUID!
+  $branchId: UUID!
+  $filters: JSON
+  $after: String
+) {
+  communicationReminders(
+    organizationId: $organizationId
+    branchId: $branchId
+    filters: $filters
+    after: $after
+  )
+}
+mutation CommunicationAction(
+  $organizationId: UUID!
+  $action: String!
+  $data: JSON!
+  $requestId: UUID!
+) {
+  communicationAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    requestId: $requestId
+  )
+}
+query NotificationInbox($organizationId: UUID!, $unread: Boolean!, $after: String) {
+  notificationInbox(organizationId: $organizationId, unread: $unread, after: $after)
+}

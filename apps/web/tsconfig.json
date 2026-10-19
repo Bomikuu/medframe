@@ -46,7 +46,9 @@
     ".next-login-enhancements/types/**/*.ts",
     ".next-login-enhancements/dev/types/**/*.ts",
     ".next-reconstruction/types/**/*.ts",
-    ".next-reconstruction/dev/types/**/*.ts"
+    ".next-reconstruction/dev/types/**/*.ts",
+    ".next-batch4/types/**/*.ts",
+    ".next-batch4/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

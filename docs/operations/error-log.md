@@ -251,3 +251,34 @@ AUTH-001 above. This was a command-location correction, with no product repair.
 - REF-003/004 remain unverified after source changes because UI-RECON-001 blocked acceptance. EDITOR-001's unrelated test import ordering and AUTH-002's dependency triage remain deferred.
 - The synthetic portal had no released snapshot and the patient had no saved medical history revision. Populated exact-version/history pages were not visually accepted; no fake releases or diagnoses were created for screenshots.
 - A dark-preview capture caught the closing Select menu during its animation. Color-mode change and cancel restoration assertions passed; this transient image is not a settled-overlay acceptance image. No recapture was performed.
+
+## Django Batch 4 — October 19, 2026
+
+### B4-001 — Shared financial entry trigger references a field absent on payment/credit rows (activation blocker)
+
+- Reproduction: the single `tests_django.test_billing` / `tests_django.test_communications` invocation, or record a payment against an issued invoice in the Batch 4 review clone.
+- Actual: PostgreSQL raises `record "new" has no field "payment_id"` in `billing_entry_guard()`, installed by `billing.0002_integrity_permissions`. Its refund-only condition combines `TG_TABLE_NAME='billing_refund' AND ... NEW.payment_id`; that expression is not safe for records from other trigger tables. Payment and credit insertion reach the shared function without a `payment_id` field.
+- Impact: payment/credit posting is blocked and transaction rolls back. Seven of 20 backend tests errored, including dependent partial-payment, replay, immutable-payment, credit-adjusted portal and concurrent-posting coverage. They are not passing tests. No original database was migrated; Batch 4 is not active.
+- Evidence: `/tmp/medframe-batch4-backend.log`, retained under `.impeccable/review/batch4/`. Four new migrations did apply to the clone; migration success alone did not exercise posting.
+- Disposition: deferred without fix, migration rewrite or retest, honoring the user's one-pass/log-errors instruction. A later authorized repair should isolate table-specific field expressions in separate branches/functions and use an additive corrective migration because the initial migration has already been applied to the review database. Do not bypass the guard or restore the clone over original data.
+
+### B4-002 — Five new Python string literals exceed the line-length limit (deferred)
+
+- Single scoped Ruff pass reports five E501 findings: two URL literals in `medframe_apps/auditing/notifications.py` and three safe message literals in `medframe_apps/communications/reminders.py`.
+- Impact: Python style check is not clean. No suppression, post-check wrapping or rerun occurred. Frontend ESLint, production build/TypeScript and migration drift pass.
+- Evidence: `/tmp/medframe-batch4-ruff.log`, retained in the review directory.
+
+### B4-003 — Browser cancellation confirmation selector is case-sensitive (deferred harness finding)
+
+- The sole browser run saves recipient consent, previews/schedules a follow-up reminder, clicks Cancel reminder and confirms it, then waits for exact text `Cancelled`.
+- Actual badge source text is `cancelled` with CSS `capitalize`. The locator times out. Read-only clone inspection afterward finds one delivery with `state='cancelled'`; no product failure is established by the casing mismatch. The browser group remains failed, not retroactively passed.
+- Four other browser groups pass, with 20 desktop/mobile captures, no recorded geometry findings and no page errors. Financial posting groups were skipped after B4-001, without bypassing its trigger or repeating the failed request.
+- Evidence: `.impeccable/review/batch4/browser-report.json`, `/tmp/medframe-batch4-browser.log`. No harness correction or browser retry was run.
+
+### B4-004 — Per-invoice payment/event detail lists are unbounded (deferred source-review finding)
+
+- `medframe_apps/billing/queries.py::invoice_detail` serializes all invoice payments and non-draft financial events rather than paging/capping those collections. Invoice-list and notification/reminder-list pages already use bounded keyset pagination; line items are limited at draft validation.
+- Impact: an invoice with a very long payment/event history could produce an expensive oversized detail response. No large-history runtime scenario was exercised in the bounded pass.
+- Disposition: log without a source fix or new test cycle. A later authorized fix should page history while keeping totals authoritative and allow the user to select an eligible original payment for refunds without loading an unbounded list.
+
+Batch 4 code/build are preserved separately. Original `.next-reconstruction`/Django runtime, accounts, credentials and data remain active. Live Twilio delivery, online money movement, exhaustive guardian/branch concurrency and successful paid/refund browser balances are not verified. See `django-batch-4-verification.md` for exact preservation, scope and remaining activation work.

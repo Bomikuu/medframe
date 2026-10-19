@@ -6,11 +6,13 @@ from config import views
 from config.admin import site
 from medframe_apps.accounts import google_views
 from medframe_apps.accounts import views as auth
+from medframe_apps.communications.views import sms_status
 from medframe_apps.documents import views as documents
 from medframe_apps.portal import files as portal_files
 from medframe_apps.portal import views as portal_auth
 
 urlpatterns = [
+    path("communications/sms/status", sms_status),
     path("portal/graphql", portal_graphql),
     path("portal/documents/download", portal_files.download),
     path("portal/auth/csrf", auth.csrf),

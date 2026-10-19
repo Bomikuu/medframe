@@ -117,6 +117,8 @@ export type Mutation = {
   applyConsultationTemplate: EncounterType;
   authorizeDocumentDownload: Scalars['String']['output'];
   beginDocumentUpload: DocumentType;
+  billingAction: Scalars['JSON']['output'];
+  communicationAction: Scalars['JSON']['output'];
   createEncounter: EncounterType;
   createEncounterAmendment: EncounterType;
   createPatient: PatientDemographics;
@@ -226,6 +228,22 @@ export type MutationBeginDocumentUploadArgs = {
   organizationId: Scalars['UUID']['input'];
   patientId?: InputMaybe<Scalars['UUID']['input']>;
   purpose: Scalars['String']['input'];
+};
+
+
+export type MutationBillingActionArgs = {
+  action: Scalars['String']['input'];
+  data: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
+};
+
+
+export type MutationCommunicationActionArgs = {
+  action: Scalars['String']['input'];
+  data: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
 };
 
 
@@ -594,12 +612,18 @@ export type Query = {
   __typename?: 'Query';
   appointmentAvailability: Scalars['JSON']['output'];
   appointments: Scalars['JSON']['output'];
+  billingInvoice: Scalars['JSON']['output'];
+  billingInvoices: Scalars['JSON']['output'];
+  billingPreview: Scalars['JSON']['output'];
+  billingSetup: Scalars['JSON']['output'];
   branchQueue: Scalars['JSON']['output'];
   chartRevisions: Scalars['JSON']['output'];
   clinicAppearance: Scalars['JSON']['output'];
   clinicDashboard: Scalars['JSON']['output'];
   clinicPatients: PatientPage;
   clinicWorkspace: WorkspaceType;
+  communicationReminders: Scalars['JSON']['output'];
+  communicationSetup: Scalars['JSON']['output'];
   consultationRecords: Scalars['JSON']['output'];
   consultationTemplates: Scalars['JSON']['output'];
   currentUser: UserType;
@@ -616,6 +640,7 @@ export type Query = {
   historyRecords: Scalars['JSON']['output'];
   medicalDocuments: Array<DocumentType>;
   myOrganizations: Array<OrganizationType>;
+  notificationInbox: Scalars['JSON']['output'];
   notifications: Scalars['JSON']['output'];
   operationsSetup: Scalars['JSON']['output'];
   organizationBranding: Scalars['JSON']['output'];
@@ -658,6 +683,34 @@ export type QueryAppointmentsArgs = {
 };
 
 
+export type QueryBillingInvoiceArgs = {
+  invoiceId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryBillingInvoicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  branchId: Scalars['UUID']['input'];
+  filters?: InputMaybe<Scalars['JSON']['input']>;
+  organizationId: Scalars['UUID']['input'];
+  patientId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+
+export type QueryBillingPreviewArgs = {
+  data: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryBillingSetupArgs = {
+  branchId?: InputMaybe<Scalars['UUID']['input']>;
+  organizationId: Scalars['UUID']['input'];
+  search?: Scalars['String']['input'];
+};
+
+
 export type QueryBranchQueueArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   branchId: Scalars['UUID']['input'];
@@ -693,6 +746,22 @@ export type QueryClinicPatientsArgs = {
 
 export type QueryClinicWorkspaceArgs = {
   organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryCommunicationRemindersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  branchId: Scalars['UUID']['input'];
+  filters?: InputMaybe<Scalars['JSON']['input']>;
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryCommunicationSetupArgs = {
+  branchId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId?: InputMaybe<Scalars['UUID']['input']>;
+  search?: Scalars['String']['input'];
 };
 
 
@@ -798,6 +867,13 @@ export type QueryMedicalDocumentsArgs = {
   first?: Scalars['Int']['input'];
   organizationId: Scalars['UUID']['input'];
   patientId: Scalars['UUID']['input'];
+};
+
+
+export type QueryNotificationInboxArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  organizationId: Scalars['UUID']['input'];
+  unread?: Scalars['Boolean']['input'];
 };
 
 

@@ -38,4 +38,10 @@ export {
   Ruler,
   MoreHorizontal,
   ExternalLink,
+  ReceiptText,
+  CreditCard,
+  Wallet,
+  Send,
+  Trash2,
+  Calculator,
 } from "lucide-react";

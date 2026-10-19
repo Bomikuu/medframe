@@ -17,6 +17,14 @@ from medframe_apps.treatments.models import FollowUp, TreatmentPlanItem
 @strawberry.type
 class WorkspaceQuery:
     @strawberry.field
+    def notification_inbox(
+        self, info: Info, organization_id: UUID, unread: bool = False, after: str | None = None
+    ) -> JSON:
+        from medframe_apps.auditing.notifications import notification_page
+
+        return notification_page(info.context, organization_id, unread, after)
+
+    @strawberry.field
     def clinic_appearance(self, info: Info, organization_id: UUID) -> JSON:
         return services.read_appearance(info.context.user, organization_id)
 

@@ -1,0 +1,18 @@
+query MyBilling($linkId: UUID!, $after: String) {
+  myBilling(linkId: $linkId, after: $after)
+}
+query MyInvoice($linkId: UUID!, $invoiceId: UUID!) {
+  myInvoice(linkId: $linkId, invoiceId: $invoiceId)
+}
+query MyCommunicationPreferences($linkId: UUID!) {
+  myCommunicationPreferences(linkId: $linkId)
+}
+mutation RevokeMyReminders($linkId: UUID!, $expectedVersion: Int!) {
+  revokeMyReminders(linkId: $linkId, expectedVersion: $expectedVersion)
+}
+query MyNotifications($linkId: UUID!, $after: String) {
+  myNotifications(linkId: $linkId, after: $after)
+}
+mutation ReadMyNotifications($linkId: UUID!, $ids: [UUID!]!) {
+  readMyNotifications(linkId: $linkId, ids: $ids)
+}

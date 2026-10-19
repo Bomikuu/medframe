@@ -16,6 +16,8 @@ import {
   FileText,
   HeartPulse,
   ShieldCheck,
+  ReceiptText,
+  MessageSquare,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -123,6 +125,18 @@ function ClinicFrame({ children }: { children: ReactNode }) {
           show: can("operations.read"),
         },
         { path: "/clinic/queue", label: "Queue", Icon: ListOrdered, show: can("operations.read") },
+      ],
+    },
+    {
+      label: "Finance & communication",
+      links: [
+        { path: "/clinic/billing", label: "Billing", Icon: ReceiptText, show: can("billing.read") },
+        {
+          path: "/clinic/communications",
+          label: "Communications",
+          Icon: MessageSquare,
+          show: can("communications.manage"),
+        },
       ],
     },
     {

@@ -10,6 +10,8 @@ scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads
 
 type PortalMutation {
   myAppointmentAction(linkId: UUID!, appointmentId: UUID!, data: JSON!, requestId: UUID!): JSON!
+  readMyNotifications(linkId: UUID!, ids: [UUID!]!): Boolean!
+  revokeMyReminders(linkId: UUID!, expectedVersion: Int!): JSON!
   submitPatientReport(linkId: UUID!, category: String!, text: String!, requestId: UUID!): JSON!
   authorizePortalDownload(linkId: UUID!, releaseId: UUID!, versionId: UUID!): String!
   savePortalPreferences(linkId: UUID!, mode: String!, density: String!, expectedVersion: Int!): JSON!
@@ -19,6 +21,10 @@ type PortalQuery {
   myAppointments(linkId: UUID!): JSON!
   myQueue(linkId: UUID!): JSON!
   myAppointmentAvailability(linkId: UUID!, data: JSON!): JSON!
+  myNotifications(linkId: UUID!, after: String = null): JSON!
+  myBilling(linkId: UUID!, after: String = null): JSON!
+  myInvoice(linkId: UUID!, invoiceId: UUID!): JSON!
+  myCommunicationPreferences(linkId: UUID!): JSON!
   portalSession: JSON!
   portalLinks: JSON!
   portalWorkspace(linkId: UUID!): JSON!
