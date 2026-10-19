@@ -1,10 +1,10 @@
 # Anatomy reference UI and assistant preview
 
-October 19, 2026. Branch `codex/anatomy-reference-editor`. The user supplied the visual reference and explicitly requested a visible AI chat sidebar with integration deferred. This is a frontend extension of Batch 6, implemented natively without subagents.
+October 19, 2026. Branch `codex/anatomy-reference-editor`. The user supplied the visual reference and explicitly requested a visible AI chat sidebar with integration deferred. This is a frontend extension of Batch 6, implemented natively without subagents. **Active locally** using `.next-anatomy-reference`; source implementation `3eb7bd8`.
 
 ## Scope and preservation
 
-Baseline `fa1b614`, tag `checkpoint/pre-anatomy-reference-2026-10-19`; `.next-batch6` remains intact. No Django models, migrations, permissions, authentication, patient-release logic or persistence services changed. Review used the existing synthetic Batch 6 clone on8001/3001. No synthetic records were imported into original, and no original credentials/MFA were changed. The original API/worker/beat continued running during UI development.
+Baseline `fa1b614`, tag `checkpoint/pre-anatomy-reference-2026-10-19`; `.next-batch6` remains intact. No Django models, migrations, permissions, authentication, patient-release logic or persistence services changed. Review used the existing synthetic Batch 6 clone on 8001/3001. No synthetic records were imported into original, and no original credentials/MFA were changed. The original API/worker/beat continued running during UI development.
 
 The anatomy tab now opens a focused workspace with the reference's consultation header, grouped navigation, real model canvas, floating camera controls, four view thumbnails, selected-structure/findings inspector and a right Medframe AI panel. Back returns to consultation notes; fullscreen toggling and responsive drawers retain the same RHF owner and aggregate version. The header uses actual patient metadata/save status, not the reference's fictional patient or relative-save text. Existing completed-draft/finalization rules remain; no fake Finalize action was added to editable drafts.
 
@@ -22,7 +22,7 @@ Raw evidence: ignored `.impeccable/review/anatomy-reference/`.
 
 | Check                         | Result                                                                                                                                                                                                                  |
 | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Preview generation            | Eight real model renders, about100KiB total                                                                                                                                                                             |
+| Preview generation            | Eight real model renders, about 100KiB total                                                                                                                                                                            |
 | Production build / TypeScript | Initial and corrected `.next-anatomy-reference` builds pass                                                                                                                                                             |
 | Prettier                      | Supported changed files formatted; check passes                                                                                                                                                                         |
 | Scoped ESLint                 | Initial camera-control immutability error; corrected to declarative OrbitControls bounds. Final: zero errors, one unused-import warning                                                                                 |
@@ -35,7 +35,7 @@ The Canvas fallback issue was traced from DOM/model state with zero page errors 
 
 The tablet/phone automation race was in the harness: after closing the AI sheet, a viewport change briefly encountered its closing dialog and looked for the inspector's generic Close button. No product repair followed. The remaining run waited for actual dialog teardown, used the already-saved synthetic consultation and did not repeat successful desktop checks.
 
-Nine captures cover1742×980 desktop,1024×768 tablet and390×844 phone. All geometry reports have no document horizontal overflow. Early full-page desktop/tablet captures can include the underlying page below the fixed viewport; the phone remainder uses viewport captures. The ordinary corrected editor has **zero page errors**. The model-failure run records one expected `Failed to fetch` from intentional GLB abort; it is not an ordinary runtime failure.
+Nine captures cover 1742×980 desktop, 1024×768 tablet and 390×844 phone. All geometry reports have no document horizontal overflow. Early full-page desktop/tablet captures can include the underlying page below the fixed viewport; the phone remainder uses viewport captures. The ordinary corrected editor has **zero page errors**. The model-failure run records one expected `Failed to fetch` from intentional GLB abort; it is not an ordinary runtime failure.
 
 Specific assertions: AI starter/composer interactions cause zero network mutations; send remains disabled; close/reopen clears preview text; a synthetic right-femur mesh pin persists with exact mesh/side metadata; camera preset/zoom/fit leave its clinical identity intact; Back/reopen retains the same note; responsive fields retain their content; blocked model loads permit editing/saving the existing note without changing its model anchor. No finalization, full backend regression, exhaustive a11y or clinical-anatomy validation claim is made from these checks.
 
@@ -49,9 +49,9 @@ Specific assertions: AI starter/composer interactions cause zero network mutatio
 
 ## Graphify, Jev and Impeccable
 
-Existing frontend Graphify query traced AnatomyEditor/AnatomyViewport/FindingForm/EncounterEditor:328 reachable nodes,34 shown under the950-token budget; this was navigation, not exhaustive proof. Source was inspected directly. Refreshed frontend corpus:233 TS/TSX files in app/components/features/lib, **1,134 nodes,5,487 edges,40 communities**. Output `graphify-out/frontend-anatomy-reference/` retains manifests, numeric cohesion/confidence, report and cost. One icon barrel yielded no modeled symbols. Deterministic AST extraction uses zero external extraction tokens; generated contracts, tests/scripts, non-code documents, images/models and build outputs are excluded. Backend graph was not needlessly rebuilt because backend source is unchanged.
+Existing frontend Graphify query traced AnatomyEditor/AnatomyViewport/FindingForm/EncounterEditor: 328 reachable nodes, 34 shown under the 950-token budget; this was navigation, not exhaustive proof. Source was inspected directly. Refreshed frontend corpus: 233 TS/TSX files in app/components/features/lib, **1,134 nodes, 5,487 edges, 40 communities**. Output `graphify-out/frontend-anatomy-reference/` retains manifests, numeric cohesion/confidence, report and cost. One icon barrel yielded no modeled symbols. Deterministic AST extraction uses zero external extraction tokens; generated contracts, tests/scripts, non-code documents, images/models and build outputs are excluded. Backend graph was not needlessly rebuilt because backend source is unchanged.
 
-Jev0.7.0 / jev-1.13.0 received sanitized architecture/results only, without the reference image, patient data or credentials:
+Jev 0.7.0 / jev-1.13.0 received sanitized architecture/results only, without the reference image, patient data or credentials:
 
 | Stage  | Choice            | Confidence | Input/output tokens |
 | ------ | ----------------- | ---------: | ------------------: |
@@ -62,4 +62,10 @@ These support prioritization; they do not prove functionality or authorize clini
 
 ## Activation
 
-Frontend source is ready for the local web cutover. Original API8000, worker and beat are unchanged. Local activation will replace only the web process with `.next-anatomy-reference`, preserve `.next-batch6`, and record read-only HTTP/asset readiness below. No database migration/restore, role reset or authenticated original-data mutation is part of this UI activation.
+The local frontend cutover is complete. Web PID **371075**, exec session **63382**, serves `.next-anatomy-reference` at `http://localhost:3000`. Log: `/tmp/medframe-anatomy-reference-web-runtime.log`. The review web/API were stopped.
+
+Original API8000 PID252111, worker PID252112 and beat PID252114 continued unchanged. Read-only readiness checks pass: API ready200, login200, body/skeleton preview downloads200, unauthenticated GraphQL denied403. No original authenticated clinical mutation, database migration/restore, role reset, credential/MFA change or backend restart occurred during UI activation.
+
+Open a consultation's **Anatomy** tab. It enters the focused editor; **Consultation/Back** returns to notes, and fullscreen toggling retains the same form. The desktop AI dock opens by default. At narrower widths, the toolbar AI button opens the preview drawer. Existing draft/completion/finalization permissions remain authoritative.
+
+Rollback: keep `.next-batch6`, `fa1b614` and `checkpoint/pre-anatomy-reference-2026-10-19`. The previous UI artifact can be served against the unchanged current Django API; retain any new clinical writes and never restore a review clone over original. No push/public deployment or live AI integration was performed.
