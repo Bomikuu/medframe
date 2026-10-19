@@ -28,4 +28,8 @@ Jev `jev-1.13.0`, sanitized architecture only: encrypted scoped reveal over brow
 
 ## Activation
 
-Pending final confirmation, fresh encrypted checkpoint/isolated restore, original fingerprints/storage verification, additive original migration and launcher switch. Prior artifact and original identity/data remain preserved. No public deployment, live messages, AI integration, money movement or fixture import.
+Activated locally after fresh encrypted checkpoint `pre-batch2-20261020-012533-a60013b` verified all 139 tables in new isolated restore `medframe_django_modal_dashboard_activation_20261020`. Separate encrypted storage checkpoint `modal-dashboard-storage-20261020` verifies 51 objects in a new isolated bucket without original writes. With original services stopped, preservation capture/check confirms all 6,111 original rows across 139 tables match after applying only additive stations.0010 (one new reveal table, plus normal Django metadata). No original credentials, MFA, memberships, clinical grants, records or objects were replaced. No fixture import or clone restore over original.
+
+Runtime artifact `.next-device-modal-toggles`, BUILD_ID `qfFY5xDB3JH6MF0AilTD8`, source implementation `a60013b`; original database `medframe_django`, native API/worker/scheduler and port-3000 frontend managed by `./medframe start --production --dist-dir .next-device-modal-toggles`. The previous `.next-devices-gallery` remains intact. Switching an older UI is not a database rollback; retain the additive schema and reconcile later writes. Local readiness results are appended after startup. No public deployment, live messages, AI integration or money movement.
+
+Startup completes with all four launcher-owned processes running. Frontend `/login` and Django `/health/ready` both return HTTP 200 after activation. No additional browser round or broad regression suite was run against the original database.
