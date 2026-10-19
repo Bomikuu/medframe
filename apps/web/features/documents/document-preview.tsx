@@ -50,9 +50,11 @@ export function DocumentPreview({
       const parsed = new URL(url, window.location.origin);
       if (
         parsed.origin !== window.location.origin ||
-        !["/api/backend/documents/download", "/api/backend/portal/documents/download"].includes(
-          parsed.pathname,
-        )
+        ![
+          "/api/backend/documents/download",
+          "/api/backend/portal/documents/download",
+          "/api/backend/diagnostics/documents/download",
+        ].includes(parsed.pathname)
       )
         throw new Error("Invalid transfer");
       const response = await fetch(parsed, { cache: "no-store", signal: controller.signal });

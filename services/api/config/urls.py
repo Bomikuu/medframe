@@ -2,6 +2,7 @@ from django.urls import path
 
 from api_graphql.portal_views import graphql as portal_graphql
 from api_graphql.views import graphql
+from medframe_apps.diagnostics import views as diagnostics
 from config import views
 from config.admin import site
 from medframe_apps.accounts import google_views
@@ -12,6 +13,8 @@ from medframe_apps.portal import files as portal_files
 from medframe_apps.portal import views as portal_auth
 
 urlpatterns = [
+    path("diagnostics/documents/upload/<uuid:version_id>", diagnostics.upload),
+    path("diagnostics/documents/download", diagnostics.download),
     path("communications/sms/status", sms_status),
     path("portal/graphql", portal_graphql),
     path("portal/documents/download", portal_files.download),

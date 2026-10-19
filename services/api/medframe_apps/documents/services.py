@@ -1,18 +1,14 @@
-import hashlib
-import io
-import re
 from pathlib import PurePath
 from uuid import UUID, uuid4
 
 from django.core import signing
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.db import transaction
-from PIL import Image, UnidentifiedImageError
 
 from config.errors import DomainError
 from medframe_apps.auditing.services import audit
 from medframe_apps.documents.models import Document, DocumentVersion
+from medframe_apps.documents.storage import receive_version_bytes
+from medframe_apps.documents.storage import validate_bytes as validate_bytes
 from medframe_apps.organizations.policy import require_membership
 from medframe_apps.patients.services import require_patient
 
@@ -33,6 +29,8 @@ def require_document(user, organization_id, version_id, *, write=False):
     if version is None:
         raise DomainError("NOT_FOUND", "Document is unavailable.", 404)
     document = version.document
+    if document.purpose == "diagnostic":
+        raise DomainError("NOT_FOUND", "Use the authorized diagnostic request for this file.", 404)
     if document.purpose == "clinical":
         require_patient(
             user,
@@ -43,7 +41,7 @@ def require_document(user, organization_id, version_id, *, write=False):
         )
         if write:
             require_membership(user, organization_id, "documents.write")
-    else:
+    elif document.purpose in {"logo", "avatar"}:
         require_membership(
             user,
             organization_id,
@@ -51,6 +49,8 @@ def require_document(user, organization_id, version_id, *, write=False):
         )
         if document.purpose == "avatar" and document.uploaded_by_id != user.id:
             raise DomainError("NOT_FOUND", "Profile image is unavailable.", 404)
+    else:
+        raise DomainError("NOT_FOUND", "File purpose is unavailable.", 404)
     return version
 
 
@@ -169,42 +169,6 @@ def begin_document_upload(user, organization_id, patient_id, encounter_id, purpo
     return version
 
 
-def validate_bytes(data, content_type, purpose):
-    if content_type == "application/pdf":
-        if not data.startswith(b"%PDF-") or b"%%EOF" not in data[-2048:]:
-            raise DomainError("INVALID_FILE", "The PDF signature is invalid.")
-        # PDFs are served as attachments; active content is rejected before quarantine.
-        if re.search(rb"/(JavaScript|JS|Launch|EmbeddedFile|RichMedia)\b", data):
-            raise DomainError("INVALID_FILE", "Use a PDF without embedded active content.")
-        return data
-    try:
-        with Image.open(io.BytesIO(data)) as image:
-            expected = {"image/jpeg": "JPEG", "image/png": "PNG", "image/webp": "WEBP"}[
-                content_type
-            ]
-            if image.format != expected or image.width * image.height > 20_000_000:
-                raise ValueError("Image format or dimensions")
-            if purpose != "clinical" and max(image.size) > 2048:
-                raise ValueError("Profile/logo dimension limit")
-            image.verify()
-        if purpose != "clinical":
-            with Image.open(io.BytesIO(data)) as image:
-                output = io.BytesIO()
-                image.convert("RGB" if content_type == "image/jpeg" else "RGBA").save(
-                    output, format=expected
-                )
-                result = output.getvalue()
-                if len(result) > 2 * 1024 * 1024:
-                    raise ValueError("Re-encoded asset size")
-                return result
-        return data
-    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
-        raise DomainError(
-            "INVALID_FILE",
-            "Choose a valid image. Profile and logo images must be at most 2048 pixels per side.",
-        ) from None
-
-
 @transaction.atomic
 def complete_document_upload(user, organization_id, version_id, uploaded_file):
     initial = require_document(user, organization_id, version_id, write=True)
@@ -218,7 +182,6 @@ def complete_document_upload(user, organization_id, version_id, uploaded_file):
         or uploaded_file.content_type != version.content_type
     ):
         raise DomainError("INVALID_FILE", "File size or type does not match the upload request.")
-    data = validate_bytes(uploaded_file.read(), version.content_type, version.document.purpose)
     if version.document.encounter_id:
         from medframe_apps.encounters.services import editable, require_encounter
 
@@ -227,15 +190,7 @@ def complete_document_upload(user, organization_id, version_id, uploaded_file):
         )
         if not editable(encounter):
             raise DomainError("IMMUTABLE", "This consultation is no longer editable.", 409)
-    saved_key = default_storage.save(version.key, ContentFile(data))
-    version.key = saved_key
-    version.size = len(data)
-    version.sha256 = hashlib.sha256(data).hexdigest()
-    version.scan_state = "pending"
-    version.save()
-    from medframe_apps.documents.tasks import enqueue_scan
-
-    transaction.on_commit(lambda: enqueue_scan(version.id))
+    receive_version_bytes(version, uploaded_file)
     audit(user, "document.upload.received", organization_id, version.id)
     return version
 

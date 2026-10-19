@@ -34,6 +34,7 @@ class ReleaseSelection(Input):
     chart_revision_id: UUID | None = None
     plan_revision_ids: list[UUID] = Field(default_factory=list, max_length=5)
     follow_up_revision_ids: list[UUID] = Field(default_factory=list, max_length=10)
+    diagnostic_result_ids: list[UUID] = Field(default_factory=list, max_length=5)
     document_version_ids: list[UUID] = Field(default_factory=list, max_length=20)
 
     @model_validator(mode="after")
@@ -43,6 +44,7 @@ class ReleaseSelection(Input):
             self.plan_revision_ids,
             self.follow_up_revision_ids,
             self.document_version_ids,
+            self.diagnostic_result_ids,
         ]
         if any(len(set(group)) != len(group) for group in groups):
             raise ValueError("Choose each source only once")
@@ -81,6 +83,7 @@ def build_preview(user, org, patient, data):
             selection.plan_revision_ids,
             selection.follow_up_revision_ids,
             selection.document_version_ids,
+            selection.diagnostic_result_ids,
         ]
     ):
         raise DomainError("INVALID_INPUT", "Select at least one clinical source.")
@@ -174,6 +177,19 @@ def build_preview(user, org, patient, data):
         manifest["documents"].append(
             {"id": str(row.id), "version": row.version, "sha256": row.sha256}
         )
+    from medframe_apps.diagnostics.releases import diagnostic_release_snapshot
+
+    diagnostics = diagnostic_release_snapshot(
+        user, org, patient.id, selection.diagnostic_result_ids
+    )
+    payload["diagnostics"] = diagnostics["diagnostics"]
+    existing_ids = {item["id"] for item in payload["documents"]}
+    payload["documents"].extend(
+        item for item in diagnostics["documents"] if item["id"] not in existing_ids
+    )
+    manifest["diagnostics"] = [
+        {"id": item["id"], "sequence": item["sequence"]} for item in diagnostics["diagnostics"]
+    ]
     if len(json.dumps(payload, ensure_ascii=False).encode()) > 65536:
         raise DomainError("TOO_LARGE", "Select fewer sources; the release must fit 64KiB.", 413)
     return {

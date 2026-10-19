@@ -130,6 +130,24 @@ function ClinicFrame({ children }: { children: ReactNode }) {
     {
       label: "Finance & communication",
       links: [
+        {
+          path: "/clinic/diagnostics",
+          label: "Diagnostics",
+          Icon: ReceiptText,
+          show: can("diagnostics.read"),
+        },
+        {
+          path: "/clinic/diagnostic-inbox",
+          label: "Diagnostic inbox",
+          Icon: ReceiptText,
+          show: can("diagnostics.center.work"),
+        },
+        {
+          path: "/clinic/settings/diagnostic-centers",
+          label: "Diagnostic centers",
+          Icon: ReceiptText,
+          show: can("diagnostics.partners.manage"),
+        },
         { path: "/clinic/billing", label: "Billing", Icon: ReceiptText, show: can("billing.read") },
         {
           path: "/clinic/communications",

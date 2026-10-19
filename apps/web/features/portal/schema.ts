@@ -2,6 +2,21 @@ import { z } from "zod";
 import { findingSchema, diagnosisSchema, procedureSchema } from "@/features/consultations/schema";
 import { themeSchema } from "@/features/branding/schema";
 export const releasePayloadSchema = z.object({
+  diagnostics: z
+    .array(
+      z.object({
+        id: z.string(),
+        sequence: z.number(),
+        test_name: z.string(),
+        report: z.string(),
+        performed_at: z.string(),
+        author: z.string(),
+        review: z
+          .object({ interpretation: z.string(), next_steps: z.string(), author: z.string() })
+          .nullable(),
+      }),
+    )
+    .default([]),
   summary: z.string(),
   encounters: z.array(
     z.object({

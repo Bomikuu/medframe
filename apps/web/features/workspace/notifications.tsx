@@ -28,6 +28,8 @@ const schema = z.object({
   unread_count: z.number(),
 });
 const titles: Record<string, string> = {
+  diagnostic_result: "Diagnostic result ready for review",
+  diagnostic_scan: "Diagnostic file security scan updated",
   billing_updated: "Billing entry recorded",
   encounter_finalized: "Consultation finalized",
   document_clean: "Document ready",

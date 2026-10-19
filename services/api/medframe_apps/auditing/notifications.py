@@ -15,6 +15,16 @@ from medframe_apps.record_filters import page_records
 
 def target(request, row):
     try:
+        if row.kind == "diagnostic_result":
+            from medframe_apps.diagnostics.policy import get_request
+
+            get_request(request, row.organization_id, row.resource_id, context="clinic")
+            return f"/clinic/diagnostics/{row.resource_id}?organization={row.organization_id}"
+        if row.kind == "diagnostic_scan":
+            from medframe_apps.diagnostics.policy import get_request
+
+            get_request(request, row.organization_id, row.resource_id, context="center")
+            return f"/clinic/diagnostic-inbox/{row.resource_id}?organization={row.organization_id}"
         if row.kind == "billing_updated":
             get_invoice(staff_member(request, row.organization_id), row.resource_id)
             return f"/clinic/billing/{row.resource_id}?organization={row.organization_id}"

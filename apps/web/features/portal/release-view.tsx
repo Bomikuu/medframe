@@ -106,6 +106,26 @@ export function ReleaseView({
           </p>
         </section>
       ))}
+      {payload.diagnostics.map((result) => (
+        <section key={result.id} className="grid gap-3 border-t border-border pt-5">
+          <h3 className="text-xl font-semibold">
+            {result.test_name} · Result version {result.sequence}
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Center report by {result.author} · {dateLabel(result.performed_at)}
+          </p>
+          <p className="text-sm leading-7 whitespace-pre-wrap">{result.report}</p>
+          {result.review && (
+            <>
+              <h4 className="font-semibold">Clinician review by {result.review.author}</h4>
+              <p className="text-sm leading-7 whitespace-pre-wrap">
+                {result.review.interpretation}
+              </p>
+              <p className="text-sm leading-7 whitespace-pre-wrap">{result.review.next_steps}</p>
+            </>
+          )}
+        </section>
+      ))}
       {!!payload.documents.length && (
         <section className="grid gap-4 border-t border-border pt-6">
           <h3 className="text-xl font-semibold">Shared documents</h3>

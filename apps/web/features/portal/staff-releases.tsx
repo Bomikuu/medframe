@@ -34,6 +34,7 @@ const sourcesSchema = z.object({
   plans: z.array(sourceSchema),
   follow_ups: z.array(sourceSchema),
   documents: z.array(sourceSchema),
+  diagnostics: z.array(sourceSchema),
 });
 const empty = {
   summary: "",
@@ -45,6 +46,7 @@ const empty = {
   planIds: [] as string[],
   followupIds: [] as string[],
   documentIds: [] as string[],
+  diagnosticIds: [] as string[],
   requestId: "",
 };
 const previewSchema = z.object({ digest: z.string(), payload: releasePayloadSchema });
@@ -171,6 +173,7 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
         plans: [...parsed.data.plans, ...(older.plans?.items ?? [])],
         follow_ups: [...parsed.data.follow_ups, ...(older.follow_ups?.items ?? [])],
         documents: [...parsed.data.documents, ...(older.documents?.items ?? [])],
+        diagnostics: [...parsed.data.diagnostics, ...(older.diagnostics?.items ?? [])],
       }
     : null;
 
@@ -192,7 +195,7 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
   const serialized = JSON.stringify(values);
   const validPreview = preview?.serialized === serialized ? preview : null;
   function selectList(
-    key: "planIds" | "followupIds" | "documentIds",
+    key: "planIds" | "followupIds" | "documentIds" | "diagnosticIds",
     id: string,
     checked: boolean,
   ) {
@@ -236,6 +239,7 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
             plan_revision_ids: input.planIds,
             follow_up_revision_ids: input.followupIds,
             document_version_ids: input.documentIds,
+            diagnostic_result_ids: input.diagnosticIds,
           };
           try {
             const result = await getGraphqlClient().request(PreviewPortalReleaseDocument, {
@@ -360,6 +364,11 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
                 { key: "planIds", title: "Plan versions", items: sourceLists!.plans },
                 { key: "followupIds", title: "Follow-up versions", items: sourceLists!.follow_ups },
                 { key: "documentIds", title: "Clean file versions", items: sourceLists!.documents },
+                {
+                  key: "diagnosticIds",
+                  title: "Reviewed diagnostic result versions",
+                  items: sourceLists!.diagnostics,
+                },
               ] as const
             ).map((group) => (
               <fieldset key={group.key} className="grid gap-2 border-t border-border pt-4">
@@ -392,7 +401,7 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
               >
                 Refresh available versions
               </Button>
-              {["encounters", "plans", "follow_ups", "documents"].map((kind) => {
+              {["encounters", "plans", "follow_ups", "documents", "diagnostics"].map((kind) => {
                 const cursor = older[kind] ? older[kind].cursor : parsed.data.source_cursors[kind];
                 return cursor ? (
                   <Button

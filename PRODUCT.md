@@ -16,6 +16,8 @@ The local app has completed the Django Batch 1 cutover. Batch 2 extends it with 
 
 Batch 4 financial communication is active locally on `codex/django-financial-batch-4` with `.next-batch4`: separate billing/communications apps, staff invoices/manual payments/refunds/credits, consent-based reminders and patient statements/preferences. The user authorized the recorded blocker repair; 20 focused backend tests and six browser groups pass. All five additive migrations are applied, with all 4,475 pre-existing rows across 73 tables preserved. See `docs/operations/django-batch-4-verification.md` for checkpoint/runtime/tool evidence and `docs/operations/error-log.md` for deferred issues including B4-004. SMS remains preview-only; payments/refunds record money moved elsewhere rather than initiating transfers.
 
+Batch 5 diagnostic collaboration source is saved on `codex/django-diagnostics-batch-5`, including referrals, center selection, result upload/review and explicit release integration. It is **not active or fully accepted**: SQL trigger and portal prerender blockers plus remaining plan gaps are recorded in `docs/operations/django-batch-5-verification.md` and `docs/operations/error-log.md`. Original data and `.next-batch4` remain preserved; no Batch 5 original migration occurred. Local API/web were not running at final inspection.
+
 ## Users
 
 Dentists and doctors documenting real clinical care are the primary users. Clinic staff have narrowly scoped administrative permissions. Patients and verified guardians access only the exact versions explicitly released by their clinician through the separate patient portal. Initial specialties are dentistry and general medical practice.

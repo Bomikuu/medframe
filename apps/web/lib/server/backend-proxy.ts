@@ -26,8 +26,12 @@ export const backendUrl = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
 export const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 
 export async function proxyBackend(request: Request, path: string): Promise<Response> {
-  const upload = /^documents\/upload\/[0-9a-f-]{36}$/.test(path);
-  const download = ["documents/download", "portal/documents/download"].includes(path);
+  const upload = /^(?:diagnostics\/)?documents\/upload\/[0-9a-f-]{36}$/.test(path);
+  const download = [
+    "documents/download",
+    "portal/documents/download",
+    "diagnostics/documents/download",
+  ].includes(path);
   const expectedMethod = path.endsWith("auth/csrf") || download ? "GET" : "POST";
   if ((!allowedPaths.has(path) && !upload && !download) || request.method !== expectedMethod) {
     return Response.json({ message: "This endpoint is unavailable." }, { status: 404 });

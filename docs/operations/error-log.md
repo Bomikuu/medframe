@@ -290,3 +290,41 @@ The user subsequently requested “activate”, authorizing recorded blocker rep
 The focused backend invocation passed all 20 tests in 4.628 seconds, scoped Ruff and migration drift passed, and six browser groups passed with 22 desktop/mobile captures, zero page errors and no recorded geometry findings. Payment/refund/credit/reload and the patient’s matching outstanding balance were exercised on the review clone. Frontend product code was unchanged; the existing passing build/TypeScript/ESLint artifact was reused. No broad repair/retest loop was run.
 
 Batch 4 is active locally after fresh encrypted backup/verified restore, five additive migrations and preservation of all 4,475 original rows across 73 tables. Accounts/passwords/MFA were not reset and no review clone replaced original data. SMS remains preview-only. **B4-004 remains deferred**: per-invoice payment/event history serialization is unbounded. Older unrelated findings and acceptance gaps remain deferred. No live provider delivery or online money transfer was performed. See `django-batch-4-verification.md` and ignored `.impeccable/review/batch4-activation/` for evidence and current runtime.
+
+## Django Batch 5 — October 19, 2026
+
+The user approved native implementation with one accumulated verification pass. The findings below are recorded without repair/retest. Original data and Batch 4 artifact remain preserved; Batch 5 is not active.
+
+### B5-001 — Diagnostic request SQL trigger has ambiguous variable/alias names (activation blocker)
+
+- Reproduction: new request creation in the isolated clone, or the accumulated diagnostic test modules.
+- PostgreSQL reports `column reference "a.id" is ambiguous` in `diagnostic_scope_guard()`. The function declares record variables `a` / `r` and also uses them as SQL aliases. Request insert fails even though its migration installed successfully.
+- Impact: 14 of 32 backend tests error before their intended referral/result/file/portal/concurrency assertions. No successful diagnostic end-to-end flow established.
+- Evidence: `.impeccable/review/batch5/backend.log`; migration `diagnostics.0002_integrity_permissions`. Repair must be additive for the already-migrated clone. No fix/retry performed.
+
+### B5-002 — Patient diagnostics route lacks PortalProvider boundary (activation blocker)
+
+- Production frontend compiled and TypeScript passed, then prerender `/portal/diagnostics` threw `PortalProvider required`. The new routes render PatientDiagnostics directly; incumbent patient pages supply their own provider/Suspense boundary.
+- Impact: no complete `.next-batch5` production artifact; browser journey and activation not attempted.
+- Evidence: `.impeccable/review/batch5/build.log`. No provider repair/rebuild performed.
+
+### B5-003 — Scoped Ruff reports 29 findings (deferred)
+
+- Long SQL/string literals in the new migration/test, config URL import order, late test imports and an assigned lambda in diagnostic history serialization.
+- Pre-check Ruff formatting/import cleanup was insufficient. No rule suppression or post-check repair was applied.
+- Evidence: `.impeccable/review/batch5/ruff.log`.
+
+### B5-004 — Frontend lint error and compiler warning (deferred)
+
+- Unescaped apostrophe in `features/diagnostics/patient-diagnostics.tsx` fails react/no-unescaped-entities.
+- `form.watch()` in request-form triggers the React compiler/RHF incompatible-library warning.
+- Evidence: `.impeccable/review/batch5/eslint.log`. No lint fix/retry performed.
+
+### B5-005 — Remaining plan and acceptance gaps (deferred source review)
+
+- Center accepting/profile controls exist in the model/provisioning path but no operator-facing update workflow was completed. Saved referral draft editing has backend support but lacks its editing form. DiagnosticResultView shows attachments for the current result; no validated calibrated imaging capability exists or is claimed.
+- Center/patient choice and source-file picker queries cap at 50 but do not expose paging beyond that cap; complete pagination of large option sets remains unfinished. Request date and modality/other filter rejection, wrong-center/other-patient attachment injection, expiry and suspension races do not all have independent assertions in the accumulated test set.
+- Diagnostic assignment rows permit mutable active/accepted/performed metadata through the ORM; attributed application events exist, but raw assignment-state history and result-draft scope need further database-boundary review. Request attachment update/delete guards and cross-organization/result references are authored but not established by the blocked tests. No database security assurance is claimed.
+- Report/upload drafts are not fully guarded for all local file-selection/organization-switch cases; uploaded result attachments have no removal control, so a rejected/unavailable attachment may strand submission. No post-check product changes were made.
+- No browser harness/visual captures, real diagnostic upload/scan/submission acceptance, exact diagnostic file release acceptance or successful concurrency acceptance was completed because earlier blockers stopped the journey. Existing file regressions passing do not establish the new file workflow.
+- These gaps remain separate from a narrow trigger/provider fix; see `django-batch-5-verification.md` for actual scope and next authorized work.

@@ -1,6 +1,6 @@
 # Medframe Batch 5 — diagnostic collaboration
 
-Status: approved by the user’s “proceed” on October 19, 2026; implementation plan is prepared for review. The user requested Batch 5 with Jev, Graphify and Impeccable. Native execution only, no subagents. No product code, migrations or runtime changes have been made for this batch.
+Status: design and native plan approved by the user. Source implementation is saved with failed bounded verification and unfinished items; Batch 5 is not active. See `docs/operations/django-batch-5-verification.md` for actual scope and B5-001 through B5-005. Native execution only, no subagents.
 
 ## Outcome and authority
 

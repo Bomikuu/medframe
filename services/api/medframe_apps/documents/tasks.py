@@ -72,12 +72,31 @@ def scan_document(self, version_id):
         version.scanned_at = timezone.now()
         version.scan_attempts += 1
         version.save(update_fields=["scan_state", "scanned_at", "scan_attempts"])
-        Notification.objects.create(
-            user_id=version.uploaded_by_id,
-            organization_id=version.document.organization_id,
-            kind="document_" + state,
-            resource_id=version.id,
-        )
+        if version.document.purpose == "diagnostic":
+            from medframe_apps.diagnostics.models import ResultDraftAttachment
+
+            attachment = (
+                ResultDraftAttachment.objects.select_related(
+                    "draft__assignment__partnership__center"
+                )
+                .filter(version=version)
+                .first()
+            )
+            if attachment:
+                assignment = attachment.draft.assignment
+                Notification.objects.create(
+                    user_id=version.uploaded_by_id,
+                    organization_id=assignment.partnership.center.organization_id,
+                    kind="diagnostic_scan",
+                    resource_id=assignment.request_id,
+                )
+        else:
+            Notification.objects.create(
+                user_id=version.uploaded_by_id,
+                organization_id=version.document.organization_id,
+                kind="document_" + state,
+                resource_id=version.id,
+            )
 
 
 def enqueue_scan(version_id):

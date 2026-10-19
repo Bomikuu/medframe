@@ -93,6 +93,10 @@ input MedicationInput {
 }
 
 type Mutation {
+  diagnosticAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
+  diagnosticPartnershipAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
+  beginDiagnosticUpload(organizationId: UUID!, diagnosticRequestId: UUID!, metadata: JSON!, requestId: UUID!): JSON!
+  authorizeDiagnosticDownload(organizationId: UUID!, requestId: UUID!, versionId: UUID!, context: String!): String!
   billingAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   communicationAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   operationsAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
@@ -220,6 +224,11 @@ type ProviderType {
 }
 
 type Query {
+  diagnosticSetup(organizationId: UUID!, search: String! = "", patientId: UUID = null): JSON!
+  diagnosticRequests(organizationId: UUID!, context: String! = "clinic", filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
+  diagnosticRequest(organizationId: UUID!, requestId: UUID!, context: String! = "clinic"): JSON!
+  diagnosticHistory(organizationId: UUID!, requestId: UUID!, context: String! = "clinic", kind: String! = "events", after: String = null): JSON!
+  diagnosticPreview(organizationId: UUID!, requestId: UUID!): JSON!
   billingSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
   billingInvoices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
   billingInvoice(organizationId: UUID!, invoiceId: UUID!): JSON!

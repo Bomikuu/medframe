@@ -30,6 +30,7 @@ import { ConsultationList } from "@/features/consultations/consultation-pages";
 import { TreatmentPlans } from "@/features/treatments/treatment-plans";
 import { ChartComparison } from "@/features/dental/chart-comparison";
 import { PatientPortalAccess } from "@/features/portal/access/patient-portal-access";
+import { DiagnosticList } from "@/features/diagnostics/request-list";
 import { StaffReleases } from "@/features/portal/staff-releases";
 import { ReportReview } from "@/features/portal/report-review";
 import { DocumentPanel } from "@/features/documents/document-panel";
@@ -51,6 +52,7 @@ export function PatientOverview({
     ["consultations", "Consultations", clinical],
     ["dental", "Dental chart", clinical],
     ["treatments", "Treatments", clinical],
+    ["diagnostics", "Diagnostics", clinical && can("diagnostics.read")],
     ["documents", "Documents", clinical],
     ["billing", "Billing", can("billing.read")],
     ["shared", "Shared records", clinical],
@@ -265,6 +267,9 @@ export function PatientOverview({
             </TabsContent>
             <TabsContent value="treatments">
               <TreatmentPlans patientId={patientId} />
+            </TabsContent>
+            <TabsContent value="diagnostics">
+              <DiagnosticList patientId={patientId} />
             </TabsContent>
             <TabsContent value="documents">
               <DocumentPanel patientId={patientId} />

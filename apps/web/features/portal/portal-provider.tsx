@@ -228,6 +228,13 @@ function PortalShell({
                 Billing
               </Link>
               <Link
+                href={href("/portal/diagnostics")}
+                className="px-4 py-3 text-sm font-medium"
+                aria-current={pathname.startsWith("/portal/diagnostics") ? "page" : undefined}
+              >
+                Diagnostics
+              </Link>
+              <Link
                 href={href("/portal/queue")}
                 aria-current={pathname === "/portal/queue" ? "page" : undefined}
                 className="text-primary hover:underline"

@@ -19,6 +19,7 @@ export type PortalMutation = {
   readMyNotifications: Scalars['Boolean']['output'];
   revokeMyReminders: Scalars['JSON']['output'];
   savePortalPreferences: Scalars['JSON']['output'];
+  selectDiagnosticCenter: Scalars['JSON']['output'];
   submitPatientReport: Scalars['JSON']['output'];
 };
 
@@ -58,6 +59,15 @@ export type PortalMutationSavePortalPreferencesArgs = {
 };
 
 
+export type PortalMutationSelectDiagnosticCenterArgs = {
+  centerId: Scalars['UUID']['input'];
+  diagnosticRequestId: Scalars['UUID']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  linkId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
+};
+
+
 export type PortalMutationSubmitPatientReportArgs = {
   category: Scalars['String']['input'];
   linkId: Scalars['UUID']['input'];
@@ -71,6 +81,8 @@ export type PortalQuery = {
   myAppointments: Scalars['JSON']['output'];
   myBilling: Scalars['JSON']['output'];
   myCommunicationPreferences: Scalars['JSON']['output'];
+  myDiagnosticRequest: Scalars['JSON']['output'];
+  myDiagnosticRequests: Scalars['JSON']['output'];
   myInvoice: Scalars['JSON']['output'];
   myNotifications: Scalars['JSON']['output'];
   myQueue: Scalars['JSON']['output'];
@@ -101,6 +113,18 @@ export type PortalQueryMyBillingArgs = {
 
 
 export type PortalQueryMyCommunicationPreferencesArgs = {
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyDiagnosticRequestArgs = {
+  linkId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyDiagnosticRequestsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
   linkId: Scalars['UUID']['input'];
 };
 

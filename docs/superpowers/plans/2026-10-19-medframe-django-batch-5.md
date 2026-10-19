@@ -1,6 +1,6 @@
 # Medframe Batch 5 Implementation Plan
 
-Execution: native in this chat, without subagents, delegation, or a fresh agent reviewer. The user approved the written design with “proceed”. This plan awaits review before product implementation. The user’s one-pass verification preference overrides per-task red/green execution: write the focused tests alongside each task, then run the accumulated checks once at the end. Tasks/commits are implementation order, not separate feature handoffs.
+Execution: native in this chat, without subagents, delegation, or a fresh agent reviewer. The user approved the written design with “proceed”. The user approved this plan with “proceed”; native implementation was executed with the bounded results below. The user’s one-pass verification preference overrides per-task red/green execution: write the focused tests alongside each task, then run the accumulated checks once at the end. Tasks/commits are implementation order, not separate feature handoffs.
 
 **Goal:** Complete doctor request → patient center selection → center examination/result submission → clinician review/explicit patient release, with revocable referral-specific access.
 
@@ -113,3 +113,13 @@ Coverage checked against the approved spec: request/center/patient lifecycle (ta
 Graphify queried the existing frontend/backend structural graphs with present vocabulary `[release, document, preview, source, portal, workspace, schema, upload, request, version]`. Bounded calls trace StaffReleases → ReleaseForm/ReleaseView, ReleaseView → DocumentPreview, DocumentPreview → shared Dialog/PdfPreview, and backend release sources/preview/download to live patient policy and existing pagination/manifest owners. Source inspection, not the graph, establishes the exact transfer allowlist and SQL constraints. The graph has no diagnostics implementation yet; no new coverage is claimed. Trace: ignored `.impeccable/review/batch5-plan/integration-graph-trace.txt`.
 
 Jev 0.7.0 / `jev-1.13.0` selected `access_locking`, confidence 0.94, from policy-first/upload-first/UI-first ordering choices, **578 input / 47 output tokens**. Only sanitized architecture was sent. This puts policy/serialization before file exposure; it is a judgment rather than verification. Raw response: ignored `.impeccable/review/batch5-plan/jev-plan-priority.json`.
+
+## Actual execution ledger — October 19, 2026
+
+- Ruling: user instruction for native work/no subagents and one accumulated pass overrides independent reviewer and per-task red/green defaults. No subagents or separate review task were used.
+- Checkpoint: encrypted original backup/restore clone verified all 85 existing table counts, source_written=false. Existing containers had been stopped; they were started without recreation before checkpoint. No original migration.
+- Tasks 1–5: connected source was authored for policy/persistence, lifecycle, transfers/results, portal/releases/API and clinic/center/patient UI. Checkboxes remain open because their acceptance criteria did not pass and specific plan items remain incomplete (B5-005); source presence is not completion.
+- Task 6: clone migrations/drift/codegen pass. One backend invocation ran 32 tests, 18 pass/14 SQL-trigger errors. Ruff: 29 findings. ESLint: one error/one warning. Production compile/TypeScript passed; prerender failed for missing PortalProvider. Browser/harness/visual acceptance/activation skipped after blockers.
+- No product fix, rule suppression, test rerun or rebuild followed failures. B5-001 through B5-005 are logged. Original data and .next-batch4 remain intact. At final inspection no API/web listener was running; do not equate preserved artifact with an active server.
+- Graphify discovery and separate backend/frontend corpus refresh completed; code-only zero external tokens, scope/limitations and initial helper failures retained. Jev sanitized choices: revocation (455/45 tokens) and trigger (493/39 tokens). Actual outputs are in ignored .impeccable/review/batch5/.
+- Completion boundary: saved implementation with blockers and unfinished acceptance, not a completed/activated Batch 5. See docs/operations/django-batch-5-verification.md for preservation, exact checks and remaining work.

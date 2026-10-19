@@ -157,3 +157,7 @@ Billing uses a branch-scoped ledger list and a statement/action split on wide sc
 Communications uses explicit patient/recipient selection before consent or reminder entry, safe fixed-message previews, purpose/channel choices and a real delivery queue. Preview is visibly labeled not sent; accepted and delivered remain separate. Unknown outcomes instruct reconciliation and have no automatic retry action. Patient reminders provide a separate opt-out destination. Existing semantic tokens, typography, shadcn/Radix primitives, Sheet geometry and profile/clinical-media rules are retained.
 
 These surfaces are active locally in `.next-batch4` after the authorized trigger repair. Six focused desktop/mobile browser groups pass, including payment/refund/credit balances and the patient statement; the documented browser and history-scaling limits remain. See `docs/operations/django-batch-4-verification.md`.
+
+## Batch 5 diagnostic extension — saved, inactive
+
+Diagnostic request/inbox/selection and result/release UI extends the existing clinical desk and shared shadcn/Radix/Tailwind owners. Clinical files retain full framing; no new raster assets or visual identity were introduced. The development direction/unfinished finish verdict is in `.impeccable/surfaces/diagnostics.md`. Production prerender is blocked and no browser visual acceptance was performed; see `docs/operations/django-batch-5-verification.md` and deferred B5-001 through B5-005. This records source intent rather than a verified rendered design.

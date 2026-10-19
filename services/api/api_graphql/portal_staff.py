@@ -63,7 +63,7 @@ class PortalStaffQuery:
 
         pages = {
             kind: release_source_page(info.context.user, organization_id, patient_id, kind)
-            for kind in ["encounters", "plans", "follow_ups", "documents"]
+            for kind in ["encounters", "plans", "follow_ups", "documents", "diagnostics"]
         }
         return {
             **{kind: page["items"] for kind, page in pages.items()},

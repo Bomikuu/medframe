@@ -1,0 +1,91 @@
+query DiagnosticSetup($organizationId: UUID!, $search: String!, $patientId: UUID) {
+  diagnosticSetup(organizationId: $organizationId, search: $search, patientId: $patientId)
+}
+query DiagnosticRequests(
+  $organizationId: UUID!
+  $context: String!
+  $filters: JSON
+  $after: String
+  $patientId: UUID
+) {
+  diagnosticRequests(
+    organizationId: $organizationId
+    context: $context
+    filters: $filters
+    after: $after
+    patientId: $patientId
+  )
+}
+query DiagnosticRequest($organizationId: UUID!, $requestId: UUID!, $context: String!) {
+  diagnosticRequest(organizationId: $organizationId, requestId: $requestId, context: $context)
+}
+query DiagnosticHistory(
+  $organizationId: UUID!
+  $requestId: UUID!
+  $context: String!
+  $kind: String!
+  $after: String
+) {
+  diagnosticHistory(
+    organizationId: $organizationId
+    requestId: $requestId
+    context: $context
+    kind: $kind
+    after: $after
+  )
+}
+query DiagnosticPreview($organizationId: UUID!, $requestId: UUID!) {
+  diagnosticPreview(organizationId: $organizationId, requestId: $requestId)
+}
+mutation DiagnosticAction(
+  $organizationId: UUID!
+  $action: String!
+  $data: JSON!
+  $requestId: UUID!
+) {
+  diagnosticAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    requestId: $requestId
+  )
+}
+mutation DiagnosticPartnershipAction(
+  $organizationId: UUID!
+  $action: String!
+  $data: JSON!
+  $requestId: UUID!
+) {
+  diagnosticPartnershipAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    requestId: $requestId
+  )
+}
+mutation BeginDiagnosticUpload(
+  $organizationId: UUID!
+  $diagnosticRequestId: UUID!
+  $metadata: JSON!
+  $requestId: UUID!
+) {
+  beginDiagnosticUpload(
+    organizationId: $organizationId
+    diagnosticRequestId: $diagnosticRequestId
+    metadata: $metadata
+    requestId: $requestId
+  )
+}
+mutation AuthorizeDiagnosticDownload(
+  $organizationId: UUID!
+  $requestId: UUID!
+  $versionId: UUID!
+  $context: String!
+) {
+  authorizeDiagnosticDownload(
+    organizationId: $organizationId
+    requestId: $requestId
+    versionId: $versionId
+    context: $context
+  )
+}

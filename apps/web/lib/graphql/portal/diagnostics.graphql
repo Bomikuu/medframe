@@ -1,0 +1,21 @@
+query MyDiagnosticRequests($linkId: UUID!, $after: String) {
+  myDiagnosticRequests(linkId: $linkId, after: $after)
+}
+query MyDiagnosticRequest($linkId: UUID!, $requestId: UUID!) {
+  myDiagnosticRequest(linkId: $linkId, requestId: $requestId)
+}
+mutation SelectDiagnosticCenter(
+  $linkId: UUID!
+  $diagnosticRequestId: UUID!
+  $centerId: UUID!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  selectDiagnosticCenter(
+    linkId: $linkId
+    diagnosticRequestId: $diagnosticRequestId
+    centerId: $centerId
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  )
+}
