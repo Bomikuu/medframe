@@ -18,6 +18,7 @@ import { PatientAvatar } from "@/components/application/patient-avatar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSafety } from "@/features/workspace/safety-provider";
+import { PatientAnatomy } from "@/features/anatomy/patient-anatomy";
 import { PatientDentalChart } from "@/features/dental/patient-dental-chart";
 import { PatientRecordDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
@@ -50,6 +51,7 @@ export function PatientOverview({
     ["overview", "Overview", true],
     ["medical", "Medical history", clinical],
     ["consultations", "Consultations", clinical],
+    ["anatomy", "Anatomy", clinical],
     ["dental", "Dental chart", clinical],
     ["treatments", "Treatments", clinical],
     ["diagnostics", "Diagnostics", clinical && can("diagnostics.read")],
@@ -258,6 +260,9 @@ export function PatientOverview({
             </TabsContent>
             <TabsContent value="consultations">
               <ConsultationList patientId={patientId} />
+            </TabsContent>
+            <TabsContent value="anatomy">
+              {active === "anatomy" && clinical && <PatientAnatomy patientId={patientId} />}
             </TabsContent>
             <TabsContent value="dental">
               <div className="grid gap-6">

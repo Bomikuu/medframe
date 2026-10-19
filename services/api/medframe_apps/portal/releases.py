@@ -31,6 +31,9 @@ class SelectedEncounter(Input):
 class ReleaseSelection(Input):
     summary: str = Field(min_length=1, max_length=4000)
     encounters: list[SelectedEncounter] = Field(default_factory=list, max_length=5)
+    anatomy_chart_revision_id: UUID | None = None
+    anatomy_finding_keys: list[UUID] = Field(default_factory=list, max_length=60)
+    anatomy_include_notes: bool = False
     chart_revision_id: UUID | None = None
     plan_revision_ids: list[UUID] = Field(default_factory=list, max_length=5)
     follow_up_revision_ids: list[UUID] = Field(default_factory=list, max_length=10)
@@ -41,6 +44,7 @@ class ReleaseSelection(Input):
     def unique_sources(self):
         groups = [
             [value.revision_id for value in self.encounters],
+            self.anatomy_finding_keys,
             self.plan_revision_ids,
             self.follow_up_revision_ids,
             self.document_version_ids,
@@ -80,6 +84,7 @@ def build_preview(user, org, patient, data):
         [
             selection.encounters,
             selection.chart_revision_id,
+            selection.anatomy_chart_revision_id,
             selection.plan_revision_ids,
             selection.follow_up_revision_ids,
             selection.document_version_ids,
@@ -190,6 +195,10 @@ def build_preview(user, org, patient, data):
     manifest["diagnostics"] = [
         {"id": item["id"], "sequence": item["sequence"]} for item in diagnostics["diagnostics"]
     ]
+    from medframe_apps.anatomy.releases import build_anatomy_release
+
+    payload["anatomy"] = build_anatomy_release(user, org, patient.id, selection)
+    manifest["anatomy"] = payload["anatomy"]["source"] if payload["anatomy"] else None
     if len(json.dumps(payload, ensure_ascii=False).encode()) > 65536:
         raise DomainError("TOO_LARGE", "Select fewer sources; the release must fit 64KiB.", 413)
     return {

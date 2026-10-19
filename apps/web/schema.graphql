@@ -72,6 +72,7 @@ type EncounterType {
   editable: Boolean!
   revisions: [RevisionType!]!
   template: JSON
+  providerSpecialty: String!
   patientHistoryRevisionId: UUID
 }
 
@@ -224,6 +225,10 @@ type ProviderType {
 }
 
 type Query {
+  anatomyReference(organizationId: UUID!): JSON!
+  anatomyChart(organizationId: UUID!, patientId: UUID!, revisionId: UUID = null, filters: JSON = null, after: String = null, first: Int! = 20): JSON!
+  anatomyRevisions(organizationId: UUID!, patientId: UUID!, after: String = null, first: Int! = 20): JSON!
+  anatomyComparison(organizationId: UUID!, patientId: UUID!, leftRevisionId: UUID!, rightRevisionId: UUID!, after: String = null, first: Int! = 20): JSON!
   diagnosticSetup(organizationId: UUID!, search: String! = "", patientId: UUID = null): JSON!
   diagnosticRequests(organizationId: UUID!, context: String! = "clinic", filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
   diagnosticRequest(organizationId: UUID!, requestId: UUID!, context: String! = "clinic"): JSON!

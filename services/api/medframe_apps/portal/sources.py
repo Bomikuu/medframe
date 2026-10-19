@@ -8,6 +8,10 @@ from medframe_apps.treatments.models import FollowUpRevision, TreatmentPlanRevis
 
 def release_source_page(user, org, patient_id, kind, after=None):
     require_patient(user, org, patient_id, "patients.clinical.write")
+    if kind == "anatomy":
+        from medframe_apps.anatomy.releases import anatomy_release_sources
+
+        return anatomy_release_sources(user, org, patient_id, after)
     if kind == "diagnostics":
         from medframe_apps.diagnostics.releases import reviewed_result_sources
 

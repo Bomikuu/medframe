@@ -28,6 +28,7 @@ import { StatusBadge } from "@/components/application/status-badge";
 import { FileText, Stethoscope, Crosshair, MessageSquare } from "@/components/icons";
 import { PatientAvatar } from "@/components/application/patient-avatar";
 import { PageHeading, failureCode, failureText } from "@/features/patients/feedback";
+import { AnatomyEditor } from "@/features/anatomy/anatomy-editor";
 import { DentalEditor } from "@/features/dental/dental-editor";
 import { DocumentPanel } from "@/features/documents/document-panel";
 import { templateSchema } from "./templates/schema";
@@ -81,7 +82,9 @@ export function EncounterEditor({
   const dirty = form.formState.isDirty;
   const readOnly = exactRevision || !encounter.editable || !can("encounters.write");
   const [review, setReview] = useState(false);
-  const [clinicalTab, setClinicalTab] = useState("dental");
+  const [clinicalTab, setClinicalTab] = useState(
+    initial.providerSpecialty === "general_medicine" ? "anatomy" : "dental",
+  );
   usePatientDraft(key, form);
   useUnsavedChanges(key, dirty && !readOnly, () => form.reset());
 
@@ -445,7 +448,7 @@ export function EncounterEditor({
         </div>
       </details>
       <div
-        className={`grid min-w-0 items-start gap-6 ${clinicalTab === "dental" ? "" : "xl:grid-cols-[minmax(0,1fr)_280px]"}`}
+        className={`grid min-w-0 items-start gap-6 ${["dental", "anatomy"].includes(clinicalTab) ? "" : "xl:grid-cols-[minmax(0,1fr)_280px]"}`}
       >
         <div className="min-w-0">
           <FormProvider {...form}>
@@ -464,6 +467,7 @@ export function EncounterEditor({
                 <div className="overflow-x-auto border-b border-border">
                   <TabsList variant="line" className="min-w-max">
                     <TabsTrigger value="notes">Notes & diagnoses</TabsTrigger>
+                    <TabsTrigger value="anatomy">Anatomy</TabsTrigger>
                     <TabsTrigger value="dental">Dental chart</TabsTrigger>
                     <TabsTrigger value="procedures">Procedures</TabsTrigger>
                     <TabsTrigger value="documents">Documents</TabsTrigger>
@@ -479,6 +483,14 @@ export function EncounterEditor({
                       }
                     />
                   </div>
+                </TabsContent>
+                <TabsContent value="anatomy" forceMount className="data-[state=inactive]:hidden">
+                  <AnatomyEditor
+                    active={clinicalTab === "anatomy"}
+                    readOnly={readOnly}
+                    patientId={encounter.patientId}
+                    save={save}
+                  />
                 </TabsContent>
                 <TabsContent value="dental" forceMount className="data-[state=inactive]:hidden">
                   <div className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-6">

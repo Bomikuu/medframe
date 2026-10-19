@@ -1,6 +1,6 @@
 # Medframe Batch 6 Implementation Plan
 
-Execution: native in this chat, no subagents/delegated reviewer/separate chat. User approved the written design with “approve”; this written plan awaits review. One accumulated verification pass replaces per-task red/green loops under the user’s standing preference. Necessary activation-blocker repairs and focused confirmation are authorized, and local activation is automatic. No separate execution-method or activation question is needed.
+Execution: native in this chat, no subagents/delegated reviewer/separate chat. User approved the written design with “approve”; the user approved this written plan with “proceed implementation”. One accumulated verification pass replaces per-task red/green loops under the user’s standing preference. Necessary activation-blocker repairs and focused confirmation are authorized, and local activation is automatic. No separate execution-method or activation question is needed.
 
 **Goal:** Ship a model-first body/skeleton annotation workflow inside consultations, with preserved patient-side semantics, exact history/comparison and explicit patient releases.
 
@@ -113,4 +113,8 @@ Graphify traced existing apply_template → authorized encounter/version and tem
 
 Jev 0.7.0 / jev-1.13.0 selected `asset_registry_contract`, confidence 0.95, **594 input / 44 output tokens**, over viewer-first/release-first order. Only sanitized architectural state was sent; this is prioritization, not proof or authorization. Raw output: ignored `.impeccable/review/batch6-plan/jev-priority.json`.
 
-Plan status: prepared for review. No product code, migrations, assets or tests changed during planning; Batch 5 remains on its existing runtime. After approval, execute natively and activate locally without re-asking those settled choices.
+Plan approved and executed natively. The original planning record above remains historical. See docs/operations/django-batch-6-verification.md for actual implementation, bounded verification, activation and deferred scope; unchecked detail assertions are not implied to pass. The user’s standing local activation authorization remains in force.
+
+## Execution handoff
+
+Core tasks 1–5 are implemented together: licensed/mapped real assets, Django registry and immutable history, one consultation aggregate, explicit portal snapshots, and model-first editor/navigation. Task6 is in final local cutover. The detailed unchecked assertions are retained as the original plan, not retroactively all marked passed. B6-004/005 enumerate unfinished refinements and unverified cases. Actual commands/results replace planning estimates in the operation record.

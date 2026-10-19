@@ -1,7 +1,27 @@
+import { anatomyFindingSchema } from "@/features/anatomy/schema";
 import { z } from "zod";
 import { findingSchema, diagnosisSchema, procedureSchema } from "@/features/consultations/schema";
 import { themeSchema } from "@/features/branding/schema";
 export const releasePayloadSchema = z.object({
+  anatomy: z
+    .object({
+      source: z.object({
+        revision_id: z.string(),
+        version: z.number(),
+        created_at: z.string(),
+        author: z.string(),
+        registry_version: z.number(),
+      }),
+      findings: z.array(
+        anatomyFindingSchema
+          .omit({ key: true, source_revision_id: true, notes: true })
+          .extend({ label: z.string(), notes: z.string().optional() }),
+      ),
+      notes_included: z.boolean(),
+      reference_notice: z.string(),
+    })
+    .nullable()
+    .default(null),
   diagnostics: z
     .array(
       z.object({

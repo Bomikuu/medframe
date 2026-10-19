@@ -41,6 +41,7 @@ class EncounterType:
     editable: bool
     revisions: list[RevisionType]
     template: JSON | None
+    provider_specialty: str
     patient_history_revision_id: UUID | None
 
 
@@ -70,6 +71,9 @@ def encounter_details(encounter, exact_revision=None):
         if value:
             template = template_details(value)
     return EncounterType(
+        provider_specialty=exact_revision.content.get("context", {}).get("provider_specialty", "")
+        if exact_revision
+        else encounter.provider.specialty,
         id=encounter.id,
         patient_id=encounter.patient_id,
         patient_name=encounter.patient.full_name,

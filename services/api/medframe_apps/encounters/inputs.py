@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, FiniteFloat, model_validator
 
+from medframe_apps.anatomy.inputs import AnatomyFindingInput
 from medframe_apps.dental.reference import validate_tooth_surfaces
 
 
@@ -79,6 +80,7 @@ class DraftInput(Input):
     soap: Soap = Field(default_factory=Soap)
     diagnoses: list[DiagnosisInput] = Field(default_factory=list, max_length=20)
     observations: list[ObservationInput] = Field(default_factory=list, max_length=30)
+    anatomy_findings: list[AnatomyFindingInput] = Field(default_factory=list, max_length=60)
     findings: list[FindingInput] = Field(default_factory=list, max_length=80)
     procedures: list[ProcedureInput] = Field(default_factory=list, max_length=30)
     document_ids: list[UUID] = Field(default_factory=list, max_length=20)
@@ -89,6 +91,8 @@ class DraftInput(Input):
             raise ValueError("Combined draft must fit 48KiB")
         if len({finding.key for finding in self.findings}) != len(self.findings):
             raise ValueError("Finding keys must be unique")
+        if len({item.key for item in self.anatomy_findings}) != len(self.anatomy_findings):
+            raise ValueError("Anatomy finding keys must be unique")
         if len(set(self.document_ids)) != len(self.document_ids):
             raise ValueError("Document versions must be unique")
         return self

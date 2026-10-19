@@ -1,4 +1,6 @@
 "use client";
+import { AnatomyReleasePicker } from "@/features/anatomy/release-picker";
+import { chartStampSchema } from "@/features/anatomy/schema";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -35,6 +37,7 @@ const sourcesSchema = z.object({
   follow_ups: z.array(sourceSchema),
   documents: z.array(sourceSchema),
   diagnostics: z.array(sourceSchema),
+  anatomy: z.array(chartStampSchema.extend({ label: z.string() })),
 });
 const empty = {
   summary: "",
@@ -43,6 +46,9 @@ const empty = {
   diagnoses: false,
   procedures: false,
   chartId: "",
+  anatomyChartId: "",
+  anatomyKeys: [] as string[],
+  anatomyNotes: false,
   planIds: [] as string[],
   followupIds: [] as string[],
   documentIds: [] as string[],
@@ -164,11 +170,28 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
   const sources = useRemote(ReleaseSourcesDocument, { organizationId, patientId });
   const parsed = sourcesSchema.safeParse(sources.data?.releaseSources);
   const [older, setOlder] = useState<
-    Record<string, { items: z.infer<typeof sourceSchema>[]; cursor: string | null }>
+    Record<
+      string,
+      {
+        items: (z.infer<typeof sourceSchema> & {
+          revision_id?: string;
+          author?: string;
+          encounter_id?: string;
+          registry_version?: number;
+        })[];
+        cursor: string | null;
+      }
+    >
   >({});
   const sourceLists = parsed.success
     ? {
         ...parsed.data,
+        anatomy: [
+          ...parsed.data.anatomy,
+          ...(older.anatomy?.items ?? []).map((item) =>
+            chartStampSchema.extend({ label: z.string() }).parse(item),
+          ),
+        ],
         encounters: [...parsed.data.encounters, ...(older.encounters?.items ?? [])],
         plans: [...parsed.data.plans, ...(older.plans?.items ?? [])],
         follow_ups: [...parsed.data.follow_ups, ...(older.follow_ups?.items ?? [])],
@@ -236,6 +259,9 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
                 ]
               : [],
             chart_revision_id: input.chartId || null,
+            anatomy_chart_revision_id: input.anatomyChartId || null,
+            anatomy_finding_keys: input.anatomyKeys,
+            anatomy_include_notes: input.anatomyNotes,
             plan_revision_ids: input.planIds,
             follow_up_revision_ids: input.followupIds,
             document_version_ids: input.documentIds,
@@ -337,6 +363,50 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
                 </label>
               </div>
             </fieldset>
+            <fieldset className="grid gap-3 border-t border-border pt-4">
+              <legend className="font-medium">Anatomical findings (explicit selection)</legend>
+              <label className="grid gap-2 text-sm">
+                Exact anatomical chart
+                <select
+                  className="h-11 max-w-full rounded-md border border-input bg-background px-3"
+                  value={values.anatomyChartId}
+                  onChange={(event) => {
+                    form.setValue("anatomyChartId", event.target.value, { shouldDirty: true });
+                    form.setValue("anatomyKeys", [], { shouldDirty: true });
+                    form.setValue("anatomyNotes", false, { shouldDirty: true });
+                  }}
+                >
+                  <option value="">Do not share anatomy</option>
+                  {sourceLists!.anatomy.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.label} · {timeLabel(item.created_at)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {values.anatomyChartId && (
+                <AnatomyReleasePicker
+                  key={values.anatomyChartId}
+                  patientId={patientId}
+                  revisionId={
+                    sourceLists!.anatomy.find((item) => item.id === values.anatomyChartId)!
+                      .revision_id
+                  }
+                  keys={values.anatomyKeys ?? []}
+                  onChange={(keys) => form.setValue("anatomyKeys", keys, { shouldDirty: true })}
+                />
+              )}
+              <label className="flex min-h-11 items-center gap-3 text-sm">
+                <Checkbox
+                  disabled={!values.anatomyChartId}
+                  checked={values.anatomyNotes}
+                  onCheckedChange={(checked) =>
+                    form.setValue("anatomyNotes", checked === true, { shouldDirty: true })
+                  }
+                />
+                Include clinical notes for selected anatomical findings
+              </label>
+            </fieldset>
             <fieldset className="grid gap-2 border-t border-border pt-4">
               <legend className="font-medium">Dental chart snapshot (optional)</legend>
               {sourceLists!.encounters.map((item) => (
@@ -401,46 +471,62 @@ function ReleaseForm({ patientId, onPublished }: { patientId: string; onPublishe
               >
                 Refresh available versions
               </Button>
-              {["encounters", "plans", "follow_ups", "documents", "diagnostics"].map((kind) => {
-                const cursor = older[kind] ? older[kind].cursor : parsed.data.source_cursors[kind];
-                return cursor ? (
-                  <Button
-                    key={kind}
-                    type="button"
-                    variant="outline"
-                    disabled={busy}
-                    onClick={async () => {
-                      const current = capture();
-                      setBusy(true);
-                      setError(null);
-                      try {
-                        const result = await getGraphqlClient().request(ReleaseSourcePageDocument, {
-                          organizationId,
-                          patientId,
-                          kind,
-                          after: cursor,
-                        });
-                        if (current()) {
-                          const page = recordPage(sourceSchema).parse(result.releaseSourcePage);
-                          setOlder((previous) => ({
-                            ...previous,
-                            [kind]: {
-                              items: [...(previous[kind]?.items ?? []), ...page.items],
-                              cursor: page.end_cursor,
+              {["encounters", "plans", "follow_ups", "documents", "diagnostics", "anatomy"].map(
+                (kind) => {
+                  const cursor = older[kind]
+                    ? older[kind].cursor
+                    : parsed.data.source_cursors[kind];
+                  return cursor ? (
+                    <Button
+                      key={kind}
+                      type="button"
+                      variant="outline"
+                      disabled={busy}
+                      onClick={async () => {
+                        const current = capture();
+                        setBusy(true);
+                        setError(null);
+                        try {
+                          const result = await getGraphqlClient().request(
+                            ReleaseSourcePageDocument,
+                            {
+                              organizationId,
+                              patientId,
+                              kind,
+                              after: cursor,
                             },
-                          }));
+                          );
+                          if (current()) {
+                            const page = recordPage(
+                              kind === "anatomy"
+                                ? sourceSchema.extend({
+                                    revision_id: z.string(),
+                                    author: z.string(),
+                                    encounter_id: z.string(),
+                                    registry_version: z.number(),
+                                  })
+                                : sourceSchema,
+                            ).parse(result.releaseSourcePage);
+                            setOlder((previous) => ({
+                              ...previous,
+                              [kind]: {
+                                items: [...(previous[kind]?.items ?? []), ...page.items],
+                                cursor: page.end_cursor,
+                              },
+                            }));
+                          }
+                        } catch (failure) {
+                          if (current()) setError(failure);
+                        } finally {
+                          if (current()) setBusy(false);
                         }
-                      } catch (failure) {
-                        if (current()) setError(failure);
-                      } finally {
-                        if (current()) setBusy(false);
-                      }
-                    }}
-                  >
-                    Older {kind.replaceAll("_", " ")} versions
-                  </Button>
-                ) : null;
-              })}
+                      }}
+                    >
+                      Older {kind.replaceAll("_", " ")} versions
+                    </Button>
+                  ) : null;
+                },
+              )}
             </div>
           </>
         ) : (

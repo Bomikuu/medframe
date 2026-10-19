@@ -1,0 +1,2552 @@
+[
+  {
+    "id": "body.gluteal_regionl",
+    "source_mesh": "Gluteal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.gluteal_foldl",
+    "source_mesh": "Gluteal_foldl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.gluteal_regionr",
+    "source_mesh": "Gluteal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.gluteal_foldr",
+    "source_mesh": "Gluteal_foldr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.hip_regionr",
+    "source_mesh": "Hip_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_kneel",
+    "source_mesh": "Anterior_region_of_kneel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_kneer",
+    "source_mesh": "Anterior_region_of_kneer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_kneer",
+    "source_mesh": "Posterior_region_of_kneer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.popliteal_fossar",
+    "source_mesh": "Popliteal_fossar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_kneel",
+    "source_mesh": "Posterior_region_of_kneel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.popliteal_fossal",
+    "source_mesh": "Popliteal_fossal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_malleolusl",
+    "source_mesh": "Lateral_malleolusl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_anklel",
+    "source_mesh": "Anterior_region_of_anklel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_malleolusl",
+    "source_mesh": "Medial_malleolusl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_malleolusr",
+    "source_mesh": "Medial_malleolusr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_malleolusr",
+    "source_mesh": "Lateral_malleolusr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_retromalleolar_regionl",
+    "source_mesh": "Medial_retromalleolar_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_retromalleolar_regionr",
+    "source_mesh": "Lateral_retromalleolar_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_retromalleolar_regionr",
+    "source_mesh": "Medial_retromalleolar_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_retromalleolar_regionl",
+    "source_mesh": "Lateral_retromalleolar_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_ankler",
+    "source_mesh": "Anterior_region_of_ankler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_legl",
+    "source_mesh": "Posterior_region_of_legl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_legl",
+    "source_mesh": "Anterior_region_of_legl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_legr",
+    "source_mesh": "Anterior_region_of_legr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_legr",
+    "source_mesh": "Posterior_region_of_legr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_border_of_footl",
+    "source_mesh": "Medial_border_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.metatarsal_regionr",
+    "source_mesh": "Metatarsal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.hallucial_eminencer",
+    "source_mesh": "Hallucial_eminencer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_border_of_footl",
+    "source_mesh": "Lateral_border_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsum_of_footr",
+    "source_mesh": "Dorsum_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.soler",
+    "source_mesh": "Soler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_part_of_longitudinal_arch_of_footr",
+    "source_mesh": "Lateral_part_of_longitudinal_arch_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_part_of_longitudinal_arch_of_footr",
+    "source_mesh": "Medial_part_of_longitudinal_arch_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.distal_transverse_arch_of_footr",
+    "source_mesh": "Distal_transverse_arch_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.proximal_transverse_arch_of_footr",
+    "source_mesh": "Proximal_transverse_arch_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_border_of_footr",
+    "source_mesh": "Medial_border_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_border_of_footr",
+    "source_mesh": "Lateral_border_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.heel_regionl",
+    "source_mesh": "Heel_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.metatarsal_regionl",
+    "source_mesh": "Metatarsal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.hallucial_eminencel",
+    "source_mesh": "Hallucial_eminencel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.solel",
+    "source_mesh": "Solel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.distal_transverse_arch_of_footl",
+    "source_mesh": "Distal_transverse_arch_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_part_of_longitudinal_arch_of_footl",
+    "source_mesh": "Medial_part_of_longitudinal_arch_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.proximal_transverse_arch_of_footl",
+    "source_mesh": "Proximal_transverse_arch_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_part_of_longitudinal_arch_of_footl",
+    "source_mesh": "Lateral_part_of_longitudinal_arch_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsal_surfaces_of_digits_of_footr",
+    "source_mesh": "Dorsal_surfaces_of_digits_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.nail_plate_foot_r",
+    "source_mesh": "Nail_plate_(foot)r",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.perionyx_foot_r",
+    "source_mesh": "Perionyx_(foot)r",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.plantar_surfaces_of_digits_of_footl",
+    "source_mesh": "Plantar_surfaces_of_digits_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.plantar_surfaces_of_digits_of_footr",
+    "source_mesh": "Plantar_surfaces_of_digits_of_footr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsal_surfaces_of_digits_of_footl",
+    "source_mesh": "Dorsal_surfaces_of_digits_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.nail_plate_foot_l",
+    "source_mesh": "Nail_plate_(foot)l",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.perionyx_foot_l",
+    "source_mesh": "Perionyx_(foot)l",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsum_of_footl",
+    "source_mesh": "Dorsum_of_footl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.heel_regionr",
+    "source_mesh": "Heel_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_thighl",
+    "source_mesh": "Anterior_region_of_thighl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.femoral_trianglel",
+    "source_mesh": "Femoral_trianglel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_thighr",
+    "source_mesh": "Anterior_region_of_thighr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.femoral_triangler",
+    "source_mesh": "Femoral_triangler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_thighl",
+    "source_mesh": "Posterior_region_of_thighl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_thighr",
+    "source_mesh": "Posterior_region_of_thighr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.hip_regionl",
+    "source_mesh": "Hip_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.hypogastric_regionr",
+    "source_mesh": "Hypogastric_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.epigastric_regionr",
+    "source_mesh": "Epigastric_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.hypogastric_regionl",
+    "source_mesh": "Hypogastric_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.inguinal_regionl",
+    "source_mesh": "Inguinal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.hypochondriac_regionr",
+    "source_mesh": "Hypochondriac_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.umbilical_regionl",
+    "source_mesh": "Umbilical_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.umbilicusl",
+    "source_mesh": "Umbilicusl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.hypochondriac_regionl",
+    "source_mesh": "Hypochondriac_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.inguinal_regionr",
+    "source_mesh": "Inguinal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.epigastric_regionl",
+    "source_mesh": "Epigastric_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_region_of_abdomenr",
+    "source_mesh": "Lateral_region_of_abdomenr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_region_of_abdomenl",
+    "source_mesh": "Lateral_region_of_abdomenl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.umbilical_regionr",
+    "source_mesh": "Umbilical_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.umbilicusr",
+    "source_mesh": "Umbilicusr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.palmr",
+    "source_mesh": "Palmr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsal_surfaces_of_digits_of_handl",
+    "source_mesh": "Dorsal_surfaces_of_digits_of_handl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.nail_platel",
+    "source_mesh": "Nail_platel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.perionyxl",
+    "source_mesh": "Perionyxl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsal_surfaces_of_digits_of_handr",
+    "source_mesh": "Dorsal_surfaces_of_digits_of_handr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.nail_plater",
+    "source_mesh": "Nail_plater",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.perionyxr",
+    "source_mesh": "Perionyxr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.palmar_surfaces_of_digits_of_handl",
+    "source_mesh": "Palmar_surfaces_of_digits_of_handl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.palmar_surfaces_of_digits_of_handr",
+    "source_mesh": "Palmar_surfaces_of_digits_of_handr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.palml",
+    "source_mesh": "Palml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsum_of_handr",
+    "source_mesh": "Dorsum_of_handr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.dorsum_of_handl",
+    "source_mesh": "Dorsum_of_handl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_armr",
+    "source_mesh": "Anterior_region_of_armr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_bicipital_groover",
+    "source_mesh": "Medial_bicipital_groover",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_bicipital_groover",
+    "source_mesh": "Lateral_bicipital_groover",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_arml",
+    "source_mesh": "Anterior_region_of_arml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_bicipital_groovel",
+    "source_mesh": "Lateral_bicipital_groovel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_bicipital_groovel",
+    "source_mesh": "Medial_bicipital_groovel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_armr",
+    "source_mesh": "Posterior_region_of_armr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_arml",
+    "source_mesh": "Posterior_region_of_arml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_border_of_forearml",
+    "source_mesh": "Lateral_border_of_forearml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_border_of_forearmr",
+    "source_mesh": "Medial_border_of_forearmr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_border_of_forearmr",
+    "source_mesh": "Lateral_border_of_forearmr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_forearml",
+    "source_mesh": "Posterior_region_of_forearml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.medial_border_of_forearml",
+    "source_mesh": "Medial_border_of_forearml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_forearmr",
+    "source_mesh": "Posterior_region_of_forearmr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_forearml",
+    "source_mesh": "Anterior_region_of_forearml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_forearmr",
+    "source_mesh": "Anterior_region_of_forearmr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_elbowl",
+    "source_mesh": "Posterior_region_of_elbowl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_elbowr",
+    "source_mesh": "Posterior_region_of_elbowr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_elbowr",
+    "source_mesh": "Anterior_region_of_elbowr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.cubital_fossar",
+    "source_mesh": "Cubital_fossar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_elbowl",
+    "source_mesh": "Anterior_region_of_elbowl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.cubital_fossal",
+    "source_mesh": "Cubital_fossal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.deltoid_regionr",
+    "source_mesh": "Deltoid_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.deltoid_regionl",
+    "source_mesh": "Deltoid_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.radial_foveolar",
+    "source_mesh": "Radial_foveolar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_wristl",
+    "source_mesh": "Posterior_region_of_wristl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_wristr",
+    "source_mesh": "Anterior_region_of_wristr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.radial_foveolal",
+    "source_mesh": "Radial_foveolal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_wristr",
+    "source_mesh": "Posterior_region_of_wristr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_region_of_wristl",
+    "source_mesh": "Anterior_region_of_wristl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.fossa_antihelicar",
+    "source_mesh": "Fossa_antihelicar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.eminentia_fossae_triangularisr",
+    "source_mesh": "Eminentia_fossae_triangularisr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lobule_of_auriclel",
+    "source_mesh": "Lobule_of_auriclel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.eminentia_scaphael",
+    "source_mesh": "Eminentia_scaphael",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.antitragusr",
+    "source_mesh": "Antitragusr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.eminentia_scaphaer",
+    "source_mesh": "Eminentia_scaphaer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_notch_of_auriclel",
+    "source_mesh": "Anterior_notch_of_auriclel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.tragusr",
+    "source_mesh": "Tragusr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.helixl",
+    "source_mesh": "Helixl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.cymba_conchaer",
+    "source_mesh": "Cymba_conchaer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.concha_of_auricler",
+    "source_mesh": "Concha_of_auricler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.triangular_fossal",
+    "source_mesh": "Triangular_fossal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.fossa_antihelical",
+    "source_mesh": "Fossa_antihelical",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_auricular_groover",
+    "source_mesh": "Posterior_auricular_groover",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.auricular_tuberclel",
+    "source_mesh": "Auricular_tuberclel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.cymba_conchael",
+    "source_mesh": "Cymba_conchael",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.crura_of_antihelixr",
+    "source_mesh": "Crura_of_antihelixr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.apex_of_auriclel",
+    "source_mesh": "Apex_of_auriclel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.crura_of_antihelixl",
+    "source_mesh": "Crura_of_antihelixl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.cavity_of_conchal",
+    "source_mesh": "Cavity_of_conchal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.antihelixl",
+    "source_mesh": "Antihelixl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.eminentia_fossae_triangularisl",
+    "source_mesh": "Eminentia_fossae_triangularisl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.eminentia_conchaer",
+    "source_mesh": "Eminentia_conchaer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.helixr",
+    "source_mesh": "Helixr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.antitragusl",
+    "source_mesh": "Antitragusl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_auricular_groovel",
+    "source_mesh": "Posterior_auricular_groovel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anterior_notch_of_auricler",
+    "source_mesh": "Anterior_notch_of_auricler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.antihelixr",
+    "source_mesh": "Antihelixr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.auricular_regionl",
+    "source_mesh": "Auricular_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.cavity_of_conchar",
+    "source_mesh": "Cavity_of_conchar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.intertragic_incisurel",
+    "source_mesh": "Intertragic_incisurel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.scaphar",
+    "source_mesh": "Scaphar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.scaphal",
+    "source_mesh": "Scaphal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.eminentia_conchael",
+    "source_mesh": "Eminentia_conchael",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lobule_of_auricler",
+    "source_mesh": "Lobule_of_auricler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.tragusl",
+    "source_mesh": "Tragusl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.apex_of_auricler",
+    "source_mesh": "Apex_of_auricler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.intertragic_incisurer",
+    "source_mesh": "Intertragic_incisurer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.auricular_tubercler",
+    "source_mesh": "Auricular_tubercler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.triangular_fossar",
+    "source_mesh": "Triangular_fossar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.concha_of_auriclel",
+    "source_mesh": "Concha_of_auriclel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.auricular_regionr",
+    "source_mesh": "Auricular_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.frontal_regionr",
+    "source_mesh": "Frontal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.eyebrowr",
+    "source_mesh": "Eyebrowr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.temporal_regionl",
+    "source_mesh": "Temporal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.mastoid_regionl",
+    "source_mesh": "Mastoid_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.occipital_regionl",
+    "source_mesh": "Occipital_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.mastoid_regionr",
+    "source_mesh": "Mastoid_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.temporal_regionr",
+    "source_mesh": "Temporal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.frontal_regionl",
+    "source_mesh": "Frontal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.eyebrowl",
+    "source_mesh": "Eyebrowl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.parietal_regionl",
+    "source_mesh": "Parietal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.parietal_regionr",
+    "source_mesh": "Parietal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.occipital_regionr",
+    "source_mesh": "Occipital_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.buccal_regionr",
+    "source_mesh": "Buccal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.nasolabial_sulcusl",
+    "source_mesh": "Nasolabial_sulcusl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.mental_regionr",
+    "source_mesh": "Mental_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.oral_regionr",
+    "source_mesh": "Oral_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.angle_of_mouthr",
+    "source_mesh": "Angle_of_mouthr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.labial_commissurer",
+    "source_mesh": "Labial_commissurer",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.philtrumr",
+    "source_mesh": "Philtrumr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.infra_orbital_regionl",
+    "source_mesh": "Infra-orbital_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.nasolabial_sulcusr",
+    "source_mesh": "Nasolabial_sulcusr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.mentolabial_sulcusl",
+    "source_mesh": "Mentolabial_sulcusl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.zygomatic_regionr",
+    "source_mesh": "Zygomatic_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.oral_regionl",
+    "source_mesh": "Oral_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.philtruml",
+    "source_mesh": "Philtruml",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.labial_commissurel",
+    "source_mesh": "Labial_commissurel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.angle_of_mouthl",
+    "source_mesh": "Angle_of_mouthl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.nasal_regionl",
+    "source_mesh": "Nasal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.orbital_regionl",
+    "source_mesh": "Orbital_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.orbital_regionr",
+    "source_mesh": "Orbital_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.buccal_regionl",
+    "source_mesh": "Buccal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.mental_regionl",
+    "source_mesh": "Mental_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.parotideomasseteric_regionl",
+    "source_mesh": "Parotideomasseteric_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.nasal_regionr",
+    "source_mesh": "Nasal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.infra_orbital_regionr",
+    "source_mesh": "Infra-orbital_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.mentolabial_sulcusr",
+    "source_mesh": "Mentolabial_sulcusr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.zygomatic_regionl",
+    "source_mesh": "Zygomatic_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.parotideomasseteric_regionr",
+    "source_mesh": "Parotideomasseteric_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.muscular_trianglel",
+    "source_mesh": "Muscular_trianglel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.carotid_trianglel",
+    "source_mesh": "Carotid_trianglel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.carotid_triangler",
+    "source_mesh": "Carotid_triangler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.muscular_triangler",
+    "source_mesh": "Muscular_triangler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.submandibular_triangler",
+    "source_mesh": "Submandibular_triangler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.submental_triangler",
+    "source_mesh": "Submental_triangler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.submental_trianglel",
+    "source_mesh": "Submental_trianglel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.submandibular_trianglel",
+    "source_mesh": "Submandibular_trianglel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.sternocleidomastoid_regionr",
+    "source_mesh": "Sternocleidomastoid_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lesser_supraclavicular_fossar",
+    "source_mesh": "Lesser_supraclavicular_fossar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.sternocleidomastoid_regionl",
+    "source_mesh": "Sternocleidomastoid_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lesser_supraclavicular_fossal",
+    "source_mesh": "Lesser_supraclavicular_fossal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_neckl",
+    "source_mesh": "Posterior_region_of_neckl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.posterior_region_of_neckr",
+    "source_mesh": "Posterior_region_of_neckr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_region_of_neckl",
+    "source_mesh": "Lateral_region_of_neckl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_region_of_neckr",
+    "source_mesh": "Lateral_region_of_neckr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.greater_supraclavicular_fossar",
+    "source_mesh": "Greater_supraclavicular_fossar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.greater_supraclavicular_fossal",
+    "source_mesh": "Greater_supraclavicular_fossal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.urogenital_regionl",
+    "source_mesh": "Urogenital_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.anal_regionl",
+    "source_mesh": "Anal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.urogenital_regionr",
+    "source_mesh": "Urogenital_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.anal_regionr",
+    "source_mesh": "Anal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.pectoral_regionl",
+    "source_mesh": "Pectoral_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.inframammary_regionl",
+    "source_mesh": "Inframammary_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.mammary_regionl",
+    "source_mesh": "Mammary_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.deltopectoral_trianglel",
+    "source_mesh": "Deltopectoral_trianglel",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.presternal_regionl",
+    "source_mesh": "Presternal_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.presternal_regionr",
+    "source_mesh": "Presternal_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.infraclavicular_fossal",
+    "source_mesh": "Infraclavicular_fossal",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.deltopectoral_triangler",
+    "source_mesh": "Deltopectoral_triangler",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.infraclavicular_fossar",
+    "source_mesh": "Infraclavicular_fossar",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.pectoral_regionr",
+    "source_mesh": "Pectoral_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.mammary_regionr",
+    "source_mesh": "Mammary_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.inframammary_regionr",
+    "source_mesh": "Inframammary_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_region_of_thoraxl",
+    "source_mesh": "Lateral_region_of_thoraxl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lateral_region_of_thoraxr",
+    "source_mesh": "Lateral_region_of_thoraxr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.sacral_regionr",
+    "source_mesh": "Sacral_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.interscapular_regionl",
+    "source_mesh": "Interscapular_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.scapular_regionr",
+    "source_mesh": "Scapular_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.interscapular_regionr",
+    "source_mesh": "Interscapular_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.infrascapular_regionl",
+    "source_mesh": "Infrascapular_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.infrascapular_regionr",
+    "source_mesh": "Infrascapular_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.sacral_regionl",
+    "source_mesh": "Sacral_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lumbar_regionr",
+    "source_mesh": "Lumbar_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.vertebral_regionr",
+    "source_mesh": "Vertebral_regionr",
+    "side": "right",
+    "layer": "body"
+  },
+  {
+    "id": "body.vertebral_regionl",
+    "source_mesh": "Vertebral_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.lumbar_regionl",
+    "source_mesh": "Lumbar_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "body.scapular_regionl",
+    "source_mesh": "Scapular_regionl",
+    "side": "left",
+    "layer": "body"
+  },
+  {
+    "id": "skeleton.tibiar",
+    "source_mesh": "Tibiar",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.patellal",
+    "source_mesh": "Patellal",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.tibial",
+    "source_mesh": "Tibial",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_third_finger_of_footl",
+    "source_mesh": "Proximal_phalanx_of_third_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fourth_finger_of_footl",
+    "source_mesh": "Proximal_phalanx_of_fourth_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_third_finger_of_footr",
+    "source_mesh": "Distal_phalanx_of_third_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_third_finger_of_footl",
+    "source_mesh": "Middle_phalanx_of_third_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fifth_finger_of_footr",
+    "source_mesh": "Middle_phalanx_of_fifth_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_first_finger_of_footr",
+    "source_mesh": "Proximal_phalanx_of_first_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_third_finger_of_footr",
+    "source_mesh": "Middle_phalanx_of_third_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_second_finger_of_footl",
+    "source_mesh": "Proximal_phalanx_of_second_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_second_finger_of_footr",
+    "source_mesh": "Distal_phalanx_of_second_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fifth_finger_of_footl",
+    "source_mesh": "Middle_phalanx_of_fifth_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_first_finger_of_footr",
+    "source_mesh": "Distal_phalanx_of_first_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fifth_finger_of_footl",
+    "source_mesh": "Proximal_phalanx_of_fifth_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fifth_finger_of_footl",
+    "source_mesh": "Distal_phalanx_of_fifth_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fourth_finger_of_footr",
+    "source_mesh": "Middle_phalanx_of_fourth_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fourth_finger_of_footl",
+    "source_mesh": "Distal_phalanx_of_fourth_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_second_finger_of_footl",
+    "source_mesh": "Distal_phalanx_of_second_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_third_finger_of_footr",
+    "source_mesh": "Proximal_phalanx_of_third_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fifth_finger_of_footr",
+    "source_mesh": "Distal_phalanx_of_fifth_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fourth_finger_of_footr",
+    "source_mesh": "Distal_phalanx_of_fourth_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_third_finger_of_footl",
+    "source_mesh": "Distal_phalanx_of_third_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fifth_finger_of_footr",
+    "source_mesh": "Proximal_phalanx_of_fifth_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_first_finger_of_footl",
+    "source_mesh": "Proximal_phalanx_of_first_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_second_finger_of_footr",
+    "source_mesh": "Middle_phalanx_of_second_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_second_finger_of_footl",
+    "source_mesh": "Middle_phalanx_of_second_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fourth_finger_of_footr",
+    "source_mesh": "Proximal_phalanx_of_fourth_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_first_finger_of_footl",
+    "source_mesh": "Distal_phalanx_of_first_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_second_finger_of_footr",
+    "source_mesh": "Proximal_phalanx_of_second_finger_of_footr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fourth_finger_of_footl",
+    "source_mesh": "Middle_phalanx_of_fourth_finger_of_footl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fourth_metatarsal_bonel",
+    "source_mesh": "Fourth_metatarsal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fifth_metatarsal_boner",
+    "source_mesh": "Fifth_metatarsal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.first_metatarsal_boner",
+    "source_mesh": "First_metatarsal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.second_metatarsal_bonel",
+    "source_mesh": "Second_metatarsal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.third_metatarsal_boner",
+    "source_mesh": "Third_metatarsal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.third_metatarsal_bonel",
+    "source_mesh": "Third_metatarsal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.first_metatarsal_bonel",
+    "source_mesh": "First_metatarsal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fourth_metatarsal_boner",
+    "source_mesh": "Fourth_metatarsal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.second_metatarsal_boner",
+    "source_mesh": "Second_metatarsal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fifth_metatarsal_bonel",
+    "source_mesh": "Fifth_metatarsal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.intermediate_cuneiform_bonel",
+    "source_mesh": "Intermediate_cuneiform_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.talusr",
+    "source_mesh": "Talusr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.lateral_cuneiform_bonel",
+    "source_mesh": "Lateral_cuneiform_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.intermediate_cuneiform_boner",
+    "source_mesh": "Intermediate_cuneiform_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.cuboid_bonel",
+    "source_mesh": "Cuboid_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.calcaneusl",
+    "source_mesh": "Calcaneusl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.medial_cuneiform_bonel",
+    "source_mesh": "Medial_cuneiform_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.cuboid_boner",
+    "source_mesh": "Cuboid_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.navicular_boner",
+    "source_mesh": "Navicular_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.medial_cuneiform_boner",
+    "source_mesh": "Medial_cuneiform_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.talusl",
+    "source_mesh": "Talusl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.navicular_bonel",
+    "source_mesh": "Navicular_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.calcaneusr",
+    "source_mesh": "Calcaneusr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.lateral_cuneiform_boner",
+    "source_mesh": "Lateral_cuneiform_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.patellar",
+    "source_mesh": "Patellar",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.femurl",
+    "source_mesh": "Femurl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fibulal",
+    "source_mesh": "Fibulal",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fibular",
+    "source_mesh": "Fibular",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.femurr",
+    "source_mesh": "Femurr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.hip_boner",
+    "source_mesh": "Hip_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.hip_bonel",
+    "source_mesh": "Hip_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.sacrum",
+    "source_mesh": "Sacrum",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_c6",
+    "source_mesh": "Vertebra_C6",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_c3",
+    "source_mesh": "Vertebra_C3",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.axis_c2_",
+    "source_mesh": "Axis_(C2)",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_c7",
+    "source_mesh": "Vertebra_C7",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_c4",
+    "source_mesh": "Vertebra_C4",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.atlas_c1_",
+    "source_mesh": "Atlas_(C1)",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_c5",
+    "source_mesh": "Vertebra_C5",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_l5",
+    "source_mesh": "Vertebra_L5",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_l3",
+    "source_mesh": "Vertebra_L3",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_l4",
+    "source_mesh": "Vertebra_L4",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_l2",
+    "source_mesh": "Vertebra_L2",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_l1",
+    "source_mesh": "Vertebra_L1",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t5",
+    "source_mesh": "Vertebra_T5",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t11",
+    "source_mesh": "Vertebra_T11",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t1",
+    "source_mesh": "Vertebra_T1",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t6",
+    "source_mesh": "Vertebra_T6",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t3",
+    "source_mesh": "Vertebra_T3",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t4",
+    "source_mesh": "Vertebra_T4",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t12",
+    "source_mesh": "Vertebra_T12",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t7",
+    "source_mesh": "Vertebra_T7",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t8",
+    "source_mesh": "Vertebra_T8",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t9",
+    "source_mesh": "Vertebra_T9",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t10",
+    "source_mesh": "Vertebra_T10",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.vertebra_t2",
+    "source_mesh": "Vertebra_T2",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.coccyx",
+    "source_mesh": "Coccyx",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.hyoid_bone",
+    "source_mesh": "Hyoid_bone",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.mandible",
+    "source_mesh": "Mandible",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.parietal_bonel",
+    "source_mesh": "Parietal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.nasal_boner",
+    "source_mesh": "Nasal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.temporal_bonel",
+    "source_mesh": "Temporal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.ethmoid_bone",
+    "source_mesh": "Ethmoid_bone",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.maxillar",
+    "source_mesh": "Maxillar",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.zygomatic_bonel",
+    "source_mesh": "Zygomatic_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.occipital_bone",
+    "source_mesh": "Occipital_bone",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.maxillal",
+    "source_mesh": "Maxillal",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.parietal_boner",
+    "source_mesh": "Parietal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.nasal_bonel",
+    "source_mesh": "Nasal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.frontal_bone",
+    "source_mesh": "Frontal_bone",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.sphenoid_bone",
+    "source_mesh": "Sphenoid_bone",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.zygomatic_boner",
+    "source_mesh": "Zygomatic_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.temporal_boner",
+    "source_mesh": "Temporal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fourth_ribl",
+    "source_mesh": "Fourth_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.first_ribl",
+    "source_mesh": "First_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fifth_ribl",
+    "source_mesh": "Fifth_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fifth_ribr",
+    "source_mesh": "Fifth_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.first_ribr",
+    "source_mesh": "First_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.third_ribl",
+    "source_mesh": "Third_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.third_ribr",
+    "source_mesh": "Third_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.seventh_ribr",
+    "source_mesh": "Seventh_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fourth_ribr",
+    "source_mesh": "Fourth_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.seventh_ribl",
+    "source_mesh": "Seventh_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.second_ribl",
+    "source_mesh": "Second_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.sixth_ribl",
+    "source_mesh": "Sixth_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.second_ribr",
+    "source_mesh": "Second_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.sixth_ribr",
+    "source_mesh": "Sixth_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.eighth_ribl",
+    "source_mesh": "Eighth_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.tenth_ribr",
+    "source_mesh": "Tenth_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.ninth_ribl",
+    "source_mesh": "Ninth_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.ninth_ribr",
+    "source_mesh": "Ninth_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.eighth_ribr",
+    "source_mesh": "Eighth_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.twelfth_ribl",
+    "source_mesh": "Twelfth_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.twelfth_ribr",
+    "source_mesh": "Twelfth_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.eleventh_ribl",
+    "source_mesh": "Eleventh_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.eleventh_ribr",
+    "source_mesh": "Eleventh_ribr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.tenth_ribl",
+    "source_mesh": "Tenth_ribl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.manubrium_of_sternum",
+    "source_mesh": "Manubrium_of_sternum",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.body_of_sternum",
+    "source_mesh": "Body_of_sternum",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.xiphoid_process",
+    "source_mesh": "Xiphoid_process",
+    "side": "midline",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.ulnal",
+    "source_mesh": "Ulnal",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fifth_finger_of_handr",
+    "source_mesh": "Proximal_phalanx_of_fifth_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_second_finger_of_handl",
+    "source_mesh": "Proximal_phalanx_of_second_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fifth_finger_of_handl",
+    "source_mesh": "Distal_phalanx_of_fifth_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_first_finger_of_handr",
+    "source_mesh": "Proximal_phalanx_of_first_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_second_finger_of_handr",
+    "source_mesh": "Proximal_phalanx_of_second_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fifth_metacarpal_bonel",
+    "source_mesh": "Fifth_metacarpal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_third_finger_of_handr",
+    "source_mesh": "Proximal_phalanx_of_third_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fourth_finger_of_handr",
+    "source_mesh": "Middle_phalanx_of_fourth_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.humerusr",
+    "source_mesh": "Humerusr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fourth_finger_of_handl",
+    "source_mesh": "Distal_phalanx_of_fourth_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_second_finger_of_handl",
+    "source_mesh": "Middle_phalanx_of_second_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.third_metacarpal_bonel",
+    "source_mesh": "Third_metacarpal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fourth_metacarpal_boner",
+    "source_mesh": "Fourth_metacarpal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.second_metacarpal_boner",
+    "source_mesh": "Second_metacarpal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fourth_metacarpal_bonel",
+    "source_mesh": "Fourth_metacarpal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fifth_finger_of_handr",
+    "source_mesh": "Middle_phalanx_of_fifth_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.first_metacarpal_boner",
+    "source_mesh": "First_metacarpal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_third_finger_of_handl",
+    "source_mesh": "Middle_phalanx_of_third_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fourth_finger_of_handl",
+    "source_mesh": "Middle_phalanx_of_fourth_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fourth_finger_of_handr",
+    "source_mesh": "Proximal_phalanx_of_fourth_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fourth_finger_of_handr",
+    "source_mesh": "Distal_phalanx_of_fourth_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_first_finger_of_handl",
+    "source_mesh": "Distal_phalanx_of_first_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.ulnar",
+    "source_mesh": "Ulnar",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_third_finger_of_handl",
+    "source_mesh": "Distal_phalanx_of_third_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_second_finger_of_handr",
+    "source_mesh": "Middle_phalanx_of_second_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.radiusl",
+    "source_mesh": "Radiusl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.fifth_metacarpal_boner",
+    "source_mesh": "Fifth_metacarpal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_first_finger_of_handl",
+    "source_mesh": "Proximal_phalanx_of_first_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.first_metacarpal_bonel",
+    "source_mesh": "First_metacarpal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fifth_finger_of_handl",
+    "source_mesh": "Proximal_phalanx_of_fifth_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.second_metacarpal_bonel",
+    "source_mesh": "Second_metacarpal_bonel",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_first_finger_of_handr",
+    "source_mesh": "Distal_phalanx_of_first_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.humerusl",
+    "source_mesh": "Humerusl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.third_metacarpal_boner",
+    "source_mesh": "Third_metacarpal_boner",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_fifth_finger_of_handr",
+    "source_mesh": "Distal_phalanx_of_fifth_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_second_finger_of_handr",
+    "source_mesh": "Distal_phalanx_of_second_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_fourth_finger_of_handl",
+    "source_mesh": "Proximal_phalanx_of_fourth_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_third_finger_of_handr",
+    "source_mesh": "Distal_phalanx_of_third_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.distal_phalanx_of_second_finger_of_handl",
+    "source_mesh": "Distal_phalanx_of_second_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.proximal_phalanx_of_third_finger_of_handl",
+    "source_mesh": "Proximal_phalanx_of_third_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_fifth_finger_of_handl",
+    "source_mesh": "Middle_phalanx_of_fifth_finger_of_handl",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.radiusr",
+    "source_mesh": "Radiusr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.middle_phalanx_of_third_finger_of_handr",
+    "source_mesh": "Middle_phalanx_of_third_finger_of_handr",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.scapular",
+    "source_mesh": "Scapular",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.scapulal",
+    "source_mesh": "Scapulal",
+    "side": "left",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.clavicler",
+    "source_mesh": "Clavicler",
+    "side": "right",
+    "layer": "skeleton"
+  },
+  {
+    "id": "skeleton.claviclel",
+    "source_mesh": "Claviclel",
+    "side": "left",
+    "layer": "skeleton"
+  }
+]

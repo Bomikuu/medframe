@@ -2,6 +2,7 @@
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { z } from "zod";
 import { releasePayloadSchema } from "./schema";
+import { AnatomyView } from "@/features/anatomy/anatomy-view";
 import { ChartView } from "@/features/dental/chart-view";
 import { DocumentPreview } from "@/features/documents/document-preview";
 import { dateLabel } from "@/features/patients/feedback";
@@ -20,6 +21,25 @@ export function ReleaseView({
         <h3 className="text-xl font-semibold">Care summary</h3>
         <p className="mt-3 max-w-prose leading-7 whitespace-pre-wrap">{payload.summary}</p>
       </section>
+      {payload.anatomy && (
+        <section className="grid gap-4 border-t border-border pt-6">
+          <h3 className="text-xl font-semibold">Shared anatomical findings</h3>
+          <p className="text-sm text-muted-foreground">
+            {payload.anatomy.reference_notice} · revision {payload.anatomy.source.version} ·{" "}
+            {timeLabel(payload.anatomy.source.created_at)}
+          </p>
+          <p className="text-sm">
+            Clinical notes {payload.anatomy.notes_included ? "included" : "not included"}.
+          </p>
+          <AnatomyView
+            findings={payload.anatomy.findings.map((value, index) => ({
+              ...value,
+              key: `release-${index}`,
+              notes: value.notes ?? "",
+            }))}
+          />
+        </section>
+      )}
       {payload.encounters.map((item) => (
         <article key={item.id} className="grid gap-4 border-t border-border pt-6">
           <div>

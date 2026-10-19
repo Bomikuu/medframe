@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "medframe_apps.operations",
     "medframe_apps.billing",
     "medframe_apps.diagnostics",
+    "medframe_apps.anatomy",
     "medframe_apps.communications",
 ]
 MIDDLEWARE = [

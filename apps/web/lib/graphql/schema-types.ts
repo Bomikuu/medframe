@@ -84,6 +84,7 @@ export type EncounterType = {
   patientHistoryRevisionId?: Maybe<Scalars['UUID']['output']>;
   patientId: Scalars['UUID']['output'];
   patientName: Scalars['String']['output'];
+  providerSpecialty: Scalars['String']['output'];
   reason: Scalars['String']['output'];
   revisionId?: Maybe<Scalars['UUID']['output']>;
   revisions: Array<RevisionType>;
@@ -646,6 +647,10 @@ export type ProviderType = {
 
 export type Query = {
   __typename?: 'Query';
+  anatomyChart: Scalars['JSON']['output'];
+  anatomyComparison: Scalars['JSON']['output'];
+  anatomyReference: Scalars['JSON']['output'];
+  anatomyRevisions: Scalars['JSON']['output'];
   appointmentAvailability: Scalars['JSON']['output'];
   appointments: Scalars['JSON']['output'];
   billingInvoice: Scalars['JSON']['output'];
@@ -708,6 +713,39 @@ export type Query = {
   toothHistory: Scalars['JSON']['output'];
   treatmentPlans: Scalars['JSON']['output'];
   userPreferences: Scalars['JSON']['output'];
+};
+
+
+export type QueryAnatomyChartArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  filters?: InputMaybe<Scalars['JSON']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+  revisionId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+
+export type QueryAnatomyComparisonArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: Scalars['Int']['input'];
+  leftRevisionId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+  rightRevisionId: Scalars['UUID']['input'];
+};
+
+
+export type QueryAnatomyReferenceArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryAnatomyRevisionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
 };
 
 

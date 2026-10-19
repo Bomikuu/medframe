@@ -2,6 +2,7 @@ fragment EncounterFields on EncounterType {
   template
   id
   patientId
+  providerSpecialty
   patientName
   branchId
   reason

@@ -1,0 +1,33 @@
+query AnatomyChart(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $revisionId: UUID
+  $after: String
+  $first: Int
+) {
+  anatomyChart(
+    organizationId: $organizationId
+    patientId: $patientId
+    revisionId: $revisionId
+    after: $after
+    first: $first
+  )
+}
+query AnatomyRevisions($organizationId: UUID!, $patientId: UUID!, $after: String) {
+  anatomyRevisions(organizationId: $organizationId, patientId: $patientId, after: $after)
+}
+query AnatomyComparison(
+  $organizationId: UUID!
+  $patientId: UUID!
+  $leftRevisionId: UUID!
+  $rightRevisionId: UUID!
+  $after: String
+) {
+  anatomyComparison(
+    organizationId: $organizationId
+    patientId: $patientId
+    leftRevisionId: $leftRevisionId
+    rightRevisionId: $rightRevisionId
+    after: $after
+  )
+}

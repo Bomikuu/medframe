@@ -1,0 +1,9 @@
+# General anatomy reference assets
+
+These GLB adaptations use the body-region and skeletal FBX geometry distributed by [Lluís Vinent's Z-Anatomy PC version](https://github.com/LluisV/Z-Anatomy/tree/6c7f9016bd5899ac8edafd31b9900c151df42ed6), pinned commit `6c7f9016bd5899ac8edafd31b9900c151df42ed6`.
+
+Attribution: Z-Anatomy, Gauthier Kervyn and contributors; PC adaptation by Lluís Vinent. Underlying BodyParts3D, © The Database Center for Life Science, Kousaku Okubo and contributors. The [Z-Anatomy source project](https://github.com/Z-Anatomy/Models-of-human-anatomy) identifies BodyParts3D's original CC BY-SA 2.1 Japan license. The PC distribution and these adapted model files use [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/). Retain source attribution and share adaptations under the applicable share-alike terms. Full distribution license is in LICENSE.txt. This records supplied notices; it is not a legal clearance opinion.
+
+Medframe modifications: select named body-region surfaces and principal bones, exclude label/attachment helper meshes and unrelated systems, bake source world transforms into metre coordinates, index duplicate vertices, replace display materials, and export separate GLB layers. No mesh decimation, diagnostic coloration, calibration or patient-specific reconstruction. The skeletal selection has 179 named meshes; it does not claim all 206 bones. Inner-ear, kidney, organ and other unrelated assets are excluded.
+
+`manifest.json` retains exact source URLs, commit, SHA-256 checksums, output hashes, per-mesh source name, transform, patient-side mapping and bounds. `mapping.json` is the explicit canonical-to-source mapping. Public copies of this notice and both data files accompany the models. The offline converter does not execute source atlas programs or add-ons.

@@ -1,3 +1,4 @@
+import { anatomyFindingSchema } from "@/features/anatomy/schema";
 import { z } from "zod";
 
 export const diagnosisSchema = z.object({
@@ -32,6 +33,7 @@ export const procedureSchema = z.object({
   notes: z.string().max(500),
 });
 export const draftSchema = z.object({
+  anatomy_findings: z.array(anatomyFindingSchema).max(60).default([]),
   soap: z.object({
     subjective: z.string().max(6000),
     objective: z.string().max(6000),
@@ -53,7 +55,10 @@ export const draftSchema = z.object({
   document_ids: z.array(z.string().uuid()).max(20),
 });
 export const encounterFormSchema = z
-  .object({ content: draftSchema, expectedVersion: z.number().int().positive() })
+  .object({
+    content: draftSchema.extend({ anatomy_findings: z.array(anatomyFindingSchema).max(60) }),
+    expectedVersion: z.number().int().positive(),
+  })
   .refine(
     (value) => new TextEncoder().encode(JSON.stringify(value.content)).byteLength <= 49152,
     "Keep the combined draft within 48KiB.",

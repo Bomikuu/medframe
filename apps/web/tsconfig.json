@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -19,7 +23,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     }
   },
   "include": [
@@ -50,7 +56,11 @@
     ".next-batch4/types/**/*.ts",
     ".next-batch4/dev/types/**/*.ts",
     ".next-batch5/types/**/*.ts",
-    ".next-batch5/dev/types/**/*.ts"
+    ".next-batch5/dev/types/**/*.ts",
+    ".next-batch6/types/**/*.ts",
+    ".next-batch6/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

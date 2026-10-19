@@ -35,7 +35,8 @@ def validated_draft(content):
     except (ValidationError, ValueError):
         raise DomainError(
             "INVALID_INPUT",
-            "Check SOAP, diagnoses, tooth surfaces, procedures, and the combined draft size.",
+            "Check SOAP, anatomy, diagnoses, tooth surfaces, procedures, "
+            "and the combined draft size.",
         ) from None
 
 
@@ -147,11 +148,20 @@ def save_encounter_draft(user, organization_id, encounter_id, content, expected_
             "Reopen a completed draft or start an amendment to change finalized care.",
             409,
         )
+    # Older clients do not know this field; omission must not erase newer facts.
+    if isinstance(content, dict) and "anatomy_findings" not in content:
+        content = {
+            **content,
+            "anatomy_findings": encounter.draft.content.get("anatomy_findings", []),
+        }
     content = validated_draft(content)
     if content["document_ids"]:
         from medframe_apps.documents.services import validate_encounter_documents
 
         validate_encounter_documents(user, encounter, content["document_ids"], clean=False)
+    from medframe_apps.anatomy.services import validate_anatomy_draft
+
+    validate_anatomy_draft(user, encounter, content["anatomy_findings"])
     draft = encounter.draft
     draft.content = content
     draft.updated_by = user
@@ -252,7 +262,8 @@ def finalize_encounter(user, organization_id, encounter_id, expected_version):
         raise DomainError("INVALID_PROVIDER", "The responsible provider is no longer active.")
     content = validated_draft(draft.content)
     if not any(content["soap"].values()) and not any(
-        content[key] for key in ("diagnoses", "observations", "findings", "procedures")
+        content[key]
+        for key in ("diagnoses", "observations", "findings", "procedures", "anatomy_findings")
     ):
         raise DomainError("EMPTY_RECORD", "Document the consultation before finalizing.")
     if content["document_ids"]:
@@ -278,6 +289,7 @@ def finalize_encounter(user, organization_id, encounter_id, expected_version):
         "provider_name": encounter.provider.membership.user.display_name,
         "provider_id": str(encounter.provider_id),
         "branch_name": encounter.branch.name,
+        "provider_specialty": encounter.provider.specialty,
     }
     snapshot["context"]["template_revision_id"] = (
         str(draft.template_revision_id) if draft.template_revision_id else None
@@ -320,6 +332,9 @@ def finalize_encounter(user, organization_id, encounter_id, expected_version):
     Procedure.objects.bulk_create(
         [Procedure(revision=revision, **value) for value in content["procedures"]]
     )
+    from medframe_apps.anatomy.services import capture_anatomy_revision
+
+    capture_anatomy_revision(encounter, revision, content)
     DentalChartRevision.objects.create(revision=revision, findings=chart)
     encounter.status = "finalized"
     encounter.version += 1
@@ -370,6 +385,8 @@ def create_encounter_amendment(
     draft.content = {
         key: value for key, value in latest.content.items() if key in DraftInput.model_fields
     }
+    for item in draft.content.get("anatomy_findings", []):
+        item["source_revision_id"] = str(latest.id)
     draft.amendment_reason = reason.strip()
     draft.base_revision_version = latest.version
     draft.is_amendment = True
