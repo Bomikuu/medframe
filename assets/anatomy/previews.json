@@ -1,0 +1,63 @@
+{
+  "license": "CC-BY-SA-4.0",
+  "attribution": "Z-Anatomy / BodyParts3D; see assets/anatomy/ATTRIBUTION.md",
+  "modifications": "Camera-only transparent renders of the existing licensed GLBs; no anatomy reshaped.",
+  "files": [
+    {
+      "layer": "body",
+      "view": "front",
+      "file": "body-front.png",
+      "width": 144,
+      "height": 200
+    },
+    {
+      "layer": "body",
+      "view": "back",
+      "file": "body-back.png",
+      "width": 144,
+      "height": 200
+    },
+    {
+      "layer": "body",
+      "view": "left",
+      "file": "body-left.png",
+      "width": 144,
+      "height": 200
+    },
+    {
+      "layer": "body",
+      "view": "right",
+      "file": "body-right.png",
+      "width": 144,
+      "height": 200
+    },
+    {
+      "layer": "skeleton",
+      "view": "front",
+      "file": "skeleton-front.png",
+      "width": 144,
+      "height": 200
+    },
+    {
+      "layer": "skeleton",
+      "view": "back",
+      "file": "skeleton-back.png",
+      "width": 144,
+      "height": 200
+    },
+    {
+      "layer": "skeleton",
+      "view": "left",
+      "file": "skeleton-left.png",
+      "width": 144,
+      "height": 200
+    },
+    {
+      "layer": "skeleton",
+      "view": "right",
+      "file": "skeleton-right.png",
+      "width": 144,
+      "height": 200
+    }
+  ]
+}

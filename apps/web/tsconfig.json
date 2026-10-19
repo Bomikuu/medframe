@@ -58,7 +58,9 @@
     ".next-batch5/types/**/*.ts",
     ".next-batch5/dev/types/**/*.ts",
     ".next-batch6/types/**/*.ts",
-    ".next-batch6/dev/types/**/*.ts"
+    ".next-batch6/dev/types/**/*.ts",
+    ".next-anatomy-reference/types/**/*.ts",
+    ".next-anatomy-reference/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

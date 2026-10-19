@@ -490,6 +490,22 @@ export function EncounterEditor({
                     readOnly={readOnly}
                     patientId={encounter.patientId}
                     save={save}
+                    consultation={{
+                      patientName: encounter.patientName,
+                      patientId: encounter.patientId,
+                      status: encounter.isAmendment ? "amendment draft" : encounter.status,
+                      saveStatus: status,
+                      error: failure ? failureText(failure) : undefined,
+                      busy: busy || lifecycleBusy,
+                      canComplete: !readOnly,
+                      canFinalize: completed && !exactRevision && can("encounters.write"),
+                      onComplete: () => void transition("completed"),
+                      onFinalize: () => {
+                        setReview(true);
+                        void finalize();
+                      },
+                      onBack: () => setClinicalTab("notes"),
+                    }}
                   />
                 </TabsContent>
                 <TabsContent value="dental" forceMount className="data-[state=inactive]:hidden">

@@ -374,3 +374,19 @@ The scoped tests cover canonical sides, mesh/version/bounds/finite validation, o
 ### B6-006 — Remaining fallback browser acceptance (deferred)
 
 Forced GLB abort produced the expected model-fetch error and visibly switched the editor to the illustrative map; the first assertion expected an unavailable notification, while the context-loss path switches directly to the map. The scoped map/list remains present in captured DOM. A remaining-step confirmation then matched both the visible editor map and a hidden history map. The final narrowed attempt timed out waiting for post-MFA navigation, before fallback editing/save. It was stopped rather than continuing authentication/retest attempts. Consequently model-failure rendering is observed, but **keyboard fallback entry/save and saved draft retention under context loss do not have completed browser acceptance**. The forced-failure report's model-load page error is expected fault-injection evidence; the ordinary corrected 3D editor confirmation had zero page errors. Logs: browser-remaining-initial.json, browser-fallback-locator-evidence.json, browser-fallback-confirmation.json and browser-fallback-final.log in the ignored Batch 6 evidence folder. No original credentials/MFA or unrelated authentication behavior were repaired.
+
+## Anatomy reference UI — October19
+
+### ANAT-REF-001 — Supported canvas switched to fallback (resolved activation blocker)
+
+The first scoped browser attempt found no canvas and a visible fallback without a model-load page error. The new WebglUnavailable fallback component invoked onFailure in an effect; React mounts canvas fallback children even when the browser supports WebGL. Pure fallback markup removes that side effect. Build/TypeScript and the real-model/annotation confirmation pass. The first scoped ESLint also flagged assignments to hook-returned OrbitControls properties; limits now use declarative props. No lint rule bypasses. Evidence: anatomy-reference/build*.log, eslint*.log, browser-initial.json and browser-main-confirmation.json under ignored review evidence.
+
+### ANAT-REF-002 — Closing-sheet harness timing (resolved harness gap)
+
+The corrected run passed both desktop groups and tablet drawer assertions/captures. Before phone steps, a viewport change encountered a closing AI sheet and attempted the inspector's generic Close locator. The remaining-step harness waits for closed-dialog teardown and checks phone/fallback only, using the already-saved synthetic consultation. Both remaining groups pass. No product change or repeated desktop sweep followed. Normal editor page errors: zero; intentional blocked-fetch run has one expected model-load error.
+
+### ANAT-REF-003 — Minor UI refinements and unverified edges (deferred)
+
+One unused Bot import warning remains after removing a duplicate mobile action; scoped ESLint has zero errors. Narrow toolbar controls scroll horizontally; current Sheet base width makes phone panels relatively narrow, with vertically scrolling forms. View thumbnails overlay lower anatomy in the whole-body frame. The reused full history/comparison widget has no separate compact-inspector acceptance. Record these for later rather than starting another polish/rebuild loop. Raw captures/results: `.impeccable/review/anatomy-reference/`. Source data, live clinical permissions and backend deferred findings remain untouched.
+
+This explicitly requested redesign replaces the old B6-004 layout and navigator semantics, and adds real isolate framing. The B6-006 model-download-failure entry/save gap now has passing phone evidence; direct GPU context-loss and visible map-pin overlays remain unverified/deferred.

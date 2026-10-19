@@ -1,25 +1,104 @@
 "use client";
-import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Canvas, type ThreeEvent, useThree } from "@react-three/fiber";
 import { Html, OrbitControls, useGLTF } from "@react-three/drei";
-import { Mesh, MeshStandardMaterial, Vector3 } from "three";
+import { Mesh, MeshStandardMaterial, Vector3, PerspectiveCamera } from "three";
+import type { OrbitControls as OrbitControlsHandle } from "three-stdlib";
 import type { AnatomyAnchor, AnatomyCamera, AnatomyFinding, AnatomyLayer } from "./schema";
 import { anatomyAsset, structures } from "./asset-registry";
 
-function Camera({ view, reset }: { view: AnatomyCamera; reset: number }) {
-  const { camera, invalidate } = useThree();
-  useEffect(() => {
-    const positions = {
-      front: [0, 0, 2.8],
-      back: [0, 0, -2.8],
-      left: [2.8, 0, 0],
-      right: [-2.8, 0, 0],
+function Camera({
+  view,
+  reset,
+  zoom = 0,
+  layer,
+  selected,
+  isolate,
+}: Pick<SceneProps, "layer" | "selected" | "isolate"> & {
+  view: AnatomyCamera;
+  reset: number;
+  zoom?: number;
+}) {
+  const { camera, controls: genericControls, invalidate, size } = useThree();
+  const controls = genericControls as OrbitControlsHandle | undefined;
+  const targetId = isolate ? selected : undefined;
+  const framing = useMemo(() => {
+    const entries = structures.filter(
+      (value) => value.layer === layer && (!targetId || value.id === targetId),
+    );
+    const lower = [0, 1, 2].map((axis) =>
+      Math.min(...entries.map((value) => value.bounds.min[axis])),
+    );
+    const upper = [0, 1, 2].map((axis) =>
+      Math.max(...entries.map((value) => value.bounds.max[axis])),
+    );
+    return {
+      center: new Vector3(
+        ...(lower.map((value, axis) => (value + upper[axis]) / 2) as [number, number, number]),
+      ).sub(new Vector3(0, 0.9, 0)),
+      extent: new Vector3(
+        ...(upper.map((value, axis) => value - lower[axis]) as [number, number, number]),
+      ),
     };
-    camera.position.fromArray(positions[view]);
-    camera.lookAt(0, 0, 0);
+  }, [layer, targetId]);
+  useLayoutEffect(() => {
+    if (!(camera instanceof PerspectiveCamera)) return;
+    const lateral = view === "left" || view === "right";
+    const tangent = Math.tan((camera.fov * Math.PI) / 360);
+    const vertical = framing.extent.y;
+    const horizontal = lateral ? framing.extent.z : framing.extent.x;
+    const depth = lateral ? framing.extent.x : framing.extent.z;
+    const distance =
+      Math.max(vertical / (2 * tangent), horizontal / ((2 * tangent * size.width) / size.height)) *
+        1.16 +
+      depth / 2;
+    const direction = { front: [0, 0, 1], back: [0, 0, -1], left: [1, 0, 0], right: [-1, 0, 0] }[
+      view
+    ];
+    camera.position
+      .copy(framing.center)
+      .addScaledVector(new Vector3(...direction), Math.max(distance, 0.12));
+    camera.lookAt(framing.center);
+    camera.updateProjectionMatrix();
+    if (controls) {
+      controls.target.copy(framing.center);
+      controls.update();
+    }
+    invalidate();
+  }, [camera, controls, framing, view, reset, size.width, size.height, invalidate]);
+  const priorZoom = useRef(zoom);
+  useEffect(() => {
+    const delta = zoom - priorZoom.current;
+    priorZoom.current = zoom;
+    if (!delta) return;
+    const target = controls?.target ?? framing.center;
+    const offset = camera.position.clone().sub(target).multiplyScalar(Math.pow(0.8, delta));
+    offset.clampLength(0.06, 12);
+    camera.position.copy(target).add(offset);
+    controls?.update();
     camera.updateProjectionMatrix();
     invalidate();
-  }, [camera, invalidate, view, reset]);
+  }, [zoom, camera, controls, framing.center, invalidate]);
+  return null;
+}
+function ContextLoss({ onFailure }: { onFailure: () => void }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    const lost = (event: Event) => {
+      event.preventDefault();
+      onFailure();
+    };
+    gl.domElement.addEventListener("webglcontextlost", lost);
+    return () => gl.domElement.removeEventListener("webglcontextlost", lost);
+  }, [gl, onFailure]);
   return null;
 }
 function Model({
@@ -30,6 +109,7 @@ function Model({
   annotate,
   onSelect,
   onAnchor,
+  onFindingSelect,
   onReady,
 }: SceneProps & { onReady: () => void }) {
   const { invalidate } = useThree();
@@ -40,7 +120,7 @@ function Model({
     result.traverse((object) => {
       if (!(object instanceof Mesh)) return;
       object.material = new MeshStandardMaterial({
-        color: layer === "body" ? "#c9d8dc" : "#f0e8d4",
+        color: layer === "body" ? "#cdd4d6" : "#e1ded5",
         roughness: 0.8,
       });
     });
@@ -53,10 +133,10 @@ function Model({
       object.raycast = object.visible ? Mesh.prototype.raycast : () => {};
       (object.material as MeshStandardMaterial).color.set(
         object.userData.structure_id === selected
-          ? "#44b6b0"
+          ? "#71d2cc"
           : layer === "body"
-            ? "#c9d8dc"
-            : "#f0e8d4",
+            ? "#cdd4d6"
+            : "#e1ded5",
       );
     });
     invalidate();
@@ -95,7 +175,8 @@ function Model({
             value.anchor.asset_version === asset!.id &&
             (!isolate || value.structure_id === selected),
         )
-        .map((value, index) => {
+        .map((value) => {
+          const index = findings.findIndex((item) => item.key === value.key);
           const anchor = value.anchor!;
           if (anchor.kind !== "model") return null;
           const mesh = scene
@@ -110,7 +191,9 @@ function Model({
               <button
                 type="button"
                 aria-label={`Finding ${index + 1}: ${value.description}`}
-                onClick={() => onSelect?.(value.structure_id)}
+                onClick={() =>
+                  onFindingSelect ? onFindingSelect(value.key) : onSelect?.(value.structure_id)
+                }
                 className="grid size-7 place-items-center rounded-full border-2 border-background bg-primary text-xs font-semibold text-primary-foreground shadow-sm"
               >
                 {index + 1}
@@ -128,10 +211,11 @@ export type SceneProps = {
   findings: AnatomyFinding[];
   annotate?: boolean;
   onSelect?: (id: string) => void;
+  onFindingSelect?: (key: string) => void;
   onAnchor?: (id: string, anchor: AnatomyAnchor) => void;
 };
 export default function AnatomyScene(
-  props: SceneProps & { view: AnatomyCamera; reset: number; onFailure: () => void },
+  props: SceneProps & { view: AnatomyCamera; reset: number; zoom?: number; onFailure: () => void },
 ) {
   const [readyLayer, setReadyLayer] = useState("");
   const onReady = useCallback(() => setReadyLayer(props.layer), [props.layer]);
@@ -149,18 +233,23 @@ export default function AnatomyScene(
         frameloop="demand"
         dpr={[1, 1.5]}
         camera={{ position: [0, 0, 2.8], fov: 42, near: 0.01, far: 50 }}
-        onCreated={({ gl }) => {
-          gl.domElement.addEventListener("webglcontextlost", props.onFailure, { once: true });
-        }}
-        fallback={<p>3D is unavailable. Switch to the 2D map.</p>}
+        fallback={<p>3D is unavailable. Use the 2D reference map.</p>}
       >
         <ambientLight intensity={1.6} />
         <directionalLight position={[3, 4, 5]} intensity={2.5} />
         <Suspense fallback={null}>
           <Model key={props.layer} {...props} onReady={onReady} />
         </Suspense>
-        <Camera view={props.view} reset={props.reset} />
-        <OrbitControls makeDefault enableDamping={false} minDistance={0.25} maxDistance={6} />
+        <Camera
+          view={props.view}
+          reset={props.reset}
+          zoom={props.zoom}
+          layer={props.layer}
+          selected={props.selected}
+          isolate={props.isolate}
+        />
+        <ContextLoss onFailure={props.onFailure} />
+        <OrbitControls makeDefault enableDamping={false} minDistance={0.06} maxDistance={12} />
       </Canvas>
     </div>
   );

@@ -1,51 +1,98 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-import { Expand, Minimize, MousePointer2, MapPin, RotateCcw } from "lucide-react";
+import { Plus, Minus, RotateCcw, LocateFixed, Bot, PanelRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import type { EncounterForm } from "@/features/consultations/schema";
-import { structures, structureLabel } from "./asset-registry";
-import type { AnatomyAnchor, AnatomyCamera, AnatomyLayer } from "./schema";
+import { structures } from "./asset-registry";
+import { navigationGroup, type RegionGroup } from "./navigation";
+import type { AnatomyAnchor, AnatomyCamera, AnatomyFinding, AnatomyLayer } from "./schema";
 import { AnatomyViewport } from "./anatomy-viewport";
 import { AnatomyMap } from "./anatomy-map";
-import { FindingForm } from "./finding-form";
-import { PatientAnatomy } from "./patient-anatomy";
+import { AnatomyHeader, type AnatomyConsultation } from "./anatomy-header";
+import { AnatomyToolbar } from "./anatomy-toolbar";
+import { StructureNavigator } from "./structure-navigator";
+import { AnatomyInspector, type InspectorTab } from "./anatomy-inspector";
+import { AnatomyAssistant } from "./anatomy-assistant";
+import { ViewThumbnails } from "./view-thumbnails";
+import { EditorPanel } from "./editor-panel";
+import { useDesktopPanels } from "./use-editor-panels";
 
+const initialStructure =
+  structures.find((value) => value.id === "body.posterior_region_of_armr") ?? structures[0];
 export function AnatomyEditor({
   active,
   readOnly,
   patientId,
   save,
+  consultation,
 }: {
   active: boolean;
   readOnly: boolean;
   patientId: string;
   save: () => Promise<unknown>;
+  consultation: AnatomyConsultation;
 }) {
   const { control } = useFormContext<EncounterForm>();
   const entries = useFieldArray({ control, name: "content.anatomy_findings" });
   const findings = useWatch({ control, name: "content.anatomy_findings" }) ?? [];
+  const wide = useDesktopPanels();
   const [layer, setLayer] = useState<AnatomyLayer>("body");
   const [view, setView] = useState<AnatomyCamera>("front");
-  const [selection, setSelection] = useState(structures[0].id);
+  const [selection, setSelection] = useState(initialStructure.id);
+  const [group, setGroup] = useState<RegionGroup | null>(null);
   const [query, setQuery] = useState("");
   const [focusKey, setFocusKey] = useState<string>();
   const [annotate, setAnnotate] = useState(false);
   const [map, setMap] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [modelFailed, setModelFailed] = useState(false);
+  const [expanded, setExpanded] = useState(true);
   const [isolate, setIsolate] = useState(false);
   const [reset, setReset] = useState(0);
+  const [zoom, setZoom] = useState(0);
+  const [assistantOpen, setAssistantOpen] = useState(true);
+  const [assistantDrawer, setAssistantDrawer] = useState(false);
+  const [navigatorOpen, setNavigatorOpen] = useState(false);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>("details");
+  const desktop = wide && expanded;
+  const current = structures.find((value) => value.id === selection) ?? initialStructure;
+  const focused = findings.findIndex((value) => value.key === focusKey);
   useEffect(() => {
+    if (!active || !expanded) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setExpanded(false);
+      if (
+        !event.defaultPrevented &&
+        event.key === "Escape" &&
+        !document.querySelector('[data-slot="sheet-content"]')
+      )
+        setExpanded(false);
     };
     window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, []);
-  const current = structures.find((value) => value.id === selection);
-  const focused = findings.findIndex((value) => value.key === focusKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", close);
+    };
+  }, [active, expanded]);
+
+  function select(id: string) {
+    const structure = structures.find((value) => value.id === id);
+    if (!structure) return;
+    setSelection(id);
+    setLayer(structure.layer as AnatomyLayer);
+    setGroup(navigationGroup(structure));
+    setFocusKey(undefined);
+  }
+  function focusFinding(key: string) {
+    const finding = findings.find((value) => value.key === key);
+    if (!finding) return;
+    select(finding.structure_id);
+    setFocusKey(key);
+    setInspectorTab("findings");
+    setInspectorOpen(true);
+  }
   function add(id = selection, anchor?: AnatomyAnchor) {
     const item = structures.find((value) => value.id === id);
     if (readOnly || !item || findings.length >= 60) return;
@@ -65,292 +112,277 @@ export function AnatomyEditor({
       code: "",
       anchor,
     });
+    select(id);
     setFocusKey(key);
     setAnnotate(false);
+    setInspectorTab("findings");
+    setInspectorOpen(true);
   }
-  function select(id: string) {
-    setSelection(id);
-    setFocusKey(undefined);
+  function carry(value: AnatomyFinding) {
+    if (readOnly || findings.some((item) => item.key === value.key) || findings.length >= 60)
+      return;
+    entries.append(value);
+    select(value.structure_id);
+    setFocusKey(value.key);
+    setInspectorTab("findings");
   }
-  const fallback = (
-    <div className="grid h-full grid-rows-[auto_1fr]">
-      <p role="status" className="p-3 text-sm">
-        3D unavailable. Your draft is retained; use the 2D map and structure list.
-      </p>
-      <AnatomyMap
-        view={view}
-        enabled={annotate && !readOnly}
-        onAnchor={(anchor) => add(selection, anchor)}
-      />
-    </div>
+  function changeLayer(value: AnatomyLayer) {
+    setLayer(value);
+    select(structures.find((item) => item.layer === value)!.id);
+    setGroup(null);
+    setQuery("");
+    setIsolate(false);
+  }
+  function resetView() {
+    setIsolate(false);
+    setReset((value) => value + 1);
+  }
+  function failure() {
+    setModelFailed(true);
+    setMap(true);
+  }
+  const mapView = (
+    <AnatomyMap
+      view={view}
+      enabled={annotate && !readOnly}
+      onAnchor={(anchor) => add(selection, anchor)}
+    />
   );
+
   return (
     <section
       aria-label="Anatomy editor"
       className={
         expanded && active
-          ? "fixed inset-0 z-50 flex flex-col overflow-auto bg-background"
-          : "min-w-0 overflow-hidden rounded-xl border border-border bg-card"
+          ? "fixed inset-0 z-40 flex h-dvh min-h-0 flex-col overflow-hidden bg-background"
+          : "relative flex h-[780px] min-h-[560px] min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card"
       }
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <div>
-          <h2 className="text-lg font-semibold">Anatomy workspace</h2>
-          <p className="text-xs text-muted-foreground">Body & skeleton · generic adult reference</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {expanded && !readOnly && (
-            <Button type="button" onClick={() => void save()}>
-              Save consultation draft
-            </Button>
-          )}
-          <Button type="button" variant="outline" onClick={() => setExpanded(!expanded)}>
-            {expanded ? <Minimize /> : <Expand />}
-            {expanded ? "Exit expanded view" : "Expand editor"}
-          </Button>
-        </div>
-      </header>
+      <AnatomyHeader
+        consultation={consultation}
+        readOnly={readOnly}
+        active={active}
+        save={save}
+        onHistory={() => {
+          setInspectorTab("history");
+          setInspectorOpen(true);
+        }}
+      />
       <div
-        className={
-          expanded
-            ? "grid min-h-0 flex-1 lg:grid-cols-[240px_minmax(0,1fr)_320px]"
-            : "grid min-w-0 xl:grid-cols-[210px_minmax(300px,1fr)_280px]"
-        }
+        className={`grid min-h-0 flex-1 ${desktop ? (assistantOpen ? "grid-cols-[200px_minmax(0,1fr)_300px] min-[1660px]:grid-cols-[228px_minmax(0,1fr)_350px]" : "grid-cols-[200px_minmax(0,1fr)] min-[1660px]:grid-cols-[228px_minmax(0,1fr)]") : "grid-cols-1"}`}
       >
-        <aside className="grid content-start gap-4 border-b border-border p-4 lg:border-r lg:border-b-0">
-          <label className="grid gap-2 text-sm font-medium">
-            Anatomical layer
-            <select
-              aria-label="Anatomical layer"
-              className="h-11 rounded-md border border-input bg-background px-3"
-              value={layer}
-              onChange={(event) => {
-                const value = event.target.value as AnatomyLayer;
-                setLayer(value);
-                select(structures.find((item) => item.layer === value)!.id);
-                setIsolate(false);
-              }}
-            >
-              <option value="body">Body regions</option>
-              <option value="skeleton">Skeleton</option>
-            </select>
-          </label>
-          <label className="grid gap-2 text-sm font-medium">
-            Find a structure
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="e.g. femur"
+        <EditorPanel
+          desktop={desktop}
+          open={navigatorOpen}
+          onOpenChange={setNavigatorOpen}
+          side="left"
+          title="Anatomy navigator"
+          description="Choose a layer, region and named structure."
+          className="border-r border-border"
+        >
+          <StructureNavigator
+            layer={layer}
+            onLayer={changeLayer}
+            selected={selection}
+            onSelect={select}
+            query={query}
+            onQuery={setQuery}
+            group={group}
+            onGroup={setGroup}
+            map={map}
+            onMap={setMap}
+          />
+        </EditorPanel>
+        <div
+          className={`grid min-h-0 min-w-0 ${desktop ? "grid-cols-[minmax(0,1fr)_272px] min-[1660px]:grid-cols-[minmax(0,1fr)_310px]" : "grid-cols-1"}`}
+        >
+          <main className="flex min-h-0 min-w-0 flex-col bg-muted/20">
+            <AnatomyToolbar
+              annotate={annotate}
+              onAnnotate={setAnnotate}
+              readOnly={readOnly}
+              view={view}
+              onView={setView}
+              onReset={resetView}
+              expanded={expanded}
+              onExpand={() => setExpanded(!expanded)}
+              assistantOpen={desktop && assistantOpen}
+              onAssistant={() => (desktop ? setAssistantOpen(true) : setAssistantDrawer(true))}
+              onNavigator={() => setNavigatorOpen(true)}
+              onInspector={() => setInspectorOpen(true)}
+              desktop={desktop}
             />
-          </label>
-          <div
-            role="list"
-            aria-label="Anatomical structures"
-            className="max-h-52 overflow-y-auto lg:max-h-[460px]"
-          >
-            {structures
-              .filter(
-                (item) =>
-                  item.layer === layer &&
-                  `${item.label} ${item.side}`.toLowerCase().includes(query.toLowerCase()),
-              )
-              .map((item) => (
-                <button
-                  type="button"
-                  role="listitem"
-                  key={item.id}
-                  aria-pressed={selection === item.id}
-                  className="aria-pressed:bg-teal-wash mb-1 flex min-h-11 w-full flex-col rounded-md px-3 py-2 text-left text-sm hover:bg-muted aria-pressed:text-teal-ink"
-                  onClick={() => select(item.id)}
-                >
-                  <span>{item.label}</span>
-                  <span className="text-xs text-muted-foreground">Patient {item.side}</span>
-                </button>
-              ))}
-          </div>
-          <label className="flex min-h-11 items-center gap-2 text-sm">
-            <Checkbox checked={isolate} onCheckedChange={(value) => setIsolate(value === true)} />
-            Isolate selected structure
-          </label>
-          <p className="text-xs text-muted-foreground">
-            Left and right always refer to the patient. Rotate by dragging; scroll to zoom,
-            right-drag to pan.
-          </p>
-        </aside>
-        <div className="flex min-w-0 flex-col bg-muted/30">
-          <div className="flex flex-wrap items-center gap-2 border-b border-border bg-card p-3">
-            <Button
-              type="button"
-              size="sm"
-              variant={annotate ? "ghost" : "secondary"}
-              onClick={() => setAnnotate(false)}
-            >
-              <MousePointer2 />
-              Select
-            </Button>
-            {!readOnly && (
-              <Button
-                type="button"
-                size="sm"
-                variant={annotate ? "secondary" : "ghost"}
-                onClick={() => setAnnotate(true)}
+            {modelFailed && (
+              <p
+                role="status"
+                className="shrink-0 border-b border-border bg-card px-4 py-2 text-xs text-muted-foreground"
               >
-                <MapPin />
-                Annotate
-              </Button>
-            )}
-            <label className="sr-only" htmlFor="anatomy-view">
-              Camera view
-            </label>
-            <select
-              id="anatomy-view"
-              className="h-10 rounded-md border border-input bg-background px-2 text-sm"
-              value={view}
-              onChange={(event) => setView(event.target.value as AnatomyCamera)}
-            >
-              {["front", "back", "left", "right"].map((value) => (
-                <option key={value} value={value}>
-                  {value[0].toUpperCase() + value.slice(1)} view
-                </option>
-              ))}
-            </select>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setReset(reset + 1);
-                setIsolate(false);
-              }}
-            >
-              <RotateCcw />
-              Fit / reset
-            </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => setMap(!map)}>
-              {map ? "Use 3D model" : "Use 2D map"}
-            </Button>
-          </div>
-          <div
-            className={expanded ? "relative min-h-[420px] flex-1" : "relative h-[480px] min-w-0"}
-            aria-label="Anatomical viewport"
-          >
-            {map ? (
-              <AnatomyMap
-                view={view}
-                enabled={annotate && !readOnly}
-                onAnchor={(anchor) => add(selection, anchor)}
-              />
-            ) : active ? (
-              <AnatomyViewport
-                layer={layer}
-                selected={selection}
-                isolate={isolate}
-                findings={findings}
-                annotate={annotate && !readOnly}
-                onSelect={select}
-                onAnchor={add}
-                view={view}
-                reset={reset}
-                onFailure={() => setMap(true)}
-                fallback={fallback}
-              />
-            ) : (
-              <p className="p-5 text-sm">Model paused while this tab is hidden.</p>
-            )}
-          </div>
-          <div className="flex flex-wrap justify-between gap-2 border-t border-border bg-card px-4 py-3 text-xs">
-            <span>Selected: {current ? structureLabel(current.id) : "Unavailable"}</span>
-            <span>{annotate ? "Click a point to start a finding" : "Selection mode"}</span>
-          </div>
-          <p className="px-4 py-3 text-xs text-muted-foreground">
-            Z-Anatomy / BodyParts3D · adapted under CC BY-SA 4.0.{" "}
-            <a
-              className="underline"
-              href="/models/anatomy-attribution.txt"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Source & attribution
-            </a>
-            . Not calibrated or patient-specific.
-          </p>
-        </div>
-        <aside className="grid content-start gap-5 border-t border-border p-4 lg:border-t-0 lg:border-l">
-          {!readOnly && (
-            <Button type="button" disabled={findings.length >= 60} onClick={() => add()}>
-              Add finding for selected structure
-            </Button>
-          )}
-          <div>
-            <h3 className="mb-3 font-semibold">Consultation findings ({findings.length}/60)</h3>
-            {findings.length ? (
-              <ul className="grid gap-2">
-                {findings.map((value, index) => (
-                  <li key={value.key}>
-                    <button
-                      type="button"
-                      className="w-full rounded-md border border-border px-3 py-2 text-left text-sm hover:bg-muted"
-                      onClick={() => {
-                        setFocusKey(value.key);
-                        setSelection(value.structure_id);
-                        setLayer(value.layer);
-                      }}
-                    >
-                      <span className="font-medium">
-                        {index + 1}. {value.description || "Complete finding description"}
-                      </span>
-                      <span className="mt-1 block text-xs text-muted-foreground">
-                        {structureLabel(value.structure_id)} · {value.status.replaceAll("_", " ")}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                Select a structure or annotate a model point to record the first finding.
+                The 3D model is unavailable. Your draft is retained; continue with the 2D map and
+                named structures.
               </p>
             )}
-          </div>
-          {focused >= 0 && (
-            <>
-              <FindingForm key={findings[focused].key} index={focused} readOnly={readOnly} />
-              {!readOnly && !findings[focused].source_revision_id && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    entries.remove(focused);
-                    setFocusKey(undefined);
-                  }}
-                >
-                  Remove draft finding
-                </Button>
+            <div
+              className="relative isolate min-h-0 flex-1 overflow-hidden"
+              aria-label="Anatomical viewport"
+            >
+              {map ? (
+                <div className="h-full min-h-0 overflow-auto pb-28">{mapView}</div>
+              ) : active ? (
+                <AnatomyViewport
+                  layer={layer}
+                  selected={selection}
+                  isolate={isolate}
+                  findings={findings}
+                  annotate={annotate && !readOnly}
+                  onSelect={select}
+                  onFindingSelect={focusFinding}
+                  onAnchor={add}
+                  view={view}
+                  reset={reset}
+                  zoom={zoom}
+                  onFailure={failure}
+                  fallback={mapView}
+                />
+              ) : (
+                <p className="p-5 text-sm text-muted-foreground">
+                  Model paused while this tab is hidden.
+                </p>
               )}
-            </>
-          )}
-        </aside>
-      </div>
-      <details className="border-t border-border p-4">
-        <summary className="min-h-11 cursor-pointer font-medium">
-          Patient anatomy history & carry forward
-        </summary>
-        <PatientAnatomy
-          patientId={patientId}
-          onCarry={
-            readOnly
-              ? undefined
-              : (value) => {
-                  if (!findings.some((item) => item.key === value.key) && findings.length < 60) {
-                    entries.append(value);
-                    setFocusKey(value.key);
-                    setLayer(value.layer);
-                    setSelection(value.structure_id);
-                  }
+              {!map && (
+                <div
+                  className="absolute top-4 left-4 z-10 grid gap-0.5 rounded-xl border border-border bg-card p-1 shadow-sm"
+                  aria-label="Camera controls"
+                >
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Zoom in"
+                    onClick={() => setZoom((value) => value + 1)}
+                  >
+                    <Plus />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Zoom out"
+                    onClick={() => setZoom((value) => value - 1)}
+                  >
+                    <Minus />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Reset camera"
+                    onClick={resetView}
+                  >
+                    <RotateCcw />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="Fit model to view"
+                    onClick={() => setReset((value) => value + 1)}
+                  >
+                    <LocateFixed />
+                  </Button>
+                </div>
+              )}
+              <div className="pointer-events-none absolute top-5 right-4 z-10 rounded-md bg-card/90 px-2.5 py-1.5 text-[10px] text-muted-foreground">
+                <span className="capitalize">{view}</span> view · patient sides
+              </div>
+              {annotate && (
+                <p
+                  role="status"
+                  className="bg-teal-wash pointer-events-none absolute inset-x-14 top-16 z-10 mx-auto max-w-xs rounded-lg border border-teal-ink/20 px-3 py-2 text-center text-xs text-teal-ink"
+                >
+                  {map
+                    ? "Select a named structure, then pin a map point."
+                    : "Click a point on the model to add a finding."}
+                </p>
+              )}
+              <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between gap-2 bg-background/90">
+                <ViewThumbnails layer={layer} view={view} onView={setView} />
+                {!desktop && (
+                  <div className="mr-4 mb-5 flex gap-1">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      aria-label="Open findings inspector"
+                      onClick={() => {
+                        setInspectorTab("findings");
+                        setInspectorOpen(true);
+                      }}
+                    >
+                      <PanelRight />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <footer className="flex shrink-0 flex-wrap items-center justify-between gap-1 border-t border-border/70 bg-card px-4 py-2 text-[10px] text-muted-foreground">
+              <span>{annotate ? "Annotation mode" : "Drag to rotate · scroll to zoom"}</span>
+              <a
+                href="/models/anatomy-attribution.txt"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2"
+              >
+                Z-Anatomy / BodyParts3D · reference model
+              </a>
+            </footer>
+          </main>
+          <EditorPanel
+            desktop={desktop}
+            open={inspectorOpen}
+            onOpenChange={setInspectorOpen}
+            title="Structure details & findings"
+            description="Review anatomy, record findings or carry forward patient history."
+            className="border-l border-border"
+          >
+            <AnatomyInspector
+              current={current}
+              findings={findings}
+              focused={focused}
+              tab={inspectorTab}
+              onTab={setInspectorTab}
+              onFocus={focusFinding}
+              onAdd={() => add()}
+              onRemove={() => {
+                if (focused >= 0) {
+                  entries.remove(focused);
+                  setFocusKey(undefined);
                 }
-          }
-        />
-      </details>
+              }}
+              readOnly={readOnly}
+              isolate={isolate}
+              onIsolate={() => setIsolate(!isolate)}
+              patientId={patientId}
+              onCarry={carry}
+            />
+          </EditorPanel>
+        </div>
+        {(!desktop || assistantOpen) && (
+          <EditorPanel
+            desktop={desktop}
+            open={!desktop && assistantDrawer && active}
+            onOpenChange={setAssistantDrawer}
+            ownHeader
+            title="Medframe AI"
+            description="Unconnected assistant interface preview."
+            className="border-l border-border shadow-[-4px_0_18px_-12px_rgba(16,42,67,0.15)]"
+          >
+            <AnatomyAssistant
+              key={patientId}
+              onClose={() => (desktop ? setAssistantOpen(false) : setAssistantDrawer(false))}
+            />
+          </EditorPanel>
+        )}
+      </div>
     </section>
   );
 }
