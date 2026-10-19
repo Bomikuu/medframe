@@ -1,5 +1,9 @@
 # Deferred issue log
 
+## ONBOARD-004 — Onboarding visual follow-ups and remaining acceptance (deferred)
+
+Final captures establish the connected flow without horizontal overflow, but the existing dashboard still renders its zero-patient metric below the new first-run checklist; the brief prefers an empty-state-only first dashboard. Review displays machine-like provider ranges and applies capitalization too broadly to contact/timezone text. Branding shows the actual logo in its live editor and final workspace, while the review miniature and completion screen do not repeat every requested logo/administrator/specialty detail. Some preview content lies below the fold behind the ordinary sticky navigation until scrolled. Scoped lint retains two private/blob img warnings and a polling dependency advisory. No full every-step/every-device, axe or all already-signed-in-session transitions acceptance is claimed. Cleanup exists as a task/command but no new beat schedule is enabled. These are logged rather than another UI polish/testing loop. Evidence: clinic-onboarding branding/review/dashboard captures and lint-confirmation.log; see clinic-onboarding-verification.md for scope. This does not negate the passing core flow, private logo promotion or real workspace branding.
+
 ## 2026-10-19 — Tooth/anatomy selection focus
 
 ### SELECT-FOCUS-001 — Dental dialog harness name (resolved harness gap)
