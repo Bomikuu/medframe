@@ -1,5 +1,7 @@
 "use client";
 
+import { useInStation } from "@/features/stations/access-session";
+import { EndSessionControl } from "@/features/stations/end-session-control";
 import type { ReactNode } from "react";
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -30,6 +32,7 @@ export function DentalEditorHeader({
   inspectorOpen: boolean;
   onInspector: () => void;
 }) {
+  const station = useInStation();
   return (
     <>
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 xl:px-6">
@@ -58,6 +61,7 @@ export function DentalEditorHeader({
           </div>
         </div>
         <div className="flex max-w-full flex-wrap items-center gap-2">
+          {station && <EndSessionControl />}
           <Button
             type="button"
             variant="outline"

@@ -1,6 +1,31 @@
+import { SecureImage } from "@/features/documents/secure-image";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-export function PatientAvatar({ name, className }: { name: string; className?: string }) {
+export function PatientAvatar({
+  name,
+  imageId,
+  className,
+}: {
+  name: string;
+  imageId?: string;
+  className?: string;
+}) {
+  if (imageId)
+    return (
+      <span
+        className={cn(
+          "inline-flex size-11 shrink-0 overflow-hidden rounded-full border border-border bg-secondary",
+          className,
+        )}
+      >
+        <SecureImage
+          id={imageId}
+          avatar
+          alt={`Photo of ${name}`}
+          className="h-full w-full object-cover"
+        />
+      </span>
+    );
   const initials = name
     .trim()
     .split(/\s+/)

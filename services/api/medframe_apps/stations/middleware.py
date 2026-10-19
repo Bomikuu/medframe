@@ -75,6 +75,8 @@ class StationMiddleware:
                 "/stations/context",
                 "/stations/encounter",
                 "/stations/walk-in",
+                "/stations/dashboard",
+                "/stations/portrait",
                 "/documents/download",
             } and not request.path.startswith("/documents/upload/"):
                 return JsonResponse(

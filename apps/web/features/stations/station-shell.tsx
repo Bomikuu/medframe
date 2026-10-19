@@ -5,6 +5,7 @@ import { Brand } from "@/components/brand";
 import { ButtonLink } from "@/components/ui/button-link";
 import { ClinicalLocaleProvider } from "@/components/application/clinical-locale";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
+import { EndSessionControl } from "./end-session-control";
 import { useStationAccess } from "./access-session";
 
 export function StationShell({ children }: { children: ReactNode }) {
@@ -21,7 +22,7 @@ export function StationShell({ children }: { children: ReactNode }) {
               {workspace.organization.name}
             </span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <ButtonLink
               href={href(
                 access && access.kind !== "doctor"
@@ -32,6 +33,7 @@ export function StationShell({ children }: { children: ReactNode }) {
             >
               {access && access.kind !== "doctor" ? "Assigned consultation" : "Station home"}
             </ButtonLink>
+            {!access && <EndSessionControl />}
             {!access && (
               <ButtonLink href={href("/clinic")} variant="outline">
                 Clinic workspace

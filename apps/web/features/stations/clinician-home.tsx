@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus, Users, Stethoscope } from "lucide-react";
+import { UserPlus, Users, RefreshCw, CalendarDays } from "lucide-react";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
-import { useRemote } from "@/features/patients/use-remote";
-import { ConsultationsDocument } from "@/lib/graphql/generated";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { StatusBadge } from "@/components/application/status-badge";
-import { LoadState } from "@/features/patients/feedback";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FormSelect } from "@/features/patients/form-controls";
+import { ClinicClock } from "./clinic-clock";
+import { ConsultationGallery } from "./consultation-gallery";
+import { UpcomingCare } from "./upcoming-care";
+import { PatientPhotoDialog } from "./patient-photo-dialog";
+import { useStationDashboard, clinicTime, type GalleryItem } from "./dashboard-client";
 import { ReceiveHandoff } from "./receive-handoff";
 import { useStationAccess } from "./access-session";
 import { DoctorCodeDialog } from "./doctor-code-dialog";
@@ -37,122 +40,183 @@ export function ClinicianHome() {
 }
 
 function FullClinicianHome() {
-  const { organizationId, href, can, overview } = useWorkspace();
+  const { organizationId, href, can, workspace } = useWorkspace();
   const access = useStationAccess();
   const router = useRouter();
   const [patientOpen, setPatientOpen] = useState(false);
+  const [view, setView] = useState("today");
+  const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
   const [before, setBefore] = useState<string | null>(null);
-  const remote = useRemote(ConsultationsDocument, { organizationId, before });
+  const [photo, setPhoto] = useState<GalleryItem | null>(null);
+  const remote = useStationDashboard(organizationId, branch, view, before);
+  const timezone = remote.data?.timezone ?? workspace.organization.timezone;
   if (!can("patients.clinical.read"))
-    return (
-      <p role="alert">
-        A clinical membership and patient access are required. Contact your clinic administrator.
-      </p>
-    );
+    return <p role="alert">A clinical membership and patient access are required.</p>;
   return (
-    <div className="grid gap-8">
-      <header className="flex flex-wrap items-start justify-between gap-5 border-b border-border pb-6">
-        <div>
-          <p className="mb-2 text-sm font-medium text-teal-ink">Clinical Station</p>
-          <h1 className="text-3xl font-semibold">
-            {overview.currentUser.displayName || "Your clinical workspace"}
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            One workspace for your patients, consultations and charts. Choose a patient or start
-            with a walk-in and complete their details before saving.
+    <div className="grid min-w-0 gap-7">
+      <header className="flex min-w-0 flex-wrap items-start justify-between gap-5 border-b border-border pb-6">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-semibold tracking-tight">Clinical Station</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            {workspace.organization.name} ·{" "}
+            {remote.data?.branch ?? workspace.branches.find((value) => value.id === branch)?.name}
           </p>
         </div>
-        {!access && can("encounters.write") && <DoctorCodeDialog />}
+        <ClinicClock timezone={timezone} />
       </header>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {can("encounters.write") && (
-          <ButtonLink
-            className="h-auto min-h-24 justify-start gap-4 px-6 py-5"
-            href={href("/station/clinician/walk-in")}
-          >
-            <UserPlus className="size-6" />
-            <span className="text-left">
-              <span className="block text-base font-semibold">Start walk-in consultation</span>
-              <span className="mt-1 block text-xs font-normal opacity-85">
-                Notes and charts first · patient details before saving
-              </span>
-            </span>
-          </ButtonLink>
-        )}
-        <Button
-          variant="outline"
-          className="h-auto min-h-24 justify-start gap-4 px-6 py-5"
-          onClick={() => setPatientOpen(true)}
-        >
-          <Users className="size-6" />
-          <span className="text-left">
-            <span className="block text-base font-semibold">Choose patient</span>
-            <span className="mt-1 block text-xs font-normal text-muted-foreground">
-              Open permitted patient history and consultations
-            </span>
-          </span>
-        </Button>
-      </div>
-      <section className="grid gap-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="flex items-center gap-2 text-xl font-semibold">
-            <Stethoscope className="size-5" /> Consultations
-          </h2>
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 flex-wrap gap-3">
+          {can("encounters.write") && (
+            <ButtonLink
+              className="min-h-12 gap-2 text-left whitespace-normal"
+              href={href("/station/clinician/walk-in")}
+            >
+              <UserPlus /> Start walk-in
+            </ButtonLink>
+          )}
           <Button
-            variant="ghost"
-            onClick={() => {
-              setBefore(null);
-              remote.reload();
-            }}
+            className="min-h-12 text-left whitespace-normal"
+            variant="outline"
+            onClick={() => setPatientOpen(true)}
           >
-            Refresh latest
+            <Users /> Choose patient
           </Button>
         </div>
-        {!remote.data ? (
-          <LoadState error={remote.error} retry={remote.reload} />
-        ) : (
-          <>
-            <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-              {remote.data.encounters.map((encounter) => (
-                <li
-                  key={encounter.id}
-                  className="flex flex-wrap items-center justify-between gap-4 p-5"
-                >
-                  <div>
-                    <h3 className="font-semibold">{encounter.patientName}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{encounter.reason}</p>
-                    <div className="mt-3">
-                      <StatusBadge value={encounter.status} />
-                    </div>
-                  </div>
-                  <ButtonLink href={href(`/station/clinician/consultations/${encounter.id}`)}>
-                    Open consultation
-                  </ButtonLink>
-                </li>
-              ))}
-              {!remote.data.encounters.length && (
-                <li className="p-6 text-sm text-muted-foreground">
-                  No consultations on this page. Choose a patient or start a walk-in.
-                </li>
-              )}
-            </ul>
-            <Button
-              variant="outline"
-              className="justify-self-start"
-              disabled={remote.data.encounters.length < 20}
-              onClick={() => setBefore(remote.data!.encounters.at(-1)!.id)}
+        <div className="flex min-w-0 flex-wrap gap-3">
+          {workspace.branches.length > 1 && (
+            <FormSelect
+              id="stationBranch"
+              label="Branch"
+              value={branch}
+              onChange={(value) => {
+                setBranch(value);
+                setBefore(null);
+              }}
+              options={workspace.branches.map((value) => ({ value: value.id, label: value.name }))}
+            />
+          )}
+          {!access && can("encounters.write") && <DoctorCodeDialog />}
+        </div>
+      </div>
+      {remote.error && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"
+        >
+          <p>
+            {remote.error}{" "}
+            {remote.data
+              ? "Showing the last received snapshot. Queue status may have changed."
+              : "Clinic information could not be loaded."}
+          </p>
+          <Button variant="outline" onClick={remote.reload}>
+            Retry
+          </Button>
+        </div>
+      )}
+      <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <section className="grid min-w-0 gap-5" aria-label="Patient consultations">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Tabs
+              value={view}
+              onValueChange={(value) => {
+                setView(value);
+                setBefore(null);
+              }}
             >
-              Older consultations
+              <TabsList>
+                <TabsTrigger value="today">Today</TabsTrigger>
+                <TabsTrigger value="all">All consultations</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Button
+              variant="ghost"
+              className="min-h-11"
+              onClick={remote.reload}
+              disabled={remote.loading}
+            >
+              <RefreshCw className={remote.loading ? "animate-spin" : ""} /> Refresh
             </Button>
-          </>
+          </div>
+          {!remote.data ? (
+            <p role="status" className="py-10 text-sm text-muted-foreground">
+              {remote.error ? "Use Retry to reconnect." : "Loading your clinical day…"}
+            </p>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                <p>
+                  {view === "today"
+                    ? "Today’s consultations & scheduled patients"
+                    : "Permitted consultation records"}
+                </p>
+                <p>Updated {clinicTime(remote.data.updated_at, timezone)}</p>
+              </div>
+              {remote.data.items.length ? (
+                <ConsultationGallery
+                  items={remote.data.items}
+                  timezone={timezone}
+                  onPhoto={setPhoto}
+                  showDate={view === "all"}
+                />
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border px-6 py-14 text-center">
+                  <CalendarDays className="mx-auto mb-5 size-9 text-muted-foreground" />
+                  <h2 className="text-xl font-semibold">
+                    {view === "today" ? "A clear day ahead" : "No consultations on this page"}
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-sm text-sm leading-6 text-muted-foreground">
+                    {view === "today"
+                      ? "No permitted consultations or scheduled patients for today. Start a walk-in or choose a patient to begin care."
+                      : "Choose a patient to open their history, or return to the latest consultations."}
+                  </p>
+                </div>
+              )}
+              {view === "all" && (
+                <div className="flex flex-wrap justify-between gap-3">
+                  <Button variant="ghost" disabled={!before} onClick={() => setBefore(null)}>
+                    Latest consultations
+                  </Button>
+                  <Button
+                    variant="outline"
+                    disabled={!remote.data.cursor}
+                    onClick={() => setBefore(remote.data!.cursor)}
+                  >
+                    Older consultations
+                  </Button>
+                </div>
+              )}
+              {view === "today" && remote.data.has_more && (
+                <p className="text-xs text-muted-foreground">
+                  Showing the first 50 records for today. Choose a patient or use All consultations
+                  to find more.
+                </p>
+              )}
+            </>
+          )}
+        </section>
+        {remote.data ? (
+          <UpcomingCare
+            items={remote.data.agenda}
+            timezone={timezone}
+            truncated={remote.data.agenda_truncated}
+            available={remote.data.operations_available}
+          />
+        ) : (
+          <aside
+            className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground"
+            aria-label="Upcoming care"
+          >
+            Upcoming care is unavailable until the dashboard connects.
+          </aside>
         )}
-      </section>
+      </div>
       {!access && (
-        <details className="rounded-lg border border-border p-5">
-          <summary className="font-medium">
+        <details className="border-t border-border pt-5">
+          <summary className="min-h-11 text-sm font-medium">
             Receive clinical responsibility from another doctor
           </summary>
-          <div className="mt-5">
+          <div className="mt-5 max-w-xl">
             <ReceiveHandoff />
           </div>
         </details>
@@ -164,10 +228,21 @@ function FullClinicianHome() {
             Only records permitted to your account and this device’s branch are shown.
           </DialogDescription>
           <PatientPicker
-            onSelect={(patient) => router.push(href(`/station/clinician/patients/${patient.id}`))}
+            onSelect={(patient) => {
+              setPatientOpen(false);
+              router.push(href(`/station/clinician/patients/${patient.id}`));
+            }}
           />
         </DialogContent>
       </Dialog>
+      {photo && (
+        <PatientPhotoDialog
+          key={photo.patient_id}
+          patient={photo}
+          onClose={() => setPhoto(null)}
+          onSaved={remote.reload}
+        />
+      )}
     </div>
   );
 }

@@ -55,7 +55,7 @@ MUTATIONS = {
 }
 
 
-DOCTOR_PERMISSIONS = PERMISSIONS | {"patients.register", "treatments.write"}
+DOCTOR_PERMISSIONS = PERMISSIONS | {"patients.register", "treatments.write", "operations.read"}
 DOCTOR_QUERIES = QUERIES | {
     "encounters",
     "providers",

@@ -150,3 +150,12 @@ class WalkInCommit(Record):
                 fields=["organization", "actor", "request_id"], name="station_walk_in_once"
             )
         ]
+
+
+class PatientPortrait(Record):
+    patient = models.OneToOneField("patients.Patient", on_delete=models.PROTECT)
+    document_version = models.ForeignKey(
+        "documents.DocumentVersion", null=True, on_delete=models.PROTECT
+    )
+    version = models.PositiveIntegerField(default=1)
+    updated_by = models.ForeignKey("accounts.User", on_delete=models.PROTECT)

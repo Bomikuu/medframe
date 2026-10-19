@@ -19,6 +19,8 @@ urlpatterns = [
     path("stations/context", stations.context),
     path("stations/access", stations.access),
     path("stations/doctor", stations.doctor),
+    path("stations/dashboard", stations.dashboard),
+    path("stations/portrait", stations.portrait),
     path("stations/walk-in", stations.walk_in),
     path("stations/pair", stations.pair),
     path("stations/manage", stations.manage),

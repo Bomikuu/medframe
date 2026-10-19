@@ -298,3 +298,48 @@ def walk_in(request):
     require_session_realm(request, "staff")
     throttle(request, "station.walk_in", str(request.user.id), 30, 300)
     return JsonResponse(commit(request, json_object(request)))
+
+
+@require_POST
+@domain_view
+def dashboard(request):
+    from medframe_apps.stations.dashboard import snapshot
+
+    require_session_realm(request, "staff")
+    throttle(request, "station.dashboard", str(request.user.id), 90, 60)
+    data = json_object(request)
+    if data.get("view", "today") not in {"today", "all"}:
+        raise DomainError("INVALID_INPUT", "Choose Today or All consultations.")
+    return JsonResponse(
+        snapshot(
+            request,
+            identifier(data, "organization_id"),
+            identifier(data, "branch_id"),
+            view=data.get("view", "today"),
+            before=UUID(str(data["before"])) if data.get("before") else None,
+        )
+    )
+
+
+@require_POST
+@domain_view
+def portrait(request):
+    from medframe_apps.stations import portraits
+
+    require_session_realm(request, "staff")
+    throttle(request, "station.portrait", str(request.user.id), 60, 60)
+    data = json_object(request)
+    org, patient_id = identifier(data, "organization_id"), identifier(data, "patient_id")
+    if data.get("action", "get") == "get":
+        return JsonResponse(portraits.current(request, org, patient_id))
+    if data.get("action") == "select":
+        return JsonResponse(
+            portraits.select(
+                request,
+                org,
+                patient_id,
+                UUID(str(data["image_id"])) if data.get("image_id") else None,
+                data["expected_version"],
+            )
+        )
+    raise DomainError("INVALID_INPUT", "Choose get or select.")

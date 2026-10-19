@@ -4,18 +4,19 @@ import { createContext, useContext, useEffect, useRef, useState, type ReactNode 
 import { LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
-import { errorMessage, requestWithCsrf } from "@/lib/auth/client";
+import { errorMessage } from "@/lib/auth/client";
+import { EndSessionControl } from "./end-session-control";
 import { stationRequest, type StationContext, type AccessSession } from "./client";
 
-const AccessContext = createContext<AccessSession | null>(null);
-export const useStationAccess = () => useContext(AccessContext);
+const AccessContext = createContext<AccessSession | null | undefined>(undefined);
+export const useStationAccess = () => useContext(AccessContext) ?? null;
+export const useInStation = () => useContext(AccessContext) !== undefined;
 
 export function StationSessionBoundary({ children }: { children: ReactNode }) {
   const [context, setContext] = useState<StationContext | null>(null);
   const [error, setError] = useState("");
   const [ended, setEnded] = useState(false);
   const knownScope = useRef(false);
-  const [busy, setBusy] = useState(false);
   const strip = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const element = strip.current;
@@ -54,17 +55,6 @@ export function StationSessionBoundary({ children }: { children: ReactNode }) {
       window.clearInterval(timer);
     };
   }, []);
-  async function end() {
-    setBusy(true);
-    setEnded(true);
-    try {
-      await requestWithCsrf("auth/logout", {});
-      window.location.replace("/station");
-    } catch (cause) {
-      setError(errorMessage(cause));
-      setBusy(false);
-    }
-  }
   if (!context && !error)
     return (
       <p role="status" className="p-5 text-sm">
@@ -106,15 +96,7 @@ export function StationSessionBoundary({ children }: { children: ReactNode }) {
               minute: "2-digit",
             })}
           </p>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            onClick={() => void end()}
-          >
-            End session
-          </Button>
+          <EndSessionControl />
         </div>
       )}
       {children}
