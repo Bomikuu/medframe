@@ -20,4 +20,8 @@ Jev 1.13.0 received only sanitized architecture/request text. `choice` selected 
 
 ## Local activation
 
-Pending checkpoint/preservation and runtime restart after the interruption. No database migration, account, password, MFA, clinical record, financial or external-message change is required.
+Active locally from implementation `fcc5193`, `.next-device-code-modals`, original `medframe_django`. No migration or credential/MFA/role change was made. Before restarting traffic, a fresh encrypted checkpoint at `/home/micxsz/.local/share/medframe/checkpoints/pre-batch2-20261019-212823-fcc5193` restored into new isolated `medframe_django_device_code_activation_20261019` and verified all 137 table counts. Capture/check fingerprints preserve every one of the 5,912 original rows across 137 tables. The encrypted storage checkpoint at `/home/micxsz/.local/share/medframe/checkpoints/device-code-storage-20261019` verified 51 original objects into new isolated bucket `medframe-review-device-code-20261019`; originals were not written. No review data was imported.
+
+Runtime: web PID 1031856 (port 3000), API 1031847 (8000), worker 1031848 (concurrency 2), beat 1031849. Tool sessions 64546/2792/50350/76887 respectively. Logs `/tmp/medframe-device-code-{web,api,worker,beat}-runtime.log`; beat state `/tmp/medframe-device-code-original-beat`. Both local login and proxied CSRF return 200 after restart. Review services remain stopped. Local SMTP capture and SMS preview-only configuration retained.
+
+Rollback: preserved prior source/tag and `.next-station-kiosk` are retained; use the old artifact with the same original database if needed. Do not restore a review clone over the original or reset schema. No external messages, online money movement or public deployment. Older unrelated deferred findings remain untouched.
