@@ -1,5 +1,6 @@
 "use client";
 
+import { PortalKioskCode } from "@/features/stations/kiosk/portal-kiosk-code";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -48,6 +49,7 @@ export function PatientOperations({ queue = false }: { queue?: boolean }) {
           {data.branch} · {data.timezone}
         </p>
       </div>
+      <PortalKioskCode key={linkId} />
       <OperationsLiveStatus connected={connected} updated={data.updated_at} />
       {!!remote.error && (
         <p role="alert" className="text-sm text-destructive">

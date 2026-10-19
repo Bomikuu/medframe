@@ -1,0 +1,7 @@
+# Patient Station
+
+Mode: Operate. Inherit the established white/cool canvas, navy primary actions, teal selection, Manrope/Jakarta and actual shared shadcn controls. Four large explicitly requested home actions lead to brief touch journeys. Human task headings, generous spacing, input widths appropriate to name/phone/date/code, clear appointment-versus-queue summaries and a prominently readable ticket number. Avoid staff navigation or clinical editor chrome. Department management follows the existing clinic workspace with structured forms, real queue facts and explicit audited actions.
+
+Pairing is separate from patient verification. Enter a short one-use patient code obtained from the verified portal or reception. No demographic matching exposes records; new registration is a reception review request. After finish/cancel/timeout, clear the server scope, remount memory-only patient UI and return home. Back/Home/Cancel/help remain visible; warn before inactivity expiry and provide an accessible extension within the absolute session limit. Polling does not extend that limit. Tickets survive printing failure; no fake waiting estimate.
+
+Payments shows the verified patient's issued service lines/balance and an honest cashier continuation. Digital payment and cash hardware remain unavailable until the next integration phase; no button can claim paid. TV remains a later phase. No new global visual system, stock patient portraits, AI integration or private data in URLs/local storage.

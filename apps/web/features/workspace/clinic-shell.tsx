@@ -162,6 +162,12 @@ function ClinicFrame({ children }: { children: ReactNode }) {
       label: "Settings",
       links: [
         {
+          path: "/clinic/stations",
+          label: "Patient Stations",
+          Icon: MonitorSmartphone,
+          show: can("operations.read"),
+        },
+        {
           path: "/clinic/settings/stations",
           label: "Devices & Stations",
           Icon: MonitorSmartphone,

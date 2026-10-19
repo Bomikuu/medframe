@@ -74,7 +74,9 @@
     ".next-clinical-ai-drawer/types/**/*.ts",
     ".next-clinical-ai-drawer/dev/types/**/*.ts",
     ".next-ai-drawer-layer/types/**/*.ts",
-    ".next-ai-drawer-layer/dev/types/**/*.ts"
+    ".next-ai-drawer-layer/dev/types/**/*.ts",
+    ".next-station-kiosk/types/**/*.ts",
+    ".next-station-kiosk/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

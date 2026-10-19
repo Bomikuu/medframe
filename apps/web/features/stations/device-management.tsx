@@ -50,6 +50,9 @@ export function DeviceManagement() {
         title="Devices & Stations"
         description="Open a device to edit its settings, pair it again or manage access."
       >
+        <ButtonLink href={href("/clinic/stations")} variant="outline">
+          Patient Stations & departments
+        </ButtonLink>
         <ButtonLink href={href("/station/clinician")} variant="outline">
           Doctor workspace & code
         </ButtonLink>

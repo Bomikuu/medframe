@@ -105,12 +105,14 @@ export function StationEntry() {
                 ) : (
                   <AccessCodeForm />
                 )
+              ) : device.mode === "kiosk" ? (
+                <ButtonLink href="/station/kiosk">
+                  Open patient kiosk <ArrowRight />
+                </ButtonLink>
               ) : (
                 <p role="status" className="rounded-lg bg-muted p-4 text-sm leading-6">
-                  Device approved.{" "}
-                  {device.mode === "kiosk" ? "Patient self-service" : "The live queue display"} will
-                  be enabled in the next Station phase. No patient information is available on this
-                  screen.
+                  Device approved. The live queue display will be enabled in the next Station phase.
+                  No patient information is available on this screen.
                 </p>
               )}
             </div>

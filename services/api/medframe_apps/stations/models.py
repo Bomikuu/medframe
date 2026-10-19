@@ -159,3 +159,18 @@ class PatientPortrait(Record):
     )
     version = models.PositiveIntegerField(default=1)
     updated_by = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
+
+
+# Django discovers the phase's focused model module through the app's model owner.
+from medframe_apps.stations.kiosk_models import (  # noqa: E402,F401
+    DepartmentCounter,
+    KioskBoundary,
+    KioskEvent,
+    KioskIntake,
+    KioskPatientSession,
+    KioskProof,
+    KioskRequest,
+    StationDepartment,
+    StationVisit,
+    VisitStage,
+)

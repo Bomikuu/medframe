@@ -14,8 +14,14 @@ from medframe_apps.onboarding import views as onboarding
 from medframe_apps.portal import files as portal_files
 from medframe_apps.portal import views as portal_auth
 from medframe_apps.stations import views as stations
+from medframe_apps.stations.kiosk_management import manage as kiosk_manage
+from medframe_apps.stations.kiosk_management import portal_code
+from medframe_apps.stations.kiosk_views import kiosk
 
 urlpatterns = [
+    path("stations/kiosk", kiosk),
+    path("stations/kiosk/manage", kiosk_manage),
+    path("portal/kiosk-code", portal_code),
     path("stations/context", stations.context),
     path("stations/access", stations.access),
     path("stations/doctor", stations.doctor),
