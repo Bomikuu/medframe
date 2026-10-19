@@ -10,6 +10,9 @@ from medframe_apps.providers.models import ProviderProfile
 def require_operations(request, organization_id, permission, branch_id):
     require_session_realm(request, "staff")
     member = require_membership(request.user, organization_id, permission)
+    credential = getattr(request, "station_credential", None)
+    if credential and credential.device.branch_id != branch_id:
+        raise DomainError("NOT_FOUND", "This branch is unavailable on this device.", 404)
     if (member.branch_id and member.branch_id != branch_id) or not Branch.objects.filter(
         id=branch_id, organization_id=organization_id
     ).exists():

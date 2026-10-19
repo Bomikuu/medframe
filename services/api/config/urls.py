@@ -13,8 +13,14 @@ from medframe_apps.documents import views as documents
 from medframe_apps.onboarding import views as onboarding
 from medframe_apps.portal import files as portal_files
 from medframe_apps.portal import views as portal_auth
+from medframe_apps.stations import views as stations
 
 urlpatterns = [
+    path("stations/context", stations.context),
+    path("stations/pair", stations.pair),
+    path("stations/manage", stations.manage),
+    path("stations/encounter", stations.encounter),
+    path("stations/handoff", stations.handoff),
     path("onboarding/graphql", onboarding_graphql),
     path("onboarding/account/prepare", onboarding.prepare_account),
     path("onboarding/account/mfa/enroll", onboarding.enroll),

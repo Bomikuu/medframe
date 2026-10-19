@@ -38,6 +38,12 @@ def scoped_patients(user, organization_id, permission="patients.demographics.rea
     queryset = Patient.objects.filter(organization_id=organization_id)
     if member.branch_id:
         queryset = queryset.filter(branch_id=member.branch_id)
+    from medframe_apps.stations.context import current_request
+
+    request = current_request.get()
+    credential = getattr(request, "station_credential", None) if request else None
+    if credential:
+        queryset = queryset.filter(branch_id=credential.device.branch_id)
     directory = not permission.startswith("patients.clinical.") and bool(
         {"patients.directory.manage", "patients.access.manage"} & permissions
     )

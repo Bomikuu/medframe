@@ -1,4 +1,9 @@
 const allowedPaths = new Set([
+  "stations/context",
+  "stations/pair",
+  "stations/manage",
+  "stations/encounter",
+  "stations/handoff",
   "onboarding/graphql",
   "onboarding/account/prepare",
   "onboarding/account/mfa/enroll",

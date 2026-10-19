@@ -51,7 +51,13 @@ export function ConsultationList({ patientId }: { patientId?: string }) {
   );
 }
 
-export function ConsultationPage({ encounterId }: { encounterId: string }) {
+export function ConsultationPage({
+  encounterId,
+  focused = false,
+}: {
+  encounterId: string;
+  focused?: boolean;
+}) {
   const { organizationId } = useWorkspace();
   const params = useSearchParams();
   const revisionId = params.get("revision");
@@ -65,6 +71,7 @@ export function ConsultationPage({ encounterId }: { encounterId: string }) {
         initial={remote.data.encounter}
         exactRevision={!!revisionId}
         reload={remote.reload}
+        focused={focused}
       />
     </>
   );

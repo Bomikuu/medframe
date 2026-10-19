@@ -18,6 +18,7 @@ import { AnatomyAssistant } from "./anatomy-assistant";
 import { ViewThumbnails } from "./view-thumbnails";
 import { EditorPanel } from "./editor-panel";
 import { useDesktopPanels } from "./use-editor-panels";
+import { useEditorSelection } from "@/features/stations/editor-selection";
 
 const initialStructure =
   structures.find((value) => value.id === "body.posterior_region_of_armr") ?? structures[0];
@@ -38,9 +39,18 @@ export function AnatomyEditor({
   const entries = useFieldArray({ control, name: "content.anatomy_findings" });
   const findings = useWatch({ control, name: "content.anatomy_findings" }) ?? [];
   const wide = useDesktopPanels();
-  const [layer, setLayer] = useState<AnatomyLayer>("body");
-  const [view, setView] = useState<AnatomyCamera>("front");
-  const [selection, setSelection] = useState(initialStructure.id);
+  const editorSelection = useEditorSelection();
+  const restored = editorSelection?.initial;
+  const updateSelection = editorSelection?.update;
+  const start = structures.find((value) => value.id === restored?.structure) || initialStructure;
+  const [layer, setLayer] = useState<AnatomyLayer>(start.layer as AnatomyLayer);
+  const [view, setView] = useState<AnatomyCamera>(
+    restored?.structure ? structureView(start) : "front",
+  );
+  const [selection, setSelection] = useState(start.id);
+  useEffect(() => {
+    updateSelection?.({ structure: selection, layer });
+  }, [selection, layer, updateSelection]);
   const [group, setGroup] = useState<RegionGroup | null>(null);
   const [query, setQuery] = useState("");
   const [focusKey, setFocusKey] = useState<string>();
@@ -51,7 +61,9 @@ export function AnatomyEditor({
   const [isolate, setIsolate] = useState(false);
   const [reset, setReset] = useState(0);
   const [zoom, setZoom] = useState(0);
-  const [cameraFocus, setCameraFocus] = useState<string>();
+  const [cameraFocus, setCameraFocus] = useState<string | undefined>(
+    restored?.structure ? start.id : undefined,
+  );
   const [assistantOpen, setAssistantOpen] = useState(true);
   const [assistantDrawer, setAssistantDrawer] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);

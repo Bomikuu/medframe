@@ -4,7 +4,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/application/status-badge";
 import { ClinicalEntry } from "@/components/application/clinical-entry";
 import dynamic from "next/dynamic";
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEditorSelection } from "@/features/stations/editor-selection";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { MessageSquare, MoreHorizontal, ExternalLink } from "@/components/icons";
 import { useUnsavedChanges } from "@/features/workspace/safety-provider";
@@ -58,6 +59,8 @@ export function DentalEditor({
   encounterStatus,
   navigation,
   onPatientRecord,
+  onPendingChange,
+  clinicalContext,
 }: {
   readOnly: boolean;
   patientId: string;
@@ -72,6 +75,8 @@ export function DentalEditor({
   encounterStatus: string;
   navigation: ReactNode;
   onPatientRecord: () => void;
+  onPendingChange?: (pending: boolean) => void;
+  clinicalContext?: ReactNode;
 }) {
   const { organizationId } = useWorkspace();
   const remote = useRemote(DentalReferenceDocument, { organizationId });
@@ -95,15 +100,28 @@ export function DentalEditor({
   );
   values.forEach((finding) => merged.set(finding.key, finding));
   const displayFindings = Array.from(merged.values());
-  const [selected, setSelected] = useState("16");
-  const [selectedSurface, setSelectedSurface] = useState<string | null>(null);
-  const [dentition, setDentition] = useState<"permanent" | "primary">("permanent");
+  const selection = useEditorSelection();
+  const restored = selection?.initial;
+  const updateSelection = selection?.update;
+  const [selected, setSelected] = useState(restored?.tooth || "16");
+  const [selectedSurface, setSelectedSurface] = useState<string | null>(restored?.surface ?? null);
+  const [dentition, setDentition] = useState<"permanent" | "primary">(
+    Number((restored?.tooth || "16")[0]) >= 5 ? "primary" : "permanent",
+  );
   const [tool, setTool] = useState<DentalTool>("select");
   const [pending, setPending] = useState<PendingPin | null>(null);
   const [noteText, setNoteText] = useState("");
+  useEffect(() => {
+    onPendingChange?.(!!pending || !!noteText);
+  }, [pending, noteText, onPendingChange]);
   const [activePin, setActivePin] = useState<string | null>(null);
   const [inspectorOpen, setInspectorOpen] = useState(false);
-  const viewport = useDentalViewport();
+  const viewport = useDentalViewport(
+    restored?.tooth ? { tooth: restored.tooth, surface: restored.surface ?? null } : null,
+  );
+  useEffect(() => {
+    updateSelection?.({ tooth: selected, surface: selectedSurface });
+  }, [selected, selectedSurface, updateSelection]);
   const chartRef = useRef<HTMLDetailsElement | null>(null);
   const [chartOpen, setChartOpen] = useState(false);
   const [inspectorTab, setInspectorTab] = useState("findings");
@@ -275,6 +293,7 @@ export function DentalEditor({
             </>
           }
         />
+        {clinicalContext}
         <div
           className={`relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] ${viewport.expandedCanvas ? "" : "lg:grid-cols-[248px_minmax(0,1fr)_340px] 2xl:grid-cols-[280px_minmax(0,1fr)_380px]"}`}
         >

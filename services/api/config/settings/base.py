@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "medframe_apps.anatomy",
     "medframe_apps.communications",
     "medframe_apps.onboarding",
+    "medframe_apps.stations",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -72,6 +73,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "medframe_apps.accounts.middleware.ClinicalSessionMiddleware",
+    "medframe_apps.stations.middleware.StationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

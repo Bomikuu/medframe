@@ -40,7 +40,7 @@ def validated_draft(content):
         ) from None
 
 
-def require_encounter(user, organization_id, encounter_id, *, write=False):
+def require_encounter(user, organization_id, encounter_id, *, write=False, station_check=True):
     if write:
         require_membership(user, organization_id, "encounters.write")
     allowed = scoped_patients(
@@ -70,6 +70,10 @@ def require_encounter(user, organization_id, encounter_id, *, write=False):
     if write:
         queryset = queryset.select_for_update(of=("self",))
     encounter = queryset.get(id=encounter_id)
+    if write and station_check:
+        from medframe_apps.stations.ownership import authorize_write
+
+        authorize_write(encounter, user)
     return encounter
 
 

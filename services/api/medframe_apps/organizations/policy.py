@@ -80,6 +80,9 @@ def require_membership(user, organization_id, permission):
     )
     if membership is None:
         raise DomainError("FORBIDDEN", "You do not have access to this workspace.", 403)
+    from medframe_apps.stations.policy import check_membership_device
+
+    check_membership_device(organization_id, permission)
     return membership
 
 

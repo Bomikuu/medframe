@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   ReceiptText,
   MessageSquare,
+  MonitorSmartphone,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -160,6 +161,12 @@ function ClinicFrame({ children }: { children: ReactNode }) {
     {
       label: "Settings",
       links: [
+        {
+          path: "/clinic/settings/stations",
+          label: "Devices & Stations",
+          Icon: MonitorSmartphone,
+          show: can("organization.manage"),
+        },
         {
           path: "/clinic/settings/schedules",
           label: "Schedules",

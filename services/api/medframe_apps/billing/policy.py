@@ -13,6 +13,12 @@ def staff_member(request, organization_id, permission="billing.read"):
 
 def scoped_branches(member):
     query = Branch.objects.filter(organization_id=member.organization_id)
+    from medframe_apps.stations.context import current_request
+
+    request = current_request.get()
+    credential = getattr(request, "station_credential", None) if request else None
+    if credential:
+        query = query.filter(id=credential.device.branch_id)
     return query.filter(id=member.branch_id) if member.branch_id else query
 
 
