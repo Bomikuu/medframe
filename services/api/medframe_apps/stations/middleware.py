@@ -33,7 +33,7 @@ class StationMiddleware:
                     "DEVICE_UNAVAILABLE", "This device needs clinic approval.", 403
                 )
         protected = request.path == "/graphql" or request.path.startswith(
-            ("/documents/", "/diagnostics/", "/portal/", "/onboarding/")
+                ("/documents/", "/diagnostics/", "/portal/", "/onboarding/", "/admin/")
         )
         credential = request.station_credential
         if protected and (

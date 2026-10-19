@@ -349,6 +349,7 @@ class StationTests(ClinicalFixture):
             HTTP_ORIGIN="http://localhost:3000",
         )
         self.assertEqual(response.status_code, 403)
+        self.assertEqual(client.get("/admin/").status_code, 403)
         response = client.post(
             "/stations/context",
             {},

@@ -39,3 +39,7 @@ Kiosk verification will reuse portal patient proofs, not matching name/date of b
 ## Preservation and verification
 
 Commit/tag the current source, retain `.next-clinic-onboarding`, encrypted DB checkpoint with verified restore, synthetic isolated review, then fresh activation checkpoint and original-row fingerprints around additive migrations. Run accumulated scoped backend, build/type/lint and desktop/tablet/phone browser checks once. Log unrelated failures; standing activation authorization allows blocker repair and a focused confirmation. No public deployment, clone import, credential reset or subagents.
+
+## Delivery state
+
+Phase 1 is active locally; see `docs/operations/station-phase-1-verification.md` for exact implementation, source/runtime/checkpoint, staged verification and remaining scope. Subsequent patient self-service/department queues and payments/TV phases remain outstanding.
