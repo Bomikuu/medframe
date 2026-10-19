@@ -156,4 +156,4 @@ Billing uses a branch-scoped ledger list and a statement/action split on wide sc
 
 Communications uses explicit patient/recipient selection before consent or reminder entry, safe fixed-message previews, purpose/channel choices and a real delivery queue. Preview is visibly labeled not sent; accepted and delivered remain separate. Unknown outcomes instruct reconciliation and have no automatic retry action. Patient reminders provide a separate opt-out destination. Existing semantic tokens, typography, shadcn/Radix primitives, Sheet geometry and profile/clinical-media rules are retained.
 
-These surfaces have an inactive `.next-batch4` build with a blocked financial posting trigger and bounded browser limitations; see `docs/operations/django-batch-4-verification.md`.
+These surfaces are active locally in `.next-batch4` after the authorized trigger repair. Six focused desktop/mobile browser groups pass, including payment/refund/credit balances and the patient statement; the documented browser and history-scaling limits remain. See `docs/operations/django-batch-4-verification.md`.

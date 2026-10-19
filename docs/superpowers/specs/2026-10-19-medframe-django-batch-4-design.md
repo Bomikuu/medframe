@@ -1,6 +1,6 @@
 # Medframe Batch 4 — Financial communication design
 
-Status: approved by the user’s “proceed implementation”; implemented in source with activation blockers recorded in `docs/operations/django-batch-4-verification.md`. Execution remains native in this chat, without subagents. The user requested the next connected batch after the application-wide visual reconstruction.
+Status: approved by the user’s “proceed implementation”; implemented and active locally after the user’s subsequent “activate” request. The original failed pass, authorized repairs, preservation and passing focused confirmation are recorded in `docs/operations/django-batch-4-verification.md`. Execution remains native in this chat, without subagents. The user requested the next connected batch after the application-wide visual reconstruction.
 
 ## Intent and acceptance
 

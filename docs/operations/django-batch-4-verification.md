@@ -2,13 +2,13 @@
 
 Date: October 19, 2026 (Asia/Manila). Branch: `codex/django-financial-batch-4`.
 
-**State: implemented in source and built successfully, but blocked from local activation.** The existing application remains on `.next-reconstruction` at port 3000 with its prior API process at 8000. Financial posting fails at a new SQL trigger, so Batch 4 migrations were **not** applied to the original database. No repair/retest was performed after the one verification pass.
+**Current state: Batch 4 is active locally after the user’s “activate” request.** All five Batch 4 migrations, including the corrective trigger migration, are applied to the original `medframe_django` database. The web uses `.next-batch4` on port 3000; Django API, worker and scheduler are running. All 4,475 pre-existing rows across 73 tables passed preservation checks before traffic resumed. SMS remains preview-only. The initial failed pass is retained below as historical evidence; the authorized activation results and runtime supersede its status.
 
 ## Connected implementation
 
 The user approved the [written design](../superpowers/specs/2026-10-19-medframe-django-batch-4-design.md) with “proceed implementation.” Execution followed the [native plan](../superpowers/plans/2026-10-19-medframe-django-batch-4.md) without subagents or additional approval gates.
 
-- New Django `billing` app: PHP decimal-string input converted to integer minor units; bounded consultation/procedure/other line items, fixed/percentage discounts, authoritative totals, draft/issue/void, unique invoice numbers, staff-recorded cash/bank/other payments, partial payments, payment-specific refunds, separate credit notes and computed outstanding/refundable balances. Issued statements and financial history are protected by append-only/scope/amount triggers. **The shared entry trigger has B4-001 below; payment and credit posting are not usable yet.**
+- New Django `billing` app: PHP decimal-string input converted to integer minor units; bounded consultation/procedure/other line items, fixed/percentage discounts, authoritative totals, draft/issue/void, unique invoice numbers, staff-recorded cash/bank/other payments, partial payments, payment-specific refunds, separate credit notes and computed outstanding/refundable balances. Issued statements and financial history are protected by append-only/scope/amount triggers. The initial shared-trigger failure B4-001 was repaired during authorized activation below.
 - Financial mutations use staff realm, active permission/clinic/branch scope, expected aggregate version, invoice locks and UUID request receipts. Clinical source references require clinical patient access; financial authority does not grant access to notes. No action changes clinical finalization.
 - New Django `communications` app: confirmed encrypted recipient, explicit per-purpose/channel consent, optional verified portal recipient, versioned defaults-off automation settings, source-version/dedup checks, durable delivery attempts/events and actual states. Follow-up instructions remain in the existing clinical model and are excluded from messages.
 - Preview transport is default. The optional Twilio adapter has bounded network calls, sanitized error codes, no implicit SDK retries, signed status callbacks and separate accepted/delivered states. Ambiguous timeouts/expired sending leases become unknown and are not automatically resubmitted. Actual dispatched/previewed message text is encrypted for historical inspection. No real SMS, online payment or money transfer occurred.
@@ -19,7 +19,7 @@ The user approved the [written design](../superpowers/specs/2026-10-19-medframe-
 
 The installed SMS dependency is Twilio 9.12.0 with its locked transitive dependencies. Configuration names are `SMS_LIVE_ENABLED` (default false), `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` and optional `TWILIO_STATUS_CALLBACK_URL`. Credentials remain server-side; no new credentials were placed in the environment or Git. Live configuration/delivery was not verified. SDK/callback behavior follows the official [Message resource](https://www.twilio.com/docs/messaging/api/message-resource) and [status callback documentation](https://www.twilio.com/docs/messaging/guides/outbound-message-status-in-status-callbacks); these references do not prove real delivery.
 
-## One accumulated verification pass
+## Initial accumulated verification pass (before activation)
 
 | Check                                        | Actual result                                                                                           |
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -61,7 +61,7 @@ Jev 0.7.0, authenticated TypeSafe `jev-1.13.0`, received sanitized design/implem
 
 Evidence directory: ignored `.impeccable/review/batch4/` contains raw tool outputs, graph summaries/reports/trace, build/lint/Ruff/backend/migration logs, browser harness/report and screenshots. `/tmp/medframe-batch4-*.log` are the original logs. The single browser harness is `/tmp/medframe-batch4-browser.cjs`.
 
-## Preservation and runtime
+## Initial preservation and runtime (before activation)
 
 - Baseline source: `8b059fa` / `checkpoint/pre-batch4-2026-10-19`. Design/preference commits `b6c4f70` and `efb5da4` precede implementation.
 - Private encrypted checkpoint: `/home/micxsz/.local/share/medframe/checkpoints/pre-batch2-20261019-094413-8b059fa`; its historical filename prefix is unchanged. The verified source bundle/config and encrypted dump remain private.
@@ -70,3 +70,37 @@ Evidence directory: ignored `.impeccable/review/batch4/` contains raw tool outpu
 - Review API/web on 8001/3001 used the clone, isolated throttle/channel/broker configuration and forced-disabled SMS. Those temporary servers were stopped after the one browser run. `.next-batch4` is an inactive review artifact; `.next-reconstruction` is preserved.
 - Current source includes unapplied Batch 4 migrations. Restarting backend/beat from this branch against the original database is **not** the preserved baseline runtime; continue with the clone until activation is explicitly completed. Use the saved baseline source/artifact for a baseline restart, rather than silently applying incomplete finance migrations to original data.
 - To activate after authorized repairs: use an additive corrective migration for the existing rehearsal trigger, perform a focused confirmation under the user's chosen limit, take a fresh original checkpoint, then apply the complete additive migration chain to original data and switch local servers. Never restore the clone over original records or discard subsequent writes. No push or public deployment occurred.
+
+## Authorized activation — October 19, 2026
+
+The user’s “activate” request authorized the recorded blocker repair and one focused confirmation. Repair commit `0ab67de` adds `billing.0003_isolate_entry_trigger_fields`: table-specific payment/refund/credit fields are evaluated in separate branches while retaining invoice locks, append-only integrity and aggregate limits. Already-applied migrations were not rewritten. Five long notification/reminder literals were wrapped without changing their values (B4-002). The activation browser harness matches source `cancelled` text and scopes its assertion to the newest reminder (B4-003); original failed evidence remains unchanged. B4-004 remains deferred.
+
+| Focused confirmation                                 | Actual result                                                                                       |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Billing and communications backend                   | **20 passed**, 4.628 seconds; isolated test DB, Redis 4 / broker 5                                  |
+| Scoped Ruff, including preservation helper           | Passed                                                                                              |
+| Migration drift                                      | Passed                                                                                              |
+| Corrective migration on review clone                 | Passed                                                                                              |
+| Browser                                              | **Six groups passed**, zero page errors, 22 captures at 1440px/390px, no recorded geometry findings |
+| Original API / login / unauthenticated billing smoke | Ready HTTP 200 / HTTP 200 / expected HTTP 307                                                       |
+| Reminder worker                                      | Celery ping: one node online, `pong`; beat process running                                          |
+
+Frontend product code did not change in the repair. The existing passing `.next-batch4` production build, TypeScript and ESLint evidence was reused; no redundant rebuild or broad regression loop was run. The one activation backend/browser confirmation used the isolated review database. Browser writes exercised a PHP 1,500 invoice, PHP 500 partial payment, PHP 300 refund and PHP 300 credit, ending at PHP 1,000 outstanding, persisting after reload and matching the patient statement. Other groups cover real password/MFA flows, invoice issue, confirmed contact/consent, safe reminder preview, schedule/cancel and patient opt-out. No original financial fixture was inserted, external SMS sent or money transferred. No exhaustive accessibility, full clinical regression, live provider delivery or full concurrency matrix is claimed. Mobile statement tables retain contained horizontal scrolling; the older portal tab-resize advisory remains deferred.
+
+### Preserved data and current local runtime
+
+- Source checkpoints: baseline `8b059fa` / `checkpoint/pre-batch4-2026-10-19`; implementation `4532799` / `checkpoint/pre-batch4-activation-2026-10-19`; activation repair `0ab67de`. `.next-reconstruction` remains intact.
+- Fresh encrypted checkpoint: `/home/micxsz/.local/share/medframe/checkpoints/pre-batch2-20261019-103141-0ab67de`. The helper’s historical `pre-batch2` prefix is unchanged. Restore into new `medframe_django_batch4_activation_20261019` matched all 73 table counts; the helper did not write to the original database or create a plaintext dump.
+- Before migration, the old API/web were stopped and no original worker/beat was running. The temporary review API/web were also stopped. `scripts/verify-additive-preservation.py` captured private canonical SHA256 row fingerprints for every existing public table, then verified **all 4,475 original rows across 73 tables** after migration. Only additive permission/content-type/migration metadata was allowed in existing tables. Fingerprints remain outside Git in the private checkpoint.
+- All five additive migrations succeeded on original `medframe_django`: `billing.0001_initial`, `billing.0002_integrity_permissions`, `billing.0003_isolate_entry_trigger_fields`, `communications.0001_initial`, `communications.0002_integrity`. Existing records, roles, passwords and MFA were preserved. No clone was restored over the source database.
+- API port 8000: PID `1144203`, tool session `87592`; web port 3000: PID `1144824`, session `66454`, `.next-batch4`. Celery worker PID `1144390`, session `30210`, concurrency 2; beat PID `1144570`, session `33509`, private schedule `/tmp/medframe-batch4-celerybeat`. These are local process identifiers at activation, not a durable service installation.
+- Runtime logs: `/tmp/medframe-batch4-{api,web,worker,beat}-runtime.log`. API/worker/beat explicitly use `SMS_LIVE_ENABLED=false`. A read-only check confirms the existing administrator membership has billing/communication permissions. Existing account credentials were not reset.
+- No push/public deployment. Future rollback must preserve subsequent writes and retain these additive migrations; the old UI artifact alone does not revert the new schema. Never restore a rehearsal clone over original records.
+
+### Activation Graphify / Jev evidence
+
+Graphify queried/traversed the existing backend graph for invoice, payment, refund, action, replay and version relationships, checked against source, then refreshed the backend corpus: **254 Python files, 1,610 nodes, 6,732 edges, 74 communities**, zero external extraction tokens. All saved edge endpoints resolve. Nine backend files yielded no symbols; the cache-root stat-index warning remains recorded. Frontend code did not change, so its 208-file map was retained. Graph relationships do not analyze SQL trigger semantics; actual database checks establish the repair. No subagents were used.
+
+Jev 0.7.0 / `jev-1.13.0` evaluated sanitized activation priorities and selected `row_preservation`, confidence 1.0, **555 input / 49 output tokens**. This prioritized preservation verification; it is not proof of correctness. No patient data, secrets or private attachments were submitted.
+
+Ignored `.impeccable/review/batch4-activation/` retains raw Jev output, Graphify trace/report/summary/cost/manifest/integrity, backend/Ruff/drift/migration/checkpoint/preservation logs, browser harness/report/screenshots and runtime smoke/worker ping. Initial `.impeccable/review/batch4/` evidence remains intact.
