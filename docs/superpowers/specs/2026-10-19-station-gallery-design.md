@@ -1,0 +1,17 @@
+# Clinical Station gallery
+
+The user asks for native implementation of a tablet gallery home, clinic time, an upcoming queue/scheduled patient side rail, patient images, today's consultation times and late/delayed/rescheduled states, plus End session confirmation. This extends the existing Medframe Operate world and existing Station access model; no new identity, AI, messages or payment integration. Work stays native and activates locally under standing instructions.
+
+## Composition and behavior
+
+Keep navy/teal, Manrope/Jakarta and shared shadcn. A clinic-time header anchors the day. Compact touch actions lead to the existing walk-in editor and patient chooser. A spacious patient gallery occupies the main area; circular portraits and initials fallback identify people. Each card shows actual scheduled/opened time, patient reference, persisted care/attendance state, recorded reschedule and delay facts, and one clear open/start action. Today is default; All consultations remains paginated and authorized. Tablet landscape keeps a narrower agenda rail; portrait/phone stack it without clipping. Existing STATION-DOCTOR-002 is directly in this requested replacement surface and is addressed by the new layout, not an unrelated polish pass.
+
+Timing comes from Django in clinic timezone. A past booked slot without check-in is awaiting arrival, not an inferred no-show. Late arrival requires a real check-in after scheduled start. Delay requires a recorded queue delay; started-late requires actual service start. Rescheduled badges require an existing appointment.rescheduled event. Appointment status and clinical record status remain separate. Future scheduled patients and active queues are ordered and periodically refreshed; no invented waiting estimates. Authorized patient/branch/provider filtering happens before metadata or portraits are returned. A stale/failed feed remains visibly stale and does not promise current queue state.
+
+Patient photos reuse protected patient-linked clinical image uploads and clean-scan document versions. A new one-to-one portrait pointer stores selected version and optimistic version, without changing existing patient/doc rows or image framing. Doctor sessions may select only an image from that same authorized patient; pending/rejected/foreign images are denied. Circular upload/preview controls do not crop original clinical bytes. No generated faces or public image URLs. Missing photos show initials and an add/change photo control. Existing upload controls get a narrow image-only/circular variant rather than a second upload pipeline.
+
+End session opens an explicit confirmation above all editors. Cancel keeps work/session intact; confirm warns that only saved records persist, then invokes native logout. No automatic logout on first click. Unrelated editor/queue/payment issues stay deferred.
+
+## Verification and preservation
+
+One accumulated targeted backend/build/lint pass and one batched desktop/tablet/phone browser round. Log failures; only activation blockers receive focused repairs/confirmation. Existing source/build and fresh encrypted database/storage checkpoints plus verified restore and row fingerprints precede additive original migration. Synthetic fixtures and isolated storage only. Graphify first-query/source verification and refreshed code graph plus sanitized Jev evidence are recorded; no private patient data is sent to Jev. No subagents.
