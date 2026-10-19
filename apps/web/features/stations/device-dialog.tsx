@@ -9,7 +9,6 @@ import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { errorMessage } from "@/lib/auth/client";
-import { TemporaryCode } from "./code-input";
 import {
   functionLabels,
   modeFunctions,
@@ -17,7 +16,6 @@ import {
   stationRequest,
   type Device,
   type Mode,
-  type Transfer,
 } from "./client";
 
 type Branch = { id: string; name: string };
@@ -42,7 +40,6 @@ export function DeviceDialog({
   const [functions, setFunctions] = useState(
     initial?.functions ?? ["clinical.read", "clinical.write"],
   );
-  const [transfer, setTransfer] = useState<Transfer | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -80,10 +77,9 @@ export function DeviceDialog({
         },
       );
       setDevice(result.device);
-      setTransfer(null);
       setNotice(
         result.pairing_required
-          ? "Settings saved. Generate a new code and pair this device again."
+          ? "Settings saved. Open Pairing code from the device list to connect this device again."
           : "Device settings saved.",
       );
       await onSaved();
@@ -120,28 +116,17 @@ export function DeviceDialog({
       setBusy(false);
     }
   }
-  async function manage(action: "pair" | "approve" | "revoke") {
+  async function manage(action: "approve" | "revoke") {
     if (!device) return;
     const descriptions = {
-      pair: "This ends the device’s current access and replaces any unused pairing code. Enter the new code on the receiving device, then approve it again.",
       approve: `Compare verification phrase ${device.verification_phrase ?? "on the receiving screen"} with the physical device before approving.`,
       revoke: "This immediately ends access on this device. Saved patient records remain intact.",
     };
     if (
       !(await confirm({
-        title:
-          action === "pair"
-            ? "Regenerate pairing code?"
-            : action === "approve"
-              ? "Approve this device?"
-              : "Revoke this device?",
+        title: action === "approve" ? "Approve this device?" : "Revoke this device?",
         description: descriptions[action],
-        action:
-          action === "pair"
-            ? "Generate new code"
-            : action === "approve"
-              ? "Approve device"
-              : "Revoke device",
+        action: action === "approve" ? "Approve device" : "Revoke device",
       }))
     )
       return;
@@ -149,14 +134,13 @@ export function DeviceDialog({
     setError("");
     setNotice("");
     try {
-      const result = await stationRequest<Transfer & { device: Device }>("manage", {
+      const result = await stationRequest<{ device: Device }>("manage", {
         organization_id: organizationId,
         device_id: device.id,
         expected_version: device.version,
         action,
       });
       setDevice(result.device);
-      setTransfer(action === "pair" ? result : null);
       setNotice(
         action === "approve" ? "Device approved." : action === "revoke" ? "Device revoked." : "",
       );
@@ -177,8 +161,8 @@ export function DeviceDialog({
       <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-xl">
         <DialogTitle>{device ? "Manage device" : "Add clinic device"}</DialogTitle>
         <DialogDescription>
-          Set its purpose, then connect and approve the physical device. The doctor’s access code is
-          managed separately.
+          Edit device settings and manage access. Generate pairing codes separately from the device
+          list.
         </DialogDescription>
         <form
           className="grid gap-5"
@@ -235,10 +219,9 @@ export function DeviceDialog({
               </label>
             ))}
           </fieldset>
-          {mode !== "clinician" && (
+          {mode === "display" && (
             <p className="text-xs leading-5 text-muted-foreground">
-              Kiosk self-service and TV display workflows remain scheduled for a later Station
-              phase.
+              TV display workflows remain scheduled for a later Station phase.
             </p>
           )}
           <p className="text-xs leading-5 text-muted-foreground">
@@ -278,14 +261,6 @@ export function DeviceDialog({
               >
                 Refresh connection
               </Button>
-              <Button
-                type="button"
-                variant="outline"
-                disabled={busy || dirty}
-                onClick={() => void manage("pair")}
-              >
-                Regenerate pairing code
-              </Button>
               {device.state === "pending" && (
                 <Button
                   type="button"
@@ -311,7 +286,6 @@ export function DeviceDialog({
                 Save your changes before changing the connection.
               </p>
             )}
-            {transfer && <TemporaryCode code={transfer.code} expiresAt={transfer.expires_at} />}
           </section>
         )}
         {notice && (

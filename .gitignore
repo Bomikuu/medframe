@@ -65,3 +65,6 @@ apps/web/public/vendor/pdfjs/
 .next-ai-drawer-layer/
 
 .next-station-kiosk/
+.next-device-code-modals/
+.playwright-cli/
+output/playwright/

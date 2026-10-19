@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Monitor, Tablet, Tv, Plus, RefreshCw, Settings2 } from "lucide-react";
+import { Monitor, Tablet, Tv, Plus, RefreshCw, Settings2, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import {
@@ -17,6 +17,7 @@ import { PageHeading } from "@/features/patients/feedback";
 import { errorMessage } from "@/lib/auth/client";
 import { functionLabels, modeLabels, stationRequest, type Device } from "./client";
 import { DeviceDialog } from "./device-dialog";
+import { DevicePairingDialog } from "./device-pairing-dialog";
 
 type Setup = { devices: Device[]; branches: { id: string; name: string }[] };
 const modeIcons = { clinician: Tablet, kiosk: Monitor, display: Tv };
@@ -25,6 +26,7 @@ export function DeviceManagement() {
   const [setup, setSetup] = useState<Setup | null>(null);
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Device | null | undefined>(undefined);
+  const [pairingDevice, setPairingDevice] = useState<Device | null>(null);
   const refresh = useCallback(async () => {
     try {
       setSetup(await stationRequest<Setup>("manage", { organization_id: organizationId }));
@@ -95,7 +97,7 @@ export function DeviceManagement() {
                 <TableHead>Device</TableHead>
                 <TableHead>Purpose & functions</TableHead>
                 <TableHead>Connection</TableHead>
-                <TableHead className="text-right">Manage</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -137,13 +139,22 @@ export function DeviceManagement() {
                       </p>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="outline"
-                        onClick={() => setSelected(device)}
-                        aria-label={`Manage ${device.name}`}
-                      >
-                        <Settings2 /> Manage
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => setPairingDevice(device)}
+                          aria-label={`Pairing code for ${device.name}`}
+                        >
+                          <KeyRound /> Pairing code
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setSelected(device)}
+                          aria-label={`Manage ${device.name}`}
+                        >
+                          <Settings2 /> Manage
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
@@ -151,6 +162,15 @@ export function DeviceManagement() {
             </TableBody>
           </Table>
         </div>
+      )}
+      {pairingDevice && (
+        <DevicePairingDialog
+          key={pairingDevice.id}
+          device={pairingDevice}
+          organizationId={organizationId}
+          onClose={() => setPairingDevice(null)}
+          onSaved={refresh}
+        />
       )}
       {selected !== undefined && setup && (
         <DeviceDialog
