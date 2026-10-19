@@ -2,7 +2,7 @@
 
 October 19, 2026 (Asia/Manila). Branch: `codex/django-diagnostics-batch-5`.
 
-**State: source implementation saved; incomplete acceptance and blocked from activation.** The new trigger prevents request creation; the patient diagnostics page fails production prerender. Batch 5 migrations were applied to a private review clone only. Original data/accounts/MFA and the old `.next-batch4` artifact remain preserved. No failed rule/constraint was suppressed, no post-check product repair/retry occurred, and no claim of a usable diagnostic workflow is made.
+**Current state: Batch 5 is active locally.** The user’s “activate always after” authorizes necessary activation-blocker repairs and establishes local activation as the default for subsequent batches. Original-data cutover is complete with all 4,560 pre-existing rows across 85 tables preserved. The web uses `.next-batch5`; API/worker/beat are running and SMS stays preview-only. The initial failed pass below remains historical; the authorized activation section supersedes its runtime/blocker status. B5-005 remains a set of deferred feature/coverage gaps, not a claim of full plan completion.
 
 ## Implemented source
 
@@ -64,6 +64,54 @@ Current execution total: **948 input / 84 output tokens**. Earlier design/plan c
 
 Ignored `.impeccable/review/batch5/` holds checkpoint, codegen/migration/drift/backend/build/Ruff/ESLint/format logs, graph scope reports/manifests/cost/integrity and raw Jev outputs. `/tmp/medframe-batch5-refresh-graphs.py` was a local orchestration helper. No browser harness/report/screenshots exist for Batch 5 because its prerequisite build failed.
 
-## Next authorized work
+## Initial remaining work (before activation)
 
 B5-001/B5-002 block activation. B5-003/B5-004 and B5-005 remain logged. A later user repair request must use additive corrective migrations for the already-migrated clone, preserve original source/data before any cutover and keep the confirmation bounded. Never restore the clone over original or replace exact earlier result/release evidence. Until then this is saved source with failed acceptance, not a completed/activated Batch 5.
+
+## Authorized local activation — October 19, 2026
+
+Standing instruction saved in AGENTS.md: activate each implemented batch locally after bounded verification, without a separate permission question. Necessary activation-blocker repairs are included; unrelated findings stay logged. Preservation, MFA/permissions, preview messaging and no public deployment remain unchanged constraints.
+
+Repairs:
+
+- `683bbe0`: additive `diagnostics.0003_unambiguous_scope_guard` replaces the function with distinct `request_row` / `assignment_row` record variables while preserving checks. Already-applied 0002/0004 SQL was whitespace-wrapped only; the semantic trigger repair is a new migration. Patient diagnostics list/detail now use the existing PortalProvider/Suspense composition. B5-003/004 lint findings are resolved, including import placement, SQL literal wrapping, named serializer and RHF useWatch.
+- `2b9e2c3`: the browser exposed a diagnostic patient-release rendering blocker, `Invalid time value`, caused by passing a full timestamp to dateLabel. It now uses the existing clinic-time formatter. No unrelated deferred feature expansion was undertaken.
+- Preservation helper explicitly permits the single new `diagnostic_operator` role row while still requiring every existing role/data row fingerprint to match. It does not broadly allow arbitrary role changes.
+
+| Focused confirmation                               | Actual result                                                                                        |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Six diagnostic backend modules                     | **15 passed**, 11.524 seconds                                                                        |
+| Scoped Ruff                                        | Passed, including preservation helper                                                                |
+| Scoped diagnostic frontend ESLint                  | Passed, zero findings; release renderer lint also passes                                             |
+| Clone corrective migration and drift               | Passed                                                                                               |
+| Production build / TypeScript                      | Passed after portal repair; final timestamp repair build also passed                                 |
+| Browser main confirmation                          | Three groups passed; clinician review completed, patient release rendering found timestamp error     |
+| Targeted remaining-step confirmation               | Patient exact-version release rendering and live old-ticket revocation both passed; zero page errors |
+| Original API / login / staff route / patient route | Ready HTTP 200 / HTTP 200 / expected unauthenticated HTTP 307 / HTTP 200 shell                       |
+| Celery worker and beat                             | One node responds pong; beat process running                                                         |
+
+The original backend regressions were not broadly repeated. The focused invocation now exercises the previously blocked diagnostics policy, transitions/replay/immutability, real private-file/ClamAV path, review/correction/history, explicit portal release and two-connection cancellation/submission race. Fifteen passing tests are not exhaustive coverage of B5-005.
+
+Browser evidence uses real password/MFA for synthetic clinician, center operator and verified patient accounts on `medframe_django_batch5_20261019`. Draft setup and precise examination time were supplied through authorized GraphQL; issuance/sharing confirmation, patient center selection, center acceptance/report/upload/submit and clinician review use the actual controls. Explicit release preview/publication and old-ticket checks use authorized GraphQL/HTTP. A one-shot task against the clone performed real ClamAV scanning; the original worker did not consume review jobs. No real external message or money transfer occurred.
+
+The first browser attempt stopped because a copied synthetic PNG fixture failed byte validation; the row remained uploading. Its evidence is retained as `browser-first-report.json`. Replacing the test fixture with a valid locally generated PNG allowed the main confirmation to pass issuance, patient selection and real upload/submission, then find the timestamp error. After that single product correction, only patient release rendering and revocation were confirmed; no full journey or backend suite was repeated. Main report retains its historical page error/failure; tail report has two passing groups/zero errors. Do not misreport one flawless browser run. Across the main and remaining-step confirmations there are **five passing groups, ten desktop/mobile captures**, no recorded page-overflow findings, and the initial errors remain visible in evidence.
+
+Manually inspected clinician reviewed-result desktop, center report/upload mobile and patient released-report mobile screenshots. They show attributed state/history, separate center/clinician content and full file access controls. The old mobile portal tab-strip limitation remains; no polish loop or exhaustive accessibility/1024/768 coverage was performed. Center correction was covered in backend tests rather than a second complete browser journey.
+
+### Original-data cutover and runtime
+
+- Repair baseline `683bbe0`, tag `checkpoint/pre-batch5-activation-2026-10-19`; timestamp fix `2b9e2c3`. Old `.next-batch4` and baseline source remain preserved.
+- Fresh encrypted checkpoint `/home/micxsz/.local/share/medframe/checkpoints/pre-batch2-20261019-135445-683bbe0`; restored new `medframe_django_batch5_activation_20261019` with all **85 table counts matching**, source_written=false. Historical checkpoint prefix is from the existing helper. No plaintext dump or credentials were committed.
+- No original web/API/worker/beat was running before cutover. Private row fingerprints captured **4,560 original rows across 85 public tables**, then all matched after migration. Additions are limited to normal migration/content-type/permission/role-permission metadata and the exact new operator role. Original accounts, passwords, MFA, records and role rows are unchanged. Fingerprints remain private in the checkpoint folder.
+- Original `medframe_django` applied four additive migrations: diagnostics 0001/0002, documents 0004 and diagnostics 0003. No clone replaced original data. Synthetic partnerships/center accounts/results/releases stayed on the review clone; the original starts with real configured data, not imported review records. Center registration/clinic authorization is required before real patient selection has choices.
+- Review API/web 8001/3001 were stopped. Current local API PID `152484`, exec session `10931`, port 8000; web PID `152719`, session `36630`, port 3000, `.next-batch5`. Worker PID `152745`, session `8900`, concurrency 2; beat PID `152870`, session `53486`, schedule `/tmp/medframe-batch5-celerybeat`. These are activation-time local process identifiers, not a durable service installation.
+- Logs `/tmp/medframe-batch5-{api,web,worker,beat}-runtime.log`. API/worker/beat explicitly use SMS_LIVE_ENABLED=false. Worker ping confirms one node online. Runtime smoke is read-only; original credentials were not used/reset by the harness.
+- Rollback must preserve subsequent writes and retain additive migrations; merely switching a UI build does not undo schema. Never restore the review clone over original data. No push/public deployment or live external delivery occurred.
+
+### Actual activation Graphify / Jev use
+
+Graphify queried existing document/portal/release/request/version relationships, retaining truncated discovery output as navigation evidence. Final backend refresh: **237 files, 1,393 nodes, 5,670 edges, 70 communities**; frontend: **213 files, 1,051 nodes, 5,084 edges, 39 communities**. Code-only extraction, zero external tokens, numeric cohesion and source/confidence labels retained. Ten backend and one frontend files yielded no symbols. All saved edges resolve to existing nodes. SQL semantics remain outside graph proof. No subagents. Final maps/manifests/cost and raw refresh logs are saved separately from original failure evidence.
+
+Jev 0.7.0 / jev-1.13.0 received sanitized activation architecture and selected `domain_workflow`, confidence 0.97, **442 input / 48 output tokens**. This prioritized the previously blocked real workflow and revocation confirmation; it is not authorization or verification. No patient data/credentials/private attachments were submitted.
+
+Evidence: ignored `.impeccable/review/batch5-activation/` contains original/final build, focused backend, Ruff/ESLint/helper-lint, migrate/drift/checkpoint/preservation/runtime logs; raw Jev response; graph reports/manifests/cost/integrity; browser harnesses, initial/main/tail reports and desktop/mobile captures. B5-005 and older unrelated findings remain deferred. Local activation is complete; not all originally planned diagnostic features or exhaustive acceptance are complete.

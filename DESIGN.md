@@ -161,3 +161,7 @@ These surfaces are active locally in `.next-batch4` after the authorized trigger
 ## Batch 5 diagnostic extension — saved, inactive
 
 Diagnostic request/inbox/selection and result/release UI extends the existing clinical desk and shared shadcn/Radix/Tailwind owners. Clinical files retain full framing; no new raster assets or visual identity were introduced. The development direction/unfinished finish verdict is in `.impeccable/surfaces/diagnostics.md`. Production prerender is blocked and no browser visual acceptance was performed; see `docs/operations/django-batch-5-verification.md` and deferred B5-001 through B5-005. This records source intent rather than a verified rendered design.
+
+## Batch 5 activation evidence
+
+Batch 5 now runs locally as `.next-batch5` after authorized blockers were repaired. Clinician reviewed-result desktop, center report/upload mobile and released diagnostic patient report mobile were inspected in the actual persisted workflow. They retain the existing clinical desk/shadcn forms and explicit center-vs-clinician authorship. Ten responsive captures across bounded confirmations show no recorded page overflow; the older mobile portal tab-strip limitation remains. No further polish or visual-world change was performed. Prior inactive/source-only notes are historical; B5-005 scope gaps remain. See docs/operations/django-batch-5-verification.md.

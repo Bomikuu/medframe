@@ -328,3 +328,17 @@ The user approved native implementation with one accumulated verification pass. 
 - Report/upload drafts are not fully guarded for all local file-selection/organization-switch cases; uploaded result attachments have no removal control, so a rejected/unavailable attachment may strand submission. No post-check product changes were made.
 - No browser harness/visual captures, real diagnostic upload/scan/submission acceptance, exact diagnostic file release acceptance or successful concurrency acceptance was completed because earlier blockers stopped the journey. Existing file regressions passing do not establish the new file workflow.
 - These gaps remain separate from a narrow trigger/provider fix; see `django-batch-5-verification.md` for actual scope and next authorized work.
+
+## Batch 5 — authorized activation resolution
+
+The user’s “activate always after” establishes standing local-activation authorization, including necessary blocker repairs and bounded confirmation. This supersedes the old stop-before-repair instruction for activation blockers only. Unrelated findings remain deferred.
+
+B5-001 is resolved by additive diagnostics 0003, using unambiguous record names. B5-002 is resolved with the established patient PortalProvider/Suspense boundary. B5-003/004 scoped Ruff/ESLint findings are resolved. Repair commit `683bbe0`; all 15 focused diagnostic tests pass, migration/drift and build/TypeScript/lint pass. Initial failure evidence remains historical.
+
+### B5-006 — Diagnostic patient-release timestamp formatting (resolved during activation)
+
+The focused browser confirmation reached a published diagnostic report, then `ReleaseView` threw `Invalid time value`: dateLabel expects a date-only string but received result.performed_at as a full timestamp. Commit `2b9e2c3` uses the existing clinic-time formatter. Final build/TypeScript and release lint pass; targeted patient report rendering and old-ticket revocation pass. No full browser journey/backend suite was repeated after this correction.
+
+The earlier browser fixture's copied PNG was rejected before reception; replacing only that synthetic test fixture allowed real upload/ClamAV/submission to proceed. Initial/main/tail reports are all retained; this was not one flawless run. Five groups pass across main and targeted remaining-step confirmations, with ten responsive captures and preserved historical failure evidence.
+
+Original-data activation is complete: fresh encrypted backup/verified restore; four additive original migrations; all 4,560 existing rows across 85 tables preserved; local web/API/worker/beat running, SMS preview-only. B5-005 and older unrelated issues remain deferred. See django-batch-5-verification.md for evidence, process identifiers and scope.

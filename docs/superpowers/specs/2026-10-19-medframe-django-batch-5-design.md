@@ -1,6 +1,6 @@
 # Medframe Batch 5 — diagnostic collaboration
 
-Status: design and native plan approved by the user. Source implementation is saved with failed bounded verification and unfinished items; Batch 5 is not active. See `docs/operations/django-batch-5-verification.md` for actual scope and B5-001 through B5-005. Native execution only, no subagents.
+Status: design/plan approved; Batch 5 is active locally after authorized blocker repair and bounded confirmation. See docs/operations/django-batch-5-verification.md for actual completed flow, original-data preservation and deferred B5-005 gaps. Native execution only, no subagents.
 
 ## Outcome and authority
 

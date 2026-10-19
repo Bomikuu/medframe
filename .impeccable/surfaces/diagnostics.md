@@ -21,3 +21,7 @@ No generated raster imagery is planned. Native-only review and the user's one-pa
 ## Finish verdict
 
 Not accepted: product source authored but build/prerender and domain trigger blockers prevent the browser review. No rendered desktop/mobile proof exists. Preserve the intended direction; do not claim visual completion. B5-001 through B5-005 remain deferred under the user's no-repair rule. No shipping raster was generated.
+
+## Activation finish verdict
+
+Core operated flow accepted within bounded evidence: clinician result desktop, center report/upload 390px and released patient report 390px inspected after actual persisted actions. Ten captures across main and targeted confirmations show no recorded page overflow. Timestamp rendering corrected; old portal navigation strip limitation and B5-005 remain deferred. The prior unaccepted verdict remains historical. No new visual identity/raster/provenance claim. Batch 5 active locally; broader unfinished features are not implied accepted.
