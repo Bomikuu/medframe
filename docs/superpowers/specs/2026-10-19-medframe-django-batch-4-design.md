@@ -112,3 +112,9 @@ PHP single-currency ledger, staff-recorded payments/refunds, separate credit not
 ## Implementation references
 
 Use the maintained provider SDK's signature validator against the exact configured callback URL; message acceptance and delivery are distinct provider states. Follow the official [Twilio Message resource](https://www.twilio.com/docs/messaging/api/message-resource) and [outbound status callbacks](https://www.twilio.com/docs/messaging/guides/outbound-message-status-in-status-callbacks). The conservative unknown-timeout/reconciliation policy above is our duplicate-avoidance design decision, not a claim that the provider guarantees exactly-once submission.
+
+## Graphify and Jev design evidence
+
+Graphify queried the existing frontend graph during Batch 4 discovery, locating the notification, follow-up and workspace owners. That graph covers frontend code only; Django financial/communication code does not exist yet and no backend graph coverage is claimed. The graph query is a navigation aid, checked against the actual Django source and master brief.
+
+After the user's explicit request to use both tools throughout the work, Jev 0.7.0 / TypeSafe `jev-1.13.0` evaluated a sanitized design summary with mutually explicit priorities: ledger atomicity, delivery ambiguity and access scope. It selected `ledger_atomicity` with confidence 0.94 (593 input / 49 output tokens). Accordingly, the implementation plan should lead backend verification with concurrent payment/refund and replay invariants while retaining access isolation and delivery ambiguity tests. This is a prioritization judgment, not evidence that the design or future implementation is correct. No patient data or secrets were submitted. Raw output is retained under ignored `.impeccable/review/batch4/jev-design-priority.json`. Product implementation still awaits the written-design review.
