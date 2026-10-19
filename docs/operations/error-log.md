@@ -543,7 +543,7 @@ That confirmation produced ready/copied/phone captures and reached generation/re
 
 ## KIOSK-RECEPTION-001 — generated migration import order (activation blocker)
 
-The accumulated Ruff pass reports I001 only in newly generated `stations.0009_reception_kiosk_access`: Django emitted uuid after third-party imports. This is a new-phase activation blocker; apply the bounded import organizer and confirm the touched Python scope. Existing use-kiosk cleanup-ref warning remains deferred and is not repaired. Initial reports are retained in ignored phase evidence.
+The accumulated Ruff pass reports I001 only in newly generated `stations.0009_reception_kiosk_access`: Django emitted uuid after third-party imports. This is a new-phase activation blocker; the bounded import organizer was applied and the final touched Python scope passes Ruff. Existing use-kiosk cleanup-ref warning remains deferred and is not repaired. Initial reports are retained in ignored phase evidence.
 
 ## KIOSK-RECEPTION-002 — accumulated test requested simultaneous active departments
 
