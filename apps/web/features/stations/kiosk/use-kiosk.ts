@@ -194,6 +194,7 @@ export function useKiosk() {
   function start(next: Task) {
     setTask(next);
     if (setup?.strict_verification) {
+      epoch.current++;
       active.current = null;
       setSession(null);
       setSnapshot(null);
