@@ -95,7 +95,17 @@ def patient_snapshot(session):
     }
 
 
+def require_task_code(session):
+    from medframe_apps.stations.kiosk_reception import strict
+
+    if strict(session.credential.device) and KioskRequest.objects.filter(session=session).exists():
+        raise DomainError(
+            "REVERIFY_REQUIRED", "Strict mode needs a new patient code for the next task.", 403
+        )
+
+
 def available(session, data):
+    require_task_code(session)
     branch = session.proof.branch
     department = department_for(branch, data["department_id"])
     if department.kind != "consultation":
@@ -138,6 +148,7 @@ def perform(request, data):
                 "CONFLICT", "This confirmation changed. Review your selection again.", 409
             )
         return previous.result
+    require_task_code(session)
     branch = session.proof.branch
     department = department_for(branch, data["department_id"])
     if action == "book":
@@ -230,6 +241,7 @@ def perform(request, data):
 
 
 def balances(session):
+    require_task_code(session)
     from medframe_apps.billing.calculations import amount_text, invoice_totals
     from medframe_apps.billing.models import Invoice
 

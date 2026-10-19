@@ -119,6 +119,11 @@ def redeem(request, code, generation=None):
         raise DomainError(
             "INVALID_PROOF", "This code is unavailable. Ask reception for a new patient code.", 403
         )
+    return open_patient_session(credential, proof)
+
+
+def open_patient_session(credential, proof):
+    """Caller validates source, scope and one-use proof inside its transaction."""
     # One patient on this device. A new redemption ends every earlier patient scope.
     KioskPatientSession.objects.filter(credential=credential, ended_at__isnull=True).update(
         ended_at=timezone.now()

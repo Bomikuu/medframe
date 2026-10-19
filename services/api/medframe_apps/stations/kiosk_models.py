@@ -162,3 +162,27 @@ class KioskBoundary(models.Model):
         "stations.DeviceCredential", primary_key=True, on_delete=models.PROTECT
     )
     generation = models.PositiveIntegerField(default=1)
+
+
+class KioskPolicy(models.Model):
+    device = models.OneToOneField(
+        "stations.StationDevice", primary_key=True, on_delete=models.PROTECT
+    )
+    strict_verification = models.BooleanField(default=False)
+
+
+class KioskAssignment(Record):
+    credential = models.ForeignKey("stations.DeviceCredential", on_delete=models.PROTECT)
+    proof = models.OneToOneField("stations.KioskProof", on_delete=models.PROTECT)
+    generation = models.PositiveIntegerField()
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["credential"],
+                condition=models.Q(consumed_at__isnull=True),
+                name="station_one_pending_assignment",
+            )
+        ]

@@ -40,6 +40,7 @@ export function DeviceDialog({
   const [functions, setFunctions] = useState(
     initial?.functions ?? ["clinical.read", "clinical.write"],
   );
+  const [strict, setStrict] = useState(initial?.strict_verification ?? false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -48,6 +49,7 @@ export function DeviceDialog({
     name !== device.name ||
     branch !== device.branch_id ||
     mode !== device.mode ||
+    strict !== device.strict_verification ||
     JSON.stringify([...functions].sort()) !== JSON.stringify([...device.functions].sort());
   async function close() {
     if (
@@ -73,7 +75,7 @@ export function DeviceDialog({
           action: device ? "update" : "create",
           device_id: device?.id,
           expected_version: device?.version,
-          device: { name, branch_id: branch, mode, functions },
+          device: { name, branch_id: branch, mode, functions, strict_verification: strict },
         },
       );
       setDevice(result.device);
@@ -103,6 +105,7 @@ export function DeviceDialog({
         latest.name !== device.name ||
         latest.branch_id !== device.branch_id ||
         latest.mode !== device.mode ||
+        latest.strict_verification !== device.strict_verification ||
         JSON.stringify(latest.functions) !== JSON.stringify(device.functions)
       ) {
         throw new Error(
@@ -219,6 +222,20 @@ export function DeviceDialog({
               </label>
             ))}
           </fieldset>
+          {mode === "kiosk" && (
+            <div className="grid gap-2 border-t border-border pt-4">
+              <label className="flex min-h-11 items-center gap-3 text-sm font-semibold">
+                <Checkbox checked={strict} onCheckedChange={(value) => setStrict(value === true)} />
+                Strict patient verification
+              </label>
+              <p className="text-sm leading-6 text-muted-foreground">
+                {strict
+                  ? "Patients enter a new verification code before each task."
+                  : "Reception selects the patient for this kiosk. No code is needed; one short session covers multiple tasks."}{" "}
+                Changing this setting requires pairing the device again.
+              </p>
+            </div>
+          )}
           {mode === "display" && (
             <p className="text-xs leading-5 text-muted-foreground">
               TV display workflows remain scheduled for a later Station phase.

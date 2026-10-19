@@ -10,7 +10,7 @@ import {
   type Result,
 } from "./types";
 
-type View = "home" | "verify" | "register" | "choose" | "review" | "done";
+type View = "home" | "waiting" | "verify" | "register" | "choose" | "review" | "done";
 export function useKiosk() {
   const [cycle, setCycle] = useState(0);
   const [setup, setSetup] = useState<Setup | null>(null);
@@ -114,8 +114,9 @@ export function useKiosk() {
           void reset("Your kiosk session ended. Ask reception to continue.");
       });
   }, [reset]);
+  const hasSession = !!session;
   useEffect(() => {
-    if (view === "home") return;
+    if (view === "home" && !hasSession) return;
     const timer = window.setInterval(() => {
       const absolute = active.current ? new Date(active.current.expires_at).getTime() : Infinity;
       const idle = active.current
@@ -126,8 +127,7 @@ export function useKiosk() {
       if (seconds <= 0) void reset("Session cleared for your privacy.");
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [view, reset]);
-  const hasSession = !!session;
+  }, [view, hasSession, reset]);
   useEffect(() => {
     if (!hasSession) return;
     let cancelled = false;
@@ -147,10 +147,58 @@ export function useKiosk() {
       window.clearInterval(timer);
     };
   }, [hasSession, reset]); // Polling never renews the patient's inactivity deadline.
+  useEffect(() => {
+    if (!setup || setup.strict_verification || hasSession || !["home", "waiting"].includes(view))
+      return;
+    let cancelled = false;
+    let pending = false;
+    const current = epoch.current;
+    const receive = async () => {
+      if (pending) return;
+      pending = true;
+      try {
+        const value = await kioskRequest<{ session: PatientSession | null }>({
+          action: "receive",
+          generation: setup.generation,
+        });
+        if (!cancelled && current === epoch.current && value.session) {
+          active.current = value.session;
+          setSession(value.session);
+          setRemaining(120);
+          lastActivity.current = Date.now();
+          setView((previous) => (previous === "waiting" ? "choose" : previous));
+        }
+      } catch (cause) {
+        if (!cancelled && current === epoch.current) {
+          if (cause instanceof ApiError && cause.status === 403) void reset(errorMessage(cause));
+          else setError(errorMessage(cause));
+        }
+      } finally {
+        pending = false;
+      }
+    };
+    const initial = window.setTimeout(() => void receive(), 0);
+    const timer = window.setInterval(() => void receive(), 4000);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(initial);
+      window.clearInterval(timer);
+    };
+  }, [setup, hasSession, view, reset]);
+  function home() {
+    if (!active.current || setup?.strict_verification) return reset();
+    setView("home");
+    setResult(null);
+    setError("");
+  }
   function start(next: Task) {
-    epoch.current++;
     setTask(next);
-    setView("verify");
+    if (setup?.strict_verification) {
+      active.current = null;
+      setSession(null);
+      setSnapshot(null);
+      setView("verify");
+    } else setView(active.current ? "choose" : "waiting");
     setResult(null);
     setError("");
     lastActivity.current = Date.now();
@@ -172,6 +220,7 @@ export function useKiosk() {
     error,
     remaining,
     reset,
+    home,
     run,
     verify,
     activity,

@@ -164,10 +164,12 @@ class PatientPortrait(Record):
 # Django discovers the phase's focused model module through the app's model owner.
 from medframe_apps.stations.kiosk_models import (  # noqa: E402,F401
     DepartmentCounter,
+    KioskAssignment,
     KioskBoundary,
     KioskEvent,
     KioskIntake,
     KioskPatientSession,
+    KioskPolicy,
     KioskProof,
     KioskRequest,
     StationDepartment,

@@ -13,6 +13,7 @@ class DeviceInput(Input):
     branch_id: UUID
     mode: Literal["clinician", "kiosk", "display"]
     functions: list[str] = Field(max_length=6)
+    strict_verification: bool | None = None
 
 
 class EditorSelection(Input):

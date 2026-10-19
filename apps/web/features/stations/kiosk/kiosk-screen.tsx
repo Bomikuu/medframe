@@ -85,6 +85,10 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
   }
   async function home() {
     clearFields();
+    await kiosk.home();
+  }
+  async function finish() {
+    clearFields();
     await kiosk.reset();
   }
   function start(task: Task) {
@@ -105,7 +109,7 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
     const result = await kiosk.run<Result>({ action, ...selection, request_id: requestId });
     if (result) kiosk.complete(result);
   }
-  const timed = kiosk.view !== "home" && kiosk.remaining <= 30;
+  const timed = (kiosk.view !== "home" || !!kiosk.session) && kiosk.remaining <= 30;
   return (
     <main
       id="main"
@@ -196,6 +200,30 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                     Choose an option to get started. Reception is here if you need a hand.
                   </p>
                 </div>
+                {kiosk.session ? (
+                  <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-5">
+                    <div>
+                      <p className="font-semibold">{kiosk.session.patient_name}</p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Selected by reception · continue with any task below
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => void finish()}
+                      disabled={kiosk.busy}
+                    >
+                      Finish / change patient
+                    </Button>
+                  </div>
+                ) : (
+                  !setup.strict_verification && (
+                    <p className="mb-6 rounded-xl border border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
+                      Reception will open your patient session on this kiosk. No code is needed.
+                    </p>
+                  )
+                )}
                 <div className="grid gap-4 sm:grid-cols-2">
                   {actions.map(({ task, title, detail, icon: Icon }) => (
                     <button
@@ -229,11 +257,13 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                       ? "You're all set"
                       : kiosk.view === "register"
                         ? "New to this clinic?"
-                        : kiosk.view === "verify"
-                          ? "First, verify it's you"
-                          : kiosk.view === "review"
-                            ? "Check before you confirm"
-                            : taskNames[kiosk.task]}
+                        : kiosk.view === "waiting"
+                          ? "Reception will open your session"
+                          : kiosk.view === "verify"
+                            ? "First, verify it's you"
+                            : kiosk.view === "review"
+                              ? "Check before you confirm"
+                              : taskNames[kiosk.task]}
                   </h1>
                   {kiosk.session && (
                     <p className="mt-3 text-sm text-muted-foreground">
@@ -241,6 +271,22 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                     </p>
                   )}
                 </div>
+                {kiosk.view === "waiting" && (
+                  <div className="grid gap-5">
+                    <p role="status" className="max-w-xl leading-7 text-muted-foreground">
+                      Ask reception to select your patient record and send it to this kiosk. This
+                      screen will continue automatically. You do not need to enter a code.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-h-12 justify-self-start"
+                      onClick={() => kiosk.setView("register")}
+                    >
+                      I need to register as a new patient
+                    </Button>
+                  </div>
+                )}
                 {kiosk.view === "verify" && (
                   <form
                     className="grid gap-6"
@@ -462,7 +508,17 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                           Print using this device
                         </Button>
                       )}
-                      <Button type="button" className="min-h-14 px-8" onClick={() => void home()}>
+                      {kiosk.session && !setup.strict_verification && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="min-h-14 px-8"
+                          onClick={() => void home()}
+                        >
+                          Do another task
+                        </Button>
+                      )}
+                      <Button type="button" className="min-h-14 px-8" onClick={() => void finish()}>
                         Finish and clear my information
                       </Button>
                     </div>
@@ -510,7 +566,7 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
             >
               I’m still here
             </Button>
-            <Button type="button" variant="outline" onClick={() => void home()}>
+            <Button type="button" variant="outline" onClick={() => void finish()}>
               Finish and clear
             </Button>
           </div>

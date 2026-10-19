@@ -78,7 +78,9 @@
     ".next-station-kiosk/types/**/*.ts",
     ".next-station-kiosk/dev/types/**/*.ts",
     ".next-device-code-modals/types/**/*.ts",
-    ".next-device-code-modals/dev/types/**/*.ts"
+    ".next-device-code-modals/dev/types/**/*.ts",
+    ".next-kiosk-reception/types/**/*.ts",
+    ".next-kiosk-reception/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

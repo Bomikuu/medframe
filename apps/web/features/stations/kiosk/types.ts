@@ -22,6 +22,7 @@ export type Setup = {
   providers: Provider[];
   idle_seconds: number;
   generation: number;
+  strict_verification: boolean;
 };
 export type PatientSession = { patient_name: string; expires_at: string; idle_expires_at: string };
 export type Appointment = {

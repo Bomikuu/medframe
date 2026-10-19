@@ -68,3 +68,4 @@ apps/web/public/vendor/pdfjs/
 .next-device-code-modals/
 .playwright-cli/
 output/playwright/
+.next-kiosk-reception/

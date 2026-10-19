@@ -16,6 +16,7 @@ from medframe_apps.patients.inputs import RegisterPatientInput
 from medframe_apps.patients.models import Patient
 from medframe_apps.patients.services import register_patient
 from medframe_apps.portal.policy import require_portal_link
+from medframe_apps.stations import kiosk_reception as reception
 from medframe_apps.stations.kiosk_identity import issue
 from medframe_apps.stations.kiosk_services import department_summary, providers
 from medframe_apps.stations.kiosk_visits import (
@@ -50,7 +51,7 @@ def manage(request):
         "operations.read"
         if action in {"snapshot", "patients"}
         else "appointments.manage"
-        if action in {"issue", "review_intake"}
+        if action in {"issue", "assign", "review_intake"}
         else "queues.manage",
         branch_id,
     )
@@ -73,7 +74,7 @@ def manage(request):
                 ]
             }
         )
-    if action == "issue":
+    if action in {"issue", "assign"}:
         patient = operational_patient(member, UUID(str(data["patient_id"])), branch.id)
         method = str(data.get("method", "")).strip()
         if method not in {"in_person_identity_verified", "existing_clinic_identity_verified"}:
@@ -82,6 +83,8 @@ def manage(request):
                 "Verify the patient's identity and record the method before issuing a code.",
             )
         throttle(request, "kiosk.issue", str(request.user.id), 20, 300)
+        if action == "assign":
+            return JsonResponse(reception.assign(request, member, patient, branch, data))
         return JsonResponse(issue(patient, request.user, membership=member, method=method))
     if action in {"initialize", "department"}:
         administrator(request, org, branch.id)
@@ -287,6 +290,7 @@ def manage(request):
                 for row in intakes
             ],
             "timezone": branch.organization.timezone,
+            "kiosks": reception.devices(branch),
         }
     )
 

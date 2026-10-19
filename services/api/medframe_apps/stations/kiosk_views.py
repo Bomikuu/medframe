@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from config.errors import DomainError
 from config.middleware import domain_view, json_object
 from medframe_apps.accounts.throttling import throttle
+from medframe_apps.stations import kiosk_reception as reception
 from medframe_apps.stations import kiosk_services as services
 from medframe_apps.stations.kiosk_identity import (
     IDLE_SECONDS,
@@ -66,11 +67,28 @@ def kiosk(request):
                 ],
                 "idle_seconds": IDLE_SECONDS,
                 "generation": boundary.generation,
+                "strict_verification": reception.strict(credential.device),
             }
         )
-    if action == "verify":
-        secret, session = redeem(request, data.get("code", ""), int(data["generation"]))
-        response = private_response(session_summary(session))
+    if action in {"verify", "receive"}:
+        if action == "verify":
+            if not reception.strict(credential.device):
+                raise DomainError(
+                    "RECEPTION_REQUIRED",
+                    "Reception selects your patient session on this kiosk.",
+                    403,
+                )
+            opened = redeem(request, data.get("code", ""), int(data["generation"]))
+        else:
+            opened = reception.receive(request, int(data["generation"]))
+        if not opened:
+            return private_response({"session": None})
+        secret, session = opened
+        response = private_response(
+            {"session": session_summary(session)}
+            if action == "receive"
+            else session_summary(session)
+        )
         response.set_cookie(
             PATIENT_COOKIE,
             secret,

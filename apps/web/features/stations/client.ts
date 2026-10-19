@@ -12,6 +12,7 @@ export type Device = {
   version: number;
   last_seen_at: string | null;
   verification_phrase: string | null;
+  strict_verification: boolean;
 };
 export type StationContext = {
   access?: AccessSession;

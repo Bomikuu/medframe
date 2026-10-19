@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { ClientError } from "graphql-request";
 import { Button } from "@/components/ui/button";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 export function failureCode(error: unknown): string {
   if (error instanceof ClientError) {
@@ -35,6 +37,24 @@ export function failureText(error: unknown) {
 
 export function LoadState({ error, retry }: { error: unknown; retry: () => void }) {
   const { clearDirty } = useSafety();
+  const pathname = usePathname();
+  const router = useRouter();
+  const station = pathname.startsWith("/station");
+  function returnToCollection() {
+    const params = new URLSearchParams(window.location.search);
+    const context = new URLSearchParams();
+    const key = pathname.startsWith("/portal") ? "link" : "organization";
+    const value = params.get(key);
+    if (value) context.set(key, value);
+    const collection = station
+      ? "/station/clinician"
+      : pathname.startsWith("/portal")
+        ? "/portal"
+        : pathname.startsWith("/clinic/settings") || !pathname.startsWith("/clinic/")
+          ? "/clinic"
+          : pathname.split("/").slice(0, 3).join("/");
+    router.replace(`${collection || "/clinic"}${context.size ? `?${context}` : ""}`);
+  }
   useEffect(() => {
     if (error && ["FORBIDDEN", "NOT_FOUND", "UNAUTHENTICATED"].includes(failureCode(error)))
       clearDirty();
@@ -48,6 +68,9 @@ export function LoadState({ error, retry }: { error: unknown; retry: () => void 
           </p>
           <Button variant="outline" onClick={retry}>
             Try again
+          </Button>
+          <Button type="button" variant="ghost" onClick={returnToCollection}>
+            <ArrowLeft /> {station ? "Back to Station" : "Back to collection"}
           </Button>
           {failureCode(error) === "UNAUTHENTICATED" && (
             <a href="/login" className="text-sm text-primary underline">

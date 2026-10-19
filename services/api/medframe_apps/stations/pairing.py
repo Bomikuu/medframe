@@ -7,7 +7,12 @@ from django.utils import timezone
 from config.errors import DomainError
 from medframe_apps.common import check_version
 from medframe_apps.stations.context import digest
-from medframe_apps.stations.models import DeviceCredential, PairingChallenge, StationDevice
+from medframe_apps.stations.models import (
+    DeviceCredential,
+    KioskPolicy,
+    PairingChallenge,
+    StationDevice,
+)
 from medframe_apps.stations.policy import administrator, event
 
 ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -37,6 +42,9 @@ def device_data(device):
         "branch_id": str(device.branch_id),
         "branch": device.branch.name,
         "functions": device.functions,
+        "strict_verification": KioskPolicy.objects.filter(
+            device=device, strict_verification=True
+        ).exists(),
         "state": device.state,
         "version": device.version,
         "last_seen_at": device.last_seen_at.isoformat() if device.last_seen_at else None,
@@ -62,6 +70,8 @@ def create(request, organization_id, data):
         functions=sorted(set(data.functions)),
         created_by=request.user,
     )
+    if data.mode == "kiosk" and data.strict_verification is not None:
+        KioskPolicy.objects.create(device=device, strict_verification=data.strict_verification)
     event(request.user, organization_id, "device.created", device=device)
     return device
 
@@ -175,6 +185,11 @@ def update(request, organization_id, identifier, expected_version, data):
         device.branch_id != data.branch_id
         or device.mode != data.mode
         or set(device.functions) != set(data.functions)
+        or (
+            data.strict_verification is not None
+            and data.strict_verification
+            != KioskPolicy.objects.filter(device=device, strict_verification=True).exists()
+        )
     )
     device.name = data.name
     device.branch_id = data.branch_id
@@ -188,6 +203,10 @@ def update(request, organization_id, identifier, expected_version, data):
         device.state = "setup"
         device.approved_by = None
         device.approved_at = None
+    if data.strict_verification is not None:
+        KioskPolicy.objects.update_or_create(
+            device=device, defaults={"strict_verification": data.strict_verification}
+        )
     device.version += 1
     device.save()
     event(request.user, organization_id, "device.updated", device=device)

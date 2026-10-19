@@ -32,7 +32,7 @@ export function PortalKioskCode() {
   return (
     <div>
       <Button type="button" variant="outline" disabled={busy} onClick={() => void issue()}>
-        Get a patient kiosk code
+        Get a strict-mode kiosk code
       </Button>
       {error && (
         <p role="alert" className="mt-2 text-sm text-destructive">
@@ -46,10 +46,10 @@ export function PortalKioskCode() {
         }}
       >
         <DialogContent>
-          <DialogTitle>Use the clinic’s patient kiosk</DialogTitle>
+          <DialogTitle>Strict-mode kiosk verification</DialogTitle>
           <DialogDescription>
-            Enter this one-use patient code on an approved kiosk at your clinic branch. It expires
-            in five minutes. Do not share it with anyone.
+            Use this code only if the clinic’s kiosk is in strict mode. Standard kiosks are opened
+            by reception without a code. This code expires in five minutes; keep it private.
           </DialogDescription>
           <p className="rounded-lg bg-muted px-4 py-6 text-center text-2xl font-semibold tracking-[0.2em] select-all">
             {proof?.code}

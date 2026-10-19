@@ -14,6 +14,7 @@ import { LoadState, PageHeading } from "@/features/patients/feedback";
 import { stationRequest } from "../client";
 import { errorMessage } from "@/lib/auth/client";
 import { DepartmentDialog, StageDialog, type StaffTicket } from "./staff-dialogs";
+import { ReceptionAssignment, type ReceptionKiosk } from "./reception-assignment";
 import { clinicTime, type Department, type Provider } from "./types";
 
 type Intake = {
@@ -30,6 +31,7 @@ type Data = {
   tickets: StaffTicket[];
   intakes: Intake[];
   timezone: string;
+  kiosks: ReceptionKiosk[];
 };
 export function KioskStaffWorkspace() {
   const { can, href } = useWorkspace();
@@ -151,8 +153,8 @@ function StaffBoard({ branch }: { branch: string }) {
           Patient kiosk access
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-          Verify the patient’s identity in person, select their existing record, then issue a
-          one-use code. Device pairing is separate. A code lasts five minutes.
+          Verify the patient’s identity, select their record and send it to an idle kiosk. The
+          patient can complete multiple tasks without entering a code. Codes are for strict mode.
         </p>
         <form
           onSubmit={(e) => {
@@ -200,22 +202,35 @@ function StaffBoard({ branch }: { branch: string }) {
               />
               I verified this patient’s identity in person.
             </label>
-            <Button
-              type="button"
-              className="justify-self-start"
-              disabled={!patient || !verified || busy}
-              onClick={() =>
-                void run({
-                  action: "issue",
-                  patient_id: patient,
-                  method: "in_person_identity_verified",
-                }).then((value) => {
-                  if (value) setCode(value as { code: string; expires_at: string });
-                })
-              }
-            >
-              Generate patient code
-            </Button>
+            <ReceptionAssignment
+              kiosks={data.kiosks}
+              patient={patient}
+              verified={verified}
+              busy={busy}
+              run={run}
+            />
+            <details className="border-t border-border pt-4">
+              <summary className="cursor-pointer text-sm font-semibold">
+                Strict mode: patient verification code
+              </summary>
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-4 justify-self-start"
+                disabled={!patient || !verified || busy}
+                onClick={() =>
+                  void run({
+                    action: "issue",
+                    patient_id: patient,
+                    method: "in_person_identity_verified",
+                  }).then((value) => {
+                    if (value) setCode(value as { code: string; expires_at: string });
+                  })
+                }
+              >
+                Generate strict-mode patient code
+              </Button>
+            </details>
           </div>
         )}
         {code && (
