@@ -4,6 +4,7 @@ import {
   Group,
   Mesh,
   MeshStandardMaterial,
+  Matrix4,
   Plane,
   Quaternion,
   Vector3,
@@ -31,7 +32,7 @@ export function updateIllustrationOverlays(
   group: Group,
   teeth: Mesh[],
   findings: Finding[],
-  selected: string,
+  _selected: string,
   anatomyOnly: boolean,
 ) {
   clearIllustrationOverlays(group);
@@ -40,15 +41,18 @@ export function updateIllustrationOverlays(
     if (!tooth.visible) continue;
     const id = String(tooth.userData.tooth_id);
     const state = dentalIllustration(findings, id);
+    if (state.missing) continue;
     const bounds = tooth.geometry.boundingBox!.clone().applyMatrix4(tooth.matrixWorld);
     const size = bounds.getSize(new Vector3());
     const upper = Number(id[0]) <= 2;
     if (state.crown) {
       const cut = upper ? bounds.min.y + size.y * 0.4 : bounds.max.y - size.y * 0.4;
       const material = new MeshStandardMaterial({
-        color: id === selected ? "#44d8e4" : "#e4d4a2",
-        roughness: 0.24,
-        metalness: 0.22,
+        color: "#e1a51b",
+        emissive: "#8c5400",
+        emissiveIntensity: 0.18,
+        roughness: 0.3,
+        metalness: 0.48,
         clippingPlanes: [new Plane(new Vector3(0, upper ? -1 : 1, 0), upper ? cut : -cut)],
         polygonOffset: true,
         polygonOffsetFactor: -2,
@@ -57,9 +61,28 @@ export function updateIllustrationOverlays(
       const crown = new Mesh(tooth.geometry, material);
       crown.userData.sharedGeometry = true;
       crown.matrixAutoUpdate = false;
-      crown.matrix.copy(tooth.matrixWorld);
+      const localCenter = tooth.geometry.boundingBox!.getCenter(new Vector3());
+      const shell = new Matrix4()
+        .makeTranslation(localCenter.x, localCenter.y, localCenter.z)
+        .multiply(new Matrix4().makeScale(1.012, 1.012, 1.012))
+        .multiply(new Matrix4().makeTranslation(-localCenter.x, -localCenter.y, -localCenter.z));
+      crown.matrix.copy(tooth.matrixWorld).multiply(shell);
       crown.raycast = () => {};
       group.add(crown);
+      const bandMaterial = material.clone();
+      bandMaterial.color.set("#805010");
+      bandMaterial.emissiveIntensity = 0;
+      const edge = size.y * 0.025;
+      bandMaterial.clippingPlanes = [
+        new Plane(new Vector3(0, upper ? -1 : 1, 0), upper ? cut : -cut),
+        new Plane(new Vector3(0, upper ? 1 : -1, 0), upper ? -(cut - edge) : cut + edge),
+      ];
+      const band = new Mesh(tooth.geometry, bandMaterial);
+      band.userData.sharedGeometry = true;
+      band.matrixAutoUpdate = false;
+      band.matrix.copy(crown.matrix);
+      band.raycast = () => {};
+      group.add(band);
     }
     if (state.bracket) {
       const outward = toothDirection(id, "buccal");

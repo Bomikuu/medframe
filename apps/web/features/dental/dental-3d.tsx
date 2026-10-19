@@ -82,7 +82,11 @@ export default function Dental3D({
             {selectedSurface ? ` · ${selectedSurface}` : " · whole tooth"}
           </span>
           {condition.impaction && <span>Impaction · {condition.impaction}</span>}
-          {condition.crown && <span>Crown present</span>}
+          {condition.crown && !condition.missing && !viewport.anatomyOnly && (
+            <span className="rounded-md border border-amber-700 bg-amber-100 px-2 py-1 font-semibold text-amber-950">
+              Gold overlay · crown present
+            </span>
+          )}
           {condition.bracket && <span>Bracket present</span>}
         </div>
         <CanvasToolbar viewport={viewport} annotations={annotations} onAnnotate={onAnnotate} />
@@ -99,6 +103,9 @@ export default function Dental3D({
             </p>
           )}
           <Canvas
+            onCreated={({ gl }) => {
+              gl.localClippingEnabled = true;
+            }}
             camera={{ position: [0, 1, 6], fov: 35 }}
             frameloop="demand"
             dpr={[1, 1.5]}
@@ -168,8 +175,8 @@ export default function Dental3D({
         }
         {condition.missing && !viewport.anatomyOnly && (
           <p role="status" className="text-xs leading-5">
-            Tooth {selected} is recorded missing and its mesh is hidden. Select it in 2D or enable
-            educational reference anatomy.
+            Tooth {selected} is recorded missing. The red reference tooth marks its position; it
+            does not represent a present tooth.
           </p>
         )}
         {viewport.anatomyOnly && (

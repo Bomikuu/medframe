@@ -14,7 +14,7 @@ import { AnatomyHeader, type AnatomyConsultation } from "./anatomy-header";
 import { AnatomyToolbar } from "./anatomy-toolbar";
 import { StructureNavigator } from "./structure-navigator";
 import { AnatomyInspector, type InspectorTab } from "./anatomy-inspector";
-import { ClinicalAssistantPreview } from "@/features/assistant/clinical-assistant-preview";
+import { ClinicalAssistantDrawer } from "@/features/assistant/clinical-assistant-drawer";
 import { ViewThumbnails } from "./view-thumbnails";
 import { EditorPanel } from "./editor-panel";
 import { useDesktopPanels } from "./use-editor-panels";
@@ -64,8 +64,7 @@ export function AnatomyEditor({
   const [cameraFocus, setCameraFocus] = useState<string | undefined>(
     restored?.structure ? start.id : undefined,
   );
-  const [assistantOpen, setAssistantOpen] = useState(true);
-  const [assistantDrawer, setAssistantDrawer] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [inspectorTab, setInspectorTab] = useState<InspectorTab>("details");
@@ -195,7 +194,7 @@ export function AnatomyEditor({
         }}
       />
       <div
-        className={`grid min-h-0 flex-1 ${desktop ? (assistantOpen ? "grid-cols-[200px_minmax(0,1fr)_300px] min-[1660px]:grid-cols-[228px_minmax(0,1fr)_350px]" : "grid-cols-[200px_minmax(0,1fr)] min-[1660px]:grid-cols-[228px_minmax(0,1fr)]") : "grid-cols-1"}`}
+        className={`grid min-h-0 flex-1 ${desktop ? "grid-cols-[200px_minmax(0,1fr)] min-[1660px]:grid-cols-[228px_minmax(0,1fr)]" : "grid-cols-1"}`}
       >
         <EditorPanel
           desktop={desktop}
@@ -232,8 +231,8 @@ export function AnatomyEditor({
               onReset={resetView}
               expanded={expanded}
               onExpand={() => setExpanded(!expanded)}
-              assistantOpen={desktop && assistantOpen}
-              onAssistant={() => (desktop ? setAssistantOpen(true) : setAssistantDrawer(true))}
+              assistantOpen={assistantOpen}
+              onAssistant={() => setAssistantOpen(!assistantOpen)}
               onNavigator={() => setNavigatorOpen(true)}
               onInspector={() => setInspectorOpen(true)}
               desktop={desktop}
@@ -398,29 +397,17 @@ export function AnatomyEditor({
             />
           </EditorPanel>
         </div>
-        {(!desktop || assistantOpen) && (
-          <EditorPanel
-            desktop={desktop}
-            open={!desktop && assistantDrawer && active}
-            onOpenChange={setAssistantDrawer}
-            ownHeader
-            title="Medframe AI"
-            description="Unconnected assistant interface preview."
-            className="border-l border-border shadow-[-4px_0_18px_-12px_rgba(16,42,67,0.15)]"
-          >
-            <ClinicalAssistantPreview
-              key={patientId}
-              context={{
-                domain: "anatomy",
-                title: current.label,
-                detail: layer,
-                findingCount: findings.filter((finding) => finding.structure_id === current.id)
-                  .length,
-              }}
-              onClose={() => (desktop ? setAssistantOpen(false) : setAssistantDrawer(false))}
-            />
-          </EditorPanel>
-        )}
+        <ClinicalAssistantDrawer
+          open={assistantOpen && active}
+          onOpenChange={setAssistantOpen}
+          scopeKey={patientId}
+          context={{
+            domain: "anatomy",
+            title: current.label,
+            detail: layer,
+            findingCount: findings.filter((finding) => finding.structure_id === current.id).length,
+          }}
+        />
       </div>
     </section>
   );

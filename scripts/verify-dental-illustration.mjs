@@ -116,7 +116,8 @@ updateIllustrationOverlays(
   "48",
   false,
 );
-assert.equal(overlays.children.length, 2);
+assert.equal(overlays.children.length, 3);
+assert.equal(overlays.children[0].material.color.getHexString(), "e1a51b");
 for (const child of overlays.children)
   assert.ok(new Box3().setFromObject(child).getSize(new Vector3()).length() > 0);
 updateIllustrationOverlays(overlays, teeth, [finding("Crown present")], "48", true);

@@ -1,9 +1,7 @@
 "use client";
 
 import { Bot } from "lucide-react";
-import { ClinicalAssistantPreview } from "@/features/assistant/clinical-assistant-preview";
-import { EditorPanel } from "@/features/anatomy/editor-panel";
-import { useDesktopPanels } from "@/features/anatomy/use-editor-panels";
+import { ClinicalAssistantDrawer } from "@/features/assistant/clinical-assistant-drawer";
 import { IllustrationControls } from "./illustration-controls";
 import { illustrationChanges, type IllustrationGroup } from "./illustration";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -126,9 +124,7 @@ export function DentalEditor({
   }, [pending, noteText, onPendingChange]);
   const [activePin, setActivePin] = useState<string | null>(null);
   const [inspectorOpen, setInspectorOpen] = useState(false);
-  const desktop = useDesktopPanels();
-  const [assistantOpen, setAssistantOpen] = useState(true);
-  const [assistantDrawer, setAssistantDrawer] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const viewport = useDentalViewport(
     restored?.tooth ? { tooth: restored.tooth, surface: restored.surface ?? null } : null,
   );
@@ -332,10 +328,8 @@ export function DentalEditor({
                 type="button"
                 variant="outline"
                 aria-label="Toggle Medframe AI"
-                aria-pressed={desktop ? assistantOpen : assistantDrawer}
-                onClick={() =>
-                  desktop ? setAssistantOpen(!assistantOpen) : setAssistantDrawer(!assistantDrawer)
-                }
+                aria-pressed={assistantOpen}
+                onClick={() => setAssistantOpen(!assistantOpen)}
               >
                 <Bot />
                 <span className="hidden sm:inline">Medframe AI</span>
@@ -720,28 +714,17 @@ export function DentalEditor({
               </Tabs>
             </aside>
           </div>
-          {(!desktop || assistantOpen) && (
-            <EditorPanel
-              desktop={desktop}
-              open={!desktop && assistantDrawer && active}
-              onOpenChange={setAssistantDrawer}
-              ownHeader
-              title="Medframe AI"
-              description="Unconnected dental assistant preview."
-              className="w-[300px] shrink-0 border-l border-border 2xl:w-[320px]"
-            >
-              <ClinicalAssistantPreview
-                key={patientId ?? encounterId ?? "walk-in"}
-                context={{
-                  domain: "dental",
-                  title: `Tooth ${selected}${selectedSurface ? ` · ${selectedSurface}` : ""}`,
-                  detail: current?.label,
-                  findingCount: displayFindings.filter((item) => item.tooth === selected).length,
-                }}
-                onClose={() => (desktop ? setAssistantOpen(false) : setAssistantDrawer(false))}
-              />
-            </EditorPanel>
-          )}
+          <ClinicalAssistantDrawer
+            open={assistantOpen && active}
+            onOpenChange={setAssistantOpen}
+            scopeKey={patientId ?? encounterId ?? "walk-in"}
+            context={{
+              domain: "dental",
+              title: `Tooth ${selected}${selectedSurface ? ` · ${selectedSurface}` : ""}`,
+              detail: current?.label,
+              findingCount: displayFindings.filter((item) => item.tooth === selected).length,
+            }}
+          />
         </div>
       </DialogContent>
     </Dialog>

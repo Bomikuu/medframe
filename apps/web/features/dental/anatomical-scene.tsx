@@ -15,6 +15,7 @@ import {
   PerspectiveCamera,
   Vector3,
   type Camera,
+  type Texture,
   type Object3D,
 } from "three";
 import type { OrbitControls as OrbitControlsInstance } from "three-stdlib";
@@ -29,7 +30,10 @@ import { placeCamera } from "@/lib/three/place-camera";
 type PreparedAnatomy = {
   root: Object3D;
   teeth: Mesh[];
-  originals: Map<MeshStandardMaterial, { emissive: Color; intensity: number; color: Color }>;
+  originals: Map<
+    MeshStandardMaterial,
+    { emissive: Color; intensity: number; color: Color; map: Texture | null }
+  >;
   transforms: Map<Mesh, Matrix4>;
   outlines: Map<Mesh, Mesh>;
   overlays: Group;
@@ -53,8 +57,7 @@ function updatePresentation(prepared: PreparedAnatomy, options: Presentation) {
     const condition = toothPresentation(findings, id);
     mesh.visible =
       (reference || isolate || jaw === "both" || mesh.userData.jaw === jaw) &&
-      (!isolate || id === selected) &&
-      (anatomyOnly || !condition.missing);
+      (!isolate || id === selected);
     applyImpaction(
       mesh,
       prepared.transforms.get(mesh)!,
@@ -72,7 +75,17 @@ function updatePresentation(prepared: PreparedAnatomy, options: Presentation) {
       material.color.copy(original.color);
       material.emissive.copy(original.emissive);
       material.emissiveIntensity = original.intensity;
-      if (id === selected) {
+      const missing = !anatomyOnly && condition.missing;
+      const map = missing ? null : original.map;
+      if (material.map !== map) {
+        material.map = map;
+        material.needsUpdate = true;
+      }
+      if (missing) {
+        material.color.set("#c82139");
+        material.emissive.set("#9d132c");
+        material.emissiveIntensity = 0.25;
+      } else if (id === selected) {
         material.color.set("#45d4e5");
         material.emissive.set("#087e91");
         material.emissiveIntensity = 0.55;
@@ -103,8 +116,7 @@ function frameAnatomy(
     mesh.geometry.computeBoundingBox();
     bounds.union(mesh.geometry.boundingBox!.clone().applyMatrix4(mesh.matrixWorld));
   }
-  // An explicitly missing isolated tooth has no visible mesh; retain a valid
-  // frame and explain the missing anatomy in the surrounding UI.
+  // Retain a valid frame when the chosen jaw has no drawable mesh.
   if (bounds.isEmpty()) bounds.setFromObject(prepared.root);
   const selectedMesh = focus
     ? prepared.teeth.find((mesh) => mesh.visible && mesh.userData.tooth_id === focus.tooth)
@@ -229,6 +241,7 @@ export function AnatomicalScene({
             emissive: material.emissive.clone(),
             intensity: material.emissiveIntensity,
             color: material.color.clone(),
+            map: material.map,
           });
           return material;
         },
@@ -341,7 +354,6 @@ export function AnatomicalScene({
       />
       {showLabel &&
         selectedMesh &&
-        (anatomyOnly || !toothPresentation(findings, selected).missing) &&
         (reference || isolate || jaw === "both" || selectedMesh?.userData.jaw === jaw) && (
           <SelectionLabel
             mesh={selectedMesh}
