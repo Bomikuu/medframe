@@ -72,7 +72,9 @@
     ".next-dental-illustration/types/**/*.ts",
     ".next-dental-illustration/dev/types/**/*.ts",
     ".next-clinical-ai-drawer/types/**/*.ts",
-    ".next-clinical-ai-drawer/dev/types/**/*.ts"
+    ".next-clinical-ai-drawer/dev/types/**/*.ts",
+    ".next-ai-drawer-layer/types/**/*.ts",
+    ".next-ai-drawer-layer/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
