@@ -1,6 +1,6 @@
 # Medframe clinic invitation and onboarding
 
-Status: proposed architectural design, ready for user review. No onboarding product code, migrations or runtime changes have been made. Implementation will be one connected batch, executed natively without agents. Current preserved source is `cb17189`, with `.next-selection-focus` active locally.
+Status: design approved by the user's “proceed.” The implementation plan is `docs/superpowers/plans/2026-10-19-medframe-clinic-onboarding.md`, ready for review. No onboarding product code, migrations or runtime changes have been made. Implementation will be one connected batch, executed natively without agents. Current preserved product source is `cb17189`, with `.next-selection-focus` active locally.
 
 Authority: `docs/requirements/medframe-clinic-onboarding.txt` preserves the complete supplied brief. The user's accompanying screen sequence and UX recommendations also apply. Existing Django, clinical authorization, MFA, branding and data-preservation instructions remain authoritative.
 
