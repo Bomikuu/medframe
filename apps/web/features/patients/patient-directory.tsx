@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal, Search, ArrowRight } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { PatientForm } from "./patient-form";
@@ -35,6 +35,7 @@ export function PatientDirectory() {
   const [cursors, setCursors] = useState<(string | null)[]>([null]);
   const [view, setView] = useCollectionView(
     `${overview.currentUser.id}:${organizationId}:patients`,
+    "cards",
   );
   const remote = useRemote(PatientDirectoryDocument, {
     organizationId,
@@ -123,6 +124,19 @@ export function PatientDirectory() {
           </EntrySheet>
         )}
       </PageHeading>
+      {page && (
+        <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
+          <p className="text-sm text-muted-foreground">
+            <strong className="mr-2 text-xl font-semibold text-foreground">
+              {page.totalCount.toLocaleString()}
+            </strong>
+            {query || branch !== "all" ? "matching patient records" : "authorized patient records"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Search, select a record and continue care.
+          </p>
+        </div>
+      )}
       <div className="mb-6 flex min-w-0 flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
         <form
           role="search"
@@ -228,11 +242,11 @@ export function PatientDirectory() {
                 <Card
                   key={patient.id}
                   data-panel
-                  className="rounded-lg border border-border py-5 ring-0"
+                  className="rounded-xl border border-border py-5 ring-0 transition-colors hover:border-input"
                 >
                   <CardContent className="grid gap-4 px-5">
                     <div className="flex items-center gap-3">
-                      <PatientAvatar name={patient.fullName} />
+                      <PatientAvatar name={patient.fullName} className="size-14 text-base" />
                       <div className="min-w-0">
                         <Link
                           className="font-semibold wrap-anywhere hover:text-primary"
@@ -245,12 +259,28 @@ export function PatientDirectory() {
                         </p>
                       </div>
                     </div>
-                    <p className="border-t border-border pt-4 text-sm text-muted-foreground">
-                      Born {dateLabel(patient.dateOfBirth)}
-                    </p>
-                    <ButtonLink variant="outline" href={href(`/clinic/patients/${patient.id}`)}>
-                      Open patient
-                    </ButtonLink>
+                    <dl className="border-t border-border pt-4 text-sm">
+                      <dt className="text-xs text-muted-foreground">Date of birth</dt>
+                      <dd className="mt-1">{dateLabel(patient.dateOfBirth)}</dd>
+                    </dl>
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+                      <ButtonLink
+                        variant="link"
+                        className="h-auto p-0"
+                        href={href(`/clinic/patients/${patient.id}`)}
+                      >
+                        Open record <ArrowRight className="size-4" />
+                      </ButtonLink>
+                      {can("encounters.write") && (
+                        <ButtonLink
+                          variant="outline"
+                          size="sm"
+                          href={`${href("/clinic/consultations/new")}&patient=${patient.id}`}
+                        >
+                          Start consultation
+                        </ButtonLink>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

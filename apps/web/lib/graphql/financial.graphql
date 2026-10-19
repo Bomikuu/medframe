@@ -72,3 +72,7 @@ mutation CommunicationAction(
 query NotificationInbox($organizationId: UUID!, $unread: Boolean!, $after: String) {
   notificationInbox(organizationId: $organizationId, unread: $unread, after: $after)
 }
+
+query FinancialOverview($organizationId: UUID!, $branchId: UUID!, $days: Int!) {
+  financialOverview(organizationId: $organizationId, branchId: $branchId, days: $days)
+}

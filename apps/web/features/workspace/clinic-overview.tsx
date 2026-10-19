@@ -1,5 +1,6 @@
 "use client";
 
+import { FinancialOverviewPanel } from "@/features/billing/analytics/financial-overview";
 import { ButtonLink } from "@/components/ui/button-link";
 
 import { PatientAvatar } from "@/components/application/patient-avatar";
@@ -40,6 +41,11 @@ export function ClinicOverview() {
         <PlatformLink />
       </div>
       <SetupChecklist />
+      {can("billing.read") && (
+        <div className="mb-6">
+          <FinancialOverviewPanel compact />
+        </div>
+      )}
       {can("patients.demographics.read") ? (
         <PatientOverview />
       ) : (

@@ -712,6 +712,7 @@ export type Query = {
   eligiblePatientAssignees: Array<PatientAssignee>;
   encounter: EncounterType;
   encounters: Array<EncounterType>;
+  financialOverview: Scalars['JSON']['output'];
   followUps: Scalars['JSON']['output'];
   historyRecords: Scalars['JSON']['output'];
   medicalDocuments: Array<DocumentType>;
@@ -729,6 +730,7 @@ export type Query = {
   patientDirectory: PatientDirectoryPage;
   patientHistory: PatientTimelinePage;
   patientPortalAccess: Scalars['JSON']['output'];
+  patientProfileSummary: Scalars['JSON']['output'];
   patientReleases: Scalars['JSON']['output'];
   patientReports: Scalars['JSON']['output'];
   patientTimeline: PatientTimelinePage;
@@ -1007,6 +1009,13 @@ export type QueryEncountersArgs = {
 };
 
 
+export type QueryFinancialOverviewArgs = {
+  branchId: Scalars['UUID']['input'];
+  days?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
 export type QueryFollowUpsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   organizationId: Scalars['UUID']['input'];
@@ -1112,6 +1121,12 @@ export type QueryPatientHistoryArgs = {
 
 export type QueryPatientPortalAccessArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
+  organizationId: Scalars['UUID']['input'];
+  patientId: Scalars['UUID']['input'];
+};
+
+
+export type QueryPatientProfileSummaryArgs = {
   organizationId: Scalars['UUID']['input'];
   patientId: Scalars['UUID']['input'];
 };

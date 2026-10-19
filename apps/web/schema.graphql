@@ -241,6 +241,7 @@ type Query {
   diagnosticRequest(organizationId: UUID!, requestId: UUID!, context: String! = "clinic"): JSON!
   diagnosticHistory(organizationId: UUID!, requestId: UUID!, context: String! = "clinic", kind: String! = "events", after: String = null): JSON!
   diagnosticPreview(organizationId: UUID!, requestId: UUID!): JSON!
+  financialOverview(organizationId: UUID!, branchId: UUID!, days: Int! = 30): JSON!
   billingSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
   billingInvoices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
   billingInvoice(organizationId: UUID!, invoiceId: UUID!): JSON!
@@ -251,6 +252,7 @@ type Query {
   appointmentAvailability(organizationId: UUID!, data: JSON!): JSON!
   appointments(organizationId: UUID!, filters: JSON!, after: String = null): JSON!
   branchQueue(organizationId: UUID!, branchId: UUID!, providerId: UUID = null, after: String = null): JSON!
+  patientProfileSummary(organizationId: UUID!, patientId: UUID!): JSON!
   patientClinicalContext(organizationId: UUID!, patientId: UUID!, revisionId: UUID = null): ClinicalHistory
   clinicPatients(organizationId: UUID!, query: String! = "", first: Int! = 20, after: UUID = null): PatientPage!
   patientDirectory(organizationId: UUID!, query: String! = "", first: Int! = 20, after: String = null, sort: String! = "name_asc", branchId: UUID = null): PatientDirectoryPage!

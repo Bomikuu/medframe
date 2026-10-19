@@ -161,3 +161,7 @@ mutation ChangePatientAccess(
     ...AssigneeDetails
   }
 }
+
+query PatientProfileSummary($organizationId: UUID!, $patientId: UUID!) {
+  patientProfileSummary(organizationId: $organizationId, patientId: $patientId)
+}

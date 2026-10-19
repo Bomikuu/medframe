@@ -1,5 +1,6 @@
 "use client";
 
+import { FinancialOverviewPanel } from "./analytics/financial-overview";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -78,6 +79,10 @@ function BillingWorkspace() {
           </Button>
         </form>
       </div>
+      <FinancialOverviewPanel
+        key={`finance:${remote.setup.branch_id}`}
+        branchId={remote.setup.branch_id}
+      />
       <InvoiceCollection key={remote.setup.branch_id} setup={remote.setup} />
     </div>
   );
@@ -108,7 +113,7 @@ export function InvoiceCollection({
   return (
     <div className="grid gap-6">
       {parsed.success && parsed.data.summary && (
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="flex flex-wrap gap-x-8 gap-y-4 rounded-xl border border-border bg-card px-5 py-4">
           {[
             { label: "Outstanding", value: parsed.data.summary.outstanding, Icon: ReceiptText },
             {
@@ -118,17 +123,14 @@ export function InvoiceCollection({
             },
             { label: "Refunds due", value: parsed.data.summary.refundable, Icon: CreditCard },
           ].map(({ label, value, Icon }) => (
-            <div
-              key={label}
-              className="flex items-center gap-4 rounded-xl border border-border bg-card p-5"
-            >
+            <div key={label} className="flex min-w-0 items-center gap-3">
               <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-soft text-teal-ink">
                 <Icon className="size-5" />
               </span>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">{label}</p>
                 <p className="mt-1 font-heading text-xl font-bold">
-                  <Money value={value} />
+                  <Money value={value} code={setup.currency} />
                 </p>
               </div>
             </div>

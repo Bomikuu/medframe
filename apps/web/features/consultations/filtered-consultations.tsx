@@ -3,6 +3,8 @@ import { useClinicTime } from "@/components/application/clinical-locale";
 import { StatusBadge } from "@/components/application/status-badge";
 import Link from "next/link";
 import { useRecordAuthors } from "@/features/records/use-record-authors";
+import { PatientAvatar } from "@/components/application/patient-avatar";
+import { ButtonLink } from "@/components/ui/button-link";
 import { useState } from "react";
 import { ConsultationRecordsDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
@@ -48,22 +50,47 @@ export function FilteredConsultations({ patientId }: { patientId?: string }) {
               No consultations match these filters.
             </p>
           )}
-          <ul className="grid gap-3">
+          <ul className="mt-5 grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {parsed.data.items.map((item) => (
-              <li key={item.id}>
-                <Link
-                  href={href(`/clinic/consultations/${item.id}`)}
-                  className="flex flex-wrap justify-between gap-3 rounded-xl border border-border bg-card p-5 hover:bg-surface-hover"
-                >
+              <li key={item.id} className="min-w-0 rounded-xl border border-border bg-card p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <PatientAvatar name={item.patient_name} className="size-14 text-base" />
+                    <div className="min-w-0">
+                      <Link
+                        href={href(`/clinic/consultations/${item.id}`)}
+                        className="text-base font-semibold hover:underline"
+                      >
+                        {item.patient_name}
+                      </Link>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {item.provider_name ?? "Provider not recorded"}
+                      </p>
+                    </div>
+                  </div>
+                  <StatusBadge value={item.status} />
+                </div>
+                <p className="mt-4 text-sm leading-6 font-medium">{item.reason}</p>
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <p className="font-medium">{item.patient_name}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.reason}</p>
+                    <dt className="text-muted-foreground">Created</dt>
+                    <dd className="mt-1 leading-5">{timeLabel(item.created_at)}</dd>
                   </div>
-                  <div className="text-sm">
-                    <StatusBadge value={item.status} />
-                    <p className="mt-1 text-muted-foreground">{timeLabel(item.updated_at)}</p>
+                  <div>
+                    <dt className="text-muted-foreground">Last updated</dt>
+                    <dd className="mt-1 leading-5">{timeLabel(item.updated_at)}</dd>
                   </div>
-                </Link>
+                </dl>
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+                  <span className="text-xs text-muted-foreground">Version {item.version}</span>
+                  <ButtonLink
+                    variant="outline"
+                    size="sm"
+                    href={href(`/clinic/consultations/${item.id}`)}
+                  >
+                    Open consultation
+                  </ButtonLink>
+                </div>
               </li>
             ))}
           </ul>

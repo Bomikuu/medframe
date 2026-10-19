@@ -77,3 +77,7 @@ output/playwright/
 .next-local-production/
 
 .next-device-modal-toggles/
+
+.next-patient-profile/
+
+.next-clinic-workspace/

@@ -1,5 +1,7 @@
 "use client";
 
+import { PatientAvatar } from "@/components/application/patient-avatar";
+import { ButtonLink } from "@/components/ui/button-link";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { StatusBadge } from "@/components/application/status-badge";
 import { useState } from "react";
@@ -149,7 +151,38 @@ function AppointmentAgenda({ setup }: { setup: OperationsSetup }) {
         ) : (
           <>
             <RemoteNotice error={remote.error} retry={remote.reload} />
-            <div className="divide-y divide-border border-y border-border">
+            <div
+              className="grid grid-cols-2 gap-3 rounded-xl bg-muted/40 p-4 sm:grid-cols-4"
+              aria-label="Agenda summary"
+            >
+              {[
+                { label: "Appointments shown", value: parsed.data.items.length },
+                {
+                  label: "Booked",
+                  value: parsed.data.items.filter((row) => row.status === "booked").length,
+                },
+                {
+                  label: "Arrived",
+                  value: parsed.data.items.filter((row) =>
+                    ["checked_in", "in_service"].includes(row.status),
+                  ).length,
+                },
+                {
+                  label: "Completed",
+                  value: parsed.data.items.filter((row) => row.status === "completed").length,
+                },
+              ].map((item) => (
+                <div key={item.label}>
+                  <p className="text-xs text-muted-foreground">{item.label}</p>
+                  <p className="mt-1 text-xl font-bold tabular-nums">{item.value}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs leading-5 text-muted-foreground">
+              Counts reflect this page and the selected date, provider and status. Check-in admits a
+              patient to the queue; booking alone does not.
+            </p>
+            <div className="grid gap-3">
               {!parsed.data.items.length && (
                 <p className="py-7 text-sm text-muted-foreground">
                   No appointments for this date and filter. Book a visit or check in a walk-in from
@@ -157,21 +190,33 @@ function AppointmentAgenda({ setup }: { setup: OperationsSetup }) {
                 </p>
               )}
               {parsed.data.items.map((row) => (
-                <article key={row.id} className="grid gap-4 p-4 md:grid-cols-[1fr_auto]">
+                <article
+                  key={row.id}
+                  className="grid min-w-0 gap-4 rounded-xl border border-border bg-card p-5 xl:grid-cols-[minmax(0,1fr)_auto]"
+                >
                   <div className="min-w-0">
+                    <div className="mb-3 flex items-center gap-3">
+                      <PatientAvatar name={row.patient ?? "Patient"} className="size-12" />
+                      <div>
+                        <p className="text-sm font-semibold tabular-nums">
+                          {clock(row.start, setup.timezone)} – {clock(row.end, setup.timezone)}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">{row.branch}</p>
+                      </div>
+                    </div>
                     <h3 className="font-semibold wrap-anywhere">
                       {row.patient}{" "}
                       <span className="font-normal text-muted-foreground">{row.reference}</span>
                     </h3>
                     <p className="mt-2 text-sm">
-                      {clock(row.start, setup.timezone)} · {row.provider} ·{" "}
-                      {row.resource ?? "No room reserved"}
+                      {row.provider} · {row.resource ?? "No room reserved"}
                     </p>
                     <p className="mt-2 text-sm text-muted-foreground">
                       <StatusBadge value={row.status} /> · {row.type.replaceAll("_", " ")}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
+                    {row.patient_id && <AppointmentPatientLink patientId={row.patient_id} />}
                     {row.status === "booked" && (
                       <>
                         <Button
@@ -290,4 +335,13 @@ function AppointmentAgenda({ setup }: { setup: OperationsSetup }) {
       )}
     </>
   );
+}
+
+function AppointmentPatientLink({ patientId }: { patientId: string }) {
+  const { href, can } = useWorkspace();
+  return can("patients.demographics.read") ? (
+    <ButtonLink variant="ghost" href={href(`/clinic/patients/${patientId}`)}>
+      Patient record
+    </ButtonLink>
+  ) : null;
 }

@@ -14,6 +14,8 @@ export const sourceSchema = z.object({
 });
 export const consultationRow = z.object({
   id: z.string(),
+  patient_id: z.string().optional(),
+  provider_name: z.string().optional(),
   patient_name: z.string(),
   reason: z.string(),
   status: z.string(),

@@ -14,6 +14,14 @@ from medframe_apps.billing.queries import billing_setup, invoice_detail, invoice
 @strawberry.type
 class BillingQuery:
     @strawberry.field
+    def financial_overview(
+        self, info: Info, organization_id: UUID, branch_id: UUID, days: int = 30
+    ) -> JSON:
+        from medframe_apps.billing.analytics import financial_overview
+
+        return financial_overview(info.context, organization_id, branch_id, days)
+
+    @strawberry.field
     def billing_setup(
         self, info: Info, organization_id: UUID, branch_id: UUID | None = None, search: str = ""
     ) -> JSON:

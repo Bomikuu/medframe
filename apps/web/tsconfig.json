@@ -86,7 +86,11 @@
     ".next-devices-gallery/types/**/*.ts",
     ".next-devices-gallery/dev/types/**/*.ts",
     ".next-device-modal-toggles/types/**/*.ts",
-    ".next-device-modal-toggles/dev/types/**/*.ts"
+    ".next-device-modal-toggles/dev/types/**/*.ts",
+    ".next-patient-profile/types/**/*.ts",
+    ".next-patient-profile/dev/types/**/*.ts",
+    ".next-clinic-workspace/types/**/*.ts",
+    ".next-clinic-workspace/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

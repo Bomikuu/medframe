@@ -2,6 +2,7 @@ from uuid import UUID
 
 import strawberry
 from django.db import transaction
+from strawberry.scalars import JSON
 from strawberry.types import Info
 
 from api_graphql.patient_types import (
@@ -32,6 +33,12 @@ from medframe_apps.patients.models import PatientAccessGrant, PatientClinicalRev
 
 @strawberry.type
 class PatientQuery:
+    @strawberry.field
+    def patient_profile_summary(self, info: Info, organization_id: UUID, patient_id: UUID) -> JSON:
+        from medframe_apps.patients.profile_summary import profile_summary
+
+        return profile_summary(info.context, organization_id, patient_id)
+
     @strawberry.field
     @transaction.atomic
     def patient_clinical_context(

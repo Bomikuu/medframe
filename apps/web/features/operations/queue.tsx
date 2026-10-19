@@ -32,7 +32,9 @@ export function QueuePage() {
         title="Clinic queue"
         description="Check in patients, coordinate care and communicate delays."
       />
-      <BranchChoice setup={remote.setup} change={(value) => void guard(() => setBranch(value))} />
+      <div className="rounded-xl border border-border bg-card p-5">
+        <BranchChoice setup={remote.setup} change={(value) => void guard(() => setBranch(value))} />
+      </div>
       <QueueBoard key={remote.setup.branch_id} setup={remote.setup} />
     </div>
   );
@@ -111,6 +113,12 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
                 No active tickets. Check in an appointment or add a walk-in.
               </p>
             )}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+              <h3 className="text-base font-semibold">Service order</h3>
+              <span className="text-xs text-muted-foreground">
+                Server order · live priority and recorded delays
+              </span>
+            </div>
             {parsed.data.items.map((row) => (
               <QueueRow
                 key={`${row.id}:${row.version}`}
@@ -169,16 +177,25 @@ function QueueRow({ row, peers, reload }: { row: Ticket; peers: Ticket[]; reload
     );
   };
   return (
-    <article className="grid min-w-0 gap-4 border-t border-border py-6">
+    <article
+      aria-label={`Queue ticket ${row.number}`}
+      className="grid min-w-0 gap-4 rounded-xl border border-border bg-card p-5"
+    >
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h3 className="font-semibold wrap-anywhere">
-            Ticket {row.number} · {row.patient}
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {row.reference} · {row.provider} · <StatusBadge value={row.status} /> · Service day{" "}
-            {row.day}
-          </p>
+        <div className="flex min-w-0 items-start gap-3">
+          <span
+            className="flex min-h-14 min-w-14 shrink-0 items-center justify-center rounded-xl bg-secondary px-3 text-2xl font-bold text-primary tabular-nums"
+            aria-label={`Ticket number ${row.number}`}
+          >
+            {row.number}
+          </span>
+          <div>
+            <h3 className="font-semibold wrap-anywhere">{row.patient}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {row.reference} · {row.provider} · <StatusBadge value={row.status} /> · Service day{" "}
+              {row.day}
+            </p>
+          </div>
         </div>
         <p className="text-sm font-medium">
           {row.estimate?.label ?? "Estimate unavailable"}
