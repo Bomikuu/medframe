@@ -15,7 +15,7 @@ Execute natively in this chat under the user's direct implementation authorizati
 - [x] Implement staff department setup/versioned actions, identity code issuance, intake duplicate review/acceptance, and attributed history. Expose only necessary demographics to staff with operational permissions.
 - [x] Build focused touchscreen kiosk journey modules and memory-only inactivity/reset behavior; portal proof control and clinic Station services/queue screen. Preserve current branding and clinician editor behavior.
 - [x] Run accumulated targeted checks once against isolated synthetic data, inspect desktop/tablet/phone together, record actual failures, repair activation blockers only with focused confirmation.
-- [ ] Refresh relevant Graphify corpora; record sanitized Jev calls and limits; checkpoint original fresh, apply additive migrations and check all original rows/objects, start local services, document current activation/rollback and unfinished Phase 3.
+- [x] Refresh relevant Graphify corpora; record sanitized Jev calls and limits; checkpoint original fresh, apply additive migrations and check all original rows/objects, start local services, document current activation/rollback and unfinished Phase 3.
 
 ## Review focus
 
