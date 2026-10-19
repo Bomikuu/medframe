@@ -165,3 +165,7 @@ Diagnostic request/inbox/selection and result/release UI extends the existing cl
 ## Batch 5 activation evidence
 
 Batch 5 now runs locally as `.next-batch5` after authorized blockers were repaired. Clinician reviewed-result desktop, center report/upload mobile and released diagnostic patient report mobile were inspected in the actual persisted workflow. They retain the existing clinical desk/shadcn forms and explicit center-vs-clinician authorship. Ten responsive captures across bounded confirmations show no recorded page overflow; the older mobile portal tab-strip limitation remains. No further polish or visual-world change was performed. Prior inactive/source-only notes are historical; B5-005 scope gaps remain. See docs/operations/django-batch-5-verification.md.
+
+## Anatomy workspace extension
+
+Batch 6 retains the clinical Operate system with a structure navigator, large neutral model viewport and grouped finding inspector. Teal denotes selection, not pathology. Camera labels use patient perspective; the anatomy vocabulary and exact mesh versions remain clinical metadata. Expansion uses the existing consultation form owner. Patient releases default to static reference/list presentation and disclose selected notes. The six 1440/390 captures establish readable patient history/release layouts and a working desktop pin workflow; expanded mobile/tall-inspector overlap remains deferred. See `.impeccable/surfaces/anatomy.md` and `docs/operations/django-batch-6-verification.md` for the partial visual verdict and limitations.

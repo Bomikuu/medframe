@@ -118,3 +118,5 @@ Graphify reflected existing work memory and expanded only present vocabulary: `[
 Jev 0.7.0 / jev-1.13.0 chose `semantic_stability`, confidence 0.74, over aggregate compatibility/viewer performance, **588 input / 51 output tokens**. Only a sanitized architectural summary was submitted. This prioritizes laterality and historical anchor semantics; it is a judgment, not verification. Raw response: ignored `.impeccable/review/batch6-design/jev-priority.json`. Model source pages were inspected read-only; no extraction/download/clinical test was run for Batch 6.
 
 Before implementation, the user reviews this design and then the written implementation plan, per the selected architectural workflow. The native method and automatic local-activation preference are already settled and must not be asked again.
+
+Implementation status: core Batch6 is active locally via implementation commit `6e66c2d`. See `docs/operations/django-batch-6-verification.md` for preserved original data, exact runtime/tool evidence, staged verification failures/confirmations and deferred B6-004/005/006 scope. The design is not a claim that every planned acceptance assertion passed.

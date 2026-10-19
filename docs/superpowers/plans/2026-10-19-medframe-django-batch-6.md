@@ -117,4 +117,4 @@ Plan approved and executed natively. The original planning record above remains 
 
 ## Execution handoff
 
-Core tasks 1–5 are implemented together: licensed/mapped real assets, Django registry and immutable history, one consultation aggregate, explicit portal snapshots, and model-first editor/navigation. Task6 is in final local cutover. The detailed unchecked assertions are retained as the original plan, not retroactively all marked passed. B6-004/005 enumerate unfinished refinements and unverified cases. Actual commands/results replace planning estimates in the operation record.
+Core tasks 1–5 are implemented together: licensed/mapped real assets, Django registry and immutable history, one consultation aggregate, explicit portal snapshots, and model-first editor/navigation. Task 6 local cutover is complete: original data preserved and services active; remaining visual/acceptance gaps are recorded. The detailed unchecked assertions are retained as the original plan, not retroactively all marked passed. B6-004/005 enumerate unfinished refinements and unverified cases. Actual commands/results replace planning estimates in the operation record.

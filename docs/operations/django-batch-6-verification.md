@@ -2,6 +2,8 @@
 
 October 19, 2026, Asia/Manila. Branch `codex/django-anatomy-batch-6`. Native implementation only; no subagents, separate chats, push, public deployment or live SMS. The design and written plan were approved by the user's “approve” and “proceed implementation”. Standing authorization includes necessary activation-blocker repair and automatic local activation.
 
+**Current state: Batch 6 is active locally**, using `.next-batch6` and original `medframe_django`. Core clinical workflow is available; B6-004/005/006 refinements and acceptance gaps remain deferred.
+
 ## Implemented scope
 
 - Real Z-Anatomy outer-body regions and principal skeletal meshes, independently loaded layers, stable version/mesh/side/bounds registry. Canonical patient-left is +X, superior +Y, anterior +Z. Explicit mesh picking and local-coordinate pins, selection/annotation, camera views, manual zoom/pan, isolate, layout expansion and a keyboard/named-structure/illustrative-map alternative.
@@ -54,7 +56,7 @@ Six desktop/mobile captures already cover expanded editor, patient chart/history
 
 ## Graphify and Jev
 
-Graphify queried existing graph context first, then refreshed separate code-only corpora. Initial implementation refresh: backend253 Python files → **1,458 nodes / 5,876 edges / 61 communities**; frontend224 TS/TSX files → **1,101 nodes / 5,312 edges / 37 communities**. Final refresh follows source stabilization; reports/manifests/confidence/cohesion/cost are retained separately from Batch 5. Deterministic AST extraction uses zero external extraction tokens. Ten backend and one frontend files yielded no modeled symbols. Tests/generated clients/non-code docs/assets/build output are excluded; asset mapping is separately verified by manifest/hash tooling, not falsely claimed as semantic graph coverage. Query trace covers validate_anatomy_draft/capture_anatomy_revision/build_anatomy_release. Graphs help navigation and do not prove SQL, authorization, licensing or anatomical correctness.
+Graphify queried existing graph context first, then refreshed separate code-only corpora. Initial implementation refresh: backend253 Python files → **1,458 nodes / 5,876 edges / 61 communities**; frontend224 TS/TSX files → **1,101 nodes / 5,312 edges / 37 communities**. The final source refresh retains the same file/node/edge/community counts; reports/manifests/confidence/cohesion/cost are retained separately from Batch 5. Deterministic AST extraction uses zero external extraction tokens. Ten backend and one frontend files yielded no modeled symbols. Tests/generated clients/non-code docs/assets/build output are excluded; asset mapping is separately verified by manifest/hash tooling, not falsely claimed as semantic graph coverage. Query trace covers validate_anatomy_draft/capture_anatomy_revision/build_anatomy_release. Graphs help navigation and do not prove SQL, authorization, licensing or anatomical correctness.
 
 Jev0.7.0 / jev-1.13.0 received only sanitized architectural/check summaries:
 
@@ -65,8 +67,25 @@ Jev0.7.0 / jev-1.13.0 received only sanitized architectural/check summaries:
 | Implementation   | anatomy_identity        |       1.00 |            449 / 45 |
 | Browser priority | model_anchor            |       0.74 |            454 / 45 |
 
-These are narrow prioritization judgments, not verification or authorization. No patient information, credentials or private attachments were sent. Final cutover judgment, if run, is retained with its actual output below.
+These are narrow prioritization judgments, not verification or authorization. No patient information, credentials or private attachments were sent. Final cutover Jev selected `data_preservation`, confidence **1.00**, **473 input / 49 output tokens**. It prioritized the already-authorized checkpoint/writer-pause/fingerprint sequence; it did not authorize or verify that sequence.
 
 ## Activation record
 
-Pending fresh encrypted original checkpoint/verified restore, writer pause, pre-existing-row fingerprint comparison, additive original migrations and local service cutover. Do not treat the review clone/build as original-data activation until the dated record below confirms it. Preserve `.next-batch5` and the baseline checkpoint; never restore a clone over original or undo schema by merely switching UI artifacts.
+Source implementation commit: **`6e66c2d`**. Fresh preactivation encrypted checkpoint/verified restore: `/home/micxsz/.local/share/medframe/checkpoints/pre-batch2-20261019-144809-6e66c2d`, clone `medframe_django_batch6_cutover_20261019`, **98 tables verified**, `source_written=false`.
+
+Old web/API/worker/beat and review processes were stopped. After all original writers exited, `verify-additive-preservation.py capture` fingerprinted **4,682 pre-existing rows across 98 tables** into a private file beside the encrypted backup. Original anatomy `0001_initial` and `0002_integrity` applied successfully. The matching `check` passed before traffic resumed; only permitted migration/content-type/permission metadata additions are exempt from no-addition comparisons, and no original row fingerprints were missing. Existing accounts/passwords/MFA, clinical revisions and old build are preserved. Original anatomy finding count was zero after cutover: synthetic review records were not imported.
+
+Local processes (transient IDs at activation):
+
+| Service |    PID | Exec session | Runtime                                             |
+| ------- | -----: | -----------: | --------------------------------------------------- |
+| API     | 252111 |        53851 | Uvicorn `config.asgi:application`, `127.0.0.1:8000` |
+| Web     | 252120 |        67305 | `.next-batch6`, `http://localhost:3000`             |
+| Worker  | 252112 |        37575 | Celery concurrency2, original database/broker       |
+| Beat    | 252114 |        58834 | `/tmp/medframe-batch6-celerybeat`                   |
+
+Logs: `/tmp/medframe-batch6-{api,web,worker,beat}-runtime.log`. Review3001/8001 are stopped. Read-only activation checks pass: API ready200, login200, both exact GLB downloads200 with expected byte counts, unauthenticated GraphQL denied403, worker ping`pong`. Runtime settings confirm original `medframe_django`, both migrations applied and `SMS_LIVE_ENABLED=false`. No authenticated clinical mutation was performed against original during activation; no original credential/provider/role/MFA reset occurred. Raw HTTP/settings/preservation/ping evidence is saved in the ignored Batch6 folder.
+
+Open a consultation → **Anatomy** → **Expand editor**; general-medicine providers get the Anatomy tab by default. Patient record → Anatomy provides finalized history; Shared records → Prepare a clinical release provides separate exact chart/finding/note selections.
+
+Rollback preserves original data and later writes. Keep `.next-batch5`, `4b7b017` and `checkpoint/pre-batch6-2026-10-19`. Do not restore a review clone over original, reverse schema by switching UI artifacts, or run the old API against new anatomical drafts without a preservation-aware rollback review. The legacy-client omission safeguard exists in the new API; an older UI cannot edit the new anatomical fields. Public deployment/push remains unauthorized.

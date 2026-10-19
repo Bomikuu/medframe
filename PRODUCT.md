@@ -78,3 +78,7 @@ The reconstruction is active locally on `codex/visual-reconstruction` with `.nex
 ## Accessibility & Inclusion
 
 Provide keyboard operation, visible labels and focus, readable contrast, understandable validation, accessible alternatives to 3D, reduced-motion support, responsive layouts, and verified light/dark surfaces. Preserve entered text during errors and conflicts.
+
+## General anatomy workspace — local Batch 6
+
+Batch 6 adds a real Z-Anatomy body/skeleton reference and point findings inside the existing consultation draft. General medicine opens Anatomy by default; dentistry retains Dental. Immutable finalized anatomy history, exact comparisons and separately selected patient releases use Django authorization and the existing record lifecycle. It runs locally with `.next-batch6`; accounts/MFA and original data were preserved. The models are generic reference geometry, not patient-specific or clinically validated. Expanded responsive layout, map marker presentation and fallback acceptance gaps remain recorded in `docs/operations/django-batch-6-verification.md` and the error log.
