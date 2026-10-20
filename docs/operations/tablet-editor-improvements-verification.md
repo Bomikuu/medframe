@@ -127,3 +127,12 @@ invoice/due-through-today payment timing with attributed exceptions.
 Roadmap Design before implementation and brainstorming written-spec review
 require this review; the async question is pending. Native execution is already
 selected. No Phase4 implementation plan/feed/gate/product code is claimed.
+
+## Subsequent Phase4 status
+
+The user proceeded after the written contract, approving native Phase4.
+Implementation0a882d1 adds approved display, service-payment controls and isolated
+tickets. Its evidence/activation is in
+docs/operations/station-operations-completion-verification.md. Earlier pending
+statements above describe the Phase3 handoff boundary, not current Phase4 status.
+No Phase3 retest or unrelated editor repair was performed.

@@ -747,3 +747,43 @@ prior crown and missing/impacted states, without weakening grants/provider/lease
 That specific acceptance gap is resolved; navigation, responsive drawers and
 other deferred findings remain. Phase4 product work awaits written display/
 payment contract review and is not implemented.
+
+## STATION-OPS-001 — Scoped static blockers resolved for activation
+
+October20 Phase4 initial ESLint finds setState-in-effect in local sound preference
+loading; useSyncExternalStore replaces it and display-only confirmation passes.
+Ruff finds one102-character reverse-SQL line in new stations0012; wrapping it and
+the focused Ruff confirmation pass. Production build/TypeScript pass before and
+after preference repair. Existing kiosk-screen.tsx:80 missing-kiosk dependency
+warning stays deferred. Logs /tmp/medframe-station4-{lint,lint-confirmation,ruff,
+ruff-confirmation,build-confirmation}.log. No broad repeated suite.
+
+## STATION-OPS-002 — Native schedule correctly rejects incomplete test fixtures
+
+Initial19-case pass:17 pass,2 new linked-consultation service-start tests fail
+with provider unavailable. New fixture lacked today's native ProviderSchedule.
+Only test fixture gains an all-day local schedule; one focused two-case
+confirmation passes. No native availability/permission bypass;19 distinct cases
+have staged passing evidence. Logs station4-tests*.log under /tmp/medframe-.
+
+## STATION-OPS-003 — Browser coverage gap retained after bounded confirmation
+
+One four-group browser pass stops on missing Origin in direct requests,
+selectOption against shadcn and the unconfirmed initial generate-code dialog.
+One confirmation corrects those harness mistakes: display live/public/audio,
+code copy/reopen/reload/regeneration/consumption and stale/reconnect/revocation
+pass, with zero page exceptions. Payment/transfer/print group still stops before
+opening a ticket: accessible name is `View <department> queue`, not `View queue`.
+Selector corrected for future use, no third browser run. Invoice selector,
+service-start/exception/cashier UI, isolated print/PDF and display-notice save
+remain browser acceptance gaps, separate from passing scoped backend cases.
+Evidence /tmp/medframe-station4-browser{,-confirmation}.log and ignored
+output/playwright/station4/. No physical printer claim or inferred product fix.
+
+## STATION-OPS-004 — Nonblocking display copy/phone refinements deferred
+
+Existing device-card.tsx:140 still labels queue display content as a later phase,
+although the dedicated approved display is implemented. Display390 capture has a
+tall wrapped header for a long synthetic clinic name; no horizontal overflow.
+These do not block native feed/access; record rather than run a polish/retest
+loop. Existing kiosk callback warning and older unrelated findings remain.

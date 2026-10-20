@@ -107,10 +107,11 @@ One accumulated scoped backend pass: approved display allowlist/branch isolation
 revocation, date rollover, native ordering/dedup/call/recall/transfer/completion,
 announcement bounds/version denial, invoice scope/current due/future installments,
 refund reopening, exact-version denial and audited exception/direct-queue guard.
-One browser pass shared with Phase3, then at most one focused confirmation:
-TV/tablet/phone layouts, pairing copy/reopen/regenerate/consume, stale/reconnect,
-opt-in sound, same-visit cashier ticket, editor selection/save/fallback. Save print
-artifacts and inspect actual content. Log unrelated failures rather than expanding
+Phase3 browser evidence is retained separately without retesting its editors.
+Phase4 has one browser pass and at most one focused confirmation for TV/tablet/
+phone layouts, pairing copy/reopen/regenerate/consume, stale/reconnect, opt-in
+sound and same-visit cashier ticket. Save print artifacts when reached and inspect
+actual content; record unreached assertions as acceptance gaps. Log unrelated failures rather than expanding
 scope. Local activation uses fresh encrypted checkpoint/verified restore, full
 preservation fingerprints/private storage verification and additive original
 migrations only. No review clone import or restore over original data.

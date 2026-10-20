@@ -2,7 +2,7 @@
 
 **Purpose:** Make the implemented clinic workflows dependable, easier to use and cheaper to verify before adding another large subsystem.
 
-**Status:** User approved native implementation of Phases 1 and 2 on October 20, 2026. Implemented together in `48d6bb0`; see `docs/operations/workflow-finance-improvements-verification.md` for activation and staged evidence. Template-application browser acceptance and print pagination remain recorded follow-ups. User subsequently selected Phases3/4. Phase3 changes are active in76c42cd with logged acceptance limits; the new Phase4 display/payment contract awaits review. Phase5 remains a proposal. No subagents or separate chats.
+**Status:** User approved native implementation of Phases 1 and 2 on October 20, 2026. Implemented together in `48d6bb0`; see `docs/operations/workflow-finance-improvements-verification.md` for activation and staged evidence. Template-application browser acceptance and print pagination remain recorded follow-ups. User subsequently selected Phases3/4. Phase3 changes are active in76c42cd with logged acceptance limits; Phase4 contract was approved by proceeding and implemented in0a882d1; see docs/operations/station-operations-completion-verification.md for activation and bounded acceptance gaps. Phase5 remains a proposal. No subagents or separate chats.
 
 **Baseline:** `395fafc`, active `.next-batch8`, original Django database. Preserve existing data, accounts/MFA, role/patient boundaries and the user's uncommitted clinic-shell width change. Existing Batch8 scope/spec and phase verification records remain the sources of implemented behavior.
 
@@ -94,17 +94,17 @@ Login redirection/session recovery, reception-assisted kiosk access, separate de
 
 **User outcome:** Reception, the clinician tablet, the patient kiosk and the TV provide a coherent journey with no repeated normal-mode verification.
 
-**Owners:** Existing Station devices/pairing, visit/stage owners and operation queues; `apps/web/features/stations/station-entry.tsx`; the existing live/public-safe queue transports where suitable. The current display mode still shows a next-phase placeholder.
+**Owners:** Existing Station devices/pairing, visit/stage owners and operation queues; `apps/web/features/stations/station-entry.tsx`; the existing live/public-safe queue transports where suitable. The dedicated approved display is now implemented; an older device-card description remains deferred.
 
-**Review pending:** docs/superpowers/specs/2026-10-20-station-operations-completion-design.md is written; the async user review question is pending. No Phase4 product implementation yet.
+**Approved and implemented:** The user proceeded after the written contract. Native implementation0a882d1 includes the display/payment/ticket owners below. Display/pairing/stale/revocation browser groups pass; payment/transfer/print UI acceptance remains logged. See docs/operations/station-operations-completion-verification.md. No Phase3 editor retest or third Phase4 browser round.
 
 **Design before implementation:** Define a dedicated display-safe DTO and supported device/branch access, reconnect behavior, ordering, retention and optional sound policy. This is a new subsystem, so that contract must be reviewed before implementation.
 
-- [ ] Implement the paired read-only TV display: currently called numbers, room/counter, upcoming numbers, time and explicitly authored announcements. Reuse native queue/priority order; reveal no patient names, records, reasons or financial details. Do not duplicate the queue engine.
-- [ ] Add call/recall/skip/transfer/complete updates and an honest disconnected/stale indicator. Sound/speech is opt-in and may require an initial operator gesture; speak queue numbers/counters only.
-- [ ] Finish the device code lifecycle UI check: current code visible when retrievable, copy, reopen/reload, regenerate and hide after consumption/revocation. Preserve separate Manage/code modals and existing encrypted-code handling.
-- [ ] Finish print-friendly service tickets and cashier continuation in the same visit. Staff-assisted and customer-facing identity entry remain distinct; normal reception-selected sessions do not gain repeated codes. Strict mode retains its explicit repeated-verification policy.
-- [ ] Define configurable payment-before/after-service behavior with auditable staff exception rules before implementing a hard gate. Queue-stage completion must never finalize clinical notes or fabricate payment.
+- [x] Implement the paired read-only TV display: currently called numbers, room/counter, upcoming numbers, time and explicitly authored announcements. Reuse native queue/priority order; reveal no patient names, records, reasons or financial details. Do not duplicate the queue engine.
+- [x] Add call/recall/skip/transfer/complete updates and an honest disconnected/stale indicator. Sound/speech is opt-in and may require an initial operator gesture; speak queue numbers/counters only.
+- [x] Finish the device code lifecycle UI check: current code visible when retrievable, copy, reopen/reload, regenerate and hide after consumption/revocation. Preserve separate Manage/code modals and existing encrypted-code handling.
+- [ ] Browser acceptance for implemented isolated print-friendly service tickets and cashier continuation in the same visit. Backend same-visit/current-due cases pass; final browser group stopped at a queue-button harness mismatch. Staff-assisted and customer-facing identity entry remain distinct; normal reception-selected sessions do not gain repeated codes. Strict mode retains its explicit repeated-verification policy.
+- [x] Define configurable payment-before/after-service behavior with auditable staff exception rules before implementing a hard gate. Queue-stage completion must never finalize clinical notes or fabricate payment.
 
 **Done:** An approved display device receives only the allowlisted branch feed; reconnect preserves correct current order; reception/kiosk/cashier transfer preserves one visit and clear next steps. Browser print layouts are not claims of physical printer/cash-acceptor validation.
 
@@ -149,4 +149,4 @@ Graphify queried the existing current Batch8 graphs first using actual vocabular
 
 Sanitized Jev selects finish_existing over external_expansion, confidence1.0, model jev-1.13.0,480input/36output tokens; CLI/auth status succeed. It received only generic implementation/evidence state, no patient information, credentials, private attachments or original database content. This supports prioritization, not proof or authorization. Local logs: `/tmp/medframe-improvements-{frontend-graph,backend-graph,jev}.*`.
 
-**Current next action:** Review the Phase1/2 verification record and logged follow-ups. Select later scope explicitly; this implementation does not authorize Phases 3–5.
+**Current status:** Phases1/2, Phase3 and Phase4 are locally active with their separate bounded evidence and logged gaps. Phase4 record: docs/operations/station-operations-completion-verification.md. Phase5 remains proposed; no live external integration or unrelated repair is included.
