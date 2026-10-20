@@ -1,8 +1,8 @@
 # Station operations completion design — improvement Phase 4
 
-Status: concrete contract prepared for user review. User requested Phases3/4;
-Phase3's existing editor contract is already selected. This new display/payment
-contract needs review before Phase4 implementation. Execute natively, no agents.
+Status: approved by the user proceeding after this written contract was presented.
+Phase3 is active separately; proceed with Phase4 natively, no agents.
+Implementation plan: docs/superpowers/plans/2026-10-20-station-operations-completion.md.
 
 ## Outcome and chosen approach
 
