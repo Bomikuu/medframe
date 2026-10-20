@@ -705,3 +705,45 @@ schedule filters. This does not establish every historical retry/editor/catalog
 permutation from SERVICE-PLAN-002. B8-002's saved-file defect is a corrected harness
 path: actual CSV and exact historical JSON files parse; remaining template apply
 acceptance is IMPROVE-002. Older unrelated findings remain deferred.
+
+## TABLET-IMPROVE-001 — Initial dental dialog locator (historical)
+
+Phase3 probe asks for Dental editor, but Radix uses the patient title. Four dental
+groups stop before actions; screenshots show the editor. The one confirmation
+uses data-dental-editor and passes cross-visit save/reopen and model-fetch
+fallback. Initial anatomy GPU fallback passes. No missing-editor failure or
+permission change inferred. See tablet-editor-improvements-verification.md.
+
+## TABLET-IMPROVE-002 — Navigation error reproduced; component still unproven
+
+Saved editor→notes→home→walk-in→notes reproduces STATION-GALLERY-003 at
+2026-10-20T04:57:39.793Z with a full React production deletion stack (first frame
+ui,2nii411saqstq.js:1:108261). Walk-in notes still render; no saved-record loss.
+Final Dental locator mismatches actual Dental chart. No app component identified;
+no speculative React/Three/portal rewrite. Still deferred, not resolved. Evidence
+/tmp/medframe-improvements3-confirmation.log and ignored improvements34 captures.
+
+## TABLET-IMPROVE-003 — Drawer responsive/keyboard acceptance remains partial
+
+1024 dental canvas/full-height drawer/close hit test and Escape retaining parent
+pass. At768 close hit testing fails during fade/transform;390 not reached.
+Anatomy stops on immediate1024 canvas-size comparison;390/GPU continuation not
+reached. Settled layout/pointer/focus semantics unproven; no product repair
+inferred or complete responsive claim. No third browser run. Older gaps remain.
+
+## TABLET-IMPROVE-004 — GPU/save final browser reload assertion gap
+
+Dental context loss reaches fallback, Continue in2D, notes edit and native Draft
+saved. Reload Subjective locator then times out with the dental dialog open.
+A read-only isolated native require_encounter query verifies version3 and the
+exact saved SOAP/crown/missing/impaction states, writing nothing. Keep the split
+evidence, not a clean full browser-group claim. Model-fetch fallback passes with
+its intentionally aborted request's expected browser error retained.
+
+## October20 Phase3 cross-visit status
+
+DENTAL-ILLUSTRATION-004 now has a passing known-writer browser save/reopen for
+prior crown and missing/impacted states, without weakening grants/provider/lease.
+That specific acceptance gap is resolved; navigation, responsive drawers and
+other deferred findings remain. Phase4 product work awaits written display/
+payment contract review and is not implemented.

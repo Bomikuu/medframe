@@ -2,7 +2,7 @@
 
 **Purpose:** Make the implemented clinic workflows dependable, easier to use and cheaper to verify before adding another large subsystem.
 
-**Status:** User approved native implementation of Phases 1 and 2 on October 20, 2026. Implemented together in `48d6bb0`; see `docs/operations/workflow-finance-improvements-verification.md` for activation and staged evidence. Template-application browser acceptance and print pagination remain recorded follow-ups. Phases 3–5 remain proposals. No subagents or separate chats.
+**Status:** User approved native implementation of Phases 1 and 2 on October 20, 2026. Implemented together in `48d6bb0`; see `docs/operations/workflow-finance-improvements-verification.md` for activation and staged evidence. Template-application browser acceptance and print pagination remain recorded follow-ups. User subsequently selected Phases3/4. Phase3 changes are active in76c42cd with logged acceptance limits; the new Phase4 display/payment contract awaits review. Phase5 remains a proposal. No subagents or separate chats.
 
 **Baseline:** `395fafc`, active `.next-batch8`, original Django database. Preserve existing data, accounts/MFA, role/patient boundaries and the user's uncommitted clinic-shell width change. Existing Batch8 scope/spec and phase verification records remain the sources of implemented behavior.
 
@@ -80,11 +80,13 @@ Login redirection/session recovery, reception-assisted kiosk access, separate de
 
 **Contract:** Preserve default3D, tooth/structure centering, existing crown/red missing-tooth illustrations, exact anchors, floating full-height assistant and the single versioned clinical draft. The assistant stays disconnected.
 
-- [ ] Reproduce the retained gallery→notes→home→walk-in→dental DOM-error sequence with timestamps/stack capture; avoid speculative React/Three rewrites.
+- [x] Reproduce the retained gallery→notes→home→walk-in→dental DOM-error sequence with timestamps/stack capture; avoid speculative React/Three rewrites.
 - [ ] Check supported tablet/phone canvas bounds, drawer edge placement, visible close/save/end controls and keyboard/focus return. Fix only the current reproduced overflow/occlusion, preserving shared component behavior elsewhere.
 - [ ] Make selected tooth/surface/structure and the active editing state unmistakable. Explain when a record is historical, a lease belongs elsewhere or a provider setup is missing. Never enable a disabled crown control by bypassing the native write owner.
-- [ ] Complete the cross-visit crown/missing/impacted state save-and-reopen check under a known writable lease. Distinguish saved current state from historical findings.
+- [x] Complete the cross-visit crown/missing/impacted state save-and-reopen check under a known writable lease. Distinguish saved current state from historical findings.
 - [ ] Check one slow/failed model fetch and one GPU/context-loss fallback while saving the same clinical draft. A fallback must not erase notes or claim that unavailable geometry loaded.
+
+**Current evidence:** Editing/read-only feedback and renderer fallback changes are active. Cross-visit save/reopen passes; GPU fallback and saved synthetic SOAP have staged browser/native proof. Navigation error recurs with a timestamped React stack. Drawer/phone/final reload acceptance remains open; no full Phase3 acceptance or third browser round. See docs/operations/tablet-editor-improvements-verification.md.
 
 **Done:** The supported viewport set has reachable controls, preserved draft/selection and a working native save/reopen path; reproduced navigation errors are resolved or remain explicitly documented. No claim of anatomical/clinical validation.
 
@@ -93,6 +95,8 @@ Login redirection/session recovery, reception-assisted kiosk access, separate de
 **User outcome:** Reception, the clinician tablet, the patient kiosk and the TV provide a coherent journey with no repeated normal-mode verification.
 
 **Owners:** Existing Station devices/pairing, visit/stage owners and operation queues; `apps/web/features/stations/station-entry.tsx`; the existing live/public-safe queue transports where suitable. The current display mode still shows a next-phase placeholder.
+
+**Review pending:** docs/superpowers/specs/2026-10-20-station-operations-completion-design.md is written; the async user review question is pending. No Phase4 product implementation yet.
 
 **Design before implementation:** Define a dedicated display-safe DTO and supported device/branch access, reconnect behavior, ordering, retention and optional sound policy. This is a new subsystem, so that contract must be reviewed before implementation.
 
