@@ -30,6 +30,7 @@ await group("specialty-guidance", "staff", async (p) => {
   const subjective = p.getByRole("textbox", { name: "Subjective", exact: true });
   await subjective.waitFor();
   const before = await subjective.inputValue();
+  await p.getByText("Consultation template & prompts", { exact: true }).click();
   await p.getByText("Consultation guidance", { exact: true }).click();
   await p.getByRole("combobox", { name: "Clinic template", exact: true }).click();
   await p.getByRole("option", { name: `${meta.template_name} · version 1`, exact: true }).click();

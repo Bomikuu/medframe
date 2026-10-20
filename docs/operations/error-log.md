@@ -650,3 +650,58 @@ The focused continuation selects the editorial/dental template and forest palett
 ## B7-005 — custom alias canonical remains application clinic URL (deferred)
 
 Verified local alias root serves the published page, but its canonical points to the stable Medframe /clinics/[slug] URL rather than the alias root. The focused custom-domain canonical assertion fails; HTTP inspection records that actual canonical. Mapping/private-route denial/robots/domain sitemap checks pass separately. Primary custom-domain canonical selection is deferred; real domain DNS/TLS/hosting is operator setup and was not changed or accepted. Unrelated older findings remain deferred.
+
+## IMPROVE-001 — Initial review setup/locator failures (historical, bounded correction)
+
+October20 Phase1/2: the first isolated fixture wrapper set DATABASE_URL, whereas
+Django uses its separate DJANGO_DATABASE_URL/NAME target. The fixture's database
+assertion stopped before mutation. The corrected wrapper explicitly selects the
+review DB. A prematurely opened review API received only anonymous login/session
+reads before restart; no original fixture/session import or authenticated review.
+Initial browser groups did not leave the default dental dialog; the historical
+export dialog was covered by that canvas. The initial history group also assumed
+a named region for an unnamed section. One focused confirmation uses Clinical
+notes and the actual section, then passes historical export/revocation and older
+payment/refund/confirmation. Other groups remain independently recorded. Initial
+logs/screenshots preserved; no third browser round. See workflow-finance-improvements-verification.md.
+
+## IMPROVE-002 — Applying specialty guidance browser acceptance incomplete
+
+Specialty selection and edited starter save succeed through native controls.
+After Clinical notes, the focused group waits for the inner Consultation guidance
+summary while its outer Consultation template & prompts details is collapsed.
+The screenshot shows the unchanged synthetic unpublished SOAP and collapsed
+parent; this is a harness discovery/acceptance gap, not a reproduced application
+failure or authorization issue. Browser apply/save/SOAP-preservation assertions
+were not reached. The reusable helper/click path now includes the parent, but was
+not rerun after exhausting one pass/one confirmation. Do not claim full connected
+specialty-application acceptance. No native template/editor owner change or
+speculative UI/permission repair. Remaining B8-002 template-application scope is
+tracked here; saved CSV/exact JSON/review invalidation/revocation/reader gaps now
+have passing evidence in this phase.
+
+## IMPROVE-003 — Recorded-payment print spans five A4 pages (deferred)
+
+Open invoice → Recorded payments → View confirmation and render print media.
+The browser-generated PDF preserves only the confirmation's text and correct
+original/refund/retained/current-balance/source fields, but paginates the compact
+confirmation over five A4 pages. Impact: excessive paper/whitespace. Evidence
+output/playwright/improvements12/payment-confirmation.pdf and
+/tmp/medframe-improvements12-confirmation-print.txt; PDF page count5. The UI
+confirmation works for staff/portal and the backend denies nonexistent/foreign
+payments; no financial or patient authorization bypass was observed. Print
+layout remains deferred without a polish/rebuild/third-browser loop; physical
+printing and the refreshed-on-print button were not exercised. Do not claim a
+single-page receipt or complete printer acceptance.
+
+## October20 Phase1/2 status update to older findings
+
+B4-004's unbounded detail serialization is resolved in 48d6bb0: first20 rows for
+payments/events, scoped signed keyset pages and an independent full eligible
+refund lookup; whole-ledger totals remain authoritative. Ten focused cases pass.
+SERVICE-CONTEXT-001's missing draft/uninvoiced/void/workflow-reader/portal branches
+now pass in this phase, together with partial→deposit-settled payment and native
+schedule filters. This does not establish every historical retry/editor/catalog
+permutation from SERVICE-PLAN-002. B8-002's saved-file defect is a corrected harness
+path: actual CSV and exact historical JSON files parse; remaining template apply
+acceptance is IMPROVE-002. Older unrelated findings remain deferred.

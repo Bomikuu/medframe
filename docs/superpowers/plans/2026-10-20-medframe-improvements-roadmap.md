@@ -2,7 +2,7 @@
 
 **Purpose:** Make the implemented clinic workflows dependable, easier to use and cheaper to verify before adding another large subsystem.
 
-**Status:** Proposed roadmap requested by the user; planning only. This does not authorize changes to deferred findings, external services or patient records. Native execution is already the standing preference. No subagents or separate chats.
+**Status:** User approved native implementation of Phases 1 and 2 on October 20, 2026. Implemented together in `48d6bb0`; see `docs/operations/workflow-finance-improvements-verification.md` for activation and staged evidence. Template-application browser acceptance and print pagination remain recorded follow-ups. Phases 3–5 remain proposals. No subagents or separate chats.
 
 **Baseline:** `395fafc`, active `.next-batch8`, original Django database. Preserve existing data, accounts/MFA, role/patient boundaries and the user's uncommitted clinic-shell width change. Existing Batch8 scope/spec and phase verification records remain the sources of implemented behavior.
 
@@ -43,12 +43,14 @@ Login redirection/session recovery, reception-assisted kiosk access, separate de
 
 **Contract:** Product authorization and data owners stay unchanged unless a current defect is reproduced. Reuse existing session recovery and native disabled/read-only states. A failed assertion is recorded as a harness failure, an acceptance gap or a reproduced product defect, with those labels kept distinct.
 
-- [ ] Create one reusable review harness for fresh synthetic metadata, exact accessible roles, stable state waits and scoped contexts. Keep session/identity material private. Use actual fixture IDs/names rather than stale literals; type=search means searchbox, and changing modal titles require reacquiring the correct dialog.
-- [ ] For CSV/JSON, start the Download listener before clicking, save the Download and parse that file. Never validate an attachment with response.text. Keep this helper in the review tooling; the product download helper is not proved defective by B8-002.
+- [x] Create one reusable review harness for fresh synthetic metadata, exact accessible roles, stable state waits and scoped contexts. Keep session/identity material private. Use actual fixture IDs/names rather than stale literals; type=search means searchbox, and changing modal titles require reacquiring the correct dialog.
+- [x] For CSV/JSON, start the Download listener before clicking, save the Download and parse that file. Never validate an attachment with response.text. Keep this helper in the review tooling; the product download helper is not proved defective by B8-002.
 - [ ] Complete one connected specialty-to-export journey: select clinic specialties, copy/edit/save a starter, apply guidance without replacing existing SOAP, open an exact saved revision, change the export selection, review/download, and prove denial after revocation. Include the reader-role exclusion.
-- [ ] Complete the missing service-payment branches: no invoice, proposed draft, partial/settled obligations, void history, financial-reader denial and patient portal display. Reuse the current ledger and existing successful payment evidence.
+- [x] Complete the missing service-payment branches: no invoice, proposed draft, partial/settled obligations, void history, financial-reader denial and patient portal display. Reuse the current ledger and existing successful payment evidence.
 - [ ] Present concise action/loading/retry/read-only explanations only where the journey reveals a current usability defect. A missing clinical grant/provider profile/lease must lead to a permitted setup/recovery action, never an authorization bypass or disclosure of an inaccessible patient.
-- [ ] Record a short click path for administrator, clinician, reception and patient roles so users can find the delivered functions. Avoid providing or changing passwords as a shortcut.
+- [x] Record a short click path for administrator, clinician, reception and patient roles so users can find the delivered functions. Avoid providing or changing passwords as a shortcut.
+
+**Implementation note:** Eight of nine browser groups have staged passing evidence. Specialty/starter saving succeeds; guidance application remains IMPROVE-002 because its collapsed parent prevented the final browser assertions. No recovery/authorization defect was reproduced that justified a product repair. See the phase verification record.
 
 **Done:** Real downloaded CSV/JSON files pass their content/selection assertions; specialty prompts remain distinct from patient facts; grant-revoked exports fail; service balances/void wording are consistent; each failure has an accurate classification. No blanket full-app acceptance claim.
 
@@ -60,11 +62,13 @@ Login redirection/session recovery, reception-assisted kiosk access, separate de
 
 **Contract:** Amounts, coverage and refundable balances remain computed from the whole native ledger. Paging a display must never change financial totals or remove the ability to choose an eligible original payment for a refund.
 
-- [ ] Add deterministic keyset pages for invoice payments/events, scoped by invoice/organization and permission. Plan the eligible-refund payment lookup separately so it does not depend on whichever payment page happens to be loaded.
-- [ ] Keep an immediately readable statement and next unpaid obligation; progressively reveal the full ledger, credits, refunds and history. Preserve the existing Due/Upcoming/Settled filters and service Manage payments destination.
-- [ ] Improve the payment review with explicit amount received, payment date/method, resulting coverage and remaining balance. Retain the existing acknowledgement and exact-version/idempotent posting owner; no automatic charge or silent financial-term edits.
-- [ ] Add a printable confirmation/receipt view for an already recorded payment, clearly identifying refunds/voids and the source entry. No printable paid receipt for a pending or unrecorded payment.
-- [ ] Check one long synthetic history, one partial payment, one refund reopening coverage, and one permission denial. Complete the dedicated concurrent agreement-issue case only if touching that owner; do not rerun unrelated financial suites.
+- [x] Add deterministic keyset pages for invoice payments/events, scoped by invoice/organization and permission. Plan the eligible-refund payment lookup separately so it does not depend on whichever payment page happens to be loaded.
+- [x] Keep an immediately readable statement and next unpaid obligation; progressively reveal the full ledger, credits, refunds and history. Preserve the existing Due/Upcoming/Settled filters and service Manage payments destination.
+- [x] Improve the payment review with explicit amount received, payment date/method, resulting coverage and remaining balance. Retain the existing acknowledgement and exact-version/idempotent posting owner; no automatic charge or silent financial-term edits.
+- [x] Add a printable confirmation/receipt view for an already recorded payment, clearly identifying refunds/voids and the source entry. No printable paid receipt for a pending or unrecorded payment.
+- [x] Check one long synthetic history, one partial payment, one refund reopening coverage, and one permission denial. Complete the dedicated concurrent agreement-issue case only if touching that owner; do not rerun unrelated financial suites.
+
+**Implementation note:** Native long-history/refund/review/portal cases and confirmation content pass. Print pagination spans five A4 pages and remains IMPROVE-003; no single-page or physical-printer claim.
 
 **Done:** Detail response size is bounded by pages; full-ledger totals are unchanged; refunds can select any eligible original payment; receipt state agrees with the native recorded entry.
 
@@ -141,4 +145,4 @@ Graphify queried the existing current Batch8 graphs first using actual vocabular
 
 Sanitized Jev selects finish_existing over external_expansion, confidence1.0, model jev-1.13.0,480input/36output tokens; CLI/auth status succeed. It received only generic implementation/evidence state, no patient information, credentials, private attachments or original database content. This supports prioritization, not proof or authorization. Local logs: `/tmp/medframe-improvements-{frontend-graph,backend-graph,jev}.*`.
 
-**Recommended next action:** Phase1's existing-workflow completion, using one shared harness/fixture/download correction and narrow connected journeys. Review/choose that scope before product implementation; native execution and eventual local activation do not need to be selected again.
+**Current next action:** Review the Phase1/2 verification record and logged follow-ups. Select later scope explicitly; this implementation does not authorize Phases 3–5.
