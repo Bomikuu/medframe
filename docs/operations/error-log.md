@@ -872,3 +872,11 @@ unverified end-to-end. Existing guard source is retained; no product failure
 established, no third run or unrelated repair. Logs:
 `/tmp/medframe-patient-overview-browser.log`,
 `/tmp/medframe-patient-overview-confirmation.log`.
+
+## HEADER-WORKSPACE-001 — unused theme binding (deferred)
+
+October20 header workspace relocation scoped ESLint: no errors, one unused `theme`
+binding warning in ClinicFrame. Removing the former sidebar logo selector leaves
+that binding unused with the user's preserved full-width main layout. No runtime
+impact. Logged without cleanup/retest under the user's bounded-testing rule;
+no unrelated appearance or user-layout repair performed.

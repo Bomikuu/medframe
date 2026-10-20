@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
+  Building2,
   CalendarDays,
   ChevronDown,
   House,
@@ -55,7 +56,7 @@ import {
 import { PatientAvatar } from "@/components/application/patient-avatar";
 import { requestWithCsrf, errorMessage } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
-import { OrganizationSwitcher } from "./organization-switcher";
+import { ClinicSwitcherDialog } from "./clinic-switcher-dialog";
 import { useWorkspace } from "./workspace-provider";
 import { useSafety } from "./safety-provider";
 import { useTheme } from "@/features/branding/theme-provider";
@@ -86,13 +87,16 @@ export function ClinicShell({ children }: { children: ReactNode }) {
 }
 
 function ClinicFrame({ children }: { children: ReactNode }) {
-  const { overview, organizationId, switchOrganization, href, can, workspace } = useWorkspace();
+  const { overview, organizationId, href, can, workspace } = useWorkspace();
   const { guard } = useSafety();
   const { setOpenMobile } = useSidebar();
   const { theme, personal } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const [busy, setBusy] = useState(false);
+  const [clinicDialogOpen, setClinicDialogOpen] = useState(false);
+  const accountTrigger = useRef<HTMLButtonElement>(null);
+  const openingClinicDialog = useRef(false);
   const [error, setError] = useState("");
   const groups = [
     {
@@ -245,15 +249,6 @@ function ClinicFrame({ children }: { children: ReactNode }) {
           >
             <HeartPulse className="size-6" />
           </span>
-          <div className="group-data-[collapsible=icon]:hidden">
-            <OrganizationSwitcher
-              organizations={overview.myOrganizations}
-              value={organizationId}
-              onChange={switchOrganization}
-              branch={workspace.branches.map((branch) => branch.name).join(", ")}
-              logoId={theme.logo_id ?? undefined}
-            />
-          </div>
         </SidebarHeader>
         <SidebarContent className="gap-4 px-2 pt-2">
           {groups.map(
@@ -325,6 +320,7 @@ function ClinicFrame({ children }: { children: ReactNode }) {
                   variant="ghost"
                   className="gap-2 rounded-xl border-l border-border px-2 sm:pl-4"
                   aria-label="Account menu"
+                  ref={accountTrigger}
                 >
                   {personal.avatar_id ? (
                     <SecureImage
@@ -342,10 +338,35 @@ function ClinicFrame({ children }: { children: ReactNode }) {
                   <ChevronDown className="size-3.5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-60">
+              <DropdownMenuContent
+                align="end"
+                className="w-64"
+                onCloseAutoFocus={(event) => {
+                  if (openingClinicDialog.current) {
+                    event.preventDefault();
+                    openingClinicDialog.current = false;
+                  }
+                }}
+              >
                 <DropdownMenuLabel className="truncate">
                   {overview.currentUser.displayName}
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="items-start gap-3 py-3"
+                  onSelect={() => {
+                    openingClinicDialog.current = true;
+                    setClinicDialogOpen(true);
+                  }}
+                >
+                  <Building2 aria-hidden className="mt-0.5 size-4 shrink-0 text-teal-ink" />
+                  <span className="grid min-w-0 gap-1">
+                    <span>Clinic & branches</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {workspace.organization.name}
+                    </span>
+                  </span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onSelect={() =>
@@ -366,6 +387,12 @@ function ClinicFrame({ children }: { children: ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
+        <ClinicSwitcherDialog
+          key={organizationId}
+          open={clinicDialogOpen}
+          onOpenChange={setClinicDialogOpen}
+          returnFocus={accountTrigger}
+        />
         <main
           id="main"
           data-density-region

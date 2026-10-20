@@ -136,3 +136,14 @@ The anatomical replacement is active locally after the user authorized its block
 - DocumentCollection owns table/card rendering; DocumentHistory pages authorized existing versions. Existing private-byte preview/download/quarantine permissions remain unchanged. Uploaded-by and clinic timezone are authoritative server data, never guessed.
 - ClinicalLocaleProvider owns clinic-time formatting for both staff and patient surfaces. Identity/session context remains owned by their existing separate providers.
 - Shared status badges always include text; colors convey actual workflow state. Clickable surfaces have hover/focus feedback, and static information remains static.
+
+## Header clinic selection
+
+`features/workspace/clinic-switcher-dialog.tsx` owns the account-menu Clinic &
+branches dialog, reusing Dialog and FormSelect. Selection is staged until Switch
+clinic; Cancel/Escape/Done keep the current workspace. Current authorized branches
+are informational, with filtering still owned by each branch-specific page.
+`workspace-provider.tsx` remains the organization source and switching owner;
+SafetyProvider confirms unsaved changes before returning to Patients. The account
+trigger receives focus when the modal closes. No global branch filter or clinical
+authorization is inferred from the selection UI.
