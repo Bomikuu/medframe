@@ -1,6 +1,6 @@
 # Services, patient workflows and installment plans
 
-Status: written specification approved by the user on October 20, 2026; native implementation plan awaiting review. Execution remains native in this chat, without subagents or separate chats.
+Status: specification and native implementation plan approved October 20, 2026. Implemented and active locally; actual verification and remaining acceptance gaps are recorded in docs/operations/services-installments-verification.md. Execution remains native in this chat, without subagents or separate chats.
 
 ## Intent and approved scope
 
