@@ -849,3 +849,26 @@ warning. A unique isolated Redis channel with existing settings reproduces
 redis.exceptions.TimeoutError within an8-second idle probe, no production groups
 or clinical messages. These findings remain deferred; no warning suppression,
 stream/channel rewrite or complete protected-file/socket browser claim.
+
+## PATIENT-OVERVIEW-001 — narrow financial value wrapping (deferred)
+
+October20 patient profile refinement,390px synthetic browser capture:
+`output/playwright/patient-overview/390.png`. A large outstanding amount plus its
+new metric icon wraps inside the two-column summary. No document overflow or lost
+amount, but financial readability is reduced. Logged without repair under the
+user's bounded testing preference; no wider metric/typography change authorized
+by this finding alone.
+
+## PATIENT-OVERVIEW-002 — remaining guard browser acceptance (deferred)
+
+Initial isolated browser run passed overview default and grouped link/keyboard
+navigation. Its guard step tried filling the existing collapsed medical-history
+form; responsive final assertion ran before the clinical query finished.
+One focused confirmation opens the disclosure and establishes the unsaved prompt,
+but then requests a nonexistent Cancel button (actual label: Keep editing).
+Responsive confirmation passes1024/390px with no page overflow. No page exceptions
+in either run. Keep editing preserves entered text / Discard navigates remain
+unverified end-to-end. Existing guard source is retained; no product failure
+established, no third run or unrelated repair. Logs:
+`/tmp/medframe-patient-overview-browser.log`,
+`/tmp/medframe-patient-overview-confirmation.log`.

@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarDays, ClipboardList, Receipt, Route, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClinicTime } from "@/components/application/clinical-locale";
@@ -27,10 +28,19 @@ export function PatientProfileMetrics({
         ))}
       </div>
     ) : null;
-  const cards: { label: string; value: string; detail: string; tab: string }[] = [];
+  const cards: {
+    label: string;
+    value: string;
+    detail: string;
+    tab: string;
+    icon: LucideIcon;
+    tone: string;
+  }[] = [];
   if (summary.clinical)
     cards.push({
       label: "Total consultations",
+      icon: ClipboardList,
+      tone: "bg-info-soft text-info",
       value: String(summary.clinical.count),
       detail: summary.clinical.recent[0]
         ? `Last: ${timeLabel(summary.clinical.recent[0].created_at)}`
@@ -40,6 +50,8 @@ export function PatientProfileMetrics({
   if (summary.operations)
     cards.push({
       label: "Upcoming appointments",
+      icon: CalendarDays,
+      tone: "bg-teal-soft text-teal-ink",
       value: String(summary.operations.appointment_count),
       detail: summary.operations.upcoming[0]
         ? timeLabel(summary.operations.upcoming[0].start)
@@ -50,6 +62,8 @@ export function PatientProfileMetrics({
     const balances = summary.financial.balances;
     cards.push({
       label: "Total outstanding",
+      icon: Receipt,
+      tone: "bg-warning-soft text-warning",
       value:
         balances.length === 1
           ? currencyLabel(balances[0].outstanding, balances[0].currency)
@@ -64,6 +78,8 @@ export function PatientProfileMetrics({
   if (summary.operations)
     cards.push({
       label: "Recorded service visits",
+      icon: Route,
+      tone: "bg-success-soft text-success",
       value: String(summary.operations.visit_count),
       detail: "Across Station departments",
       tab: "overview",
@@ -77,8 +93,13 @@ export function PatientProfileMetrics({
           onClick={() => onTab(card.tab)}
           className="h-auto min-h-28 min-w-0 flex-col items-start justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-4 text-left whitespace-normal hover:bg-muted/50 sm:px-5"
         >
-          <span className="max-w-full text-xl font-bold break-words text-foreground sm:text-2xl">
-            {card.value}
+          <span className="flex w-full min-w-0 items-center gap-3">
+            <span className={`grid size-10 shrink-0 place-items-center rounded-lg ${card.tone}`}>
+              <card.icon aria-hidden className="size-5" />
+            </span>
+            <span className="max-w-full min-w-0 text-xl font-bold break-words text-foreground tabular-nums sm:text-2xl">
+              {card.value}
+            </span>
           </span>
           <span className="text-xs font-medium text-foreground sm:text-sm">{card.label}</span>
           <span className="text-xs leading-5 text-muted-foreground">{card.detail}</span>

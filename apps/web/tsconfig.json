@@ -108,7 +108,9 @@
     ".next-station-operations/types/**/*.ts",
     ".next-station-operations/dev/types/**/*.ts",
     ".next-onboarding-reporting/types/**/*.ts",
-    ".next-onboarding-reporting/dev/types/**/*.ts"
+    ".next-onboarding-reporting/dev/types/**/*.ts",
+    ".next-patient-overview/types/**/*.ts",
+    ".next-patient-overview/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

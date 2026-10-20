@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MoreHorizontal, Stethoscope } from "lucide-react";
+import { Mail, MapPin, MoreHorizontal, Phone, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import {
@@ -54,20 +54,23 @@ export function PatientProfileHeader({
             {patient.phone && (
               <a
                 href={`tel:${patient.phone}`}
-                className="rounded-lg border border-border bg-card px-3 py-2 text-foreground hover:bg-muted"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-foreground hover:bg-muted"
               >
+                <Phone aria-hidden className="size-3.5 shrink-0 text-teal-ink" />
                 {patient.phone}
               </a>
             )}
             {patient.email && (
               <a
                 href={`mailto:${patient.email}`}
-                className="max-w-full rounded-lg border border-border bg-card px-3 py-2 break-all text-foreground hover:bg-muted"
+                className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 break-all text-foreground hover:bg-muted"
               >
+                <Mail aria-hidden className="size-3.5 shrink-0 text-teal-ink" />
                 {patient.email}
               </a>
             )}
-            <span className="rounded-lg border border-border bg-card px-3 py-2 text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-muted-foreground">
+              <MapPin aria-hidden className="size-3.5 shrink-0 text-teal-ink" />
               {branch}
             </span>
           </div>

@@ -12,7 +12,10 @@ import { PatientProfileSidebar } from "./profile/patient-profile-sidebar";
 import { profileSummarySchema } from "./profile/summary";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeftIcon } from "@/components/icons";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TabsContent } from "@/components/ui/tabs";
+import { ContactRound, UserRound } from "lucide-react";
+import { PatientProfileTabs } from "./profile/patient-profile-tabs";
+import { ProfileClinicalContext } from "./profile/patient-clinical-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { PatientAnatomy } from "@/features/anatomy/patient-anatomy";
@@ -56,9 +59,10 @@ export function PatientOverview({
     ["billing", "Billing", can("billing.read")],
     ["shared", "Shared records", clinical],
     ["access", "Access", can("portal.manage") || can("patients.access.manage")],
-  ].filter(([, , visible]) => visible);
-  const requested = params.get("tab") ?? (clinical ? "consultations" : "overview");
-  const active = sections.some(([id]) => id === requested) ? requested : "overview";
+  ] as const;
+  const visibleSections = sections.filter(([, , visible]) => visible);
+  const requested = params.get("tab") ?? "overview";
+  const active = visibleSections.some(([id]) => id === requested) ? requested : "overview";
   function changeTab(value: string) {
     void guard(() => {
       const url = new URL(window.location.href);
@@ -148,16 +152,7 @@ export function PatientOverview({
           </Button>
         </div>
       )}
-      <Tabs value={String(active)} onValueChange={changeTab} className="min-w-0 gap-6">
-        <div className="overflow-x-auto rounded-xl border border-border bg-card p-1">
-          <TabsList variant="line" className="h-auto min-w-max justify-start gap-1">
-            {sections.map(([id, label]) => (
-              <TabsTrigger key={String(id)} value={String(id)}>
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
+      <PatientProfileTabs active={active} sections={visibleSections} onTab={changeTab}>
         <TabsContent value="services">
           {active === "services" && can("services.read") && (
             <PatientServices patientId={patientId} branchId={patient.branchId} />
@@ -171,6 +166,12 @@ export function PatientOverview({
         <TabsContent value="overview">
           <div className="grid min-w-0 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
             <div className="grid min-w-0 gap-5">
+              {clinical && (
+                <ProfileClinicalContext
+                  patientId={patientId}
+                  onReview={() => changeTab("medical")}
+                />
+              )}
               {[
                 ["Identity", identity],
                 ["Contact & support", contact],
@@ -182,7 +183,14 @@ export function PatientOverview({
                 >
                   <CardHeader className="border-b border-border p-5">
                     <CardTitle>
-                      <h2>{String(heading)}</h2>
+                      <h2 className="flex items-center gap-2 text-base font-semibold">
+                        {heading === "Identity" ? (
+                          <UserRound aria-hidden className="size-4 text-info" />
+                        ) : (
+                          <ContactRound aria-hidden className="size-4 text-teal-ink" />
+                        )}
+                        {String(heading)}
+                      </h2>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-5">
@@ -203,7 +211,12 @@ export function PatientOverview({
                 </Card>
               ))}
             </div>
-            <PatientProfileSidebar patientId={patientId} summary={summary} onTab={changeTab} />
+            <PatientProfileSidebar
+              patientId={patientId}
+              summary={summary}
+              onTab={changeTab}
+              showContext={false}
+            />
           </div>
         </TabsContent>
         {clinical && (
@@ -265,7 +278,7 @@ export function PatientOverview({
             {can("patients.access.manage") && <PatientAccess patientId={patientId} />}
           </div>
         </TabsContent>
-      </Tabs>
+      </PatientProfileTabs>
     </div>
   );
 }
