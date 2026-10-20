@@ -228,3 +228,21 @@ private scans/downloads, version checks and backend permissions remain canonical
 Two profile browser groups have staged passing evidence; three existing Station
 backend checks stop before photo assertions with403, logged without repair.
 See docs/operations/patient-photo-upload-verification.md for actual limits/runtime.
+
+## Central patient actions — current profile contract
+
+One Patient actions button and its circular-photo shortcut open the same searchable
+card directory. Clinical care, Visits & payments and Patient record use existing
+navy/teal/information/financial tokens. This supersedes earlier direct write-button
+placement in header/tabs. Profile tabs browse records; native editing forms and
+confirmations live in the action workspace or their dedicated editors. Read links,
+filters/downloads and form Save/Cancel remain contextual. Permissions are native;
+read-only context is presentation only. Existing clinical/financial/portal/file
+mutation owners, version checks and locale remain. Native appointment/invoice
+selection keeps patient identity, availability and received-money semantics explicit.
+
+A sticky header contains the canonical Close target. Five groups have staged
+passing browser evidence and3 appointment-scope tests pass; completed reschedule
+and final Continue/service-reader-card browser acceptance remain unverified.
+See docs/operations/patient-actions-hub-verification.md for actual tools, failures,
+activation repair, source-only refinements, preservation/runtime and rollback.

@@ -130,3 +130,23 @@ fingerprints preserve6695 original rows/154 tables and51 objects. User main-layo
 block remains byte-identical and unstaged. See
 `docs/operations/patient-photo-upload-verification.md` for exact Graphify/Jev,
 verification, runtime/rollback and limits. Older deferred findings remain outside scope.
+
+The October20 patient action hub is active locally on codex/patient-actions-hub,
+implementation8b167ba, .next-patient-actions. One header/camera entry opens
+permission-filtered cards for native clinical, appointment, payment, service,
+photo/document and access workflows. Profile tabs use an explicit presentation-only
+read-only context; native permissions/saves/versions remain. Optional appointment
+patient filter preserves branch/provider scope before pagination;3 focused cases
+pass. Final build/TypeScript/scoped lint pass. Initial4 browser groups have2 passes/
+2 stops; one focused3-group confirmation passes Close/remaining browse suppression,
+unavailable-slot/booking Cancel and synthetic native payment. Five distinct groups
+have staged evidence; no page exceptions/third round. Header Close stacking was a
+necessary activation repair. No completed reschedule (no available selected-date
+slots), and final Continue/history and service-reader card source refinements have
+build/lint coverage only. PATIENT-ACTIONS-001/002/003 retain limits; unrelated older
+findings remain deferred. Fresh encrypted checkpoint/isolated restore/fingerprints
+preserve6706 original rows/154 tables and51 objects; no migrations or original
+credential/MFA/grant changes. User main layout remains byte-identical and unstaged.
+See `docs/operations/patient-actions-hub-verification.md` for exact tool usage,
+runtime, evidence/preservation and rollback. Native execution and standing local
+activation continue; no live messaging/money movement or AI integration.
