@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { dueSchema, agreementSchema, installmentDraftSchema } from "./installment-schema";
 
 export const moneyInput = z
   .string()
@@ -8,6 +9,10 @@ export const lineInput = z.object({
   kind: z.enum(["consultation", "procedure", "other"]),
   quantity: z.number().int().min(1).max(999),
   unit_amount: moneyInput,
+  service_id: z.string().optional(),
+  service_case_id: z.string().nullable().optional(),
+  service_version: z.number().optional(),
+  override_reason: z.string().max(500).optional(),
 });
 export const draftInput = z.object({
   patient_id: z.string().uuid("Choose a patient."),
@@ -15,6 +20,8 @@ export const draftInput = z.object({
   discount_kind: z.enum(["fixed", "percent"]),
   discount_value: moneyInput,
   lines: z.array(lineInput).min(1).max(100),
+  installment: installmentDraftSchema.nullable().optional(),
+  case_id: z.string().nullable().optional(),
 });
 export type DraftValues = z.infer<typeof draftInput>;
 export const setupSchema = z.object({
@@ -50,8 +57,11 @@ export const invoiceSchema = z.object({
   outstanding: z.string(),
   refundable: z.string(),
   payment_status: z.string(),
+  due: dueSchema.optional(),
 });
 export const invoiceDetailSchema = invoiceSchema.extend({
+  installment_plan: agreementSchema.nullable().optional(),
+  case_id: z.string().nullable().optional(),
   discount_kind: z.enum(["fixed", "percent"]),
   discount_value: z.string(),
   lines: z.array(lineInput.extend({ line_total: z.string() })),

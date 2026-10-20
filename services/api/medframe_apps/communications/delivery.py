@@ -58,7 +58,15 @@ def preflight(reminder):
         ).exists()
     ):
         raise DomainError("FORBIDDEN", "Recipient access changed.", 403)
-    return preference, safe_message(source, reminder.source_kind, reminder.organization.timezone)
+    from medframe_apps.communications.installments import validate_snapshot
+
+    if reminder.source_kind == "invoice":
+        if reminder.obligation_snapshot:
+            require_membership(reminder.created_by, reminder.organization_id, "billing.read")
+        validate_snapshot(source, reminder.obligation_snapshot)
+    return preference, safe_message(
+        source, reminder.source_kind, reminder.organization.timezone, reminder.obligation_snapshot
+    )
 
 
 def callback_url(delivery):

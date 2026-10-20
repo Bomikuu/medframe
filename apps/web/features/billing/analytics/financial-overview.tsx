@@ -132,9 +132,9 @@ export function FinancialOverviewPanel({
                 detail: compare(value.current.issued, value.previous.issued),
               },
               {
-                label: "Current receivables",
+                label: "Total outstanding",
                 amount: value.outstanding,
-                detail: `${value.unpaid_count} unpaid invoices · all issued dates`,
+                detail: `${money(value.due_now, value.currency)} due through today · ${money(value.future, value.currency)} future`,
               },
               {
                 label: "Refunds recorded",

@@ -55,6 +55,7 @@ export type Invoice = {
   currency: string;
   total: string;
   outstanding: string;
+  due?: { due_now: string; overdue: string; future: string };
   paid: string;
   status: string;
   lines: { description: string; quantity: number; amount: string }[];

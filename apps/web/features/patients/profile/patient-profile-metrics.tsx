@@ -49,12 +49,15 @@ export function PatientProfileMetrics({
   if (summary.financial) {
     const balances = summary.financial.balances;
     cards.push({
-      label: "Outstanding balance",
+      label: "Total outstanding",
       value:
         balances.length === 1
           ? currencyLabel(balances[0].outstanding, balances[0].currency)
           : `${balances.length} currencies`,
-      detail: `${balances.reduce((count, row) => count + row.unpaid_count, 0)} unpaid invoices`,
+      detail:
+        balances.length === 1 && balances[0].due_now !== undefined
+          ? `${currencyLabel(balances[0].due_now, balances[0].currency)} due through today`
+          : `${balances.reduce((count, row) => count + row.unpaid_count, 0)} unpaid invoices`,
       tab: "billing",
     });
   }

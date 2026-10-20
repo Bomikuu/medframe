@@ -44,6 +44,7 @@ class Reminder(Record):
     created_by = models.ForeignKey("accounts.User", on_delete=models.PROTECT)
     version = models.PositiveIntegerField(default=1)
     automatic = models.BooleanField(default=False)
+    obligation_snapshot = models.JSONField(null=True)
 
 
 class Delivery(Record):

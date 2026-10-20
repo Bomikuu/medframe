@@ -5,7 +5,7 @@ from decimal import Decimal
 from zoneinfo import ZoneInfo
 
 from django.db import transaction
-from django.db.models import Count, F, Q, Sum
+from django.db.models import F, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
@@ -14,7 +14,6 @@ from medframe_apps.auditing.services import audit
 from medframe_apps.billing.calculations import amount_text
 from medframe_apps.billing.models import BillingSettings, Payment, Refund
 from medframe_apps.billing.policy import invoice_scope, scoped_branches, staff_member
-from medframe_apps.billing.queries import annotated_invoices
 
 
 def series_rows(query, date_field, currency_field, start, end):
@@ -82,28 +81,9 @@ def financial_overview(request, organization_id, branch_id, days=30):
     ]:
         for row in rows:
             daily.setdefault((row[field], row["day"]), {})[metric] = row["amount"] or 0
-    balances = annotated_invoices(invoices)
-    snapshot = {
-        row["currency"]: row
-        for row in balances.values("currency").annotate(
-            outstanding=Sum("balance_amount"),
-            overdue=Sum("balance_amount", filter=Q(due_date__lt=today)),
-            unpaid_count=Count("id", filter=Q(balance_amount__gt=0)),
-            not_due=Sum("balance_amount", filter=Q(due_date__gte=today)),
-            days_1_30=Sum(
-                "balance_amount",
-                filter=Q(due_date__gte=today - timedelta(days=30), due_date__lt=today),
-            ),
-            days_31_60=Sum(
-                "balance_amount",
-                filter=Q(
-                    due_date__gte=today - timedelta(days=60),
-                    due_date__lt=today - timedelta(days=30),
-                ),
-            ),
-            days_61_plus=Sum("balance_amount", filter=Q(due_date__lt=today - timedelta(days=60))),
-        )
-    }
+    from medframe_apps.billing.installment_projection import financial_due_snapshot
+
+    snapshot = financial_due_snapshot(invoices, today)
     methods = (
         Payment.objects.filter(
             invoice__in=invoices, paid_date__gte=current_start, paid_date__lt=today
@@ -139,6 +119,8 @@ def financial_overview(request, organization_id, branch_id, days=30):
                 "previous_series": previous,
                 "outstanding": amount_text(balance.get("outstanding") or 0),
                 "overdue": amount_text(balance.get("overdue") or 0),
+                "due_now": amount_text(balance.get("due_now") or 0),
+                "future": amount_text(balance.get("future") or 0),
                 "unpaid_count": balance.get("unpaid_count", 0),
                 "aging": [
                     {"label": label, "amount": amount_text(balance.get(key) or 0)}

@@ -85,3 +85,11 @@ class FinancialEvent(Record):
     request_key = models.UUIDField()
     reason = models.CharField(max_length=500, default="")
     payload = models.JSONField(default=dict)
+
+
+from medframe_apps.billing.installment_models import (  # noqa: E402,F401
+    InstallmentAgreement,
+    InstallmentObligation,
+    InvoiceLineServiceSource,
+    ServiceCaseInvoice,
+)

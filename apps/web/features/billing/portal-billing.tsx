@@ -59,8 +59,17 @@ export function PortalBilling() {
                   </div>
                   <div className="grid gap-2 sm:text-right">
                     <StatusBadge value={row.payment_status} />
+                    {row.due && (
+                      <p className="text-sm">
+                        Due through today{" "}
+                        <strong>
+                          <Money value={row.due.due_now} />
+                        </strong>{" "}
+                        · Future <Money value={row.due.future} />
+                      </p>
+                    )}
                     <p className="text-sm">
-                      Outstanding{" "}
+                      Total outstanding{" "}
                       <strong>
                         <Money value={row.outstanding} />
                       </strong>

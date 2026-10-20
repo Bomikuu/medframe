@@ -42,7 +42,14 @@ export function PaymentForm({
   const form = useForm<Values>({
     resolver: zodResolver(financialInput),
     defaultValues: {
-      amount: kind === "payment" ? invoice.outstanding : "",
+      amount:
+        kind === "payment"
+          ? invoice.due
+            ? Number(invoice.due.due_now) > 0
+              ? invoice.due.due_now
+              : (invoice.due.next_due?.remaining ?? invoice.outstanding)
+            : invoice.outstanding
+          : "",
       payment_id: invoice.payments.find((payment) => Number(payment.refundable) > 0)?.id ?? "",
       method: "cash",
       reference: "",
@@ -95,6 +102,13 @@ export function PaymentForm({
         <p>
           Outstanding: <Money value={invoice.outstanding} />
         </p>
+        {kind === "payment" && invoice.due?.is_installment && (
+          <p className="text-muted-foreground">
+            {Number(invoice.due.due_now) > 0
+              ? `Due through today: PHP ${invoice.due.due_now}`
+              : "Nothing is due through today. The suggested amount is an early payment toward the next unpaid installment."}
+          </p>
+        )}
         <p className="text-muted-foreground">
           {kind === "payment"
             ? "Record money already received by cash, bank transfer or another method. This does not charge an account."

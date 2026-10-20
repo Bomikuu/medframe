@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from config.crypto import cipher
 from config.errors import DomainError
+from medframe_apps.billing.installment_projection import invoice_due_projection, serialize_due
 from medframe_apps.communications.models import CommunicationPreference, CommunicationSettings
 from medframe_apps.communications.policy import (
     communication_member,
@@ -109,6 +110,9 @@ def communication_setup(request, organization_id, branch_id, patient_id=None, se
                     "id": str(row.id),
                     "kind": "invoice",
                     "label": "Invoice · " + row.number,
+                    "installments": serialize_due(invoice_due_projection(row))["rows"]
+                    if hasattr(row, "installment") and "billing.read" in permissions_for(member)
+                    else [],
                     "message": safe_message(row, "invoice", member.organization.timezone),
                 }
                 for row in annotated_invoices(
@@ -132,7 +136,9 @@ def reminder_summary(row):
         source = source_record(
             row.organization_id, row.branch_id, row.patient_id, row.source_kind, row.source_id
         )
-        body = safe_message(source, row.source_kind, row.organization.timezone)
+        body = safe_message(
+            source, row.source_kind, row.organization.timezone, row.obligation_snapshot
+        )
     except DomainError:
         body = "Source unavailable. This reminder will not be dispatched."
     if delivery.encrypted_body:

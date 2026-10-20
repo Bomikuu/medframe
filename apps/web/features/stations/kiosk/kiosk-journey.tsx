@@ -139,7 +139,14 @@ export function KioskJourney({
                 <div className="flex flex-wrap justify-between gap-2">
                   <h3 className="font-semibold">Bill {invoice.number}</h3>
                   <span className="font-semibold tabular-nums">
-                    {invoice.currency} {invoice.outstanding} due
+                    {invoice.currency} {invoice.due?.due_now ?? invoice.outstanding} due through
+                    today
+                    {invoice.due && (
+                      <span className="mt-1 block text-sm text-muted-foreground">
+                        {invoice.currency} {invoice.due.future} scheduled for future dates ·{" "}
+                        {invoice.outstanding} total outstanding
+                      </span>
+                    )}
                   </span>
                 </div>
                 <ul className="mt-3 grid gap-2 text-sm">

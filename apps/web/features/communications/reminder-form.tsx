@@ -15,6 +15,7 @@ import type { CommunicationSetup } from "./schema";
 
 const schema = z.object({
   source: z.string().min(1, "Choose a source."),
+  obligation: z.string(),
   channel: z.enum(["sms", "in_app"]),
   due: z.string().min(1, "Choose a future time."),
 });
@@ -32,12 +33,16 @@ export function ReminderForm({
 }) {
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { source: "", channel: "sms", due: "" },
+    defaultValues: { source: "", channel: "sms", due: "", obligation: "" },
   });
   const values = useWatch({ control: form.control });
   const action = useFinancialAction("communication");
   const sheet = useEntrySheetActions();
   const selected = setup.sources?.find((source) => `${source.kind}:${source.id}` === values.source);
+  const selectedObligation = selected?.installments?.find((row) => row.id === values.obligation);
+  const previewMessage = selectedObligation
+    ? `Medframe: Installment of PHP ${selectedObligation.remaining} scheduled for ${selectedObligation.due_date}. Sign in to your patient portal for your statement.`
+    : selected?.message;
   const deviceZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   useUnsavedChanges(`reminder:${branchId}:${patientId}`, form.formState.isDirty, () =>
     form.reset(),
@@ -50,6 +55,15 @@ export function ReminderForm({
         const source = setup.sources?.find(
           (source) => `${source.kind}:${source.id}` === data.source,
         );
+        if (
+          source?.installments?.length &&
+          !source.installments.some(
+            (row) => row.id === data.obligation && Number(row.remaining) > 0,
+          )
+        ) {
+          form.setError("obligation", { message: "Choose an unpaid installment." });
+          return;
+        }
         const due = new Date(data.due);
         if (!source || Number.isNaN(due.getTime()) || due <= new Date()) {
           form.setError("due", { message: "Choose a valid future time." });
@@ -60,6 +74,7 @@ export function ReminderForm({
           patient_id: patientId,
           source_kind: source.kind,
           source_id: source.id,
+          obligation_id: source.installments?.length ? data.obligation : null,
           channel: data.channel,
           due_at: due.toISOString(),
         });
@@ -76,12 +91,27 @@ export function ReminderForm({
           label="Reminder source"
           value={values.source ?? ""}
           error={form.formState.errors.source?.message}
-          onChange={(value) => form.setValue("source", value, { shouldDirty: true })}
+          onChange={(value) => {
+            form.setValue("source", value, { shouldDirty: true });
+            form.setValue("obligation", "");
+          }}
           options={(setup.sources ?? []).map((source) => ({
             value: `${source.kind}:${source.id}`,
             label: source.label,
           }))}
         />
+        {!!selected?.installments?.length && (
+          <FormSelect
+            id="reminder-obligation"
+            label="Unpaid installment"
+            value={values.obligation ?? ""}
+            error={form.formState.errors.obligation?.message}
+            onChange={(value) => form.setValue("obligation", value, { shouldDirty: true })}
+            options={selected.installments
+              .filter((row) => Number(row.remaining) > 0)
+              .map((row) => ({ value: row.id, label: `${row.due_date} · PHP ${row.remaining}` }))}
+          />
+        )}
         {!setup.sources?.length && (
           <p className="text-sm text-muted-foreground">
             No eligible appointments, follow-ups or issued invoices are available. Add the source
@@ -117,7 +147,7 @@ export function ReminderForm({
         <section className="grid gap-3 rounded-xl bg-teal-soft p-5 text-sm text-teal-ink">
           <h3 className="font-semibold">Message preview</h3>
           <p className="leading-6">
-            {selected?.message ?? "Choose a source to preview the exact message."}
+            {previewMessage ?? "Choose a source to preview the exact message."}
           </p>
           <p className="text-xs">
             {values.channel === "sms" && setup.transport === "preview"

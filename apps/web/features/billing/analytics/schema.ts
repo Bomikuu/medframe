@@ -26,6 +26,8 @@ export const financialOverviewSchema = z.object({
       previous_series: z.array(point),
       outstanding: z.string(),
       overdue: z.string(),
+      due_now: z.string().default("0.00"),
+      future: z.string().default("0.00"),
       unpaid_count: z.number(),
       aging: z.array(z.object({ label: z.string(), amount: z.string() })),
       methods: z.array(z.object({ method: z.string(), amount: z.string() })),

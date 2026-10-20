@@ -7,6 +7,8 @@ import { StatusBadge } from "@/components/application/status-badge";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/form-field";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DueSummary, InstallmentSchedule } from "./installment-schedule";
 import {
   Table,
   TableBody,
@@ -61,6 +63,9 @@ function InvoiceWorkspace({
   const action = useFinancialAction();
   const setup = useBillingSetup(invoice.branch_id);
   const [voidReason, setVoidReason] = useState("");
+  const [acknowledged, setAcknowledged] = useState("");
+  const agreementReady =
+    !invoice.installment_plan || acknowledged === invoice.installment_plan.digest;
   return (
     <div className="grid gap-6">
       <Link
@@ -75,7 +80,7 @@ function InvoiceWorkspace({
       >
         {invoice.state === "draft" && can("billing.manage") && (
           <Button
-            disabled={action.busy}
+            disabled={action.busy || !agreementReady}
             onClick={async () => {
               if (
                 await confirm({
@@ -86,7 +91,12 @@ function InvoiceWorkspace({
                 })
               ) {
                 if (
-                  await action.run("issue", { id: invoice.id, expected_version: invoice.version })
+                  await action.run("issue", {
+                    id: invoice.id,
+                    expected_version: invoice.version,
+                    agreement_confirmed: !!invoice.installment_plan && agreementReady,
+                    agreement_digest: invoice.installment_plan?.digest ?? "",
+                  })
                 )
                   reload();
               }
@@ -98,6 +108,20 @@ function InvoiceWorkspace({
       </PageHeading>
       <RemoteNotice error={remoteError} retry={reload} />
       <FinancialNotice error={action.error} message={action.message} />
+      {invoice.state === "draft" && invoice.installment_plan && (
+        <label className="flex items-start gap-3 rounded-lg border border-border bg-card p-5 text-sm leading-6">
+          <Checkbox
+            checked={acknowledged === invoice.installment_plan.digest}
+            onCheckedChange={(checked) =>
+              setAcknowledged(checked ? (invoice.installment_plan?.digest ?? "") : "")
+            }
+          />
+          <span>
+            I have reviewed the patient&apos;s service, total, down payment and complete monthly
+            schedule below. Issue confirms these terms and does not record money received.
+          </span>
+        </label>
+      )}
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <StatusBadge value={invoice.payment_status} />
         <span className="text-muted-foreground">
@@ -228,73 +252,77 @@ function InvoiceWorkspace({
 }
 export function InvoiceStatement({ invoice }: { invoice: InvoiceDetail }) {
   return (
-    <FinancialSection title="Statement">
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Charge</TableHead>
-              <TableHead className="text-right">Quantity</TableHead>
-              <TableHead className="text-right">Unit price</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invoice.lines.map((line, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <span className="block min-w-40 font-medium whitespace-normal">
-                    {line.description}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{line.kind}</span>
-                </TableCell>
-                <TableCell className="text-right tabular-nums">{line.quantity}</TableCell>
-                <TableCell className="text-right">
-                  <Money value={line.unit_amount} />
-                </TableCell>
-                <TableCell className="text-right">
-                  <Money value={line.line_total} />
-                </TableCell>
+    <div className="grid min-w-0 gap-5">
+      <FinancialSection title="Statement">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Charge</TableHead>
+                <TableHead className="text-right">Quantity</TableHead>
+                <TableHead className="text-right">Unit price</TableHead>
+                <TableHead className="text-right">Amount</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      <dl className="ml-auto grid w-full max-w-sm gap-3 text-sm">
-        {[
-          ["Subtotal", invoice.subtotal],
-          ["Discount", invoice.discount],
-          ["Issued charge", invoice.total],
-          ["Credits", invoice.credits],
-          ["Payments received", invoice.paid],
-          ["Refunds returned", invoice.refunded],
-        ].map(([label, value]) => (
-          <div key={label} className="flex justify-between gap-3">
-            <dt className="text-muted-foreground">{label}</dt>
-            <dd>
-              <Money value={value} />
-            </dd>
-          </div>
-        ))}
-        <div className="flex justify-between gap-3 border-t border-border pt-4 text-lg font-semibold">
-          <dt>Outstanding</dt>
-          <dd>
-            <Money value={invoice.outstanding} />
-          </dd>
+            </TableHeader>
+            <TableBody>
+              {invoice.lines.map((line, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <span className="block min-w-40 font-medium whitespace-normal">
+                      {line.description}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{line.kind}</span>
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">{line.quantity}</TableCell>
+                  <TableCell className="text-right">
+                    <Money value={line.unit_amount} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Money value={line.line_total} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
-        {Number(invoice.refundable) > 0 && (
-          <div className="flex justify-between gap-3 font-semibold text-teal-ink">
-            <dt>Refund due</dt>
+        <dl className="ml-auto grid w-full max-w-sm gap-3 text-sm">
+          {[
+            ["Subtotal", invoice.subtotal],
+            ["Discount", invoice.discount],
+            ["Issued charge", invoice.total],
+            ["Credits", invoice.credits],
+            ["Payments received", invoice.paid],
+            ["Refunds returned", invoice.refunded],
+          ].map(([label, value]) => (
+            <div key={label} className="flex justify-between gap-3">
+              <dt className="text-muted-foreground">{label}</dt>
+              <dd>
+                <Money value={value} />
+              </dd>
+            </div>
+          ))}
+          <div className="flex justify-between gap-3 border-t border-border pt-4 text-lg font-semibold">
+            <dt>Total outstanding</dt>
             <dd>
-              <Money value={invoice.refundable} />
+              <Money value={invoice.outstanding} />
             </dd>
           </div>
-        )}
-      </dl>
-      <p className="text-xs text-muted-foreground">
-        Financial statement in {invoice.currency}. Clinical records are maintained separately.
-      </p>
-    </FinancialSection>
+          {Number(invoice.refundable) > 0 && (
+            <div className="flex justify-between gap-3 font-semibold text-teal-ink">
+              <dt>Refund due</dt>
+              <dd>
+                <Money value={invoice.refundable} />
+              </dd>
+            </div>
+          )}
+        </dl>
+        {invoice.due && invoice.state === "issued" && <DueSummary due={invoice.due} />}
+        <p className="text-xs text-muted-foreground">
+          Financial statement in {invoice.currency}. Clinical records are maintained separately.
+        </p>
+      </FinancialSection>
+      {invoice.due && <InstallmentSchedule due={invoice.due} draft={invoice.state === "draft"} />}
+    </div>
   );
 }
 export function InvoiceHistory({ invoice }: { invoice: InvoiceDetail }) {

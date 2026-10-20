@@ -59,6 +59,7 @@ def save_draft(request, member, data):
     financial_patient(member, data.branch_id, data.patient_id)
     source_references(request, member, data)
     totals = draft_totals(data.lines, data.discount_kind, data.discount_value)
+    previous_sources = {}
     if data.id:
         row = get_invoice(member, data.id, lock=True)
         check_version(row.version, data.expected_version)
@@ -66,6 +67,15 @@ def save_draft(request, member, data):
             raise DomainError("CONFLICT", "An issued invoice cannot be edited.", 409)
         if row.patient_id != data.patient_id or row.branch_id != data.branch_id:
             raise DomainError("INVALID_INPUT", "Create a new draft to change patient or branch.")
+        from medframe_apps.billing.models import InvoiceLineServiceSource
+
+        previous_sources = {
+            x.line.position: x.snapshot
+            for x in InvoiceLineServiceSource.objects.filter(line__invoice=row).select_related(
+                "line"
+            )
+        }
+        InvoiceLineServiceSource.objects.filter(line__invoice=row).delete()
         row.lines.all().delete()
         row.version += 1
     else:
@@ -99,6 +109,16 @@ def save_draft(request, member, data):
             for index, line in enumerate(data.lines)
         ]
     )
+    from medframe_apps.billing.installment_actions import link_service_case, save_installment_draft
+    from medframe_apps.billing.service_sources import capture_sources
+
+    capture_sources(request, member, row, data.lines, previous_sources)
+    for line in data.lines:
+        link_service_case(request, member, row, line.service_case_id)
+    link_service_case(
+        request, member, row, data.installment.case_id if data.installment else data.case_id
+    )
+    save_installment_draft(request, member, row, data.installment)
     return row
 
 
@@ -158,6 +178,10 @@ def invoice_action(request, organization_id, action, data, request_id):
     else:
         row = get_invoice(member, parsed.id, lock=True)
         check_version(row.version, parsed.expected_version)
+        if action == "issue":
+            from medframe_apps.billing.installment_actions import issue_installment
+
+            issue_installment(request, row, parsed.agreement_confirmed, parsed.agreement_digest)
         payload = (
             issue(request, row)
             if action == "issue"

@@ -1,5 +1,17 @@
 # Deferred issue log
 
+## SERVICE-PLAN-001 — Staged activation/static and date-fixture repairs
+
+Initial39 backend cases pass38; the remaining reporting fixture used UTC instead of clinic-local date. One focused timezone-correct confirmation passes. Initial build/profile due-type, Ruff import/SQL wrapping and scoped ESLint authored-copy/ref analyzer blockers were repaired under standing local activation authorization. The first ESLint command used the wrong working directory. Logs retain each stage under /tmp/medframe-service-plans-*.log; see services-installments-verification.md. No repeated broad suite claim.
+
+## SERVICE-PLAN-002 — Browser acceptance incomplete (deferred)
+
+One browser journey stops on an ambiguous Monthly installments input/closing-option label. The sole focused continuation creates the catalog and passes1440/1024/390 captures, then stops on a stale hardcoded synthetic patient name. Current picker choices are visible in stopped.png; no page exceptions. Case/workflow/agreement/payment/portal/kiosk UI assertions remain unexecuted, and an unreached Save invoice draft locator differs from the actual Save draft button. No third browser round or full end-to-end acceptance claim. Initial CLI require/path evaluation setup errors are retained separately. Evidence: output/playwright/service-plans/ and /tmp/medframe-service-plans-browser*.log.
+
+## SERVICE-PLAN-003 — Void-plan coverage wording and remaining permutations (deferred)
+
+Source review finds void-plan rows retain generic unpaid coverage wording although due/remaining are zero and native invoice state remains void. Improve that label in a later requested refinement. Dedicated concurrent agreement issuance, every workflow/permission/device/portal and manual reminder-dispatch permutation remain outside passing acceptance evidence; existing native ledger concurrency and scoped projection/authorization cases pass. No further repair/retest loop in this phase.
+
 ## ONBOARD-004 — Onboarding visual follow-ups and remaining acceptance (deferred)
 
 Final captures establish the connected flow without horizontal overflow, but the existing dashboard still renders its zero-patient metric below the new first-run checklist; the brief prefers an empty-state-only first dashboard. Review displays machine-like provider ranges and applies capitalization too broadly to contact/timezone text. Branding shows the actual logo in its live editor and final workspace, while the review miniature and completion screen do not repeat every requested logo/administrator/specialty detail. Some preview content lies below the fold behind the ordinary sticky navigation until scrolled. Scoped lint retains two private/blob img warnings and a polling dependency advisory. No full every-step/every-device, axe or all already-signed-in-session transitions acceptance is claimed. Cleanup exists as a task/command but no new beat schedule is enabled. These are logged rather than another UI polish/testing loop. Evidence: clinic-onboarding branding/review/dashboard captures and lint-confirmation.log; see clinic-onboarding-verification.md for scope. This does not negate the passing core flow, private logo promotion or real workspace branding.
@@ -582,6 +594,7 @@ The first route probe assumed `/clinic/<organization>/settings/devices`; the act
 ## DEVICE-STATION-REFINE-002 — confirmation stops on changed dialog title
 
 The combined confirmation completes dashboard captures at 1440/1024/390 without page overflow; real department summary/drill-down, no-match/patient search, identity attestation, reception assignment and native department create/edit checks reach the subsequent device creation. Required-reading disable and keyboard switch checks complete, with desktop/phone modal captures. Create succeeds and the component title changes from Add clinic device to Manage device. The harness keeps the old dialog locator while awaiting Device settings saved and times out. A read-only inspection confirms the new title, saved function, status and clean disabled Save button. No product change or third browser run. Later browser assertions for actual clipboard, close/reopen/page-reload code redisplay, regeneration/redemption hiding, strict-setting persistence and login control remain unexecuted; scoped backend code-lifecycle tests pass. Do not claim complete browser acceptance or silently repeat the broad journey.
+
 ## CLINIC-WORKSPACE-UI-001 — scoped reporting fixture boundaries (corrected)
 
 The initial patient-summary run passes seven of eight cases; its billing fixture uses host-UTC localdate while the clinic has advanced to the next day, so native issue validation rejects a due date before issue day. The fixture now uses a future due date, and only that case passes in focused confirmation. The initial finance-report run passes five of six cases; an attempted USD invoice is correctly rejected by the existing PHP-only billing_invoice_values constraint. Replacing that fixture with supported PHP aggregation and adding the negative-net case yields two focused passes. No currency constraint, invoice policy, account, original record or production behavior was weakened. Raw staged logs are retained outside Git; no repeated clean-suite claim.
@@ -589,6 +602,7 @@ The initial patient-summary run passes seven of eight cases; its billing fixture
 ## CLINIC-WORKSPACE-UI-002 — browser empty-state role mismatch (corrected harness)
 
 The accumulated seven-page/three-width browser pass confirms 21 no-overflow captures and profile navigation/saved-note/editor-link/reload, then times out looking for the heading role `No matching patients`. Shared shadcn EmptyTitle renders a div. A single focused continuation uses exact visible text, confirms table/card/search recovery, finance period/keyboard/data-table controls, directory-only clinical exclusion and settled dashboard widgets, with no page exceptions. No product repair or third browser run. Older deferred findings remain unchanged. Evidence: ignored `output/playwright/clinic-workspace-ui/browser-initial.log` and `browser-confirmation.log`; scope/limits in `clinic-workspace-ui-verification.md`.
+
 ## KIOSK-RECOVERY-001 — Diagnostics timestamp rendering (repaired)
 
 Reported Diagnostics list with records renders a full created_at timestamp through a date-only formatter. Its numeric day becomes NaN, yielding RangeError Invalid time value. Direct reproduction confirms it; the list now uses clinic-timezone timestamp formatting, shared calendar labels validate inputs, and malformed responses no longer remain in loading indefinitely. Three pure date cases and the bounded native Diagnostics browser list/filter pass. No authorization bypass or original record changes.
@@ -604,6 +618,7 @@ The initial new backend cases use direct request objects without the middleware 
 ## KIOSK-RECOVERY-004 — retained diagnostics and coverage limits
 
 Scoped ESLint reports zero errors/two warnings (new callback member dependency and existing epoch cleanup ref). Node's direct TypeScript test import emits a module-type warning; all three cases pass. Existing original API logs also show Redis channel receive timeouts and streaming-response warnings; these are separate from the confirmed date formatter and kiosk HTTP reset paths and remain deferred without repair. The shared empty-value select's blank display and broad slow-network/idle/sign-out-failure/Google-MFA/physical-device acceptance remain outside this bounded pass. Exact evidence and limits are in `docs/operations/diagnostics-kiosk-recovery-verification.md`.
+
 ## B7-001 — website image SQL purpose constraint (activation repair)
 
 Initial scoped run passes nine/thirteen; four image cases hit the existing document_purpose constraint. Additive websites.0003 permits website images only with no patient/encounter, retaining clinical/diagnostic and other asset rules. Historical migrations and original records are unchanged. Staged focused cases pass after the fixture corrections below; no clean repeated-suite claim.

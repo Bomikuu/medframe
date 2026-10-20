@@ -1,5 +1,7 @@
 """Read-only profile facts, each section bounded by its existing native policy."""
 
+from zoneinfo import ZoneInfo
+
 from django.db import transaction
 from django.db.models import Count, Q, Sum
 from django.utils import timezone
@@ -103,6 +105,18 @@ def financial_summary(request, patient):
             or "PHP"
         )
         rows = [{"currency": currency, "outstanding": "0.00", "unpaid_count": 0}]
+    from medframe_apps.billing.installment_projection import financial_due_snapshot
+
+    amounts = financial_due_snapshot(
+        query, timezone.localdate(timezone=ZoneInfo(patient.organization.timezone))
+    )
+    for row in rows:
+        row.update(
+            {
+                key: amount_text(amounts.get(row["currency"], {}).get(key, 0))
+                for key in ["due_now", "overdue", "future"]
+            }
+        )
     return {"balances": rows}
 
 

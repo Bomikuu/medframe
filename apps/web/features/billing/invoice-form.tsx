@@ -26,21 +26,30 @@ import {
 } from "./schema";
 import { financialFailure, useFinancialAction } from "./use-billing";
 import { FinancialNotice, Money } from "./controls";
+import type { ServiceCase } from "@/features/services/schema";
+import { caseSchema } from "@/features/services/schema";
+import { useServiceAction } from "@/features/services/use-services";
+import { ServicePicker } from "./service-picker";
+import { InstallmentEditor, nextMonth } from "./installment-editor";
 
 export function InvoiceForm({
   setup,
   patientId,
   existing,
+  serviceCase,
   saved,
 }: {
   setup: BillingSetup;
   patientId?: string;
   existing?: InvoiceDetail;
+  serviceCase?: ServiceCase;
   saved: (invoice: InvoiceDetail) => void;
 }) {
   const { organizationId } = useWorkspace();
   const sheet = useEntrySheetActions();
   const action = useFinancialAction();
+  const caseAction = useServiceAction("case");
+  const today = localDate(setup.timezone);
   const capture = useRequestScope();
   const [preview, setPreview] = useState<{
     subtotal: string;
@@ -56,12 +65,53 @@ export function InvoiceForm({
       due_date: existing?.due_date ?? localDate(setup.timezone),
       discount_kind: existing?.discount_kind ?? "fixed",
       discount_value: existing?.discount_value ?? "0",
-      lines: existing?.lines.map(({ description, kind, quantity, unit_amount }) => ({
-        description,
-        kind,
-        quantity,
-        unit_amount,
-      })) ?? [{ description: "", kind: "consultation", quantity: 1, unit_amount: "" }],
+      case_id: existing?.case_id ?? serviceCase?.id ?? null,
+      installment:
+        existing?.installment_plan?.terms ??
+        (serviceCase?.financial?.payment_mode === "monthly"
+          ? {
+              case_id: serviceCase.id,
+              deposit: serviceCase.financial.deposit,
+              months: serviceCase.financial.months,
+              deposit_due: today,
+              first_due: nextMonth(today),
+            }
+          : null),
+      lines:
+        existing?.lines.map(
+          ({
+            description,
+            kind,
+            quantity,
+            unit_amount,
+            service_id,
+            service_version,
+            override_reason,
+            service_case_id,
+          }) => ({
+            description,
+            kind,
+            quantity,
+            unit_amount,
+            service_id,
+            service_version,
+            override_reason,
+            service_case_id,
+          }),
+        ) ??
+        (serviceCase?.financial
+          ? [
+              {
+                description: serviceCase.name,
+                kind: "procedure",
+                quantity: 1,
+                unit_amount: serviceCase.financial.price,
+                service_id: serviceCase.service_id,
+                service_case_id: serviceCase.id,
+                service_version: serviceCase.service_version,
+              },
+            ]
+          : [{ description: "", kind: "consultation", quantity: 1, unit_amount: "" }]),
     },
   });
   const fields = useFieldArray({ control: form.control, name: "lines" });
@@ -80,7 +130,39 @@ export function InvoiceForm({
       noValidate
       className="grid gap-7"
       onSubmit={form.handleSubmit(async (data) => {
-        const result = await action.run("save", payload(data));
+        const capturedLines = data.lines.map((line) => ({ ...line }));
+        for (let index = 0; index < capturedLines.length; index++) {
+          const line = capturedLines[index];
+          if (!line.service_id || line.service_case_id) continue;
+          const explicit =
+            capturedLines.length === 1 ? data.installment?.case_id || data.case_id : "";
+          let caseId = explicit;
+          if (!caseId) {
+            const created = await caseAction.run("create", {
+              service_id: line.service_id,
+              service_version: line.service_version,
+              patient_id: data.patient_id,
+              branch_id: setup.branch_id,
+              expected_version: 0,
+            });
+            const parsedCase = caseSchema.safeParse(created);
+            if (!parsedCase.success) return;
+            caseId = parsedCase.data.id;
+          }
+          line.service_case_id = caseId;
+          form.setValue(`lines.${index}.service_case_id`, caseId, { shouldDirty: true });
+        }
+        const linked =
+          capturedLines.length === 1 ? capturedLines[0].service_case_id || data.case_id : null;
+        const result = await action.run(
+          "save",
+          payload({
+            ...data,
+            lines: capturedLines,
+            case_id: linked || null,
+            installment: data.installment ? { ...data.installment, case_id: linked || "" } : null,
+          }),
+        );
         const parsed = invoiceDetailSchema.safeParse(result);
         if (parsed.success) {
           form.reset(data);
@@ -89,7 +171,7 @@ export function InvoiceForm({
         }
       })}
     >
-      <fieldset disabled={action.busy} className="grid min-w-0 gap-7">
+      <fieldset disabled={action.busy || caseAction.busy} className="grid min-w-0 gap-7">
         <section className="grid gap-4">
           <h3 className="font-semibold">Patient and due date</h3>
           <FormSelect
@@ -97,7 +179,14 @@ export function InvoiceForm({
             label="Patient"
             value={values.patient_id ?? ""}
             disabled={!!existing || !!patientId}
-            onChange={(value) => form.setValue("patient_id", value, { shouldDirty: true })}
+            onChange={(value) => {
+              form.setValue("patient_id", value, { shouldDirty: true });
+              form.setValue("case_id", null);
+              form
+                .getValues("lines")
+                .forEach((_, index) => form.setValue(`lines.${index}.service_case_id`, null));
+              if (form.getValues("installment")) form.setValue("installment.case_id", "");
+            }}
             error={form.formState.errors.patient_id?.message}
             options={[
               ...(existing && !setup.patients.some((patient) => patient.id === existing.patient_id)
@@ -124,6 +213,38 @@ export function InvoiceForm({
         </section>
         <section className="grid gap-5 border-t border-border pt-6">
           <h3 className="font-semibold">Charges</h3>
+          {!serviceCase && (
+            <ServicePicker
+              branchId={setup.branch_id}
+              onSelect={(service) => {
+                const line = {
+                  description: service.name,
+                  kind: "procedure" as const,
+                  quantity: 1,
+                  unit_amount: service.price ?? "",
+                  service_id: service.id,
+                  service_version: service.version,
+                };
+                if (fields.fields.length === 1 && !form.getValues("lines.0.description"))
+                  fields.replace([line]);
+                else fields.append(line);
+                if (service.payment_mode === "monthly" && form.getValues("lines").length === 1)
+                  form.setValue(
+                    "installment",
+                    {
+                      case_id: "",
+                      deposit: service.deposit ?? "0",
+                      months: service.months ?? 24,
+                      deposit_due: today,
+                      first_due: nextMonth(today),
+                    },
+                    { shouldDirty: true },
+                  );
+                setPreview(null);
+              }}
+            />
+          )}
+
           {fields.fields.map((row, index) => (
             <div key={row.id} className="grid min-w-0 gap-4 border-b border-border pb-5">
               <div className="flex items-center justify-between gap-3">
@@ -153,6 +274,18 @@ export function InvoiceForm({
                   {...form.register(`lines.${index}.description`)}
                 />
               </FormField>
+              {values.lines?.[index]?.service_id && (
+                <FormField
+                  id={`charge-override-${index}`}
+                  label="Reason if agreeing a different price"
+                >
+                  <Input
+                    id={`charge-override-${index}`}
+                    maxLength={500}
+                    {...form.register(`lines.${index}.override_reason`)}
+                  />
+                </FormField>
+              )}
               <div className="grid min-w-0 gap-4 @min-[480px]:grid-cols-[1fr_96px_140px]">
                 <FormSelect
                   id={`charge-kind-${index}`}
@@ -213,6 +346,17 @@ export function InvoiceForm({
             Add charge
           </Button>
         </section>
+        <InstallmentEditor
+          form={form}
+          today={today}
+          enabled={
+            values.lines?.length === 1 &&
+            !!values.lines?.[0]?.service_id &&
+            values.lines?.[0]?.quantity === 1
+          }
+          sourceDeposit={serviceCase?.financial?.deposit}
+          sourceMonths={serviceCase?.financial?.months}
+        />
         <section className="grid gap-4">
           <h3 className="font-semibold">Discount</h3>
           <div className="grid gap-4 @min-[480px]:grid-cols-2">
@@ -299,17 +443,17 @@ export function InvoiceForm({
           {previewError && <FinancialNotice error={previewError} />}
         </div>
       </fieldset>
-      <FinancialNotice error={action.error} />
+      <FinancialNotice error={caseAction.error || action.error} />
       <div className="sticky bottom-0 flex flex-wrap justify-end gap-3 border-t border-border bg-card py-4">
         <Button
           type="button"
           variant="outline"
-          disabled={action.busy}
+          disabled={action.busy || caseAction.busy}
           onClick={() => sheet?.cancel()}
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={action.busy}>
+        <Button type="submit" disabled={action.busy || caseAction.busy}>
           {action.busy ? "Saving draft…" : "Save draft"}
         </Button>
       </div>

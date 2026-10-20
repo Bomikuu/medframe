@@ -29,7 +29,7 @@ from medframe_apps.idempotency import record_request_result, replay_request
 PURPOSE = {"appointment": "appointments", "follow_up": "follow_ups", "invoice": "billing"}
 
 
-def safe_message(source, kind, zone):
+def safe_message(source, kind, zone, obligation=None):
     if kind == "appointment":
         moment = source.start.astimezone(ZoneInfo(zone)).strftime("%d %b %Y, %I:%M %p")
         return (
@@ -40,6 +40,14 @@ def safe_message(source, kind, zone):
         return (
             "Medframe: Please contact your clinic about a follow-up. "
             "Sign in to your patient portal for shared information."
+        )
+    if obligation:
+        from medframe_apps.billing.calculations import amount_text
+
+        return (
+            f"Medframe: Installment of PHP {amount_text(obligation['amount'])} "
+            f"scheduled for {obligation['date']}. "
+            "Sign in to your patient portal for your statement."
         )
     return (
         "Medframe: A billing update is available. "
@@ -74,9 +82,22 @@ def create_reminder(request, member, parsed, *, automatic=False):
     )
     if not source_active(source, parsed.source_kind):
         raise DomainError("CONFLICT", "This source no longer needs a reminder.", 409)
+    from medframe_apps.communications.installments import reminder_obligation
+
+    if parsed.source_kind == "invoice" and hasattr(source, "installment"):
+        from medframe_apps.billing.policy import staff_member
+
+        staff_member(request, member.organization_id, "billing.read")
+    obligation = (
+        reminder_obligation(source, parsed.obligation_id)
+        if parsed.source_kind == "invoice"
+        else None
+    )
+    if parsed.source_kind != "invoice" and parsed.obligation_id:
+        raise DomainError("INVALID_INPUT", "Choose an installment only for an invoice.")
     preference = eligible_preference(parsed.patient_id, parsed.source_kind, parsed.channel)
     key = hashlib.sha256(
-        f"{member.organization_id}:{source.id}:{parsed.source_kind}:{source.version}:{preference.version}:{parsed.channel}:{parsed.due_at.isoformat()}".encode()
+        f"{member.organization_id}:{source.id}:{parsed.source_kind}:{source.version}:{preference.version}:{parsed.channel}:{parsed.due_at.isoformat()}:{obligation}".encode()
     ).hexdigest()
     row, created = Reminder.objects.get_or_create(
         dedup_key=key,
@@ -92,6 +113,7 @@ def create_reminder(request, member, parsed, *, automatic=False):
             "channel": parsed.channel,
             "created_by": request.user,
             "automatic": automatic,
+            "obligation_snapshot": obligation,
         },
     )
     if created:

@@ -27,6 +27,7 @@ class ReminderInput(Input):
     patient_id: UUID
     source_kind: Literal["appointment", "follow_up", "invoice"]
     source_id: UUID
+    obligation_id: UUID | None = None
     channel: Literal["sms", "in_app"]
     due_at: datetime
 

@@ -45,6 +45,8 @@ def annotated_invoices(query):
 
 
 def invoice_summary(row, *, portal=False):
+    from medframe_apps.billing.installment_projection import invoice_due_projection, serialize_due
+
     totals = invoice_totals(row)
     return {
         "id": str(row.id),
@@ -60,6 +62,7 @@ def invoice_summary(row, *, portal=False):
         "version": row.version,
         "created_at": row.created_at.isoformat(),
         "issued_at": row.issued_at.isoformat() if row.issued_at else None,
+        "due": serialize_due(invoice_due_projection(row), portal=portal),
         **{
             key: value if key == "payment_status" else amount_text(value)
             for key, value in totals.items()
@@ -68,7 +71,17 @@ def invoice_summary(row, *, portal=False):
 
 
 def invoice_detail(row, *, portal=False):
+    from medframe_apps.billing.installment_actions import agreement_review
+
     result = invoice_summary(row, portal=portal)
+    review = agreement_review(row)
+    link = row.service_cases.first()
+    result["case_id"] = str(link.case_id) if link and not portal else None
+    result["installment_plan"] = (
+        {key: value for key, value in review.items() if key != "source"}
+        if portal and review
+        else review
+    )
     result.update(
         {
             "discount_kind": row.discount_kind,
@@ -80,6 +93,18 @@ def invoice_detail(row, *, portal=False):
                     "quantity": line.quantity,
                     "unit_amount": amount_text(line.unit_amount),
                     "line_total": amount_text(line.quantity * line.unit_amount),
+                    **(
+                        {
+                            "service_id": str(line.service_source.service_id),
+                            "service_case_id": line.service_source.snapshot.get("_case_id"),
+                            "service_version": line.service_source.service_version,
+                            "override_reason": line.service_source.snapshot.get(
+                                "override_reason", ""
+                            ),
+                        }
+                        if hasattr(line, "service_source") and not portal
+                        else {}
+                    ),
                 }
                 for line in row.lines.order_by("position")
             ],

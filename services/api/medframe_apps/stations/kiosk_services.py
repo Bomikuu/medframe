@@ -243,6 +243,7 @@ def perform(request, data):
 def balances(session):
     require_task_code(session)
     from medframe_apps.billing.calculations import amount_text, invoice_totals
+    from medframe_apps.billing.installment_projection import invoice_due_projection, serialize_due
     from medframe_apps.billing.models import Invoice
 
     invoices = []
@@ -256,6 +257,7 @@ def balances(session):
                 "currency": row.currency,
                 "total": amount_text(row.total),
                 "outstanding": amount_text(total["outstanding"]),
+                "due": serialize_due(invoice_due_projection(row)),
                 "paid": amount_text(total["paid"]),
                 "status": total["payment_status"],
                 "lines": [

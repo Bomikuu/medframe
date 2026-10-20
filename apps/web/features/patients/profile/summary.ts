@@ -30,7 +30,14 @@ export const profileSummarySchema = z.object({
   financial: z
     .object({
       balances: z.array(
-        z.object({ currency: z.string(), outstanding: z.string(), unpaid_count: z.number() }),
+        z.object({
+          currency: z.string(),
+          outstanding: z.string(),
+          unpaid_count: z.number(),
+          due_now: z.string().optional(),
+          overdue: z.string().optional(),
+          future: z.string().optional(),
+        }),
       ),
     })
     .nullable(),

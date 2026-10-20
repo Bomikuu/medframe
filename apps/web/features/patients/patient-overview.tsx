@@ -1,5 +1,6 @@
 "use client";
 
+import { PatientServices } from "@/features/services/patient-services";
 import { PatientBilling } from "@/features/billing/patient-billing";
 
 import Link from "next/link";
@@ -51,6 +52,7 @@ export function PatientOverview({
     ["treatments", "Treatment plan", clinical],
     ["diagnostics", "Diagnostics", clinical && can("diagnostics.read")],
     ["documents", "Documents", clinical],
+    ["services", "Services", can("services.read")],
     ["billing", "Billing", can("billing.read")],
     ["shared", "Shared records", clinical],
     ["access", "Access", can("portal.manage") || can("patients.access.manage")],
@@ -156,6 +158,11 @@ export function PatientOverview({
             ))}
           </TabsList>
         </div>
+        <TabsContent value="services">
+          {active === "services" && can("services.read") && (
+            <PatientServices patientId={patientId} branchId={patient.branchId} />
+          )}
+        </TabsContent>
         <TabsContent value="billing">
           {active === "billing" && can("billing.read") && (
             <PatientBilling patientId={patientId} branchId={patient.branchId} />

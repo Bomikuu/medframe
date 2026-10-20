@@ -1,0 +1,50 @@
+query ServiceCatalog($organizationId: UUID!, $branchId: UUID!, $filters: JSON, $after: String) {
+  serviceCatalog(
+    organizationId: $organizationId
+    branchId: $branchId
+    filters: $filters
+    after: $after
+  )
+}
+query PatientServices(
+  $organizationId: UUID!
+  $branchId: UUID!
+  $filters: JSON
+  $patientId: UUID
+  $after: String
+) {
+  patientServices(
+    organizationId: $organizationId
+    branchId: $branchId
+    filters: $filters
+    patientId: $patientId
+    after: $after
+  )
+}
+query PatientService($organizationId: UUID!, $caseId: UUID!) {
+  patientService(organizationId: $organizationId, caseId: $caseId)
+}
+query ServicePatients($organizationId: UUID!, $branchId: UUID!, $search: String!) {
+  servicePatients(organizationId: $organizationId, branchId: $branchId, search: $search)
+}
+mutation ServiceAction($organizationId: UUID!, $action: String!, $data: JSON!, $requestId: UUID!) {
+  serviceAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    requestId: $requestId
+  )
+}
+mutation PatientServiceAction(
+  $organizationId: UUID!
+  $action: String!
+  $data: JSON!
+  $requestId: UUID!
+) {
+  patientServiceAction(
+    organizationId: $organizationId
+    action: $action
+    data: $data
+    requestId: $requestId
+  )
+}

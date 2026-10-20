@@ -94,6 +94,8 @@ input MedicationInput {
 }
 
 type Mutation {
+  serviceAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
+  patientServiceAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   websiteAction(organizationId: UUID!, action: String!, data: JSON!, expectedVersion: Int!): JSON!
   inviteClinic(data: JSON!, requestId: UUID!): JSON!
   resendClinicInvitation(invitationId: UUID!, expectedVersion: Int!): JSON!
@@ -230,6 +232,10 @@ type ProviderType {
 }
 
 type Query {
+  servicePatients(organizationId: UUID!, branchId: UUID!, search: String! = ""): JSON!
+  serviceCatalog(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null): JSON!
+  patientServices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, patientId: UUID = null, after: String = null): JSON!
+  patientService(organizationId: UUID!, caseId: UUID!): JSON!
   websiteSetup(organizationId: UUID!): JSON!
   platformCapabilities: JSON!
   clinicInvitations(offset: Int! = 0, status: String! = ""): JSON!

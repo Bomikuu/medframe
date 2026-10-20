@@ -28,7 +28,17 @@ export const communicationSetupSchema = z.object({
     .array(z.object({ id: z.string(), name: z.string(), relationship: z.string() }))
     .optional(),
   sources: z
-    .array(z.object({ id: z.string(), kind: z.string(), label: z.string(), message: z.string() }))
+    .array(
+      z.object({
+        id: z.string(),
+        kind: z.string(),
+        label: z.string(),
+        message: z.string(),
+        installments: z
+          .array(z.object({ id: z.string(), due_date: z.string(), remaining: z.string() }))
+          .optional(),
+      }),
+    )
     .optional(),
 });
 export type CommunicationSetup = z.infer<typeof communicationSetupSchema>;
