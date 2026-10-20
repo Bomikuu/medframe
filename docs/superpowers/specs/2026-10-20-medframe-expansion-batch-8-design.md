@@ -1,6 +1,6 @@
 # Batch 8 — analytics, specialty workspaces and local interoperability
 
-Status: scope approved by the user on October20,2026 through the written-spec review question. No product implementation or database changes yet. Native execution and local activation remain selected. The written implementation plan is the next review artifact.
+Status: the user approved this scope and its written native plan on October20,2026. The approved local milestone is implemented and activated; actual verification, bounded browser gaps, preservation and rollback are recorded in `docs/operations/django-batch-8-verification.md`. External/optional integrations remain outside this contract.
 
 ## Intent and existing requirements
 
