@@ -181,3 +181,15 @@ The October 20 explicit global-toggle request uses one shared pill track/thumb a
 ### Clinic websites — Batch 7
 
 The builder remains an Operate surface in the clinical design system. Public clinic pages are a separate Persuade surface with explicitly authored copy, bounded navy/teal/forest/clay palettes, modern sans or editorial serif typography, generous section spacing and optional approved clinic imagery. Preview uses container responsiveness; the public hero overrides the dashboard-only h1 scale. Empty sections stay hidden publicly. No automatic patient/provider-record content, fabricated social proof, clinical images, arbitrary HTML/CSS or tracking scripts. See the Batch 7 spec and actual verification for publication/privacy and custom-domain limits.
+
+## Phase5 setup and reporting clarity
+
+The first-run checklist promotes one real next action and precedes empty metrics.
+Setup review preserves name/email casing and uses explicit provider/day labels;
+clinic logos keep proportions through the existing private preview. Templates
+show standard/enabled/historical specialties with save/dirty/discard feedback.
+Reports use explicit inclusive completed-day ranges and equal previous periods;
+current balance snapshots have their own as-of clinic date/time. Date changes
+apply on request, keeping old report context until applied. Shared white/navy/teal,
+shadcn forms, Tailwind and exact accessible tables remain authoritative. Actual
+verification and retained visual limits are recorded in the Phase5 evidence.

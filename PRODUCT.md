@@ -102,3 +102,17 @@ Dental current-state illustrations are active locally with `.next-dental-illustr
 The active `.next-clinical-ai-drawer` refinement replaces both AI columns with a shared full-height floating drawer. Crowns have a distinct gold schematic shell; missing teeth remain labelled red reference placeholders. AI integration remains disabled. See `docs/operations/clinical-ai-drawer-verification.md` for staged verification and responsive acceptance gaps.
 
 Station Phase 2 is active locally with `.next-station-kiosk`: verified four-action patient kiosk, existing appointment/reservation/check-in reuse, one patient visit across provider-optional department queues, staff-reviewed new registration and verified bill/cashier continuation. Staff configure departments and issue patient codes in Patient Stations; verified portal users can issue their own short code. Digital payments/cash hardware/TV remain Phase 3 and no kiosk button records settlement. See `docs/operations/station-kiosk-verification.md` for actual scope, staged verification, explicit setup, preserved data and remaining dependencies.
+
+## Onboarding and reporting refinement — roadmap Phase5
+
+The native onboarding review and first-run checklist now show readable saved
+identity/configuration and practical next actions. Specialty/template discovery
+distinguishes standard, enabled and historical guidance without altering clinical
+credentials or copying patient facts. Custom1–366-day completed-clinic-day reports
+compare the immediately previous equal calendar span; period activity and current
+balances remain distinct. CSV uses the same resolved dates. Verified custom-host
+canonical/OpenGraph/JSON-LD URLs agree, with private-route denial preserved.
+Active locally in .next-onboarding-reporting; exact staged evidence, unchanged
+identity/data, current advisory/runtime inventory and browser limits are in
+docs/operations/onboarding-reporting-refinement-verification.md. No AI/live
+payment/message integration or public deployment was added.

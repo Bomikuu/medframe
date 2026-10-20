@@ -787,3 +787,65 @@ although the dedicated approved display is implemented. Display390 capture has a
 tall wrapped header for a long synthetic clinic name; no horizontal overflow.
 These do not block native feed/access; record rather than run a polish/retest
 loop. Existing kiosk callback warning and older unrelated findings remain.
+
+## PHASE5-001 — Scoped implementation blockers repaired for activation
+
+Initial build stops on missing error/retry props in the new setup loading state;
+the next TypeScript stage exposes an unknown-valued error guard in TemplateEditor.
+Supply the incumbent LoadState contract and use an explicit boolean guard. A
+complete TypeScript confirmation and production build pass. The later approved
+custom-date extension has its own passing build/scoped ESLint/codegen. Final
+snapshot timestamps use an explicit clinic-zone formatter:2 midnight/fallback
+unit cases and final production build pass; no third browser run. Node emits the
+known module-typeless TS harness warning; package type was not changed to hide it.
+Initial Ruff preparation precedes formatting and reports line lengths/imports;
+final scoped Ruff and authored Prettier pass. No unrelated warning repair.
+
+## PHASE5-002 — Native branch and currency guards reject review fixtures
+
+Initial12-case backend pass:11 pass,1 schedule fixture fails native provider/
+branch scope. Use a distinct explicitly enrolled org-wide provider membership
+for the other-branch schedule; one failed-case confirmation passes. No scope
+constraint relaxed. After the user approved custom dates,14 targeted cases run:
+13 pass,1 attempts unsupported USD in the PHP-only native ledger and is correctly
+rejected by billing_invoice_values. Remove unsupported setup; one failed-case
+confirmation passes. Native currency/ledger guards remain. All24 distinct cases
+have staged passing evidence, including2 repeated existing analytics cases in
+the date extension; this is not a clean repeated24-case suite. Logs under
+/tmp/medframe-phase5-{tests,tests-confirmation,dates-tests,dates-test-confirmation}.log.
+
+## PHASE5-003 — Bounded browser fixture corrections and retained limits
+
+Initial5 independent groups: first-run dashboard, preset report/download and
+host metadata pass. Review's storage-state filename collides with metadata and
+produces an unavailable-invitation screen. Recover the existing valid native
+session/proof without changing authority/expiry; distinct metadata filename fixes
+future preparation. Specialty group reaches native starter save, unsaved/discard,
+responsive captures and removing Pediatrics, then wrongly expects no starter
+while Dermatology/Orthopedics remain enabled. Do not alter product selection
+rules. One confirmation clears the three starter specialties natively and passes
+review, generic guidance and newly approved custom-date groups; zero page errors.
+
+Review capture contains undefined colors/hours because its manually assembled
+fixture omits defaults that native validate_step normally supplies. Future
+preparer now validates complete step payloads; no third browser/visual run.
+Full default-value rendering and new review-logo image load are not independently
+browser accepted. Existing logo upload/scan/identity evidence remains separate.
+Final timestamp-only clinic-date correction is unit/build verified after browser
+confirmation; no claim of a third final-artifact browser sweep. Older Phase3/4
+payment/print/editor gaps remain deferred. Actual preset77-row/custom63-row CSV
+files were downloaded and read; date/snapshot metadata matches the applied range.
+Evidence /tmp/medframe-phase5-browser{,-confirmation}.log and ignored
+output/playwright/phase5/.
+
+## PHASE5-004 — Dependency and runtime inventory, no speculative repair
+
+Read docs/operations/onboarding-reporting-advisories.md for actual inventories and
+upstream advisory. npm reports12 high development dependency-tree entries for a
+single braces advisory; production npm and locked Python scans report no known
+advisories. No supported patch listed when checked, no major downgrade/blanket
+upgrade. A synthetic26-byte sync FileResponse reproduces the async iterator
+warning. A unique isolated Redis channel with existing settings reproduces
+redis.exceptions.TimeoutError within an8-second idle probe, no production groups
+or clinical messages. These findings remain deferred; no warning suppression,
+stream/channel rewrite or complete protected-file/socket browser claim.

@@ -19,7 +19,7 @@ feed untrusted patterns into tooling; a supported upstream patch needs its own
 minimal change/affected-flow checks. No speculative vendor patch in this phase.
 
 Python production requirements exported from the locked uv project, audited once
-with pip-audit --no-deps --disable-pip: no known vulnerabilities reported. Scanner
+with pip-audit --no-deps --disable-pip:79 applicable packages, no known vulnerabilities reported. Scanner
 warns about lack of full hashes in exported requirements. No dependency install
 inside the product environment; uvx runs its isolated scanner environment.
 Raw inventory /tmp/medframe-phase5-{npm-audit,npm-production-audit,python-packages,

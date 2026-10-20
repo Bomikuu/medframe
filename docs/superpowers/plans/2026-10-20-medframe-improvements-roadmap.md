@@ -2,7 +2,7 @@
 
 **Purpose:** Make the implemented clinic workflows dependable, easier to use and cheaper to verify before adding another large subsystem.
 
-**Status:** User approved native implementation of Phases 1 and 2 on October 20, 2026. Implemented together in `48d6bb0`; see `docs/operations/workflow-finance-improvements-verification.md` for activation and staged evidence. Template-application browser acceptance and print pagination remain recorded follow-ups. User subsequently selected Phases3/4. Phase3 changes are active in76c42cd with logged acceptance limits; Phase4 contract was approved by proceeding and implemented in0a882d1; see docs/operations/station-operations-completion-verification.md for activation and bounded acceptance gaps. Phase5 remains a proposal. No subagents or separate chats.
+**Status:** User approved native implementation of Phases 1 and 2 on October 20, 2026. Implemented together in `48d6bb0`; see `docs/operations/workflow-finance-improvements-verification.md` for activation and staged evidence. Template-application browser acceptance and print pagination remain recorded follow-ups. User subsequently selected Phases3/4. Phase3 changes are active in76c42cd with logged acceptance limits; Phase4 contract was approved by proceeding and implemented in0a882d1; see docs/operations/station-operations-completion-verification.md for activation and bounded acceptance gaps. Phase5 is implemented in d752a57; its approved custom-date policy, local activation and staged evidence are recorded in docs/operations/onboarding-reporting-refinement-verification.md. No subagents or separate chats.
 
 **Baseline:** `395fafc`, active `.next-batch8`, original Django database. Preserve existing data, accounts/MFA, role/patient boundaries and the user's uncommitted clinic-shell width change. Existing Batch8 scope/spec and phase verification records remain the sources of implemented behavior.
 
@@ -112,15 +112,17 @@ Live digital payments are a separate integration: choose a provider and environm
 
 ## Phase 5 — onboarding and reporting refinement
 
+**Implementation:** d752a57, .next-onboarding-reporting, native. User approved1–366 inclusive completed clinic days with an immediately preceding equal calendar comparison and current snapshots kept separate. No further date-policy decision is pending. See docs/operations/onboarding-reporting-refinement-verification.md; browser default-value/logo loading gaps and dependency/runtime findings remain recorded.
+
 **User outcome:** Clinic setup and reporting explain what is ready, what needs attention and what the figures mean.
 
 **Owners:** `apps/web/features/onboarding/{review-step,workspace-preview}.tsx`, existing setup checklist/dashboard, analytics/finance projections, `apps/web/features/websites/`, public metadata/proxy owners.
 
-- [ ] Replace machine-style provider ranges and over-capitalized review text with readable labels; make the actual clinic name/logo/admin/specialty summary consistent. Improve the first-run dashboard using the existing checklist rather than duplicating empty metrics.
-- [ ] Improve specialty/template discovery with readable active/legacy labels and clear unsaved/save feedback; retain generic guidance when a clinic has no selected starter. Do not add clinical advice or automatically alter provider credentials.
-- [ ] Add custom reporting ranges only after agreeing a bounded range/timezone policy; keep current-balance snapshots separate from period flows, exact tables available and currencies distinct. Do not introduce clinic/provider revenue attribution or collection-rate denominators that the ledger cannot support.
-- [ ] Recheck verified custom-host propagation and choose consistent canonical/OpenGraph/structured-data URLs. Current metadata already has a host-aware branch; reproduce the reported mismatch before editing it. No real DNS/TLS/public publishing changes without the relevant user request.
-- [ ] Inventory current dependency advisories and reproduce streaming/Redis warnings separately. Prefer minimal supported fixes with affected-flow checks; no blanket package upgrades or new tracking services.
+- [x] Replace machine-style provider ranges and over-capitalized review text with readable labels; make the actual clinic name/logo/admin/specialty summary consistent. Improve the first-run dashboard using the existing checklist rather than duplicating empty metrics.
+- [x] Improve specialty/template discovery with readable active/legacy labels and clear unsaved/save feedback; retain generic guidance when a clinic has no selected starter. Do not add clinical advice or automatically alter provider credentials.
+- [x] Add custom reporting ranges only after agreeing a bounded range/timezone policy; keep current-balance snapshots separate from period flows, exact tables available and currencies distinct. Do not introduce clinic/provider revenue attribution or collection-rate denominators that the ledger cannot support.
+- [x] Recheck verified custom-host propagation and choose consistent canonical/OpenGraph/structured-data URLs. Current metadata already has a host-aware branch; reproduce the reported mismatch before editing it. No real DNS/TLS/public publishing changes without the relevant user request.
+- [x] Inventory current dependency advisories and reproduce streaming/Redis warnings separately. Prefer minimal supported fixes with affected-flow checks; no blanket package upgrades or new tracking services.
 
 **Done:** A new clinic can understand its setup summary and next action; report periods and snapshots are explicit; verified-host behavior matches the chosen policy and preserves private-route denial.
 
@@ -149,4 +151,4 @@ Graphify queried the existing current Batch8 graphs first using actual vocabular
 
 Sanitized Jev selects finish_existing over external_expansion, confidence1.0, model jev-1.13.0,480input/36output tokens; CLI/auth status succeed. It received only generic implementation/evidence state, no patient information, credentials, private attachments or original database content. This supports prioritization, not proof or authorization. Local logs: `/tmp/medframe-improvements-{frontend-graph,backend-graph,jev}.*`.
 
-**Current status:** Phases1/2, Phase3 and Phase4 are locally active with their separate bounded evidence and logged gaps. Phase4 record: docs/operations/station-operations-completion-verification.md. Phase5 remains proposed; no live external integration or unrelated repair is included.
+**Current status:** Phases1/2, Phase3 and Phase4 are locally active with their separate bounded evidence and logged gaps. Phase4 record: docs/operations/station-operations-completion-verification.md. Phase5 is locally active with bounded evidence in docs/operations/onboarding-reporting-refinement-verification.md. All five roadmap phases have implemented scope and separately logged follow-ups; no live external integration or unrelated repair is included.
