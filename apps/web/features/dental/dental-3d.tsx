@@ -9,24 +9,22 @@ import { Button } from "@/components/ui/button";
 import type { Finding } from "@/features/consultations/schema";
 import type { AnnotationInteraction } from "./annotation-pins";
 import { AnatomicalScene } from "./anatomical-scene";
+import { ContextLoss } from "@/features/visualization/context-loss";
 import { CanvasToolbar, CanvasNavigation } from "./canvas-tools";
 import { ViewPreviews } from "./view-previews";
 import { useDentalViewport, type DentalViewport } from "./use-dental-viewport";
 import { MOLAR_REFERENCE_MODEL, PERMANENT_MODEL, VIEW_OPTIONS, toothPresentation } from "./anatomy";
 
-class ModelBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+class ModelBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { failed: boolean }
+> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
   render() {
-    return this.state.failed ? (
-      <p role="status" className="rounded-lg border border-border p-6 text-sm">
-        The anatomical model could not load. Open the 2D tooth selector to continue charting.
-      </p>
-    ) : (
-      this.props.children
-    );
+    return this.state.failed ? this.props.fallback : this.props.children;
   }
 }
 
@@ -40,11 +38,13 @@ export default function Dental3D({
   annotations,
   workspace,
   onAnnotate,
+  onOpen2D,
 }: {
   editor?: boolean;
   annotations?: AnnotationInteraction;
   workspace?: DentalViewport;
   onAnnotate?: () => void;
+  onOpen2D?: () => void;
   selected: string;
   onSelect: (id: string, surface?: string) => void;
   selectedSurface: string | null;
@@ -53,6 +53,8 @@ export default function Dental3D({
 }) {
   const localViewport = useDentalViewport();
   const viewport = workspace ?? localViewport;
+  const [failed, setFailed] = useState(false);
+  const fail = useCallback(() => setFailed(true), []);
   const [readyUrl, setReadyUrl] = useState<string | null>(null);
   const controls = useRef<OrbitControlsInstance | null>(null);
   const focused = findings.find((finding) => finding.key === annotations?.activeKey)?.anchor;
@@ -73,8 +75,27 @@ export default function Dental3D({
     viewport.resetCamera();
     annotations?.onOpen(null);
   }
+  const fallback = (
+    <div role="status" className="grid gap-4 rounded-xl border border-border bg-card p-6 text-sm">
+      <h3 className="font-semibold">3D is unavailable</h3>
+      <p className="max-w-prose leading-6 text-muted-foreground">
+        The model could not load or its graphics context was lost. Your notes, findings and selected
+        tooth are retained. Continue charting with the 2D selector.
+      </p>
+      <p className="font-medium">
+        Selected · tooth {selected}
+        {selectedSurface ? ` · ${selectedSurface}` : " · whole tooth"}
+      </p>
+      {onOpen2D && (
+        <Button type="button" variant="outline" className="w-fit" onClick={onOpen2D}>
+          Continue in 2D
+        </Button>
+      )}
+    </div>
+  );
+  if (failed) return fallback;
   return (
-    <ModelBoundary>
+    <ModelBoundary fallback={fallback}>
       <div className={editor ? "flex h-full min-h-0 min-w-0 flex-col gap-3" : "grid min-w-0 gap-4"}>
         <div role="status" className="flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded-md bg-cyan-800 px-3 py-2 font-semibold text-white">
@@ -103,6 +124,7 @@ export default function Dental3D({
             </p>
           )}
           <Canvas
+            fallback={fallback}
             onCreated={({ gl }) => {
               gl.localClippingEnabled = true;
             }}
@@ -111,6 +133,7 @@ export default function Dental3D({
             dpr={[1, 1.5]}
             gl={{ antialias: true }}
           >
+            <ContextLoss onFailure={fail} />
             <hemisphereLight args={["#ffffff", "#a7adb5", 2]} />
             <directionalLight position={[3, 5, 5]} intensity={2.5} />
             <directionalLight position={[-3, -3, -3]} intensity={1.2} />

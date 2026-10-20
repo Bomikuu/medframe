@@ -64,6 +64,7 @@ export function DentalEditor({
   navigation,
   onPatientRecord,
   onPendingChange,
+  editingNotice,
   clinicalContext,
 }: {
   readOnly: boolean;
@@ -80,6 +81,7 @@ export function DentalEditor({
   navigation: ReactNode;
   onPatientRecord: () => void;
   onPendingChange?: (pending: boolean) => void;
+  editingNotice?: string;
   clinicalContext?: ReactNode;
 }) {
   const { organizationId } = useWorkspace();
@@ -136,7 +138,13 @@ export function DentalEditor({
   const [inspectorTab, setInspectorTab] = useState("findings");
   function show2DChart() {
     setChartOpen(true);
+    setInspectorOpen(false);
     viewport.setExpandedCanvas(false);
+    requestAnimationFrame(() => {
+      const summary = chartRef.current?.querySelector("summary");
+      summary?.focus();
+      summary?.scrollIntoView({ block: "nearest" });
+    });
   }
   function selectTooth(id: string) {
     setSelected(id);
@@ -302,6 +310,8 @@ export function DentalEditor({
           reason={reason}
           status={encounterStatus}
           feedback={feedback}
+          editingNotice={editingNotice}
+          readOnly={readOnly}
           pending={!!pending}
           onExit={onExit}
           inspectorOpen={inspectorOpen}
@@ -374,6 +384,7 @@ export function DentalEditor({
                   annotations={annotations}
                   workspace={viewport}
                   onAnnotate={addFinding}
+                  onOpen2D={show2DChart}
                 />
               )}
               <details

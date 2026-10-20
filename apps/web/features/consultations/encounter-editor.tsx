@@ -32,6 +32,7 @@ import { AnatomyEditor } from "@/features/anatomy/anatomy-editor";
 import { DentalEditor } from "@/features/dental/dental-editor";
 import { DocumentPanel } from "@/features/documents/document-panel";
 import { templateSchema } from "./templates/schema";
+import { editorAccessLabel } from "@/features/stations/editor-access-label";
 import { TemplatePicker, TemplatePrompts } from "./templates/template-picker";
 import { SoapFields } from "./soap-fields";
 import { DiagnosisFields } from "./diagnosis-fields";
@@ -111,6 +112,14 @@ function OwnedEncounterEditor({
   const readOnly =
     exactRevision || !encounter.editable || !can("encounters.write") || !leaseControl.canEdit;
   const [review, setReview] = useState(false);
+  const editingNotice = editorAccessLabel({
+    historical: exactRevision,
+    editable: encounter.editable,
+    permitted: can("encounters.write"),
+    canEdit: leaseControl.canEdit,
+    lease: leaseControl.lease,
+    error: leaseControl.error,
+  });
   const [clinicalTab, setClinicalTab] = useState(
     leaseControl.initialSelection.tab ||
       (initial.providerSpecialty === "general_medicine" ? "anatomy" : "dental"),
@@ -647,6 +656,7 @@ function OwnedEncounterEditor({
                   <TabsContent value="dental" forceMount className="data-[state=inactive]:hidden">
                     <div className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-6">
                       <DentalEditor
+                        editingNotice={editingNotice}
                         onPendingChange={setChartPending}
                         clinicalContext={
                           <ClinicalAlerts

@@ -17,6 +17,7 @@ export type AnatomyConsultation = {
   patientId?: string;
   status: string;
   saveStatus: string;
+  editingNotice?: string;
   busy: boolean;
   canComplete: boolean;
   canFinalize: boolean;
@@ -155,6 +156,15 @@ export function AnatomyHeader({
           {state} · {consultation.saveStatus}
         </p>
       </header>
+      <p
+        role="status"
+        className="shrink-0 border-b border-border bg-card px-4 py-2 text-xs font-medium sm:px-5"
+      >
+        {consultation.editingNotice ??
+          (readOnly
+            ? "Read only · changes cannot be recorded from this view."
+            : "Editing this consultation draft")}
+      </p>
       {consultation.navigation}
       {consultation.clinicalContext}
     </>

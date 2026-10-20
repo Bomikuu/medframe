@@ -10,6 +10,8 @@ import { StatusBadge } from "@/components/application/status-badge";
 import { ArrowLeftIcon } from "@/components/icons";
 
 export function DentalEditorHeader({
+  editingNotice,
+  readOnly,
   patientName,
   reason,
   status,
@@ -21,6 +23,8 @@ export function DentalEditorHeader({
   inspectorOpen,
   onInspector,
 }: {
+  editingNotice?: string;
+  readOnly: boolean;
   patientName: string;
   reason: string;
   status: string;
@@ -83,9 +87,15 @@ export function DentalEditorHeader({
         {navigation}
       </nav>
       <div
-        className={`${pending ? "block" : "xl:hidden"} shrink-0 border-b border-border px-4 py-2 text-xs`}
+        className={`${pending || readOnly ? "block" : "xl:hidden"} shrink-0 border-b border-border px-4 py-2 text-xs`}
         role="status"
       >
+        <span className="mr-3 font-medium">
+          {editingNotice ??
+            (readOnly
+              ? "Read only · changes cannot be recorded from this view."
+              : "Editing this consultation draft")}
+        </span>
         {feedback}
         {pending && <span className="ml-3">Add or cancel the pending note before saving.</span>}
       </div>

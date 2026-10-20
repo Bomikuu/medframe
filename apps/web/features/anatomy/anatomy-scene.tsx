@@ -1,4 +1,5 @@
 "use client";
+import { ContextLoss } from "@/features/visualization/context-loss";
 import {
   Suspense,
   useCallback,
@@ -82,18 +83,6 @@ function Camera({
     camera.updateProjectionMatrix();
     invalidate();
   }, [zoom, camera, controls, framing.center, invalidate]);
-  return null;
-}
-function ContextLoss({ onFailure }: { onFailure: () => void }) {
-  const { gl } = useThree();
-  useEffect(() => {
-    const lost = (event: Event) => {
-      event.preventDefault();
-      onFailure();
-    };
-    gl.domElement.addEventListener("webglcontextlost", lost);
-    return () => gl.domElement.removeEventListener("webglcontextlost", lost);
-  }, [gl, onFailure]);
   return null;
 }
 function Model({
