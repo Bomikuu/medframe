@@ -149,6 +149,7 @@ function ClinicFrame({ children }: { children: ReactNode }) {
           Icon: ReceiptText,
           show: can("diagnostics.partners.manage"),
         },
+        { path: "/clinic/services", label: "Services", Icon: ReceiptText, show: can("services.read") },
         { path: "/clinic/billing", label: "Billing", Icon: ReceiptText, show: can("billing.read") },
         {
           path: "/clinic/communications",
