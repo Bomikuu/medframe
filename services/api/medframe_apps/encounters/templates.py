@@ -1,4 +1,3 @@
-from typing import Literal
 from uuid import UUID
 
 from django.db import transaction
@@ -16,6 +15,7 @@ from medframe_apps.encounters.models import (
 from medframe_apps.encounters.services import editable, require_encounter
 from medframe_apps.idempotency import record_request_result, replay_request
 from medframe_apps.organizations.policy import require_membership
+from medframe_apps.providers.specialties import validate_template_specialty
 
 
 class Prompts(Input):
@@ -28,7 +28,7 @@ class Prompts(Input):
 class TemplateInput(Input):
     id: UUID | None = None
     name: str = Field(min_length=1, max_length=120)
-    specialty: Literal["general_medicine", "dentistry", "other"] = "other"
+    specialty: str = Field(default="other", min_length=1, max_length=32)
     prompts: Prompts = Field(default_factory=Prompts)
     observation_labels: list[str] = Field(default_factory=list, max_length=20)
     active: bool = True
@@ -71,6 +71,7 @@ def save_template(user, organization_id, data, expected_version, request_id):
         if template is None:
             raise DomainError("NOT_FOUND", "Template is unavailable.", 404)
         check_version(template.version, expected_version)
+        validate_template_specialty(organization_id, parsed.specialty, template.specialty)
         template.name, template.specialty, template.active = (
             parsed.name,
             parsed.specialty,
@@ -80,6 +81,7 @@ def save_template(user, organization_id, data, expected_version, request_id):
         template.save()
     else:
         check_version(0, expected_version)
+        validate_template_specialty(organization_id, parsed.specialty)
         template = ConsultationTemplate.objects.create(
             organization_id=organization_id,
             created_by=user,

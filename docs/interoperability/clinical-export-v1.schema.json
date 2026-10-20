@@ -1,0 +1,724 @@
+{
+  "$defs": {
+    "AnatomyFindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "format": "uuid",
+          "title": "Key",
+          "type": "string"
+        },
+        "registry_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Registry Version",
+          "type": "integer"
+        },
+        "layer": {
+          "enum": ["body", "skeleton"],
+          "title": "Layer",
+          "type": "string"
+        },
+        "structure_id": {
+          "maxLength": 160,
+          "title": "Structure Id",
+          "type": "string"
+        },
+        "side": {
+          "enum": ["left", "right", "midline", "bilateral"],
+          "title": "Side",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "category": {
+          "default": "observed",
+          "enum": ["reported", "observed", "suspected", "confirmed"],
+          "title": "Category",
+          "type": "string"
+        },
+        "severity": {
+          "default": "unknown",
+          "enum": ["unknown", "mild", "moderate", "severe"],
+          "title": "Severity",
+          "type": "string"
+        },
+        "status": {
+          "default": "active",
+          "enum": ["active", "resolved", "historical", "entered_in_error"],
+          "title": "Status",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Notes",
+          "type": "string"
+        },
+        "terminology_system": {
+          "default": "",
+          "maxLength": 80,
+          "title": "Terminology System",
+          "type": "string"
+        },
+        "code": {
+          "default": "",
+          "maxLength": 80,
+          "title": "Code",
+          "type": "string"
+        },
+        "source_revision_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Revision Id"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "discriminator": {
+                "mapping": {
+                  "map": "#/$defs/MapAnchor",
+                  "model": "#/$defs/ModelAnchor"
+                },
+                "propertyName": "kind"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/ModelAnchor"
+                },
+                {
+                  "$ref": "#/$defs/MapAnchor"
+                }
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anchor"
+        }
+      },
+      "required": ["key", "layer", "structure_id", "side", "description"],
+      "title": "AnatomyFindingInput",
+      "type": "object"
+    },
+    "ChartFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "format": "uuid",
+          "title": "Key",
+          "type": "string"
+        },
+        "tooth": {
+          "title": "Tooth",
+          "type": "string"
+        },
+        "surfaces": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Surfaces",
+          "type": "array"
+        },
+        "condition": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "severity": {
+          "default": "unknown",
+          "enum": ["unknown", "mild", "moderate", "severe"],
+          "title": "Severity",
+          "type": "string"
+        },
+        "status": {
+          "default": "active",
+          "enum": ["active", "resolved", "historical"],
+          "title": "Status",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Notes",
+          "type": "string"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DentalAnchorInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "encounter_id": {
+          "format": "uuid",
+          "title": "Encounter Id",
+          "type": "string"
+        }
+      },
+      "required": ["key", "tooth", "condition", "encounter_id"],
+      "title": "ChartFinding",
+      "type": "object"
+    },
+    "DentalAnchorInput": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "enum": ["dundee-permanent-v1", "dundee-molar26-v1"],
+          "title": "Asset",
+          "type": "string"
+        },
+        "point": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "maximum": 100000,
+              "minimum": -100000,
+              "type": "number"
+            },
+            {
+              "maximum": 100000,
+              "minimum": -100000,
+              "type": "number"
+            },
+            {
+              "maximum": 100000,
+              "minimum": -100000,
+              "type": "number"
+            }
+          ],
+          "title": "Point",
+          "type": "array"
+        }
+      },
+      "required": ["asset", "point"],
+      "title": "DentalAnchorInput",
+      "type": "object"
+    },
+    "DentalSection": {
+      "additionalProperties": false,
+      "properties": {
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/FindingInput"
+          },
+          "maxItems": 80,
+          "title": "Findings",
+          "type": "array"
+        },
+        "chart": {
+          "items": {
+            "$ref": "#/$defs/ChartFinding"
+          },
+          "maxItems": 400,
+          "title": "Chart",
+          "type": "array"
+        }
+      },
+      "required": ["findings", "chart"],
+      "title": "DentalSection",
+      "type": "object"
+    },
+    "DiagnosisInput": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "certainty": {
+          "enum": ["reported", "observed", "suspected", "confirmed", "resolved"],
+          "title": "Certainty",
+          "type": "string"
+        },
+        "code": {
+          "default": "",
+          "maxLength": 40,
+          "title": "Code",
+          "type": "string"
+        }
+      },
+      "required": ["description", "certainty"],
+      "title": "DiagnosisInput",
+      "type": "object"
+    },
+    "FindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "format": "uuid",
+          "title": "Key",
+          "type": "string"
+        },
+        "tooth": {
+          "title": "Tooth",
+          "type": "string"
+        },
+        "surfaces": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Surfaces",
+          "type": "array"
+        },
+        "condition": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Condition",
+          "type": "string"
+        },
+        "severity": {
+          "default": "unknown",
+          "enum": ["unknown", "mild", "moderate", "severe"],
+          "title": "Severity",
+          "type": "string"
+        },
+        "status": {
+          "default": "active",
+          "enum": ["active", "resolved", "historical"],
+          "title": "Status",
+          "type": "string"
+        },
+        "notes": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Notes",
+          "type": "string"
+        },
+        "anchor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DentalAnchorInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": ["key", "tooth", "condition"],
+      "title": "FindingInput",
+      "type": "object"
+    },
+    "MapAnchor": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "map",
+          "title": "Kind",
+          "type": "string"
+        },
+        "reference_version": {
+          "title": "Reference Version",
+          "type": "integer"
+        },
+        "view": {
+          "enum": ["front", "back", "left", "right"],
+          "title": "View",
+          "type": "string"
+        },
+        "point": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            }
+          ],
+          "title": "Point",
+          "type": "array"
+        }
+      },
+      "required": ["kind", "reference_version", "view", "point"],
+      "title": "MapAnchor",
+      "type": "object"
+    },
+    "ModelAnchor": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "model",
+          "title": "Kind",
+          "type": "string"
+        },
+        "asset_version": {
+          "maxLength": 80,
+          "title": "Asset Version",
+          "type": "string"
+        },
+        "mesh_id": {
+          "maxLength": 160,
+          "title": "Mesh Id",
+          "type": "string"
+        },
+        "point": {
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "title": "Point",
+          "type": "array"
+        }
+      },
+      "required": ["kind", "asset_version", "mesh_id", "point"],
+      "title": "ModelAnchor",
+      "type": "object"
+    },
+    "ObservationInput": {
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        },
+        "source": {
+          "default": "observed",
+          "enum": ["reported", "observed"],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": ["label", "value"],
+      "title": "ObservationInput",
+      "type": "object"
+    },
+    "PatientIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "clinic_reference": {
+          "maxLength": 80,
+          "title": "Clinic Reference",
+          "type": "string"
+        },
+        "name_at_export": {
+          "maxLength": 240,
+          "title": "Name At Export",
+          "type": "string"
+        }
+      },
+      "required": ["id", "clinic_reference", "name_at_export"],
+      "title": "PatientIdentity",
+      "type": "object"
+    },
+    "ProcedureInput": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "maxLength": 240,
+          "minLength": 1,
+          "title": "Description",
+          "type": "string"
+        },
+        "status": {
+          "default": "proposed",
+          "enum": ["proposed", "planned", "in_progress", "completed", "cancelled"],
+          "title": "Status",
+          "type": "string"
+        },
+        "tooth": {
+          "default": "",
+          "title": "Tooth",
+          "type": "string"
+        },
+        "surfaces": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Surfaces",
+          "type": "array"
+        },
+        "notes": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Notes",
+          "type": "string"
+        }
+      },
+      "required": ["description"],
+      "title": "ProcedureInput",
+      "type": "object"
+    },
+    "RevisionIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "encounter_id": {
+          "format": "uuid",
+          "title": "Encounter Id",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        },
+        "finalized_at": {
+          "format": "date-time",
+          "title": "Finalized At",
+          "type": "string"
+        },
+        "author_id": {
+          "format": "uuid",
+          "title": "Author Id",
+          "type": "string"
+        },
+        "provider_name_at_finalization": {
+          "maxLength": 240,
+          "title": "Provider Name At Finalization",
+          "type": "string"
+        },
+        "provider_specialty_at_finalization": {
+          "maxLength": 80,
+          "title": "Provider Specialty At Finalization",
+          "type": "string"
+        }
+      },
+      "required": [
+        "encounter_id",
+        "id",
+        "version",
+        "finalized_at",
+        "author_id",
+        "provider_name_at_finalization",
+        "provider_specialty_at_finalization"
+      ],
+      "title": "RevisionIdentity",
+      "type": "object"
+    },
+    "Sections": {
+      "additionalProperties": false,
+      "properties": {
+        "soap": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Soap"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "diagnoses": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/DiagnosisInput"
+              },
+              "maxItems": 20,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Diagnoses"
+        },
+        "observations": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ObservationInput"
+              },
+              "maxItems": 30,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Observations"
+        },
+        "dental": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DentalSection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "anatomy": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/AnatomyFindingInput"
+              },
+              "maxItems": 60,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Anatomy"
+        },
+        "procedures": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/ProcedureInput"
+              },
+              "maxItems": 30,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Procedures"
+        }
+      },
+      "title": "Sections",
+      "type": "object"
+    },
+    "Soap": {
+      "additionalProperties": false,
+      "properties": {
+        "subjective": {
+          "default": "",
+          "maxLength": 6000,
+          "title": "Subjective",
+          "type": "string"
+        },
+        "objective": {
+          "default": "",
+          "maxLength": 6000,
+          "title": "Objective",
+          "type": "string"
+        },
+        "assessment": {
+          "default": "",
+          "maxLength": 6000,
+          "title": "Assessment",
+          "type": "string"
+        },
+        "plan": {
+          "default": "",
+          "maxLength": 6000,
+          "title": "Plan",
+          "type": "string"
+        }
+      },
+      "title": "Soap",
+      "type": "object"
+    },
+    "Source": {
+      "additionalProperties": false,
+      "properties": {
+        "organization_id": {
+          "format": "uuid",
+          "title": "Organization Id",
+          "type": "string"
+        },
+        "branch_id": {
+          "format": "uuid",
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "branch_name_at_finalization": {
+          "maxLength": 160,
+          "title": "Branch Name At Finalization",
+          "type": "string"
+        }
+      },
+      "required": ["organization_id", "branch_id", "branch_name_at_finalization"],
+      "title": "Source",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "medframe.clinical-export/1",
+      "default": "medframe.clinical-export/1",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "title": "Generated At",
+      "type": "string"
+    },
+    "source": {
+      "$ref": "#/$defs/Source"
+    },
+    "patient": {
+      "$ref": "#/$defs/PatientIdentity"
+    },
+    "revision": {
+      "$ref": "#/$defs/RevisionIdentity"
+    },
+    "sections": {
+      "$ref": "#/$defs/Sections"
+    }
+  },
+  "required": ["generated_at", "source", "patient", "revision", "sections"],
+  "title": "ClinicalExport",
+  "type": "object"
+}

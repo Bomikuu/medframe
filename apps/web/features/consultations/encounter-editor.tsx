@@ -1,5 +1,6 @@
 "use client";
 import { useClinicTime } from "@/components/application/clinical-locale";
+import { ExportRecord } from "./export/export-record";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -459,6 +460,9 @@ function OwnedEncounterEditor({
           </div>
           <div className="flex flex-wrap gap-2">
             {stationActions}
+            {encounter.revisionId && !stationActions && (
+              <ExportRecord encounterId={encounter.id} revisionId={encounter.revisionId} />
+            )}
             {!readOnly && (
               <>
                 <Button

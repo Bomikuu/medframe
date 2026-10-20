@@ -147,6 +147,7 @@ export type Mutation = {
   reviewPatientReport: Scalars['JSON']['output'];
   revokeClinicInvitation: Scalars['JSON']['output'];
   revokePortalAccess: Scalars['Boolean']['output'];
+  saveClinicSpecialties: Scalars['JSON']['output'];
   saveConsultationTemplate: Scalars['JSON']['output'];
   saveDashboardLayout: Scalars['JSON']['output'];
   saveFollowUp: Scalars['JSON']['output'];
@@ -461,6 +462,14 @@ export type MutationRevokePortalAccessArgs = {
 };
 
 
+export type MutationSaveClinicSpecialtiesArgs = {
+  codes: Array<Scalars['String']['input']>;
+  expectedVersion: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+  requestId: Scalars['UUID']['input'];
+};
+
+
 export type MutationSaveConsultationTemplateArgs = {
   data: Scalars['JSON']['input'];
   expectedVersion: Scalars['Int']['input'];
@@ -716,9 +725,11 @@ export type Query = {
   chartRevisions: Scalars['JSON']['output'];
   clinicAppearance: Scalars['JSON']['output'];
   clinicDashboard: Scalars['JSON']['output'];
+  clinicInsights: Scalars['JSON']['output'];
   clinicInvitations: Scalars['JSON']['output'];
   clinicPatients: PatientPage;
   clinicSetupChecklist: Scalars['JSON']['output'];
+  clinicSpecialties: Scalars['JSON']['output'];
   clinicWorkspace: WorkspaceType;
   communicationReminders: Scalars['JSON']['output'];
   communicationSetup: Scalars['JSON']['output'];
@@ -880,6 +891,13 @@ export type QueryClinicDashboardArgs = {
 };
 
 
+export type QueryClinicInsightsArgs = {
+  branchId: Scalars['UUID']['input'];
+  days?: Scalars['Int']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
 export type QueryClinicInvitationsArgs = {
   offset?: Scalars['Int']['input'];
   status?: Scalars['String']['input'];
@@ -895,6 +913,11 @@ export type QueryClinicPatientsArgs = {
 
 
 export type QueryClinicSetupChecklistArgs = {
+  organizationId: Scalars['UUID']['input'];
+};
+
+
+export type QueryClinicSpecialtiesArgs = {
   organizationId: Scalars['UUID']['input'];
 };
 
@@ -932,6 +955,7 @@ export type QueryConsultationTemplatesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   includeArchived?: Scalars['Boolean']['input'];
   organizationId: Scalars['UUID']['input'];
+  specialty?: InputMaybe<Scalars['String']['input']>;
 };
 
 

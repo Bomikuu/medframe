@@ -20,6 +20,7 @@ class TemplateQuery:
         organization_id: UUID,
         include_archived: bool = False,
         after: str | None = None,
+        specialty: str | None = None,
     ) -> JSON:
         require_membership(info.context.user, organization_id, "encounters.write")
         from django.db.models import F
@@ -29,9 +30,11 @@ class TemplateQuery:
         )
         if not include_archived:
             query = query.filter(template__active=True)
+        if specialty:
+            query = query.filter(template__specialty=specialty)
         return page_records(
             query,
-            scope=f"templates:{organization_id}:{include_archived}",
+            scope=f"templates:{organization_id}:{include_archived}:{specialty or ''}",
             after=after,
             serialize=template_details,
         )

@@ -94,6 +94,7 @@ input MedicationInput {
 }
 
 type Mutation {
+  saveClinicSpecialties(organizationId: UUID!, codes: [String!]!, expectedVersion: Int!, requestId: UUID!): JSON!
   serviceAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   patientServiceAction(organizationId: UUID!, action: String!, data: JSON!, requestId: UUID!): JSON!
   websiteAction(organizationId: UUID!, action: String!, data: JSON!, expectedVersion: Int!): JSON!
@@ -232,6 +233,8 @@ type ProviderType {
 }
 
 type Query {
+  clinicInsights(organizationId: UUID!, branchId: UUID!, days: Int! = 30): JSON!
+  clinicSpecialties(organizationId: UUID!): JSON!
   servicePatients(organizationId: UUID!, branchId: UUID!, search: String! = ""): JSON!
   serviceCatalog(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null): JSON!
   patientServices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, patientId: UUID = null, after: String = null): JSON!
@@ -299,7 +302,7 @@ type Query {
   historyRecords(organizationId: UUID!, patientId: UUID!, filters: JSON = null, after: String = null): JSON!
   followUps(organizationId: UUID!, patientId: UUID!, after: String = null): JSON!
   planRevisions(organizationId: UUID!, patientId: UUID!, planId: UUID!, after: String = null): JSON!
-  consultationTemplates(organizationId: UUID!, includeArchived: Boolean! = false, after: String = null): JSON!
+  consultationTemplates(organizationId: UUID!, includeArchived: Boolean! = false, after: String = null, specialty: String = null): JSON!
   patientPortalAccess(organizationId: UUID!, patientId: UUID!, after: String = null): JSON!
   releaseSources(organizationId: UUID!, patientId: UUID!): JSON!
   releaseSourcePage(organizationId: UUID!, patientId: UUID!, kind: String!, after: String = null): JSON!

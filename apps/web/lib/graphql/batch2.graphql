@@ -113,11 +113,13 @@ query ConsultationTemplates(
   $organizationId: UUID!
   $includeArchived: Boolean! = false
   $after: String
+  $specialty: String
 ) {
   consultationTemplates(
     organizationId: $organizationId
     includeArchived: $includeArchived
     after: $after
+    specialty: $specialty
   )
 }
 mutation SaveConsultationTemplate(

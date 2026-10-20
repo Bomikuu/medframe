@@ -1,4 +1,7 @@
 const allowedPaths = new Set([
+  "analytics/export",
+  "interoperability/preview",
+  "interoperability/download",
   "stations/kiosk",
   "stations/kiosk/manage",
   "portal/kiosk-code",
@@ -45,6 +48,7 @@ export const backendUrl = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";
 export const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 
 export async function proxyBackend(request: Request, path: string): Promise<Response> {
+  const postAttachment = ["analytics/export", "interoperability/download"].includes(path);
   const logoUpload = path === "onboarding/logo/upload";
   const logoDownload = /^onboarding\/logo\/[0-9a-f-]{36}\/content$/.test(path);
   const upload = logoUpload || /^(?:diagnostics\/)?documents\/upload\/[0-9a-f-]{36}$/.test(path);
@@ -112,7 +116,7 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
     }
     const retry = upstream.headers.get("retry-after");
     if (retry) responseHeaders.set("Retry-After", retry);
-    if (download) {
+    if (download || postAttachment) {
       for (const name of ["content-disposition", "content-security-policy", "referrer-policy"]) {
         const value = upstream.headers.get(name);
         if (value) responseHeaders.set(name, value);

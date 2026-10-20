@@ -8,9 +8,11 @@ from config.admin import site
 from medframe_apps.accounts import google_views
 from medframe_apps.accounts import views as auth
 from medframe_apps.accounts.session_routing import session_route
+from medframe_apps.analytics.views import analytics_csv
 from medframe_apps.communications.views import sms_status
 from medframe_apps.diagnostics import views as diagnostics
 from medframe_apps.documents import views as documents
+from medframe_apps.interoperability import views as interoperability
 from medframe_apps.onboarding import views as onboarding
 from medframe_apps.portal import files as portal_files
 from medframe_apps.portal import views as portal_auth
@@ -21,6 +23,9 @@ from medframe_apps.stations.kiosk_views import kiosk
 from medframe_apps.websites import public as websites_public
 
 urlpatterns = [
+    path("analytics/export", analytics_csv),
+    path("interoperability/preview", interoperability.preview),
+    path("interoperability/download", interoperability.download),
     path("websites/index", websites_public.index),
     path("websites/resolve", websites_public.resolve),
     path("websites/<slug:slug>", websites_public.page),

@@ -14,9 +14,11 @@ import { financialOverviewSchema, money } from "./schema";
 export function FinancialOverviewPanel({
   branchId,
   compact = false,
+  periodDays,
 }: {
   branchId?: string;
   compact?: boolean;
+  periodDays?: number;
 }) {
   const { organizationId, workspace, can, href } = useWorkspace();
   const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
@@ -25,7 +27,7 @@ export function FinancialOverviewPanel({
   const selectedBranch = branchId ?? branch;
   const remote = useRemote(
     FinancialOverviewDocument,
-    { organizationId, branchId: selectedBranch, days: Number(days) },
+    { organizationId, branchId: selectedBranch, days: periodDays ?? Number(days) },
     { enabled: can("billing.read") && !!selectedBranch },
   );
   const parsed = financialOverviewSchema.safeParse(remote.data?.financialOverview);
@@ -69,18 +71,20 @@ export function FinancialOverviewPanel({
             />
           </div>
         )}
-        <div className="min-w-40 flex-1">
-          <FormSelect
-            id={compact ? "dashboard-finance-period" : "billing-finance-period"}
-            label="Comparison period"
-            value={days}
-            onChange={setDays}
-            options={[7, 30, 90].map((day) => ({
-              value: String(day),
-              label: `Last ${day} completed days`,
-            }))}
-          />
-        </div>
+        {periodDays === undefined && (
+          <div className="min-w-40 flex-1">
+            <FormSelect
+              id={compact ? "dashboard-finance-period" : "billing-finance-period"}
+              label="Comparison period"
+              value={days}
+              onChange={setDays}
+              options={[7, 30, 90].map((day) => ({
+                value: String(day),
+                label: `Last ${day} completed days`,
+              }))}
+            />
+          </div>
+        )}
         {data && data.currencies.length > 1 && (
           <div className="w-32">
             <FormSelect

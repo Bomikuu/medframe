@@ -97,7 +97,15 @@ function ClinicFrame({ children }: { children: ReactNode }) {
   const groups = [
     {
       label: "Workspace",
-      links: [{ path: "/clinic", label: "Dashboard", Icon: House, show: true }],
+      links: [
+        { path: "/clinic", label: "Dashboard", Icon: House, show: true },
+        {
+          path: "/clinic/analytics",
+          label: "Analytics",
+          Icon: FileText,
+          show: can("operations.read") || can("patients.clinical.read") || can("billing.read"),
+        },
+      ],
     },
     {
       label: "Clinical",
@@ -149,7 +157,12 @@ function ClinicFrame({ children }: { children: ReactNode }) {
           Icon: ReceiptText,
           show: can("diagnostics.partners.manage"),
         },
-        { path: "/clinic/services", label: "Services", Icon: ReceiptText, show: can("services.read") },
+        {
+          path: "/clinic/services",
+          label: "Services",
+          Icon: ReceiptText,
+          show: can("services.read"),
+        },
         { path: "/clinic/billing", label: "Billing", Icon: ReceiptText, show: can("billing.read") },
         {
           path: "/clinic/communications",
@@ -185,6 +198,12 @@ function ClinicFrame({ children }: { children: ReactNode }) {
           label: "Templates",
           Icon: FileText,
           show: can("encounters.write"),
+        },
+        {
+          path: "/clinic/settings/specialties",
+          label: "Specialties",
+          Icon: Stethoscope,
+          show: can("organization.manage"),
         },
         {
           path: "/clinic/settings/website",

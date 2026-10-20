@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { ConsultationTemplatesDocument } from "@/lib/graphql/generated";
+import { ClinicSpecialtiesDocument, ConsultationTemplatesDocument } from "@/lib/graphql/generated";
+import { specialtyOptions, specialtySetupSchema } from "@/features/specialties/schema";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -20,7 +21,14 @@ export function TemplatePicker({
   const { organizationId } = useWorkspace();
   const [selected, setSelected] = useState("none");
   const [after, setAfter] = useState<string>();
-  const remote = useRemote(ConsultationTemplatesDocument, { organizationId, after });
+  const [specialty, setSpecialty] = useState("all");
+  const setupRemote = useRemote(ClinicSpecialtiesDocument, { organizationId });
+  const setup = specialtySetupSchema.safeParse(setupRemote.data?.clinicSpecialties);
+  const remote = useRemote(ConsultationTemplatesDocument, {
+    organizationId,
+    after,
+    specialty: specialty === "all" ? undefined : specialty,
+  });
   const parsed = recordPage(templateSchema).safeParse(remote.data?.consultationTemplates);
   return (
     <details className="rounded-xl border border-border bg-card p-5">
@@ -32,6 +40,20 @@ export function TemplatePicker({
         <LoadState error={remote.error} retry={remote.reload} />
       ) : parsed.success ? (
         <div className="grid max-w-xl gap-4">
+          <FormSelect
+            id="guidance-specialty"
+            label="Template specialty"
+            value={specialty}
+            onChange={(value) => {
+              setSpecialty(value);
+              setAfter(undefined);
+              setSelected("none");
+            }}
+            options={[
+              { value: "all", label: "All specialties" },
+              ...specialtyOptions(setup.success ? setup.data : undefined),
+            ]}
+          />
           <FormSelect
             id="consultation-template"
             label="Clinic template"

@@ -1,0 +1,21 @@
+query ClinicInsights($organizationId: UUID!, $branchId: UUID!, $days: Int!) {
+  clinicInsights(organizationId: $organizationId, branchId: $branchId, days: $days)
+}
+
+query ClinicSpecialties($organizationId: UUID!) {
+  clinicSpecialties(organizationId: $organizationId)
+}
+
+mutation SaveClinicSpecialties(
+  $organizationId: UUID!
+  $codes: [String!]!
+  $expectedVersion: Int!
+  $requestId: UUID!
+) {
+  saveClinicSpecialties(
+    organizationId: $organizationId
+    codes: $codes
+    expectedVersion: $expectedVersion
+    requestId: $requestId
+  )
+}

@@ -5,11 +5,13 @@ import { useForm, useWatch } from "react-hook-form";
 import {
   ConsultationTemplatesDocument,
   SaveConsultationTemplateDocument,
+  ClinicSpecialtiesDocument,
 } from "@/lib/graphql/generated";
 import { getGraphqlClient } from "@/lib/graphql/client";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
-import { useUnsavedChanges } from "@/features/workspace/safety-provider";
+import { useSafety, useUnsavedChanges } from "@/features/workspace/safety-provider";
+import { specialtyOptions, specialtySetupSchema } from "@/features/specialties/schema";
 import { useRequestScope } from "@/features/patients/use-request-scope";
 import { FormSelect } from "@/features/patients/form-controls";
 import { FormField } from "@/components/form-field";
@@ -33,6 +35,13 @@ const empty = {
 };
 export function TemplateEditor() {
   const { organizationId, can } = useWorkspace();
+  const { confirm } = useSafety();
+  const setupRemote = useRemote(
+    ClinicSpecialtiesDocument,
+    { organizationId },
+    { enabled: can("encounters.write") },
+  );
+  const setup = specialtySetupSchema.safeParse(setupRemote.data?.clinicSpecialties);
   const [after, setAfter] = useState<string>();
   const remote = useRemote(ConsultationTemplatesDocument, {
     organizationId,
@@ -143,6 +152,49 @@ export function TemplateEditor() {
           }
         })}
       >
+        {setup.success && setup.data.starters.length > 0 && (
+          <section
+            aria-label="Specialty starters"
+            className="grid gap-3 border-b border-border pb-5"
+          >
+            <h2 className="font-semibold">Start with a specialty</h2>
+            <p className="text-xs leading-5 text-muted-foreground">
+              Copy editable documentation prompts. Saving creates a clinic template; no patient
+              facts or clinical advice are generated.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {setup.data.starters.map((starter) => (
+                <Button
+                  type="button"
+                  variant="outline"
+                  key={starter.specialty}
+                  onClick={async () => {
+                    if (
+                      form.formState.isDirty &&
+                      !(await confirm({
+                        title: "Replace this template draft?",
+                        description:
+                          "Your unsaved template edits will be replaced with editable starter prompts.",
+                        action: "Use starter",
+                      }))
+                    )
+                      return;
+                    form.reset({ ...empty, requestId: crypto.randomUUID() });
+                    form.setValue("name", starter.name, { shouldDirty: true });
+                    form.setValue("specialty", starter.specialty, { shouldDirty: true });
+                    form.setValue("prompts", starter.prompts, { shouldDirty: true });
+                    form.setValue("labels", starter.observation_labels.join("\n"), {
+                      shouldDirty: true,
+                    });
+                    setSaved("");
+                  }}
+                >
+                  Use {starter.specialty.replaceAll("_", " ")}
+                </Button>
+              ))}
+            </div>
+          </section>
+        )}
         <div className="grid gap-4 @[640px]:grid-cols-[minmax(0,1fr)_220px]">
           <FormField
             id="template-name"
@@ -160,11 +212,10 @@ export function TemplateEditor() {
             label="Specialty"
             value={watchedForm.specialty ?? ""}
             onChange={(value) => form.setValue("specialty", value, { shouldDirty: true })}
-            options={[
-              { value: "other", label: "Other" },
-              { value: "dentistry", label: "Dentistry" },
-              { value: "general_medicine", label: "General medicine" },
-            ]}
+            options={specialtyOptions(
+              setup.success ? setup.data : undefined,
+              watchedForm.specialty,
+            )}
           />
         </div>
         <div className="grid min-w-0 gap-4 @[560px]:grid-cols-2">
