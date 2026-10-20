@@ -193,3 +193,15 @@ current balance snapshots have their own as-of clinic date/time. Date changes
 apply on request, keeping old report context until applied. Shared white/navy/teal,
 shadcn forms, Tailwind and exact accessible tables remain authoritative. Actual
 verification and retained visual limits are recorded in the Phase5 evidence.
+
+## Patient profile clinical overview
+
+The doctor-facing default is Overview, with explicit prior tab links preserved.
+Five permission-filtered groups replace the flat section row; detail tabs remain
+under Clinical, Charts, Care & billing and Records. The existing clinical snapshot
+leads identity/contact information. Allergy attention keeps actual review text;
+semantic blue/teal/amber/green accents and restrained Lucide icons add hierarchy.
+Existing clinical/draft/authorization owners remain. Profile surface/evidence:
+`.impeccable/surfaces/patient-profile.md` and
+`docs/operations/patient-overview-refinement-verification.md`. Large financial
+value wrapping on narrow phones and remaining guard browser acceptance are deferred.
