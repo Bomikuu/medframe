@@ -205,3 +205,14 @@ Existing clinical/draft/authorization owners remain. Profile surface/evidence:
 `.impeccable/surfaces/patient-profile.md` and
 `docs/operations/patient-overview-refinement-verification.md`. Large financial
 value wrapping on narrow phones and remaining guard browser acceptance are deferred.
+
+## Header workspace selection
+
+Clinic & branches lives in the header account menu and opens a focused shared
+Dialog. The sidebar picker is removed. Authorized clinic selection is staged until
+Switch clinic; current permitted branches are informational, preserving existing
+page-specific branch owners. Cancel/Escape preserve context; closing restores
+account-trigger focus. The existing workspace navigation/unsaved-change guard stays
+canonical. No new global branch semantics or visual world. All three focused
+browser groups pass in one round; one lint warning remains deferred. Actual
+runtime/preservation: docs/operations/header-workspace-switcher-verification.md.

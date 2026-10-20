@@ -97,3 +97,18 @@ uncommitted and byte-identical. See
 `docs/operations/patient-overview-refinement-verification.md` for actual tools,
 runtime, rollback and bounded evidence. Standing native execution/local activation
 continue; older deferred findings remain outside scope.
+
+The October20 header workspace relocation is active locally on
+codex/header-workspace-switcher, implementation2774b59, .next-header-workspace.
+Account menu Clinic & branches opens a staged authorized-clinic selection modal;
+sidebar selector removed. Existing selector switched organizations and displayed
+branch names; branch filtering remains owned by individual pages, explicitly
+explained/labeled. Shared Dialog/FormSelect and WorkspaceProvider/SafetyProvider
+remain authoritative. Build/TypeScript and all three single-pass focused browser
+groups pass, including Keep editing/Discard during switching; scoped lint has one
+unused theme warning, HEADER-WORKSPACE-001 deferred. Fresh encrypted checkpoint,
+isolated restore and preservation confirm6600 original rows/154 tables and51
+private objects. No backend/schema/auth changes. User main layout block is
+byte-identical and unstaged; only diff hunk offsets changed. See
+`docs/operations/header-workspace-switcher-verification.md` for exact tools,
+runtime, preservation and rollback. Older deferred findings remain outside scope.
