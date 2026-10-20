@@ -21,3 +21,18 @@ evidence. Unsaved prompt appears; Keep editing/Discard end-to-end remains
 unverified after the bounded harness confirmation used the wrong button label.
 Large financial values wrap awkwardly at390px; deferred without repair. See
 `docs/operations/patient-overview-refinement-verification.md` for actual coverage.
+
+## Patient photo control
+
+The profile identity row has a circular photo/initials control with a camera badge,
+Upload/Change photo and a separate Remove action for existing photos. Removal opens
+an explicit confirmation and clears only the portrait pointer. Patient files retain
+their original full framing and private scan/download rules. Clinical Station and
+the profile share `features/patients/profile/patient-photo-dialog.tsx`; clinical
+read/write plus document-write permissions gate editing. Initials remain for
+missing images and read-only users keep the normal circular display.
+
+Real synthetic upload/security scan/select/reload and responsive circular display
+pass; one focused locator correction confirms remove/cancel/persistence/file
+retention. Three older Station-based backend checks stop at workspace-open403,
+without photo-assertion coverage or repair. See patient-photo-upload verification.

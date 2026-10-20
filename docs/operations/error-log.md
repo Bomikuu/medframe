@@ -880,3 +880,26 @@ binding warning in ClinicFrame. Removing the former sidebar logo selector leaves
 that binding unused with the user's preserved full-width main layout. No runtime
 impact. Logged without cleanup/retest under the user's bounded-testing rule;
 no unrelated appearance or user-layout repair performed.
+
+## PATIENT-PHOTO-001 — existing Station-based backend checks stop before photo assertions (deferred)
+
+October20 patient profile upload phase, one targeted run of three existing
+StationGalleryTests: test_clean_same_patient_portrait_and_versioned_removal,
+test_pending_foreign_non_image_or_oversized_portraits_rejected,
+test_portrait_grant_revocation_applies_to_next_request. All stop at the existing
+self.open() assertion with403 instead of200 (lines185,202,209), before testing the
+photo service. No backend source changed. Evidence:
+/tmp/medframe-patient-photo-backend.log. These three cases remain failed/blocked;
+no speculative cause, fixture repair, retry or passing boundary claim. Actual
+profile upload/scan/select/removal has separate staged browser passing evidence.
+
+## PATIENT-PHOTO-002 — initial browser header locator mismatch (historical, confirmed)
+
+Initial two-group profile browser pass establishes upload, real scan, selection,
+reload and circular1440/1024/390 display. Removal stops at getByRole banner named
+Patient identity; that header is inside main and is not a banner landmark. One
+focused confirmation uses its observed header aria-label instead and passes Cancel,
+confirmed removal, focus return, persistence after reload and original-file
+retention. No product repair or third round. Both runs have no page exceptions.
+Evidence: /tmp/medframe-patient-photo-{browser,confirmation}.log and
+output/playwright/patient-photo/ captures. Initial failure retained.

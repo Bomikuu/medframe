@@ -147,3 +147,14 @@ are informational, with filtering still owned by each branch-specific page.
 SafetyProvider confirms unsaved changes before returning to Patients. The account
 trigger receives focus when the modal closes. No global branch filter or clinical
 authorization is inferred from the selection UI.
+
+## Shared patient portrait editing
+
+`features/patients/profile/patient-photo-dialog.tsx` is shared by the profile
+header and Clinical Station. UploadControl owns the private clinical-image
+transfer/scan; the existing versioned stations/portrait endpoint selects/removes
+the same-patient clean image. Profile control is circular, with a camera badge,
+Upload/Change and explicit Remove confirmation; focus returns to the circular
+control. Removal unlinks the profile display and preserves the original file.
+Photo changes reload the existing profile summary. Existing clinical/document
+permissions remain authoritative; no new public object or patient-image field.

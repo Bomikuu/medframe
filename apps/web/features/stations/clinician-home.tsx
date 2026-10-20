@@ -12,7 +12,7 @@ import { FormSelect } from "@/features/patients/form-controls";
 import { ClinicClock } from "./clinic-clock";
 import { ConsultationGallery } from "./consultation-gallery";
 import { UpcomingCare } from "./upcoming-care";
-import { PatientPhotoDialog } from "./patient-photo-dialog";
+import { PatientPhotoDialog } from "@/features/patients/profile/patient-photo-dialog";
 import { useStationDashboard, clinicTime, type GalleryItem } from "./dashboard-client";
 import { ReceiveHandoff } from "./receive-handoff";
 import { useStationAccess } from "./access-session";

@@ -112,7 +112,9 @@
     ".next-patient-overview/types/**/*.ts",
     ".next-patient-overview/dev/types/**/*.ts",
     ".next-header-workspace/types/**/*.ts",
-    ".next-header-workspace/dev/types/**/*.ts"
+    ".next-header-workspace/dev/types/**/*.ts",
+    ".next-patient-photo/types/**/*.ts",
+    ".next-patient-photo/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

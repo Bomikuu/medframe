@@ -10,20 +10,24 @@ import { UploadControl } from "@/features/documents/upload-control";
 import { useRemote } from "@/features/patients/use-remote";
 import { PatientDocumentsDocument } from "@/lib/graphql/generated";
 import { errorMessage } from "@/lib/auth/client";
-import { stationRequest } from "./client";
-import type { GalleryItem } from "./dashboard-client";
+import { stationRequest } from "@/features/stations/client";
 
 type Portrait = { version: number; image_id: string | null };
 export function PatientPhotoDialog({
   patient,
   onClose,
   onSaved,
+  intent = "edit",
+  onReturnFocus,
 }: {
-  patient: GalleryItem;
+  patient: { patient_id: string; patient: string; reference: string; portrait_id: string | null };
+  intent?: "edit" | "remove";
+  onReturnFocus?: () => void;
   onClose: () => void;
   onSaved: () => void;
 }) {
   const { organizationId } = useWorkspace();
+  const removing = intent === "remove";
   const { confirm } = useSafety();
   const [portrait, setPortrait] = useState<Portrait | null>(null);
   const [candidate, setCandidate] = useState<string | null>(patient.portrait_id);
@@ -31,12 +35,16 @@ export function PatientPhotoDialog({
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const documents = useRemote(PatientDocumentsDocument, {
-    organizationId,
-    patientId: patient.patient_id,
-    purpose: "clinical",
-    versionIds: uploaded ? [uploaded] : [],
-  });
+  const documents = useRemote(
+    PatientDocumentsDocument,
+    {
+      organizationId,
+      patientId: patient.patient_id,
+      purpose: "clinical",
+      versionIds: uploaded ? [uploaded] : [],
+    },
+    { enabled: !removing },
+  );
   const files = Array.from(
     new Map(
       [...(documents.data?.documentVersions ?? []), ...(documents.data?.documents ?? [])].map(
@@ -58,7 +66,10 @@ export function PatientPhotoDialog({
       patient_id: patient.patient_id,
     })
       .then((value) => {
-        if (active) setPortrait(value);
+        if (active) {
+          setPortrait(value);
+          setCandidate(value.image_id);
+        }
       })
       .catch((cause) => {
         if (active) setError(errorMessage(cause));
@@ -114,11 +125,20 @@ export function PatientPhotoDialog({
         if (!open) void close();
       }}
     >
-      <DialogContent className="max-h-[92dvh] overflow-y-auto sm:max-w-xl">
-        <DialogTitle>Patient photo</DialogTitle>
+      <DialogContent
+        className="max-h-[92dvh] overflow-y-auto sm:max-w-xl"
+        onCloseAutoFocus={(event) => {
+          if (onReturnFocus) {
+            event.preventDefault();
+            onReturnFocus();
+          }
+        }}
+      >
+        <DialogTitle>{removing ? "Remove patient photo?" : "Patient photo"}</DialogTitle>
         <DialogDescription>
-          {patient.patient} · Choose a confirmed photo of this patient. Images remain protected in
-          their clinical file; only the profile display is circular.
+          {removing
+            ? `Remove the profile photo for ${patient.patient}. The original image stays in the patient record.`
+            : `${patient.patient} · Choose a confirmed photo of this patient. Images remain protected in their clinical file; only the profile display is circular.`}
         </DialogDescription>
         <div className="flex items-center gap-4">
           <PatientAvatar
@@ -131,51 +151,55 @@ export function PatientPhotoDialog({
             <p className="mt-1 text-xs text-muted-foreground">{patient.reference}</p>
           </div>
         </div>
-        <UploadControl
-          patientId={patient.patient_id}
-          purpose="clinical"
-          profileImage
-          initialLabel="Patient profile photo"
-          onPendingChange={setUploading}
-          onUploaded={(id) => {
-            setUploaded(id);
-            documents.reload();
-          }}
-        />
-        <section className="grid gap-3">
-          <h3 className="text-sm font-semibold">Patient images</h3>
-          <p className="text-xs leading-5 text-muted-foreground">
-            Select a scanned image below, then confirm it as the profile photo.
-          </p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {files.map((file) => (
-              <button
-                key={file.id}
-                type="button"
-                className={`grid min-w-0 justify-items-center gap-2 rounded-xl border p-3 text-center text-xs ${candidate === file.id ? "bg-teal-wash border-primary" : "border-border"}`}
-                disabled={busy || file.scanState !== "clean"}
-                aria-pressed={candidate === file.id}
-                onClick={() => setCandidate(file.id)}
-              >
-                <PatientAvatar
-                  name={patient.patient}
-                  imageId={file.scanState === "clean" ? file.id : undefined}
-                  className="size-14"
-                />
-                <span className="line-clamp-2 wrap-anywhere">{file.label}</span>
-                <span className="text-muted-foreground">
-                  {file.scanState === "clean" ? "Scanned" : file.scanState.replaceAll("_", " ")}
-                </span>
-              </button>
-            ))}
-          </div>
-          {!files.length && (
-            <p className="text-sm text-muted-foreground">
-              No patient images available yet. Upload a photo above.
-            </p>
-          )}
-        </section>
-        {scanning && (
+        {!removing && (
+          <>
+            <UploadControl
+              patientId={patient.patient_id}
+              purpose="clinical"
+              profileImage
+              initialLabel="Patient profile photo"
+              onPendingChange={setUploading}
+              onUploaded={(id) => {
+                setUploaded(id);
+                documents.reload();
+              }}
+            />
+            <section className="grid gap-3">
+              <h3 className="text-sm font-semibold">Patient images</h3>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Select a scanned image below, then confirm it as the profile photo.
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {files.map((file) => (
+                  <button
+                    key={file.id}
+                    type="button"
+                    className={`grid min-w-0 justify-items-center gap-2 rounded-xl border p-3 text-center text-xs ${candidate === file.id ? "bg-teal-wash border-primary" : "border-border"}`}
+                    disabled={busy || file.scanState !== "clean"}
+                    aria-pressed={candidate === file.id}
+                    onClick={() => setCandidate(file.id)}
+                  >
+                    <PatientAvatar
+                      name={patient.patient}
+                      imageId={file.scanState === "clean" ? file.id : undefined}
+                      className="size-14"
+                    />
+                    <span className="line-clamp-2 wrap-anywhere">{file.label}</span>
+                    <span className="text-muted-foreground">
+                      {file.scanState === "clean" ? "Scanned" : file.scanState.replaceAll("_", " ")}
+                    </span>
+                  </button>
+                ))}
+              </div>
+              {!files.length && (
+                <p className="text-sm text-muted-foreground">
+                  No patient images available yet. Upload a photo above.
+                </p>
+              )}
+            </section>
+          </>
+        )}
+        {scanning && !removing && (
           <p role="status" className="text-xs text-muted-foreground">
             Waiting for the security scan. Pending images cannot be used.
           </p>
@@ -186,16 +210,32 @@ export function PatientPhotoDialog({
           </p>
         )}
         <div className="flex flex-wrap gap-2">
-          <Button
-            disabled={!portrait || !candidate || !ready || busy || uploading}
-            onClick={() => void save(candidate)}
-          >
-            Use selected photo
-          </Button>
-          {portrait?.image_id && (
-            <Button variant="ghost" disabled={busy || uploading} onClick={() => void save(null)}>
-              Remove profile photo
+          {removing ? (
+            <Button
+              variant="destructive"
+              disabled={!portrait?.image_id || busy}
+              onClick={() => void save(null)}
+            >
+              {busy ? "Removing…" : "Remove photo"}
             </Button>
+          ) : (
+            <>
+              <Button
+                disabled={!portrait || !candidate || !ready || busy || uploading}
+                onClick={() => void save(candidate)}
+              >
+                Use selected photo
+              </Button>
+              {portrait?.image_id && (
+                <Button
+                  variant="ghost"
+                  disabled={busy || uploading}
+                  onClick={() => void save(null)}
+                >
+                  Remove profile photo
+                </Button>
+              )}
+            </>
           )}
           <Button variant="outline" disabled={busy} onClick={() => void close()}>
             Cancel

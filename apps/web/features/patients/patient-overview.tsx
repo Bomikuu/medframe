@@ -132,6 +132,7 @@ export function PatientOverview({
         <PatientProfileHeader
           patient={patient}
           portraitId={summary?.clinical?.portrait_id}
+          onPhotoSaved={summaryRemote.reload}
           timezone={summary?.timezone ?? workspace.organization.timezone}
         />
         {params.get("saved") === "details" && (
