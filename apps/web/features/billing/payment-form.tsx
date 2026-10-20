@@ -13,9 +13,13 @@ import { useEntrySheetActions } from "@/components/application/entry-sheet";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useUnsavedChanges } from "@/features/workspace/safety-provider";
 import { localDate } from "@/features/operations/schema";
-import { invoiceDetailSchema, moneyInput, type InvoiceDetail } from "./schema";
+import { invoiceDetailSchema, moneyInput, paymentReviewSchema, type InvoiceDetail } from "./schema";
 import { useFinancialAction } from "./use-billing";
 import { FinancialNotice, Money } from "./controls";
+import { RefundPaymentPicker } from "./refund-payment-picker";
+import { useRemote } from "@/features/patients/use-remote";
+import { LoadState, dateLabel } from "@/features/patients/feedback";
+import { BillingPaymentReviewDocument } from "@/lib/graphql/generated";
 
 const financialInput = z.object({
   amount: moneyInput,
@@ -38,7 +42,7 @@ export function PaymentForm({
 }) {
   const action = useFinancialAction();
   const sheet = useEntrySheetActions();
-  const { workspace } = useWorkspace();
+  const { workspace, organizationId } = useWorkspace();
   const form = useForm<Values>({
     resolver: zodResolver(financialInput),
     defaultValues: {
@@ -50,7 +54,7 @@ export function PaymentForm({
               : (invoice.due.next_due?.remaining ?? invoice.outstanding)
             : invoice.outstanding
           : "",
-      payment_id: invoice.payments.find((payment) => Number(payment.refundable) > 0)?.id ?? "",
+      payment_id: "",
       method: "cash",
       reference: "",
       reason: "",
@@ -59,12 +63,30 @@ export function PaymentForm({
     },
   });
   const values = useWatch({ control: form.control });
+  const reviewRemote = useRemote(
+    BillingPaymentReviewDocument,
+    {
+      organizationId,
+      invoiceId: invoice.id,
+      expectedVersion: invoice.version,
+      amount: values.amount ?? "",
+    },
+    {
+      enabled:
+        kind === "payment" &&
+        moneyInput.safeParse(values.amount).success &&
+        Number(values.amount) > 0,
+    },
+  );
+  const review = paymentReviewSchema.safeParse(reviewRemote.data?.billingPaymentReview);
+  const reviewReady = review.success && !reviewRemote.loading && !reviewRemote.error;
   useUnsavedChanges(`financial:${invoice.id}:${kind}`, form.formState.isDirty, () => form.reset());
   return (
     <form
       noValidate
       className="grid gap-6"
       onSubmit={form.handleSubmit(async (data) => {
+        if (kind === "payment" && !reviewReady) return;
         if (
           (kind !== "payment" && !data.reason.trim()) ||
           (kind === "refund" && !data.payment_id)
@@ -119,18 +141,11 @@ export function PaymentForm({
       </div>
       <fieldset disabled={action.busy} className="grid gap-5">
         {kind === "refund" && (
-          <FormSelect
-            id="refund-payment"
-            label="Original payment"
+          <RefundPaymentPicker
+            invoice={invoice}
             value={values.payment_id ?? ""}
             error={form.formState.errors.payment_id?.message}
-            onChange={(value) => form.setValue("payment_id", value, { shouldDirty: true })}
-            options={invoice.payments
-              .filter((payment) => Number(payment.refundable) > 0)
-              .map((payment) => ({
-                value: payment.id,
-                label: `${payment.paid_date} · PHP ${payment.amount} · PHP ${payment.refundable} refundable`,
-              }))}
+            change={(value) => form.setValue("payment_id", value, { shouldDirty: true })}
           />
         )}
         <div className="max-w-xs">
@@ -195,6 +210,65 @@ export function PaymentForm({
             />
           </FormField>
         )}
+        {kind === "payment" && (
+          <section
+            aria-label="Payment review"
+            className="grid gap-4 rounded-xl border border-border bg-muted/40 p-5"
+          >
+            <h3 className="font-semibold">Review money received</h3>
+            <dl className="grid gap-3 text-sm">
+              <div className="flex justify-between gap-4">
+                <dt>Amount received</dt>
+                <dd className="font-semibold">
+                  <Money
+                    value={moneyInput.safeParse(values.amount).success ? values.amount! : "0"}
+                  />
+                </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt>Date received</dt>
+                <dd>{values.paid_date ? dateLabel(values.paid_date) : "Choose a date"}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt>Method</dt>
+                <dd>{values.method?.replaceAll("_", " ")}</dd>
+              </div>
+            </dl>
+            {!moneyInput.safeParse(values.amount).success || Number(values.amount) <= 0 ? (
+              <p className="text-sm text-muted-foreground">
+                Enter a positive amount to review its coverage.
+              </p>
+            ) : !reviewReady || !review.success ? (
+              <LoadState error={reviewRemote.error} retry={reviewRemote.reload} />
+            ) : (
+              <>
+                <dl className="grid gap-3 border-t border-border pt-4 text-sm">
+                  <div className="flex justify-between gap-4 font-semibold">
+                    <dt>Remaining invoice balance</dt>
+                    <dd>
+                      <Money value={review.data.after.outstanding} />
+                    </dd>
+                  </div>
+                  <div className="flex justify-between gap-4">
+                    <dt>Still due through today</dt>
+                    <dd>
+                      <Money value={review.data.after.due_now} />
+                    </dd>
+                  </div>
+                </dl>
+                <p className="text-sm text-muted-foreground">
+                  {review.data.after.next_due
+                    ? `Next unpaid: ${dateLabel(review.data.after.next_due.due_date)} · PHP ${review.data.after.next_due.remaining}. Payments cover the earliest unpaid obligations first.`
+                    : "This entry would settle the remaining invoice balance."}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Preview of invoice version {review.data.invoice_version}. Recording checks the
+                  current version again.
+                </p>
+              </>
+            )}
+          </section>
+        )}
         <FormField
           id={`financial-confirm-${kind}`}
           label="Confirm financial entry"
@@ -231,7 +305,7 @@ export function PaymentForm({
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={action.busy}>
+        <Button type="submit" disabled={action.busy || (kind === "payment" && !reviewReady)}>
           {action.busy
             ? "Recording…"
             : kind === "payment"

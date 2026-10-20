@@ -1,0 +1,26 @@
+# Daily Medframe click paths
+
+Use your existing account and the correct clinic/branch. Permissions still apply;
+a platform administrator or Django superuser does not bypass patient access.
+
+| Role / task                                   | Click path                                                                                                                                | What to expect                                                                                                                                                                       |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Clinic administrator: choose specialties      | Settings → Medical specialties → select → Save specialties                                                                                | Selects documentation capabilities; does not create provider credentials.                                                                                                            |
+| Permitted clinician: prepare guidance         | Settings → Templates → Use a specialty starter → edit prompts → Save template version                                                     | Guidance contains prompts, separate from patient facts.                                                                                                                              |
+| Clinician: apply guidance                     | Patient → consultation → Clinical notes → Consultation guidance → Clinic template → Save draft and apply guidance                         | Existing SOAP stays intact. The consultation initially opens its 3D dental workspace; Clinical notes returns to the notes.                                                           |
+| Clinician: export a saved revision            | Consultation → preserved revision → Clinical notes → Export record → choose sections → Review selected revision → confirm → Download JSON | Downloads that exact saved revision. Changing sections invalidates review. Current patient authorization is checked again on download.                                               |
+| Reception / financial staff: service payments | Services → Patient services → search → Open service → Manage payments                                                                     | No invoice offers preparation; a draft offers review; an issued statement shows actual received/due/future balances. Workflow-only staff see no financial panel.                     |
+| Financial staff: record money received        | Billing → issued invoice → Record payment → amount/date/method → review coverage → confirm → Record payment                               | Records money already received. Does not charge an account. A stale invoice must be reloaded.                                                                                        |
+| Financial adjustment staff: return money      | Billing → issued invoice → Record refund → Original payment → Older records if needed → amount/date/reason → confirm                      | Payment selection searches eligible entries independently of the displayed payment page. Records an already completed refund and reopens unpaid coverage unless credited separately. |
+| Financial staff: review / print               | Billing → invoice → Recorded payments → View confirmation → Print confirmation                                                            | Rechecks permission and the current ledger before printing. Shows original amount, refunds, retained money, source ID and current invoice balance.                                   |
+| Patient: read statements                      | Patient portal → Billing → statement → Recorded payments → View confirmation                                                              | Own connected patient only; redacted financial history and printable confirmation. No payment recording controls.                                                                    |
+| Reporting role: aggregate CSV                 | Analytics → choose period → Export report CSV                                                                                             | Aggregate clinic data; clinical reporting remains permission scoped.                                                                                                                 |
+
+Payment confirmations describe an existing clinic record, including partial
+payments. They are not tax invoices or new charges. Draft or unrecorded payments
+have no printable paid confirmation. Installment Due/Upcoming/Settled filters
+retain the original financial projection; paging history never changes totals.
+
+If a record becomes unavailable, use the existing recovery/navigation controls
+and contact the clinic administrator for patient/provider setup. Do not use an
+incognito session or a different role as an authorization bypass.

@@ -38,7 +38,7 @@ def serialize_due(projection, portal=False):
     return convert(projection)
 
 
-def invoice_due_projection(invoice, today=None):
+def invoice_due_projection(invoice, today=None, *, additional_payment=0):
     today = today or timezone.localdate(timezone=ZoneInfo(invoice.organization.timezone))
     try:
         agreement = invoice.installment
@@ -52,11 +52,17 @@ def invoice_due_projection(invoice, today=None):
         if agreement
         else [ScheduledAmount(0, "invoice", invoice.due_date, invoice.total, str(invoice.id))]
     )
-    payments = list(invoice.payments.all())
-    paid = sum(x.amount for x in payments)
-    refunds = sum(r.amount for x in payments for r in x.refunds.all())
-    credits = sum(x.amount for x in invoice.credits.all())
-    result = project_obligations(rows, paid, refunds, credits, today, invoice.state)
+    from medframe_apps.billing.calculations import invoice_totals
+
+    totals = invoice_totals(invoice)
+    result = project_obligations(
+        rows,
+        totals["paid"] + additional_payment,
+        totals["refunded"],
+        totals["credits"],
+        today,
+        invoice.state,
+    )
     result["is_installment"] = bool(agreement)
     return result
 

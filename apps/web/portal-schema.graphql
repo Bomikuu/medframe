@@ -27,6 +27,8 @@ type PortalQuery {
   myNotifications(linkId: UUID!, after: String = null): JSON!
   myBilling(linkId: UUID!, after: String = null): JSON!
   myInvoice(linkId: UUID!, invoiceId: UUID!): JSON!
+  myInvoiceHistory(linkId: UUID!, invoiceId: UUID!, kind: String!, after: String = null): JSON!
+  myPaymentConfirmation(linkId: UUID!, invoiceId: UUID!, paymentId: UUID!): JSON!
   myCommunicationPreferences(linkId: UUID!): JSON!
   portalSession: JSON!
   portalLinks: JSON!

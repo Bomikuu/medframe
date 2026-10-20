@@ -59,32 +59,58 @@ export const invoiceSchema = z.object({
   payment_status: z.string(),
   due: dueSchema.optional(),
 });
+export const paymentSchema = z.object({
+  id: z.string(),
+  amount: z.string(),
+  method: z.string(),
+  paid_date: z.string(),
+  refundable: z.string(),
+  reference: z.string().optional(),
+});
+export const eventSchema = z.object({
+  id: z.string(),
+  kind: z.string(),
+  created_at: z.string(),
+  amount: z.string(),
+  reason: z.string().optional(),
+  actor: z.string().optional(),
+});
+export const historyPageInfo = z.object({
+  end_cursor: z.string().nullable(),
+  has_next_page: z.boolean(),
+});
+export const paymentPageSchema = historyPageInfo.extend({ items: z.array(paymentSchema) });
+export const eventPageSchema = historyPageInfo.extend({ items: z.array(eventSchema) });
+export const paymentReviewSchema = z.object({
+  invoice_version: z.number(),
+  amount: z.string(),
+  after: dueSchema,
+});
+export const paymentConfirmationSchema = z.object({
+  invoice_id: z.string(),
+  invoice_number: z.string(),
+  invoice_version: z.number(),
+  invoice_state: z.string(),
+  patient_name: z.string(),
+  branch_name: z.string(),
+  currency: z.string(),
+  recorded_at: z.string(),
+  refunded: z.string(),
+  retained: z.string(),
+  outstanding: z.string(),
+  payment: paymentSchema,
+});
 export const invoiceDetailSchema = invoiceSchema.extend({
   installment_plan: agreementSchema.nullable().optional(),
   case_id: z.string().nullable().optional(),
   discount_kind: z.enum(["fixed", "percent"]),
   discount_value: z.string(),
   lines: z.array(lineInput.extend({ line_total: z.string() })),
-  payments: z.array(
-    z.object({
-      id: z.string(),
-      amount: z.string(),
-      method: z.string(),
-      paid_date: z.string(),
-      refundable: z.string(),
-      reference: z.string().optional(),
-    }),
-  ),
-  events: z.array(
-    z.object({
-      id: z.string(),
-      kind: z.string(),
-      created_at: z.string(),
-      amount: z.string(),
-      reason: z.string().optional(),
-      actor: z.string().optional(),
-    }),
-  ),
+  payments: z.array(paymentSchema),
+  events: z.array(eventSchema),
+  payments_page: historyPageInfo,
+  events_page: historyPageInfo,
+  has_refundable_payments: z.boolean(),
 });
 export type Invoice = z.infer<typeof invoiceSchema>;
 export type InvoiceDetail = z.infer<typeof invoiceDetailSchema>;

@@ -256,6 +256,9 @@ type Query {
   billingSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
   billingInvoices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
   billingInvoice(organizationId: UUID!, invoiceId: UUID!): JSON!
+  billingHistory(organizationId: UUID!, invoiceId: UUID!, kind: String!, after: String = null): JSON!
+  billingPaymentConfirmation(organizationId: UUID!, invoiceId: UUID!, paymentId: UUID!): JSON!
+  billingPaymentReview(organizationId: UUID!, invoiceId: UUID!, expectedVersion: Int!, amount: String!): JSON!
   billingPreview(organizationId: UUID!, data: JSON!): JSON!
   communicationSetup(organizationId: UUID!, branchId: UUID!, patientId: UUID = null, search: String! = ""): JSON!
   communicationReminders(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null): JSON!

@@ -16,3 +16,10 @@ query MyNotifications($linkId: UUID!, $after: String) {
 mutation ReadMyNotifications($linkId: UUID!, $ids: [UUID!]!) {
   readMyNotifications(linkId: $linkId, ids: $ids)
 }
+
+query MyInvoiceHistory($linkId: UUID!, $invoiceId: UUID!, $kind: String!, $after: String) {
+  myInvoiceHistory(linkId: $linkId, invoiceId: $invoiceId, kind: $kind, after: $after)
+}
+query MyPaymentConfirmation($linkId: UUID!, $invoiceId: UUID!, $paymentId: UUID!) {
+  myPaymentConfirmation(linkId: $linkId, invoiceId: $invoiceId, paymentId: $paymentId)
+}

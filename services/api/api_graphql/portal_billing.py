@@ -25,6 +25,33 @@ class PortalBillingQuery:
         return portal_invoices(info.context, link_id, invoice_id=invoice_id)
 
     @strawberry.field
+    def my_invoice_history(
+        self,
+        info: Info,
+        link_id: UUID,
+        invoice_id: UUID,
+        kind: str,
+        after: str | None = None,
+    ) -> JSON:
+        from medframe_apps.billing.history import portal_history
+
+        return portal_history(info.context, link_id, invoice_id, kind, after)
+
+    @strawberry.field
+    def my_payment_confirmation(
+        self,
+        info: Info,
+        link_id: UUID,
+        invoice_id: UUID,
+        payment_id: UUID,
+    ) -> JSON:
+        from medframe_apps.billing.history import payment_confirmation, portal_invoice
+
+        return payment_confirmation(
+            portal_invoice(info.context, link_id, invoice_id), payment_id, portal=True
+        )
+
+    @strawberry.field
     def my_communication_preferences(self, info: Info, link_id: UUID) -> JSON:
         return portal_preference(info.context, link_id)
 

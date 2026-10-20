@@ -44,6 +44,44 @@ class BillingQuery:
         return staff_invoice(info.context, organization_id, invoice_id)
 
     @strawberry.field
+    def billing_history(
+        self,
+        info: Info,
+        organization_id: UUID,
+        invoice_id: UUID,
+        kind: str,
+        after: str | None = None,
+    ) -> JSON:
+        from medframe_apps.billing.history import staff_history
+
+        return staff_history(info.context, organization_id, invoice_id, kind, after)
+
+    @strawberry.field
+    def billing_payment_confirmation(
+        self,
+        info: Info,
+        organization_id: UUID,
+        invoice_id: UUID,
+        payment_id: UUID,
+    ) -> JSON:
+        from medframe_apps.billing.history import staff_confirmation
+
+        return staff_confirmation(info.context, organization_id, invoice_id, payment_id)
+
+    @strawberry.field
+    def billing_payment_review(
+        self,
+        info: Info,
+        organization_id: UUID,
+        invoice_id: UUID,
+        expected_version: int,
+        amount: str,
+    ) -> JSON:
+        from medframe_apps.billing.history import payment_review
+
+        return payment_review(info.context, organization_id, invoice_id, expected_version, amount)
+
+    @strawberry.field
     def billing_preview(self, info: Info, organization_id: UUID, data: JSON) -> JSON:
         member = staff_member(info.context, organization_id, "billing.manage")
         parsed = validate_input(DraftInput, data)

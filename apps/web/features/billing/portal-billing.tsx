@@ -11,7 +11,8 @@ import { LoadState, dateLabel } from "@/features/patients/feedback";
 import { getPortalClient } from "@/lib/graphql/portal/client";
 import { MyBillingDocument, MyInvoiceDocument } from "@/lib/graphql/portal/generated";
 import { invoiceDetailSchema, invoicePageSchema } from "./schema";
-import { InvoiceHistory, InvoiceStatement } from "./invoice-detail";
+import { InvoiceStatement } from "./invoice-detail";
+import { InvoiceLedger } from "./invoice-ledger";
 import { Money, PageNavigation } from "./controls";
 
 export function PortalBilling() {
@@ -103,7 +104,7 @@ function PortalInvoice({ invoiceId }: { invoiceId: string }) {
         </p>
       </div>
       <InvoiceStatement invoice={invoice} />
-      <InvoiceHistory invoice={invoice} />
+      <InvoiceLedger invoice={invoice} scope={{ linkId }} />
     </div>
   );
 }

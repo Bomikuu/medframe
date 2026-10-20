@@ -84,7 +84,9 @@ export type PortalQuery = {
   myDiagnosticRequest: Scalars['JSON']['output'];
   myDiagnosticRequests: Scalars['JSON']['output'];
   myInvoice: Scalars['JSON']['output'];
+  myInvoiceHistory: Scalars['JSON']['output'];
   myNotifications: Scalars['JSON']['output'];
+  myPaymentConfirmation: Scalars['JSON']['output'];
   myQueue: Scalars['JSON']['output'];
   portalLinks: Scalars['JSON']['output'];
   portalRecord: Scalars['JSON']['output'];
@@ -135,9 +137,24 @@ export type PortalQueryMyInvoiceArgs = {
 };
 
 
+export type PortalQueryMyInvoiceHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  invoiceId: Scalars['UUID']['input'];
+  kind: Scalars['String']['input'];
+  linkId: Scalars['UUID']['input'];
+};
+
+
 export type PortalQueryMyNotificationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryMyPaymentConfirmationArgs = {
+  invoiceId: Scalars['UUID']['input'];
+  linkId: Scalars['UUID']['input'];
+  paymentId: Scalars['UUID']['input'];
 };
 
 

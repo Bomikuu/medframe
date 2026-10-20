@@ -108,38 +108,15 @@ def invoice_detail(row, *, portal=False):
                 }
                 for line in row.lines.order_by("position")
             ],
-            "payments": [
-                {
-                    "id": str(payment.id),
-                    "amount": amount_text(payment.amount),
-                    "method": payment.method,
-                    "paid_date": payment.paid_date.isoformat(),
-                    "refundable": amount_text(
-                        payment.amount
-                        - (payment.refunds.aggregate(value=Sum("amount"))["value"] or 0)
-                    ),
-                    **({} if portal else {"reference": payment.reference}),
-                }
-                for payment in row.payments.order_by("created_at")
-            ],
-            "events": [
-                {
-                    "id": str(event.id),
-                    "kind": event.kind,
-                    "created_at": event.created_at.isoformat(),
-                    "amount": amount_text(event.payload.get("amount", 0)),
-                    **(
-                        {}
-                        if portal
-                        else {"reason": event.reason, "actor": event.actor.display_name}
-                    ),
-                }
-                for event in row.events.select_related("actor")
-                .exclude(kind="save")
-                .order_by("created_at")
-            ],
         }
     )
+    from medframe_apps.billing.history import history_page, payment_query
+
+    for kind in ("payments", "events"):
+        page = history_page(row, kind, portal=portal)
+        result[kind] = page.pop("items")
+        result[f"{kind}_page"] = page
+    result["has_refundable_payments"] = payment_query(row).filter(amount__gt=F("returned")).exists()
     return result
 
 

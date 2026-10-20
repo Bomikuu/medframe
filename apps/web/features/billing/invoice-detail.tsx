@@ -20,7 +20,7 @@ import {
 import { BillingInvoiceDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
 import { LoadState, PageHeading, RemoteNotice, dateLabel } from "@/features/patients/feedback";
-import { useClinicTime } from "@/components/application/clinical-locale";
+import { InvoiceLedger } from "./invoice-ledger";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { invoiceDetailSchema, type InvoiceDetail } from "./schema";
@@ -58,7 +58,7 @@ function InvoiceWorkspace({
   reload: () => void;
   remoteError: unknown;
 }) {
-  const { can, href } = useWorkspace();
+  const { can, href, organizationId } = useWorkspace();
   const { confirm } = useSafety();
   const action = useFinancialAction();
   const setup = useBillingSetup(invoice.branch_id);
@@ -177,7 +177,7 @@ function InvoiceWorkspace({
                       saved={reload}
                     />
                   </EntrySheet>
-                  {invoice.payments.some((payment) => Number(payment.refundable) > 0) && (
+                  {invoice.has_refundable_payments && (
                     <EntrySheet
                       title="Record refund"
                       description="Record money already returned. No money is moved."
@@ -246,7 +246,7 @@ function InvoiceWorkspace({
           )}
         </FinancialSection>
       </div>
-      <InvoiceHistory invoice={invoice} />
+      <InvoiceLedger invoice={invoice} scope={{ organizationId }} />
     </div>
   );
 }
@@ -331,44 +331,5 @@ export function InvoiceStatement({ invoice }: { invoice: InvoiceDetail }) {
         />
       )}
     </div>
-  );
-}
-export function InvoiceHistory({ invoice }: { invoice: InvoiceDetail }) {
-  const time = useClinicTime();
-  return (
-    <FinancialSection title="Financial history">
-      {!invoice.events.length ? (
-        <p className="text-sm text-muted-foreground">No issued financial events yet.</p>
-      ) : (
-        <ol className="divide-y divide-border">
-          {invoice.events.map((event) => (
-            <li key={event.id} className="flex flex-wrap items-start justify-between gap-4 py-4">
-              <div>
-                <p className="font-medium capitalize">
-                  {event.kind}
-                  {Number(event.amount) > 0 && (
-                    <>
-                      {" "}
-                      · <Money value={event.amount} />
-                    </>
-                  )}
-                </p>
-                {event.reason && (
-                  <p className="mt-1 max-w-prose text-sm whitespace-pre-wrap text-muted-foreground">
-                    {event.reason}
-                  </p>
-                )}
-                {event.actor && (
-                  <p className="mt-1 text-xs text-muted-foreground">Recorded by {event.actor}</p>
-                )}
-              </div>
-              <time className="text-xs text-muted-foreground" dateTime={event.created_at}>
-                {time(event.created_at)}
-              </time>
-            </li>
-          ))}
-        </ol>
-      )}
-    </FinancialSection>
   );
 }

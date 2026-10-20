@@ -717,8 +717,11 @@ export type Query = {
   anatomyRevisions: Scalars['JSON']['output'];
   appointmentAvailability: Scalars['JSON']['output'];
   appointments: Scalars['JSON']['output'];
+  billingHistory: Scalars['JSON']['output'];
   billingInvoice: Scalars['JSON']['output'];
   billingInvoices: Scalars['JSON']['output'];
+  billingPaymentConfirmation: Scalars['JSON']['output'];
+  billingPaymentReview: Scalars['JSON']['output'];
   billingPreview: Scalars['JSON']['output'];
   billingSetup: Scalars['JSON']['output'];
   branchQueue: Scalars['JSON']['output'];
@@ -838,6 +841,14 @@ export type QueryAppointmentsArgs = {
 };
 
 
+export type QueryBillingHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  invoiceId: Scalars['UUID']['input'];
+  kind: Scalars['String']['input'];
+  organizationId: Scalars['UUID']['input'];
+};
+
+
 export type QueryBillingInvoiceArgs = {
   invoiceId: Scalars['UUID']['input'];
   organizationId: Scalars['UUID']['input'];
@@ -850,6 +861,21 @@ export type QueryBillingInvoicesArgs = {
   filters?: InputMaybe<Scalars['JSON']['input']>;
   organizationId: Scalars['UUID']['input'];
   patientId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+
+export type QueryBillingPaymentConfirmationArgs = {
+  invoiceId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
+  paymentId: Scalars['UUID']['input'];
+};
+
+
+export type QueryBillingPaymentReviewArgs = {
+  amount: Scalars['String']['input'];
+  expectedVersion: Scalars['Int']['input'];
+  invoiceId: Scalars['UUID']['input'];
+  organizationId: Scalars['UUID']['input'];
 };
 
 

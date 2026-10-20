@@ -100,7 +100,9 @@
     ".next-service-context/types/**/*.ts",
     ".next-service-context/dev/types/**/*.ts",
     ".next-batch8/types/**/*.ts",
-    ".next-batch8/dev/types/**/*.ts"
+    ".next-batch8/dev/types/**/*.ts",
+    ".next-workflow-finance/types/**/*.ts",
+    ".next-workflow-finance/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }
