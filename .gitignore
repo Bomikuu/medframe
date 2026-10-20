@@ -89,3 +89,5 @@ output/playwright/
 .next-service-plans/
 
 .superpowers/
+
+.next-service-context/

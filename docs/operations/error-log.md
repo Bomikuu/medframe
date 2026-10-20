@@ -1,5 +1,9 @@
 # Deferred issue log
 
+## SERVICE-CONTEXT-001 — Bounded browser acceptance remains partial
+
+The initial patient-service journey uses textbox for a type=search input and stops before opening the case. One focused continuation fixes the harness role, then passes responsive native payment totals, Manage payments navigation, one due summary and Due/Upcoming/Settled filtering. Native synthetic payment succeeds and reopening verifies12,000 received/48,000 outstanding/zero due. A broad /2,000/ selector then matches both12,000 received and2,000 next payment; stopped.png visibly shows the correct next obligation and Active workflow. No page exceptions in the continuation. Draft/uninvoiced/void/reader/portal and retry browser groups remain unexecuted. No third browser round or full acceptance claim. Setup-only python/callback errors precede application actions. Evidence: output/playwright/service-context/ and /tmp/medframe-service-context-browser*.log; see service-payment-context-verification.md. SERVICE-PLAN-003's generic void label is changed under the user's approved refinement, while browser acceptance and broader permutations remain open.
+
 ## SERVICE-PLAN-001 — Staged activation/static and date-fixture repairs
 
 Initial39 backend cases pass38; the remaining reporting fixture used UTC instead of clinic-local date. One focused timezone-correct confirmation passes. Initial build/profile due-type, Ruff import/SQL wrapping and scoped ESLint authored-copy/ref analyzer blockers were repaired under standing local activation authorization. The first ESLint command used the wrong working directory. Logs retain each stage under /tmp/medframe-service-plans-*.log; see services-installments-verification.md. No repeated broad suite claim.

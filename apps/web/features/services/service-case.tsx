@@ -1,9 +1,6 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { EntrySheet } from "@/components/application/entry-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -11,12 +8,11 @@ import { LoadState, RemoteNotice, dateLabel } from "@/features/patients/feedback
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "@/features/patients/use-remote";
 import { PatientServiceDocument } from "@/lib/graphql/generated";
-import { FinancialNotice, Money } from "@/features/billing/controls";
-import { useBillingSetup } from "@/features/billing/use-billing";
-import { InvoiceForm } from "@/features/billing/invoice-form";
+import { FinancialNotice } from "@/features/billing/controls";
 import { useSafety } from "@/features/workspace/safety-provider";
-import { caseSchema, type ServiceCase } from "./schema";
+import { caseSchema } from "./schema";
 import { useServiceAction } from "./use-services";
+import { ServiceBilling } from "./service-billing";
 
 export function ServiceCaseDetail({ caseId, updated }: { caseId: string; updated: () => void }) {
   const { organizationId, can } = useWorkspace();
@@ -110,7 +106,7 @@ export function ServiceCaseDetail({ caseId, updated }: { caseId: string; updated
           </div>
         </div>
       )}
-      {can("billing.read") && <CaseBilling row={row} />}
+      {can("billing.read") && <ServiceBilling service={row} />}
       <section className="grid gap-3 border-t border-border pt-5">
         <h3 className="font-semibold">Workflow history</h3>
         {row.events.map((event) => (
@@ -126,49 +122,5 @@ export function ServiceCaseDetail({ caseId, updated }: { caseId: string; updated
         ))}
       </section>
     </div>
-  );
-}
-function CaseBilling({ row }: { row: ServiceCase }) {
-  const { href, can } = useWorkspace();
-  const router = useRouter();
-  const setup = useBillingSetup(row.branch_id);
-  return (
-    <section className="grid gap-3 border-t border-border pt-5">
-      <h3 className="font-semibold">Billing agreement</h3>
-      {row.financial && (
-        <p className="text-sm">
-          Captured preset: <Money value={row.financial.price} />
-          {row.financial.payment_mode === "monthly"
-            ? ` · ${row.financial.months} monthly installments`
-            : " · Full payment"}
-        </p>
-      )}
-      {row.invoice_id ? (
-        <Button asChild variant="outline">
-          <Link href={href(`/clinic/billing/${row.invoice_id}`)}>
-            Open invoice and payment schedule
-          </Link>
-        </Button>
-      ) : row.status !== "cancelled" &&
-        can("billing.manage") &&
-        can("services.work") &&
-        setup.setup ? (
-        <EntrySheet
-          title="Prepare service invoice"
-          description="Review charges, monthly dates and the final agreement before issuing."
-        >
-          <InvoiceForm
-            setup={setup.setup}
-            patientId={row.patient_id}
-            serviceCase={row}
-            saved={(invoice) => router.push(href(`/clinic/billing/${invoice.id}`))}
-          />
-        </EntrySheet>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          No linked installment invoice. Financial staff can prepare the agreement.
-        </p>
-      )}
-    </section>
   );
 }

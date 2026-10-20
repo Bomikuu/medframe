@@ -316,12 +316,20 @@ export function InvoiceStatement({ invoice }: { invoice: InvoiceDetail }) {
             </div>
           )}
         </dl>
-        {invoice.due && invoice.state === "issued" && <DueSummary due={invoice.due} />}
+        {invoice.due && invoice.state === "issued" && !invoice.due.is_installment && (
+          <DueSummary due={invoice.due} />
+        )}
         <p className="text-xs text-muted-foreground">
           Financial statement in {invoice.currency}. Clinical records are maintained separately.
         </p>
       </FinancialSection>
-      {invoice.due && <InstallmentSchedule due={invoice.due} draft={invoice.state === "draft"} />}
+      {invoice.due && (
+        <InstallmentSchedule
+          due={invoice.due}
+          draft={invoice.state === "draft"}
+          state={invoice.state}
+        />
+      )}
     </div>
   );
 }
