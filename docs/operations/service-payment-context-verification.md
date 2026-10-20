@@ -20,6 +20,16 @@ Draft, uninvoiced preparation, void-history, workflow-only reader and verified p
 
 The six responsive captures and final stopped capture were opened and visually inspected in-thread. Payments remain readable with a full-width phone action; filter controls wrap and schedule columns scroll within their region. Long full-page captures include sticky shell/header placement at the current scroll position; they are not an assertion of every viewport interaction. The established white/navy/teal Operate identity and shared shadcn controls remain. DESIGN tokens/world unchanged. The existing session Impeccable launcher failure was reported previously and was not retried; detector did not run. Degraded review/documentation stayed native as required by the user.
 
+Native finish reviewer substitution, limited to the captured refinement (no approved comp or new visual-world contract): disposition: ship.
+
+- Persistence: PRODUCT.md, DESIGN.md and the existing clinic-services surface brief persist; the brief records this approved extension.
+- Fidelity: type matches the incumbent Manrope/Jakarta hierarchy; material matches plain task surfaces and semantic controls; ground matches the existing cool canvas/white sheet. Payment metrics, next obligation, native destination and wrapped filters match the approved scope. Internal horizontal schedule scrolling is a responsive adaptation to seven real data columns.
+- Ceiling: the incumbent Operate surface is preserved; no decorative device or promotional layout is needed for these tasks.
+- Material fixes: none established in the captured payment/filter surface. Unexecuted state/role/portal assertions remain explicit acceptance gaps, not passing review coverage.
+- Keep: native money/permission owners, separation from workflow status, readable amounts and one payment destination.
+
+Native documenter substitution: no DESIGN.md/sidecar changes; checked existing DESIGN.md, globals.css, shared Button, service-billing and installment-schedule. Palette remains cool canvas/white/navy/teal; typography remains inherited Manrope/Jakarta; rhythm uses existing grouped gaps; controls retain shared button/focus/disabled variants; phone tables scroll internally. Pre-existing design drift and unexecuted interaction coverage are not canonized or repaired.
+
 Review database `medframe_django_station_kiosk_review_20261019`, ports8001/3001, no review worker. Synthetic partial/draft/void/uninvoiced fixtures and staff/reader/patient sessions stay private outside Git. No original patient mutation, fixture import or clone restore over original. Captures: `output/playwright/service-context/`; raw CLI logs under `/tmp/medframe-service-context-browser*.log`. CLI logs include synthetic identifiers, not original patient data.
 
 ## Graphify and Jev
@@ -30,4 +40,8 @@ Sanitized Jev design chooses live_context (confidence1.0,460input/34output); imp
 
 ## Activation
 
-Pending local preservation and activation. No source/schema rollback by restoring a review clone over original. Preserve the prior artifact and the user's width edit.
+Active locally on October20,2026: implementation `fe3fd4b`, branch `codex/service-payment-context`, artifact `.next-service-context`, BUILD_ID `BRueC1DNRqioGzaK0GOjS`, original `medframe_django`. Root `./medframe start --production --dist-dir .next-service-context` owns running API/web/worker/scheduler. Frontend `/login` and API `/health/ready` return HTTP200. Review API/web were stopped. No original patient/service/payment fixtures were created by this refinement.
+
+Original app processes were stopped before preservation. Fresh encrypted checkpoint `pre-batch2-20261020-112222-fe3fd4b` was restore-verified into isolated `medframe_django_service_context_activation_20261020`:152tables, source_written=false. The helper's historical pre-batch2 prefix does not change the fresh checkpoint scope. Fingerprints verify all6,381 original rows across152tables unchanged before traffic resumes. Separate encrypted private-object copy `service-context-storage-20261020` restore-verifies51objects in isolated `medframe-review-service-context-preservation-20261020`, originals_written=false. Checkpoint configuration/archives, fingerprints, objects and session fixtures stay outside Git under private user data paths.
+
+No migration or original credential/MFA/permission change. Native ledger and historical issued agreements remain unchanged; synthetic payment action ran only in the isolated review database. Prior `.next-service-plans` and baseline `93ff2e5`/checkpoint tag remain available. The user's width patch is byte-for-byte unchanged and is the sole uncommitted source diff. Source/UI rollback requires the preserved compatible artifact and existing data-aware operating instructions; never restore a review clone over original. Local activation does not authorize public deployment, messages or online money movement.
