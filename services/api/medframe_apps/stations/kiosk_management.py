@@ -17,6 +17,7 @@ from medframe_apps.patients.models import Patient
 from medframe_apps.patients.services import register_patient
 from medframe_apps.portal.policy import require_portal_link
 from medframe_apps.stations import kiosk_reception as reception
+from medframe_apps.stations.display import settings_data
 from medframe_apps.stations.kiosk_identity import issue
 from medframe_apps.stations.kiosk_services import department_summary, providers
 from medframe_apps.stations.kiosk_visits import (
@@ -91,6 +92,25 @@ def manage(request):
         if action == "assign":
             return JsonResponse(reception.assign(request, member, patient, branch, data))
         return JsonResponse(issue(patient, request.user, membership=member, method=method))
+    if action == "display_settings":
+        # Serialize first-save/version-zero updates on the same branch owner.
+        from medframe_apps.common import advisory_lock
+        from medframe_apps.stations.display import save_settings
+
+        advisory_lock(f"station-display-settings:{branch.id}")
+        return JsonResponse(save_settings(request, branch, data))
+    if action == "link_invoice":
+        from medframe_apps.stations.payment_policy import link_invoice
+
+        stage = (
+            VisitStage.objects.select_related("visit__branch__organization")
+            .filter(id=data["stage_id"], visit__branch=branch)
+            .first()
+        )
+        if stage is None:
+            raise DomainError("NOT_FOUND", "This ticket is unavailable.", 404)
+        stage = link_invoice(request, stage, data["invoice_id"], int(data["expected_version"]))
+        return JsonResponse({"ticket": ticket_summary(stage)})
     if action in {"initialize", "department"}:
         administrator(request, org, branch.id)
         if action == "initialize":
@@ -161,6 +181,13 @@ def manage(request):
                 raise DomainError("INVALID_INPUT", "Use a duration in five-minute increments.")
             row.early_minutes = bounded(data, "early_minutes", 60, 0, 240)
             row.late_minutes = bounded(data, "late_minutes", 120, 0, 480)
+            counter = str(data.get("counter_label", row.counter_label)).strip()
+            timing = data.get("payment_timing", row.payment_timing)
+            if len(counter) > 60 or timing not in {"before", "after"}:
+                raise DomainError(
+                    "INVALID_INPUT", "Use a counter up to 60 characters and a valid payment timing."
+                )
+            row.counter_label, row.payment_timing = counter, timing
             row.save()
             record(request.user, branch, row, "department.saved")
     elif action == "stage":
@@ -251,6 +278,9 @@ def manage(request):
         .filter(visit__branch=branch, visit__date=today(branch))
         .order_by("-priority", "created_at")[:200]
     )
+    from medframe_apps.organizations.policy import permissions_for
+
+    financial = "billing.read" in permissions_for(member)
     tickets = []
     for row in stages:
         # Keep provider-restricted clinicians within their existing queue scope.
@@ -267,6 +297,16 @@ def manage(request):
                 "patient": row.visit.patient.full_name,
                 "patient_reference": row.visit.patient.reference,
                 "visit_state": row.visit.state,
+                **(
+                    {
+                        "patient_id": str(row.visit.patient_id),
+                        "payment_invoice_id": str(row.payment_invoice_id)
+                        if row.payment_invoice_id
+                        else None,
+                    }
+                    if financial
+                    else {}
+                ),
             }
         )
     intakes = KioskIntake.objects.filter(
@@ -274,6 +314,7 @@ def manage(request):
     ).order_by("created_at")[:30]
     return JsonResponse(
         {
+            "display_settings": settings_data(branch),
             "departments": [
                 department_summary(row)
                 for row in StationDepartment.objects.filter(branch=branch).order_by("name")

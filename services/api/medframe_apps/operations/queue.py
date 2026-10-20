@@ -136,6 +136,9 @@ def ticket_scope(request, ticket_id):
 @transaction.atomic
 def transition_ticket(request, ticket_id, data, request_id):
     data = parse(QueueTransitionInput, data)
+    from medframe_apps.stations.payment_policy import lock_visit_for_ticket, require_clearance
+
+    lock_visit_for_ticket(ticket_id)
     row = ticket_scope(request, ticket_id)
     branch = row.day.branch
     values = {"ticket": str(row.id), **data.model_dump(mode="json")}
@@ -153,7 +156,7 @@ def transition_ticket(request, ticket_id, data, request_id):
     }
     allowed = {
         "waiting": {"called", "cancelled", "no_show", "delay"},
-        "called": {"waiting", "in_service", "cancelled", "no_show", "delay"},
+        "called": {"waiting", "in_service", "cancelled", "no_show", "delay", "recall"},
         "in_service": {"completed", "delay", "extend"},
     }
     if data.target not in allowed.get(row.status, set()):
@@ -162,6 +165,15 @@ def transition_ticket(request, ticket_id, data, request_id):
         raise DomainError("INVALID_INPUT", "Record a short operational reason.")
     advisory_lock(f"operations-provider:{row.provider.membership.user_id}")
     if data.target == "in_service":
+        from medframe_apps.stations.models import VisitStage
+
+        stage = (
+            VisitStage.objects.select_related("department", "visit__branch__organization")
+            .filter(queue_ticket=row)
+            .first()
+        )
+        if stage:
+            require_clearance(request, stage, data.payment_exception_reason)
         if (
             QueueTicket.objects.filter(
                 service_user_id=row.provider.membership.user_id, status="in_service"
@@ -203,7 +215,7 @@ def transition_ticket(request, ticket_id, data, request_id):
     if data.target in {"completed", "cancelled", "no_show"}:
         identity = {"appointment": row.appointment} if row.appointment_id else {"ticket": row}
         Reservation.objects.filter(**identity).update(active=False)
-    if data.target not in {"delay", "extend"}:
+    if data.target not in {"delay", "extend", "recall"}:
         row.status = data.target
     row.version += 1
     row.save()

@@ -11,6 +11,8 @@ export type Department = {
   early_minutes: number;
   late_minutes: number;
   version: number;
+  counter_label: string;
+  payment_timing: "before" | "after";
 };
 export type Provider = { id: string; name: string };
 export type Setup = {
@@ -47,6 +49,8 @@ export type Ticket = {
   next_step: string;
   provider: string | null;
   queue_number: number | null;
+  counter: string;
+  payment_clearance: { required: boolean; blocked: boolean; message: string };
 };
 export type Snapshot = PatientSession & { appointments: Appointment[]; tickets: Ticket[] };
 export type Slot = { start: string; end: string; local: string; timezone: string };

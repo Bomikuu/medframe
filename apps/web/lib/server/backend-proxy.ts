@@ -2,6 +2,7 @@ const allowedPaths = new Set([
   "analytics/export",
   "interoperability/preview",
   "interoperability/download",
+  "stations/display",
   "stations/kiosk",
   "stations/kiosk/manage",
   "portal/kiosk-code",

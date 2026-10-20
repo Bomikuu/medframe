@@ -23,10 +23,12 @@ import { stationRequest } from "../client";
 import { errorMessage } from "@/lib/auth/client";
 import { DepartmentDialog, StageDialog, type StaffTicket } from "./staff-dialogs";
 import type { ReceptionKiosk } from "./reception-assignment";
+import { DisplaySettingsEditor, type DisplaySettings } from "../display/settings-editor";
 import { PatientAccessPanel, type VerifiedPatient } from "./patient-access-panel";
 import { clinicTime, type Department, type Provider } from "./types";
 
 type Data = {
+  display_settings: DisplaySettings;
   departments: Department[];
   providers: Provider[];
   tickets: StaffTicket[];
@@ -303,6 +305,9 @@ function StaffBoard({ branch, branchControl }: { branch: string; branchControl: 
           </div>
         )}
       </section>
+      {can("organization.manage") && (
+        <DisplaySettingsEditor branchId={branch} settings={data.display_settings} run={run} />
+      )}
       <div className="grid items-start gap-5 xl:grid-cols-2">
         <RegistrationRequests
           intakes={data.intakes}
@@ -375,6 +380,8 @@ function StaffBoard({ branch, branchControl }: { branch: string; branchControl: 
         <StageDialog
           key={stage.id}
           row={stage}
+          branchId={branch}
+          timezone={data.timezone}
           departments={data.departments}
           providers={data.providers}
           onClose={() => setStage(null)}

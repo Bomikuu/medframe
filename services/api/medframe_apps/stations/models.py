@@ -180,6 +180,7 @@ from medframe_apps.stations.kiosk_models import (  # noqa: E402,F401
     KioskProof,
     KioskRequest,
     StationDepartment,
+    StationDisplaySettings,
     StationVisit,
     VisitStage,
 )

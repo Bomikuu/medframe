@@ -13,7 +13,7 @@ def session_route(request):
         kind, destination = "device", "/station"
     elif credential and credential.device.mode in {"kiosk", "display"}:
         kind = "device"
-        destination = "/station/kiosk" if credential.device.mode == "kiosk" else "/station"
+        destination = "/station/kiosk" if credential.device.mode == "kiosk" else "/station/display"
     elif authenticated:
         doctor = getattr(request, "station_doctor", None)
         access = getattr(request, "station_access", None)

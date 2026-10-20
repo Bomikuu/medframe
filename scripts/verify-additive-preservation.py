@@ -31,6 +31,7 @@ if database["NAME"] != "medframe_django" or ROOT in args.path.resolve().parents:
 
 expected = json.loads(args.path.read_text()) if args.mode == "check" else None
 result = {}
+columns = {}
 with psycopg.connect(
     dbname=database["NAME"],
     user=database["USER"],
@@ -50,8 +51,29 @@ with psycopg.connect(
     if not set(selected) <= set(tables):
         raise SystemExit("An original table is missing; stop activation.")
     for table in selected:
-        query = sql.SQL("SELECT row_to_json(t)::text FROM {} t").format(
-            sql.Identifier(table)
+        actual_columns = [
+            row[0]
+            for row in connection.execute(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema='public' AND table_name=%s ORDER BY ordinal_position",
+                [table],
+            )
+        ]
+        selected_columns = (
+            expected.get("columns", {}).get(table, actual_columns)
+            if expected
+            else actual_columns
+        )
+        if not set(selected_columns) <= set(actual_columns):
+            raise SystemExit(
+                f"An original column is missing in {table}; stop activation."
+            )
+        columns[table] = selected_columns
+        query = sql.SQL(
+            "SELECT row_to_json(t)::text FROM (SELECT {} FROM {}) t"
+        ).format(
+            sql.SQL(", ").join(map(sql.Identifier, selected_columns)),
+            sql.Identifier(table),
         )
         hashes = Counter()
         with connection.cursor() as cursor:
@@ -64,7 +86,7 @@ with psycopg.connect(
         result[table] = dict(hashes)
 
 if args.mode == "capture":
-    payload = {"database": database["NAME"], "tables": result}
+    payload = {"database": database["NAME"], "tables": result, "columns": columns}
     descriptor = os.open(args.path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(descriptor, "w") as output:
         json.dump(payload, output, sort_keys=True)

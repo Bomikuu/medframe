@@ -17,6 +17,7 @@ from medframe_apps.onboarding import views as onboarding
 from medframe_apps.portal import files as portal_files
 from medframe_apps.portal import views as portal_auth
 from medframe_apps.stations import views as stations
+from medframe_apps.stations.display import display as station_display
 from medframe_apps.stations.kiosk_management import manage as kiosk_manage
 from medframe_apps.stations.kiosk_management import portal_code
 from medframe_apps.stations.kiosk_views import kiosk
@@ -30,6 +31,7 @@ urlpatterns = [
     path("websites/resolve", websites_public.resolve),
     path("websites/<slug:slug>", websites_public.page),
     path("websites/<slug:slug>/assets/<uuid:asset_id>", websites_public.asset),
+    path("stations/display", station_display),
     path("stations/kiosk", kiosk),
     path("stations/kiosk/manage", kiosk_manage),
     path("portal/kiosk-code", portal_code),

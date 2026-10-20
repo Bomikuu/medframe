@@ -3,6 +3,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
+import { Textarea } from "@/components/ui/textarea";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
+import { StagePaymentPanel } from "./stage-payment-panel";
+import { printTicket } from "./print-ticket";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -11,6 +15,8 @@ export type StaffTicket = Ticket & {
   patient: string;
   patient_reference: string;
   visit_state: string;
+  patient_id?: string;
+  payment_invoice_id?: string | null;
 };
 export type ManageAction = (data: Record<string, unknown>) => Promise<unknown>;
 
@@ -23,6 +29,8 @@ export function DepartmentDialog({
   onClose: () => void;
   run: ManageAction;
 }) {
+  const [counter, setCounter] = useState(row?.counter_label ?? "");
+  const [timing, setTiming] = useState(row?.payment_timing ?? "after");
   const [name, setName] = useState(row?.name ?? "");
   const [prefix, setPrefix] = useState(row?.prefix ?? "");
   const [kind, setKind] = useState(row?.kind ?? "other");
@@ -50,6 +58,8 @@ export function DepartmentDialog({
             setBusy(true);
             void run({
               action: "department",
+              counter_label: counter,
+              payment_timing: timing,
               ...(row ? { id: row.id, expected_version: row.version } : {}),
               name,
               prefix,
@@ -133,6 +143,28 @@ export function DepartmentDialog({
               </FormField>
             ))}
           </div>
+          <FormField id="department-counter" label="Public counter or room (optional)">
+            <Input
+              id="department-counter"
+              maxLength={60}
+              value={counter}
+              onChange={(event) => setCounter(event.target.value)}
+            />
+          </FormField>
+          <FormSelect
+            id="department-payment-timing"
+            label="Payment timing"
+            value={timing}
+            onChange={(value) => setTiming(value as "before" | "after")}
+            options={[
+              { value: "after", label: "After service" },
+              { value: "before", label: "Before service · check amount due today" },
+            ]}
+          />
+          <p className="text-xs leading-5 text-muted-foreground">
+            Before-service departments need a linked issued invoice or an authorized, recorded
+            exception. Cashier remains accessible.
+          </p>
           <label className="flex min-h-11 items-center gap-3">
             <Checkbox checked={active} onCheckedChange={(value) => setActive(value === true)} />
             Available to kiosks
@@ -146,18 +178,25 @@ export function DepartmentDialog({
   );
 }
 export function StageDialog({
-  row,
+  row: initial,
+  branchId,
+  timezone,
   departments,
   providers,
   onClose,
   run,
 }: {
   row: StaffTicket;
+  branchId: string;
+  timezone: string;
   departments: Department[];
   providers: Provider[];
   onClose: () => void;
   run: ManageAction;
 }) {
+  const [row, setRow] = useState(initial);
+  const { can } = useWorkspace();
+  const [exception, setException] = useState("");
   const [target, setTarget] = useState(
     ["waiting", "called"].includes(row.status)
       ? "called"
@@ -192,6 +231,23 @@ export function StageDialog({
         <DialogDescription>
           {row.department} · {row.status.replaceAll("_", " ")} · {row.patient_reference}
         </DialogDescription>
+        <p className="text-sm leading-6 text-muted-foreground">{row.payment_clearance.message}</p>
+        <StagePaymentPanel
+          row={row}
+          branchId={branchId}
+          run={run}
+          onLinked={(version, invoiceId, message) =>
+            setRow((old) => ({
+              ...old,
+              version,
+              payment_invoice_id: invoiceId,
+              payment_clearance: { ...old.payment_clearance, message },
+            }))
+          }
+        />
+        <Button type="button" variant="outline" onClick={() => printTicket(row, timezone)}>
+          Print service ticket
+        </Button>
         <form
           className="grid gap-5"
           onSubmit={(e) => {
@@ -205,6 +261,7 @@ export function StageDialog({
               reason,
               department_id: department,
               provider_id: provider,
+              payment_exception_reason: exception,
             })
               .then((result) => {
                 if (result) onClose();
@@ -229,6 +286,21 @@ export function StageDialog({
                     : value.replaceAll("_", " "),
             }))}
           />
+          {target === "in_service" && row.payment_clearance.required && can("billing.adjust") && (
+            <FormField
+              id="stage-payment-exception"
+              label="Payment exception reason (only if needed)"
+            >
+              <Textarea
+                id="stage-payment-exception"
+                value={exception}
+                onChange={(event) => setException(event.target.value)}
+                maxLength={240}
+                rows={3}
+                placeholder="Why service must proceed before cashier confirmation"
+              />
+            </FormField>
+          )}
           {target === "transfer" && (
             <>
               <FormSelect

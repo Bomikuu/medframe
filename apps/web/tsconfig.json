@@ -104,7 +104,9 @@
     ".next-workflow-finance/types/**/*.ts",
     ".next-workflow-finance/dev/types/**/*.ts",
     ".next-tablet-editor/types/**/*.ts",
-    ".next-tablet-editor/dev/types/**/*.ts"
+    ".next-tablet-editor/dev/types/**/*.ts",
+    ".next-station-operations/types/**/*.ts",
+    ".next-station-operations/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

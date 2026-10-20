@@ -12,6 +12,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { Brand } from "@/components/brand";
+import { printTicket } from "./print-ticket";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
@@ -548,7 +549,10 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                           type="button"
                           variant="outline"
                           className="min-h-12"
-                          onClick={() => window.print()}
+                          onClick={() => {
+                            if (kiosk.result?.ticket)
+                              printTicket(kiosk.result.ticket, setup.timezone);
+                          }}
                         >
                           <Printer />
                           Print using this device

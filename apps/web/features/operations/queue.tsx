@@ -213,6 +213,14 @@ function QueueRow({ row, peers, reload }: { row: Ticket; peers: Ticket[]; reload
           <>
             <Button
               type="button"
+              variant="outline"
+              disabled={action.busy}
+              onClick={() => void transition("recall")}
+            >
+              Recall number
+            </Button>
+            <Button
+              type="button"
               disabled={action.busy}
               onClick={() => void transition("in_service")}
             >

@@ -102,8 +102,17 @@ class RescheduleInput(Duration):
 
 
 class QueueTransitionInput(Input):
+    payment_exception_reason: str = Field(default="", max_length=240)
     target: Literal[
-        "waiting", "called", "in_service", "completed", "cancelled", "no_show", "delay", "extend"
+        "waiting",
+        "called",
+        "in_service",
+        "completed",
+        "cancelled",
+        "no_show",
+        "delay",
+        "extend",
+        "recall",
     ]
     expected_version: int = Field(ge=1)
     reason: str = Field(default="", max_length=240)

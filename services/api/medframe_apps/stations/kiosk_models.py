@@ -16,9 +16,15 @@ class StationDepartment(Record):
     early_minutes = models.PositiveSmallIntegerField(default=60)
     late_minutes = models.PositiveSmallIntegerField(default=120)
     version = models.PositiveIntegerField(default=1)
+    counter_label = models.CharField(max_length=60, default="")
+    payment_timing = models.CharField(max_length=8, default="after")
 
     class Meta:
         constraints = [
+            models.CheckConstraint(
+                condition=Q(payment_timing__in=["before", "after"]),
+                name="station_department_payment_timing",
+            ),
             models.UniqueConstraint(fields=["branch", "prefix"], name="station_department_prefix"),
             models.CheckConstraint(
                 condition=Q(kind__in=["consultation", "laboratory", "cashier", "other"]),
@@ -69,6 +75,7 @@ class VisitStage(Record):
         "operations.QueueTicket", null=True, on_delete=models.PROTECT
     )
     previous = models.OneToOneField("self", null=True, on_delete=models.PROTECT)
+    payment_invoice = models.ForeignKey("billing.Invoice", null=True, on_delete=models.PROTECT)
 
     class Meta:
         constraints = [
@@ -162,6 +169,14 @@ class KioskBoundary(models.Model):
         "stations.DeviceCredential", primary_key=True, on_delete=models.PROTECT
     )
     generation = models.PositiveIntegerField(default=1)
+
+
+class StationDisplaySettings(models.Model):
+    branch = models.OneToOneField(
+        "organizations.Branch", primary_key=True, on_delete=models.PROTECT
+    )
+    announcements = models.JSONField(default=list)
+    version = models.PositiveIntegerField(default=1)
 
 
 class KioskPolicy(models.Model):

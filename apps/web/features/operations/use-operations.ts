@@ -6,7 +6,7 @@ import { useRequestScope } from "@/features/patients/use-request-scope";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { getGraphqlClient } from "@/lib/graphql/client";
 import { OperationsActionDocument, OperationsSetupDocument } from "@/lib/graphql/generated";
-import { failureText } from "@/features/patients/feedback";
+import { failureCode, failureText } from "@/features/patients/feedback";
 import { setupSchema } from "./schema";
 
 export function useOperationsSetup(branchId?: string, search = "") {
@@ -51,7 +51,12 @@ export function useOperationsAction() {
       }
       return current();
     } catch (failure) {
-      if (current()) setError(failureText(failure));
+      if (current())
+        setError(
+          failureCode(failure) === "PAYMENT_REQUIRED"
+            ? "Cashier confirmation is required before service. Open Patient Stations to link the service invoice or transfer the same visit to cashier."
+            : failureText(failure),
+        );
       return false;
     } finally {
       pending.current = false;

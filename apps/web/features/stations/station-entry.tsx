@@ -114,10 +114,9 @@ export function StationEntry() {
                   Open patient kiosk <ArrowRight />
                 </ButtonLink>
               ) : (
-                <p role="status" className="rounded-lg bg-muted p-4 text-sm leading-6">
-                  Device approved. The live queue display will be enabled in the next Station phase.
-                  No patient information is available on this screen.
-                </p>
+                <ButtonLink href="/station/display">
+                  Open queue display <ArrowRight />
+                </ButtonLink>
               )}
             </div>
           ) : device?.state === "pending" &&

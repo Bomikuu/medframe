@@ -36,6 +36,8 @@ def department_summary(row):
         "early_minutes": row.early_minutes,
         "late_minutes": row.late_minutes,
         "version": row.version,
+        "counter_label": row.counter_label,
+        "payment_timing": row.payment_timing,
     }
 
 

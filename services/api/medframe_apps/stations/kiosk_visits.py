@@ -80,7 +80,12 @@ def synchronize(stage):
 
 def ticket_summary(stage):
     synchronize(stage)
+    from medframe_apps.stations.payment_policy import clearance
+
+    payment = clearance(stage)
     return {
+        "payment_clearance": payment,
+        "counter": stage.department.counter_label,
         "id": str(stage.id),
         "visit_id": str(stage.visit_id),
         "department_id": str(stage.department_id),
@@ -190,6 +195,7 @@ def admit(branch, patient, department, actor, *, provider=None, appointment=None
         label=f"{department.prefix}-{number:03d}",
         queue_ticket=ticket,
         previous=previous,
+        payment_invoice_id=previous.payment_invoice_id if previous else None,
     )
     record(
         actor,
@@ -309,6 +315,10 @@ def staff_stage_action(request, stage_id, data):
             raise DomainError(
                 "CONFLICT", "This action is not available for the current stage.", 409
             )
+        if action == "in_service" and not stage.queue_ticket_id:
+            from medframe_apps.stations.payment_policy import require_clearance
+
+            require_clearance(request, stage, data.get("payment_exception_reason", ""))
         if stage.queue_ticket_id and not (action == "called" and stage.status == "called"):
             target = {
                 "skipped": "no_show",
@@ -324,6 +334,7 @@ def staff_stage_action(request, stage_id, data):
                         "target": target,
                         "expected_version": stage.queue_ticket.version,
                         "reason": reason or "Department workflow",
+                        "payment_exception_reason": data.get("payment_exception_reason", ""),
                     },
                     uuid4(),
                 )
