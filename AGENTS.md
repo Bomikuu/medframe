@@ -112,3 +112,21 @@ private objects. No backend/schema/auth changes. User main layout block is
 byte-identical and unstaged; only diff hunk offsets changed. See
 `docs/operations/header-workspace-switcher-verification.md` for exact tools,
 runtime, preservation and rollback. Older deferred findings remain outside scope.
+
+The October20 circular patient profile photo control is active locally on
+codex/patient-photo-upload, implementation c417b9f, .next-patient-photo.
+Clinical Station/profile share features/patients/profile/patient-photo-dialog.tsx;
+profile adds circular camera Upload/Change plus explicit Remove confirmation,
+refresh/focus return, preserving original private clinical files. Existing clinical/
+document permission, scan, version and download owners remain. No backend/schema/
+auth changes. Build/TypeScript/scoped lint pass; two browser groups have staged
+passing native upload/actual scan/select/reload/responsive and remove/cancel/file-
+retention evidence. Three older Station-based backend checks fail at workspace-
+open403 before photo assertions, PATIENT-PHOTO-001 deferred without repair/retry.
+Initial banner-locator failure is retained; one focused confirmation passes, no
+third round. Review upload uses an explicit separate bucket and real eager scan,
+not the production task queue. Fresh encrypted checkpoint/isolated restore and
+fingerprints preserve6695 original rows/154 tables and51 objects. User main-layout
+block remains byte-identical and unstaged. See
+`docs/operations/patient-photo-upload-verification.md` for exact Graphify/Jev,
+verification, runtime/rollback and limits. Older deferred findings remain outside scope.

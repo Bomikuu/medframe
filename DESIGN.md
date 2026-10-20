@@ -216,3 +216,15 @@ account-trigger focus. The existing workspace navigation/unsaved-change guard st
 canonical. No new global branch semantics or visual world. All three focused
 browser groups pass in one round; one lint warning remains deferred. Actual
 runtime/preservation: docs/operations/header-workspace-switcher-verification.md.
+
+## Patient profile photo editing
+
+The circular patient avatar is an editable camera control for authorized clinical
+writers with document permission. Upload/Change opens the same protected editor
+as Clinical Station; separate Remove opens confirmation and unlinks the profile
+pointer while retaining the original file. Patient photo previews/display are
+circular; clinical originals retain full framing. Shared shadcn Dialog/UploadControl,
+private scans/downloads, version checks and backend permissions remain canonical.
+Two profile browser groups have staged passing evidence; three existing Station
+backend checks stop before photo assertions with403, logged without repair.
+See docs/operations/patient-photo-upload-verification.md for actual limits/runtime.
