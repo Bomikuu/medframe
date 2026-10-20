@@ -1,4 +1,6 @@
 "use client";
+
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { AnatomyReleasePicker } from "@/features/anatomy/release-picker";
 import { chartStampSchema } from "@/features/anatomy/schema";
 import { useClinicTime } from "@/components/application/clinical-locale";
@@ -59,6 +61,7 @@ const previewSchema = z.object({ digest: z.string(), payload: releasePayloadSche
 export function StaffReleases({ patientId }: { patientId: string }) {
   const timeLabel = useClinicTime();
   const { organizationId, can } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(PatientReleasesDocument, { organizationId, patientId, after });
   const parsed = recordPage(releaseRowSchema.extend({ payload: releasePayloadSchema })).safeParse(
@@ -69,7 +72,7 @@ export function StaffReleases({ patientId }: { patientId: string }) {
   const [error, setError] = useState<unknown>(null);
   const capture = useRequestScope();
   const { confirm } = useSafety();
-  const writer = can("encounters.write") && can("patients.clinical.write");
+  const writer = !readOnly && can("encounters.write") && can("patients.clinical.write");
   return (
     <section className="grid gap-5 border-t border-border pt-6">
       <h2 className="text-xl font-semibold">Records shared with the patient</h2>

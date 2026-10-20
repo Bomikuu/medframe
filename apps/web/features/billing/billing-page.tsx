@@ -1,5 +1,7 @@
 "use client";
 
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
+
 import { FinancialOverviewPanel } from "./analytics/financial-overview";
 import { useState } from "react";
 import Link from "next/link";
@@ -95,6 +97,7 @@ export function InvoiceCollection({
   patientId?: string;
 }) {
   const { organizationId, can, href } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const router = useRouter();
   const [after, setAfter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -143,7 +146,7 @@ export function InvoiceCollection({
             Balances reflect issued invoices in this filtered view. Payments and refunds are
             recorded after money moves outside Medframe.
           </p>
-          {can("billing.manage") && (
+          {!readOnly && can("billing.manage") && (
             <EntrySheet
               title="New invoice"
               description="Create a draft with consultation or procedure charges."

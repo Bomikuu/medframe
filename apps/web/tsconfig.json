@@ -114,7 +114,9 @@
     ".next-header-workspace/types/**/*.ts",
     ".next-header-workspace/dev/types/**/*.ts",
     ".next-patient-photo/types/**/*.ts",
-    ".next-patient-photo/dev/types/**/*.ts"
+    ".next-patient-photo/dev/types/**/*.ts",
+    ".next-patient-actions/types/**/*.ts",
+    ".next-patient-actions/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

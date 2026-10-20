@@ -107,3 +107,5 @@ output/playwright/
 .next-header-workspace/
 
 .next-patient-photo/
+
+.next-patient-actions/

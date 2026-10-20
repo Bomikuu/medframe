@@ -1,4 +1,6 @@
 "use client";
+
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,7 @@ export function DiagnosticList({
   context?: "clinic" | "center";
 }) {
   const { organizationId, can, href } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const timeLabel = useClinicTime();
   const permitted = can(context === "center" ? "diagnostics.center.work" : "diagnostics.read");
   const [open, setOpen] = useState(false);
@@ -54,7 +57,7 @@ export function DiagnosticList({
               : "Request examinations, share selected evidence and review results."
           }
         />
-        {context === "clinic" && can("diagnostics.request") && (
+        {context === "clinic" && !readOnly && can("diagnostics.request") && (
           <Button onClick={() => setOpen(true)}>New request</Button>
         )}
       </div>

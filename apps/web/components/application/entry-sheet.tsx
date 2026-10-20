@@ -12,6 +12,20 @@ import { Button } from "@/components/ui/button";
 import { useSafety } from "@/features/workspace/safety-provider";
 const EntrySheetActions = createContext<{ cancel: () => void; complete: () => void } | null>(null);
 export const useEntrySheetActions = () => useContext(EntrySheetActions);
+/** Embed the same form actions in an existing patient workspace without another sheet. */
+export function EntryFormActions({
+  children,
+  cancel,
+  complete,
+}: {
+  children: ReactNode;
+  cancel: () => void;
+  complete: () => void;
+}) {
+  return (
+    <EntrySheetActions.Provider value={{ cancel, complete }}>{children}</EntrySheetActions.Provider>
+  );
+}
 /** Fields keep their original form owner; RHF retains values when the panel closes. */
 export function EntrySheet({
   title,

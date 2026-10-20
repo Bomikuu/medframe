@@ -1,5 +1,7 @@
 "use client";
 
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
+
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { Progress } from "@/components/ui/progress";
 import { StatusBadge } from "@/components/application/status-badge";
@@ -47,6 +49,7 @@ const planSchema = z.array(
 
 export function TreatmentPlans({ patientId }: { patientId: string }) {
   const { organizationId, can } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const remote = useRemote(TreatmentPlansDocument, { organizationId, patientId });
   const visits = useRemote(ConsultationsDocument, { organizationId, patientId });
   const capture = useRequestScope();
@@ -120,7 +123,7 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
                         <StatusBadge value={item.status} />
                       </p>
                     </div>
-                    {can("treatments.write") && (
+                    {!readOnly && can("treatments.write") && (
                       <PlanItemWork
                         key={item.id}
                         plan={plan}
@@ -129,7 +132,7 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
                         onSaved={remote.reload}
                       />
                     )}
-                    {can("treatments.write") && item.status !== "completed" && (
+                    {!readOnly && can("treatments.write") && item.status !== "completed" && (
                       <fieldset disabled={busy} className="grid gap-3">
                         <FormSelect
                           id={`plan-item-${item.id}`}
@@ -171,7 +174,7 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
                   </li>
                 ))}
               </ol>
-              {can("treatments.write") && (
+              {!readOnly && can("treatments.write") && (
                 <AddPlanItem planId={plan.id} version={plan.version} onSaved={remote.reload} />
               )}
               <PlanHistory
@@ -197,7 +200,9 @@ export function TreatmentPlans({ patientId }: { patientId: string }) {
         </p>
       )}
       <FollowUps patientId={patientId} plans={plans.success ? plans.data : []} />
-      {can("treatments.write") && <PlanForm patientId={patientId} onSaved={remote.reload} />}
+      {!readOnly && can("treatments.write") && (
+        <PlanForm patientId={patientId} onSaved={remote.reload} />
+      )}
     </section>
   );
 }

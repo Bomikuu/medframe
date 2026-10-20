@@ -36,3 +36,24 @@ Real synthetic upload/security scan/select/reload and responsive circular displa
 pass; one focused locator correction confirms remove/cancel/persistence/file
 retention. Three older Station-based backend checks stop at workspace-open403,
 without photo-assertion coverage or repair. See patient-photo-upload verification.
+
+## Central patient actions — current placement
+
+One Patient actions header button opens the card directory; the circular camera
+shortcut opens that same directory. This supersedes the earlier direct header
+and tab write-button placement. Cards group Clinical care, Visits & payments and
+Patient record, with search and real permission filtering. Start consultation has
+the strongest navy emphasis; care/finance/record icons use existing semantic tints.
+
+Tabs now browse records through an explicit presentation-only read-only context.
+Native forms remain in the action workspace or their original dedicated editors;
+Save/Cancel, confirmations, read links, downloads, filters and pagination retain
+context. Patient/appointment/invoice identity stays pinned to the selected record.
+Photo editing/removal uses the shared private editor from this directory. A
+service reader can still review services through a read-only service card.
+
+Desktop/tablet/phone modal and native/guard/reader groups have staged evidence;
+Close header stacking is repaired in the permitted focused confirmation. No slot
+was available for the chosen reschedule date; a completed reschedule is unverified.
+Final consultation-history and service-reader card refinements have build/lint
+verification only, with no third browser round. See patient-actions verification.

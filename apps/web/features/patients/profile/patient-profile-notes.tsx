@@ -1,4 +1,5 @@
 "use client";
+import { usePatientRecordReadOnly } from "./patient-record-browse";
 
 import { useState } from "react";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -69,6 +70,7 @@ export function PatientProfileNotes({
 }
 
 function SavedConsultation({ encounterId, patientId }: { encounterId: string; patientId: string }) {
+  const readOnly = usePatientRecordReadOnly();
   const { organizationId, href } = useWorkspace();
   const timeLabel = useClinicTime();
   const remote = useRemote(ConsultationDocument, { organizationId, encounterId, revisionId: null });
@@ -99,9 +101,11 @@ function SavedConsultation({ encounterId, patientId }: { encounterId: string; pa
               Saved {timeLabel(encounter.updatedAt)} · <StatusBadge value={encounter.status} />
             </p>
           </div>
-          <ButtonLink href={open} variant="outline">
-            Open consultation
-          </ButtonLink>
+          {!readOnly && (
+            <ButtonLink href={open} variant="outline">
+              Open consultation
+            </ButtonLink>
+          )}
         </div>
         <dl className="grid gap-4 lg:grid-cols-2">
           {(

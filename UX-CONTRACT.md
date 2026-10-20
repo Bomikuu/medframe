@@ -158,3 +158,27 @@ Upload/Change and explicit Remove confirmation; focus returns to the circular
 control. Removal unlinks the profile display and preserves the original file.
 Photo changes reload the existing profile summary. Existing clinical/document
 permissions remain authoritative; no new public object or patient-image field.
+
+## Patient actions hub
+
+`features/patients/profile/patient-actions-dialog.tsx` centralizes the patient's
+write launchers in a permission-filtered card modal. The profile header has one
+Patient actions button; its camera shortcut opens the same hub. The explicit
+`PatientRecordBrowse` context suppresses write launchers in profile tabs without
+changing permissions. It defaults to normal behavior outside profile browsing.
+Read links/downloads/filters stay contextual. Clinical and financial server
+services continue to authorize every request.
+
+Native forms keep validation, version checks, idempotency and saves. The canonical
+EntryFormActions adapter supplies guarded Cancel and confirmed completion when a
+form is embedded in the hub instead of another Sheet. Only one editing workspace
+is mounted; server-confirmed completion clears that workspace's registered dirty
+state, returns to the cards and refreshes summaries. Back/Close still ask before
+discarding dirty work. Parent Close is inside the sticky modal header to remain
+reachable. Dedicated full-page patient/consultation editors retain their layouts.
+
+Appointments use a server-side patient filter before pagination, existing branch/
+provider scope and a pinned patient in BookingForm. Reschedule and Check in select
+an existing booked appointment and use native versioned actions. Payments select
+an issued patient invoice and use PaymentForm; no charge or online transfer is
+implied. Service readers retain a view card even without workflow-write rights.

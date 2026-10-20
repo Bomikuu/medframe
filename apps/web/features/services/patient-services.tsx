@@ -1,5 +1,7 @@
 "use client";
 
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
+
 import { useState } from "react";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
@@ -122,6 +124,7 @@ export function NewPatientService({
 
 export function PatientServices({ branchId, patientId }: { branchId: string; patientId?: string }) {
   const { organizationId, can } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [after, setAfter] = useState<string | null>(null);
@@ -142,7 +145,7 @@ export function PatientServices({ branchId, patientId }: { branchId: string; pat
             Track the work independently from its payment status.
           </p>
         </div>
-        {can("services.work") && (
+        {!readOnly && can("services.work") && (
           <EntrySheet
             title="Start patient service"
             description="Copy a clinic service workflow to a verified patient record."
@@ -210,13 +213,15 @@ export function PatientServices({ branchId, patientId }: { branchId: string; pat
                     {row.steps.length} steps
                   </p>
                 </div>
-                <EntrySheet
-                  title="Patient service"
-                  description="Operational workflow and its independent billing agreement."
-                  trigger="Open service"
-                >
-                  <ServiceCaseDetail caseId={row.id} updated={remote.reload} />
-                </EntrySheet>
+                {!readOnly && (
+                  <EntrySheet
+                    title="Patient service"
+                    description="Operational workflow and its independent billing agreement."
+                    trigger="Open service"
+                  >
+                    <ServiceCaseDetail caseId={row.id} updated={remote.reload} />
+                  </EntrySheet>
+                )}
               </article>
             ))}
           </div>

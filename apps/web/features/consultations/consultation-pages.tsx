@@ -1,4 +1,5 @@
 "use client";
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 
 import { FilteredConsultations } from "./filtered-consultations";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +27,7 @@ import {
 import { EncounterEditor } from "./encounter-editor";
 
 export function ConsultationList({ patientId }: { patientId?: string }) {
+  const readOnly = usePatientRecordReadOnly();
   const { href, can } = useWorkspace();
   return (
     <section>
@@ -34,7 +36,7 @@ export function ConsultationList({ patientId }: { patientId?: string }) {
         level={patientId ? 2 : 1}
         description="Walk-in care, saved drafts, and preserved visit revisions."
       >
-        {can("encounters.write") && (
+        {!readOnly && can("encounters.write") && (
           <ButtonLink
             href={
               patientId

@@ -42,18 +42,20 @@ export function BookingForm({
   walkIn = false,
   appointment,
   close,
+  patient,
 }: {
   setup: OperationsSetup;
   reload: () => void;
   walkIn?: boolean;
   appointment?: Appointment;
   close?: () => void;
+  patient?: { id: string; name: string; reference: string };
 }) {
   const { organizationId } = useWorkspace();
   const action = useOperationsAction();
   const sheet = useEntrySheetActions();
   const defaults: Values = {
-    patient_id: appointment?.patient_id ?? setup.patients[0]?.id ?? "",
+    patient_id: appointment?.patient_id ?? patient?.id ?? setup.patients[0]?.id ?? "",
     provider_id: appointment?.provider_id ?? setup.providers[0]?.id ?? "",
     resource_id: appointment?.resource_id ?? "none",
     date: localDate(setup.timezone),
@@ -159,7 +161,8 @@ export function BookingForm({
               label="Patient"
               value={watched.patient_id ?? ""}
               onChange={(value) => form.setValue("patient_id", value, { shouldDirty: true })}
-              options={setup.patients.map((row) => ({
+              disabled={!!patient}
+              options={(patient ? [patient] : setup.patients).map((row) => ({
                 value: row.id,
                 label: `${row.name} · ${row.reference}`,
               }))}

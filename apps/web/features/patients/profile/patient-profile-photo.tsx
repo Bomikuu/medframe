@@ -12,10 +12,12 @@ export function PatientProfilePhoto({
   patient,
   imageId,
   onSaved,
+  onActions,
 }: {
   patient: Pick<PatientDetailsFragment, "id" | "fullName" | "reference">;
   imageId?: string | null;
   onSaved: () => void;
+  onActions?: () => void;
 }) {
   const { can } = useWorkspace();
   const [intent, setIntent] = useState<"edit" | "remove" | null>(null);
@@ -30,6 +32,23 @@ export function PatientProfilePhoto({
     />
   );
   if (!editable) return avatar;
+  if (onActions)
+    return (
+      <button
+        type="button"
+        aria-label="Patient photo actions"
+        onClick={onActions}
+        className="relative rounded-full outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring"
+      >
+        {avatar}
+        <span
+          aria-hidden
+          className="absolute -right-1 -bottom-1 grid size-7 place-items-center rounded-full border-2 border-background bg-primary text-primary-foreground"
+        >
+          <Camera className="size-3.5" />
+        </span>
+      </button>
+    );
   return (
     <div className="grid shrink-0 justify-items-center gap-1">
       <button

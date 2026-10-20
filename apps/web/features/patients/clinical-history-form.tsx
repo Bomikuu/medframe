@@ -1,5 +1,7 @@
 "use client";
 
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
+
 import { usePatientDraft } from "./use-patient-draft";
 import { useRequestScope } from "./use-request-scope";
 
@@ -25,9 +27,10 @@ import { LoadState, RemoteNotice, failureCode, failureText } from "./feedback";
 
 export function ClinicalHistorySection({ patientId }: { patientId: string }) {
   const { organizationId, can } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const { data, error, reload } = useRemote(ClinicalRecordDocument, { organizationId, patientId });
   if (!data) return <LoadState error={error} retry={reload} />;
-  if (!can("patients.clinical.write"))
+  if (readOnly || !can("patients.clinical.write"))
     return (
       <section className="grid gap-5 border-t border-border pt-8">
         <h2 className="text-xl font-semibold">Medical history</h2>

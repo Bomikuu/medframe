@@ -1,33 +1,30 @@
 "use client";
 
-import Link from "next/link";
-import { Mail, MapPin, MoreHorizontal, Phone, Stethoscope } from "lucide-react";
+import { LayoutGrid, Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ButtonLink } from "@/components/ui/button-link";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { PatientProfilePhoto } from "./patient-profile-photo";
 import type { PatientDetailsFragment } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { dateLabel } from "../feedback";
 import { ageLabel } from "./summary";
+import type { RefObject } from "react";
 
 export function PatientProfileHeader({
   patient,
   portraitId,
   timezone,
   onPhotoSaved,
+  onActions,
+  actionTrigger,
 }: {
   patient: PatientDetailsFragment;
   portraitId?: string | null;
   timezone: string;
   onPhotoSaved: () => void;
+  onActions: () => void;
+  actionTrigger: RefObject<HTMLButtonElement | null>;
 }) {
-  const { href, can, workspace } = useWorkspace();
+  const { workspace } = useWorkspace();
   const branch =
     workspace.branches.find((item) => item.id === patient.branchId)?.name ?? "Authorized branch";
   const age = ageLabel(patient.dateOfBirth ?? null, timezone);
@@ -42,6 +39,7 @@ export function PatientProfileHeader({
           patient={patient}
           imageId={portraitId}
           onSaved={onPhotoSaved}
+          onActions={onActions}
         />
         <div className="min-w-0 flex-1">
           <h1 className="font-heading text-2xl font-bold text-foreground sm:text-[30px]">
@@ -79,41 +77,10 @@ export function PatientProfileHeader({
           </div>
         </div>
       </div>
-      <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-        <ButtonLink variant="outline" href={href(`/clinic/patients/${patient.id}/history`)}>
-          Patient record
-        </ButtonLink>
-        {can("patients.demographics.write") && (
-          <ButtonLink variant="outline" href={href(`/clinic/patients/${patient.id}/edit`)}>
-            Edit details
-          </ButtonLink>
-        )}
-        {can("encounters.write") && (
-          <ButtonLink href={`${href("/clinic/consultations/new")}&patient=${patient.id}`}>
-            <Stethoscope />
-            Start consultation
-          </ButtonLink>
-        )}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button type="button" variant="ghost" size="icon" aria-label="More patient actions">
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {can("patients.clinical.read") && (
-              <DropdownMenuItem asChild>
-                <Link href={`${href(`/clinic/patients/${patient.id}`)}&tab=documents`}>
-                  Documents
-                </Link>
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem asChild>
-              <Link href={href(`/clinic/patients/${patient.id}/history`)}>History</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+      <Button ref={actionTrigger} onClick={onActions} className="min-h-11 gap-2">
+        <LayoutGrid aria-hidden className="size-4" />
+        Patient actions
+      </Button>
     </header>
   );
 }

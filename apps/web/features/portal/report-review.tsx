@@ -1,4 +1,6 @@
 "use client";
+
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import {
@@ -19,6 +21,7 @@ import { reportSchema } from "./schema";
 export function ReportReview({ patientId }: { patientId: string }) {
   const timeLabel = useClinicTime();
   const { organizationId, can } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const [after, setAfter] = useState<string>();
   const [history, setHistory] = useState("");
   const [busy, setBusy] = useState(false);
@@ -54,7 +57,7 @@ export function ReportReview({ patientId }: { patientId: string }) {
                   Reconciled history revision: {item.history_revision_id}
                 </p>
               )}
-              {can("patients.clinical.write") && (
+              {!readOnly && can("patients.clinical.write") && (
                 <div className="flex gap-3">
                   {["acknowledged", "reviewed"].map((state) => (
                     <Button
@@ -94,7 +97,7 @@ export function ReportReview({ patientId }: { patientId: string }) {
       ) : (
         <p role="alert">Patient reports could not be read.</p>
       )}
-      {can("patients.clinical.write") && (
+      {!readOnly && can("patients.clinical.write") && (
         <ReconciliationHistory patientId={patientId} value={history} onChange={setHistory} />
       )}
       {error !== null && <p role="alert">{failureText(error)}</p>}

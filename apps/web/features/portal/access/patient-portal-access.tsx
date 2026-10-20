@@ -1,4 +1,6 @@
 "use client";
+
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -45,6 +47,7 @@ const accessSchema = z.object({
 export function PatientPortalAccess({ patientId }: { patientId: string }) {
   const timeLabel = useClinicTime();
   const { organizationId } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(PatientPortalAccessDocument, { organizationId, patientId, after });
   const parsed = accessSchema.safeParse(remote.data?.patientPortalAccess);
@@ -108,121 +111,123 @@ export function PatientPortalAccess({ patientId }: { patientId: string }) {
         Verify the person’s identity and guardian authority in clinic before inviting them. Contact
         details alone do not grant access.
       </p>
-      <details className="rounded-xl border border-border bg-card p-5">
-        <summary className="min-h-11 font-medium">Issue a verified invitation</summary>
-        <form
-          noValidate
-          className="mt-4 grid max-w-2xl gap-4"
-          onSubmit={form.handleSubmit(async (values) => {
-            const current = capture();
-            setError(null);
-            setMessage("");
-            try {
-              await getGraphqlClient().request(IssuePortalInvitationDocument, {
-                organizationId,
-                patientId,
-                requestId: values.requestId,
-                data: {
-                  email: values.email,
-                  relationship: values.relationship,
-                  method: values.method,
-                  note: values.note,
-                  attested: values.attested,
-                },
-              });
-              if (current()) {
-                form.reset({
-                  ...values,
-                  note: "",
-                  attested: false,
-                  requestId: crypto.randomUUID(),
+      {!readOnly && (
+        <details className="rounded-xl border border-border bg-card p-5">
+          <summary className="min-h-11 font-medium">Issue a verified invitation</summary>
+          <form
+            noValidate
+            className="mt-4 grid max-w-2xl gap-4"
+            onSubmit={form.handleSubmit(async (values) => {
+              const current = capture();
+              setError(null);
+              setMessage("");
+              try {
+                await getGraphqlClient().request(IssuePortalInvitationDocument, {
+                  organizationId,
+                  patientId,
+                  requestId: values.requestId,
+                  data: {
+                    email: values.email,
+                    relationship: values.relationship,
+                    method: values.method,
+                    note: values.note,
+                    attested: values.attested,
+                  },
                 });
-                setMessage("Invitation queued for delivery. It expires after 24 hours.");
-                remote.reload();
+                if (current()) {
+                  form.reset({
+                    ...values,
+                    note: "",
+                    attested: false,
+                    requestId: crypto.randomUUID(),
+                  });
+                  setMessage("Invitation queued for delivery. It expires after 24 hours.");
+                  remote.reload();
+                }
+              } catch (failure) {
+                if (current()) setError(failure);
               }
-            } catch (failure) {
-              if (current()) setError(failure);
-            }
-          })}
-        >
-          <FormField
-            id="portal-email"
-            label="Verified account email"
-            error={form.formState.errors.email?.message}
+            })}
           >
-            <Input
+            <FormField
               id="portal-email"
-              type="email"
-              autoComplete="off"
-              maxLength={320}
-              {...form.register("email", { required: "Enter the verified email address." })}
-            />
-          </FormField>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormSelect
-              id="portal-relationship"
-              label="Relationship"
-              value={watchedForm.relationship ?? ""}
-              onChange={(value) => {
-                form.setValue("relationship", value, { shouldDirty: true });
-                form.setValue(
-                  "method",
-                  value === "guardian" ? "verified_guardian_authority" : "in_person",
-                  { shouldDirty: true },
-                );
-              }}
-              options={[
-                { value: "self", label: "Patient (self)" },
-                { value: "guardian", label: "Verified guardian" },
-              ]}
-            />
-            <FormSelect
-              id="portal-verification"
-              label="Verification method"
-              value={watchedForm.method ?? ""}
-              onChange={(value) => form.setValue("method", value, { shouldDirty: true })}
-              options={
-                watchedForm.relationship === "guardian"
-                  ? [
-                      {
-                        value: "verified_guardian_authority",
-                        label: "Guardian identity and authority verified",
-                      },
-                    ]
-                  : [
-                      { value: "in_person", label: "In-person identity verification" },
-                      {
-                        value: "clinic_verified_existing_identity",
-                        label: "Clinic-verified existing identity",
-                      },
-                    ]
-              }
-            />
-          </div>
-          <FormField
-            id="verification-note"
-            label="Verification note (optional)"
-            hint="Do not enter identity document numbers or upload identity documents."
-          >
-            <Input id="verification-note" maxLength={240} {...form.register("note")} />
-          </FormField>
-          <label className="flex min-h-11 items-center gap-3 text-sm">
-            <Checkbox
-              checked={watchedForm.attested}
-              onCheckedChange={(value) =>
-                form.setValue("attested", value === true, { shouldDirty: true })
-              }
-            />
-            I verified this person’s identity and their authority for this relationship.
-          </label>
-          <Button
-            className="justify-self-start"
-            disabled={form.formState.isSubmitting || !watchedForm.attested}
-          >
-            Send verified invitation
-          </Button>
-        </form>
-      </details>
+              label="Verified account email"
+              error={form.formState.errors.email?.message}
+            >
+              <Input
+                id="portal-email"
+                type="email"
+                autoComplete="off"
+                maxLength={320}
+                {...form.register("email", { required: "Enter the verified email address." })}
+              />
+            </FormField>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormSelect
+                id="portal-relationship"
+                label="Relationship"
+                value={watchedForm.relationship ?? ""}
+                onChange={(value) => {
+                  form.setValue("relationship", value, { shouldDirty: true });
+                  form.setValue(
+                    "method",
+                    value === "guardian" ? "verified_guardian_authority" : "in_person",
+                    { shouldDirty: true },
+                  );
+                }}
+                options={[
+                  { value: "self", label: "Patient (self)" },
+                  { value: "guardian", label: "Verified guardian" },
+                ]}
+              />
+              <FormSelect
+                id="portal-verification"
+                label="Verification method"
+                value={watchedForm.method ?? ""}
+                onChange={(value) => form.setValue("method", value, { shouldDirty: true })}
+                options={
+                  watchedForm.relationship === "guardian"
+                    ? [
+                        {
+                          value: "verified_guardian_authority",
+                          label: "Guardian identity and authority verified",
+                        },
+                      ]
+                    : [
+                        { value: "in_person", label: "In-person identity verification" },
+                        {
+                          value: "clinic_verified_existing_identity",
+                          label: "Clinic-verified existing identity",
+                        },
+                      ]
+                }
+              />
+            </div>
+            <FormField
+              id="verification-note"
+              label="Verification note (optional)"
+              hint="Do not enter identity document numbers or upload identity documents."
+            >
+              <Input id="verification-note" maxLength={240} {...form.register("note")} />
+            </FormField>
+            <label className="flex min-h-11 items-center gap-3 text-sm">
+              <Checkbox
+                checked={watchedForm.attested}
+                onCheckedChange={(value) =>
+                  form.setValue("attested", value === true, { shouldDirty: true })
+                }
+              />
+              I verified this person’s identity and their authority for this relationship.
+            </label>
+            <Button
+              className="justify-self-start"
+              disabled={form.formState.isSubmitting || !watchedForm.attested}
+            >
+              Send verified invitation
+            </Button>
+          </form>
+        </details>
+      )}
       {!remote.data ? (
         <LoadState error={remote.error} retry={remote.reload} />
       ) : parsed.success ? (
@@ -241,7 +246,7 @@ export function PatientPortalAccess({ patientId }: { patientId: string }) {
                     {item.active ? "Active connection" : "Revoked connection"}
                   </p>
                 </div>
-                {item.active && (
+                {!readOnly && item.active && (
                   <Button
                     type="button"
                     variant="outline"
@@ -266,7 +271,7 @@ export function PatientPortalAccess({ patientId }: { patientId: string }) {
                     {item.state} · expires {timeLabel(item.expires_at)}
                   </p>
                 </div>
-                {item.state === "pending" && (
+                {!readOnly && item.state === "pending" && (
                   <Button
                     type="button"
                     variant="outline"
@@ -288,14 +293,16 @@ export function PatientPortalAccess({ patientId }: { patientId: string }) {
       ) : (
         <p role="alert">Patient access could not be read.</p>
       )}
-      <FormField id="revoke-reason" label="Reason for revocation">
-        <Input
-          id="revoke-reason"
-          maxLength={240}
-          value={reason}
-          onChange={(event) => setReason(event.target.value)}
-        />
-      </FormField>
+      {!readOnly && (
+        <FormField id="revoke-reason" label="Reason for revocation">
+          <Input
+            id="revoke-reason"
+            maxLength={240}
+            value={reason}
+            onChange={(event) => setReason(event.target.value)}
+          />
+        </FormField>
+      )}
       {error !== null && <p role="alert">{failureText(error)}</p>}
       {message && <p role="status">{message}</p>}
     </section>

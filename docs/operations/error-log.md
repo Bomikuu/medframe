@@ -903,3 +903,41 @@ confirmed removal, focus return, persistence after reload and original-file
 retention. No product repair or third round. Both runs have no page exceptions.
 Evidence: /tmp/medframe-patient-photo-{browser,confirmation}.log and
 output/playwright/patient-photo/ captures. Initial failure retained.
+
+## PATIENT-ACTIONS-001 — modal Close covered by sticky header (activation repair)
+
+Initial1440/390 captures show the default Dialog Close behind the new sticky
+header. Escape/focus return works but the mouse Close target is blocked. Necessary
+local-activation repair disables that default target and places canonical
+DialogClose/Button inside the sticky header. One focused confirmation passes
+actual clicks/focus return at1440/390. Initial evidence retained under
+output/playwright/patient-actions/. No global Dialog/z-index rewrite or third round.
+
+## PATIENT-ACTIONS-002 — completed reschedule acceptance remains open (deferred)
+
+Initial isolated browser run selects this patient's booked appointment and reaches
+the native reschedule form, but the chosen clinic date has no available times.
+Available time/Confirm reschedule remain disabled and native guidance is visible.
+The focused confirmation validates that unavailable-slot state, Cancel returning
+to cards, and new-booking patient pinning/Cancel. No schedule seeded/changed to
+force acceptance; no completed reschedule mutation is claimed. Provider/branch
+configuration was not repaired or its cause inferred. Separate native payment
+confirmation passes with a synthetic1.00 manual receipt in review DB only.
+Evidence: /tmp/medframe-patient-actions-{browser,confirmation}.log and
+reschedule-and-payment-failure.png. No third browser round.
+
+## PATIENT-ACTIONS-003 — staged harness/source coverage limits
+
+Initial central/read-only group passes modal1440/1024/390 bounds/Escape/focus and
+medical/service/billing suppression, then stops on heading Documents instead of
+the actual Documents & imaging. One focused confirmation uses the observed name
+and verifies documents/treatment/access suppression plus the repaired Close.
+Native launch/unsaved and read-only-role groups pass in the initial run. No page
+exceptions in either round. A review-only grant fixture first omitted its required
+organization_id and was corrected before browser work; original data unchanged.
+
+Final source audit consolidates the expanded consultation-history Start/Open
+launchers and preserves a native service-view card for service readers. Those
+last small catalog/browse changes have final build/lint coverage only. No fresh
+Continue consultation/service-reader-card browser assertion or third round. This
+is a coverage limit, not evidence of a product failure or authorization bypass.

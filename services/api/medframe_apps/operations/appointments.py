@@ -248,6 +248,19 @@ def appointment_page(request, organization_id, filters, after=None):
         and not member.roles.filter(name="receptionist").exists()
     ):
         query = query.filter(provider__membership__user=request.user)
+    if filters.get("patient_id"):
+        from uuid import UUID
+
+        from medframe_apps.patients.services import require_patient
+
+        try:
+            patient_id = UUID(str(filters["patient_id"]))
+        except (ValueError, TypeError, AttributeError):
+            raise DomainError("INVALID_INPUT", "Choose a valid patient.") from None
+        patient = require_patient(
+            request.user, organization_id, patient_id, "patients.demographics.read"
+        )
+        query = query.filter(patient=patient)
     if filters.get("provider_id"):
         require_provider_scope(member, filters["provider_id"])
         query = query.filter(provider_id=filters["provider_id"])

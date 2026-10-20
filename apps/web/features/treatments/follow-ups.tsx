@@ -1,4 +1,6 @@
 "use client";
+
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -43,6 +45,7 @@ export function FollowUps({
   plans?: { id: string; title: string }[];
 }) {
   const { organizationId, can } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(FollowUpsDocument, { organizationId, patientId, after });
   const parsed = recordPage(followUpSchema).safeParse(remote.data?.followUps);
@@ -75,7 +78,7 @@ export function FollowUps({
                     {item.status} · version {item.version}
                   </p>
                 </div>
-                {can("treatments.write") && (
+                {!readOnly && can("treatments.write") && (
                   <Button
                     type="button"
                     variant="outline"
@@ -108,7 +111,7 @@ export function FollowUps({
       ) : (
         <p role="alert">Follow-ups could not be read.</p>
       )}
-      {can("treatments.write") && (
+      {!readOnly && can("treatments.write") && (
         <EntrySheet title="Add or edit follow-up" open={open} onOpenChange={setOpen}>
           <form
             noValidate

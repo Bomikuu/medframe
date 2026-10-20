@@ -1,4 +1,5 @@
 "use client";
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { useEffect, useState } from "react";
@@ -40,7 +41,7 @@ import { SecureImage } from "./secure-image";
 export function DocumentPanel({
   patientId,
   encounterId,
-  readOnly = false,
+  readOnly: requestedReadOnly = false,
   attachedIds,
   onAttach,
   purpose = "clinical",
@@ -55,6 +56,8 @@ export function DocumentPanel({
   onUploadPending?: (pending: boolean) => void;
 }) {
   const { organizationId, can, workspace } = useWorkspace();
+  const browseOnly = usePatientRecordReadOnly();
+  const readOnly = requestedReadOnly || browseOnly;
   const [before, setBefore] = useState<string | undefined>();
   const [versionTarget, setVersionTarget] = useState<{
     id: string;

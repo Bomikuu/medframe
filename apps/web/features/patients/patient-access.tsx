@@ -1,5 +1,7 @@
 "use client";
 
+import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
+
 import { useRequestScope } from "./use-request-scope";
 
 import { useRef, useState } from "react";
@@ -19,6 +21,7 @@ import { LoadState, failureText } from "./feedback";
 
 export function PatientAccess({ patientId }: { patientId: string }) {
   const { organizationId } = useWorkspace();
+  const readOnly = usePatientRecordReadOnly();
   const { confirm } = useSafety();
   const captureRequest = useRequestScope();
   const [draft, setDraft] = useState("");
@@ -91,104 +94,110 @@ export function PatientAccess({ patientId }: { patientId: string }) {
                       <span className="text-sm font-medium">{staff.displayName}</span>
                       <p className="mt-1 text-xs text-muted-foreground">{staff.branchLabel}</p>
                     </div>
-                    <Button
-                      variant="outline"
-                      disabled={busy || grants.loading}
-                      onClick={() => {
-                        void change(staff, false);
-                      }}
-                    >
-                      Revoke access
-                    </Button>
+                    {!readOnly && (
+                      <Button
+                        variant="outline"
+                        disabled={busy || grants.loading}
+                        onClick={() => {
+                          void change(staff, false);
+                        }}
+                      >
+                        Revoke access
+                      </Button>
+                    )}
                   </li>
                 ))}
             </ul>
           )}
         </div>
       )}
-      <form
-        noValidate
-        onSubmit={(event) => {
-          event.preventDefault();
-          setQuery(draft);
-          if (query === draft) eligible.reload();
-        }}
-        className="flex max-w-xl flex-wrap items-end gap-3"
-      >
-        <div className="min-w-0 flex-1 basis-48">
-          <label htmlFor="assigneeSearch" className="mb-2 block text-sm font-medium">
-            Find a clinician by name
-          </label>
-          <Input
-            ref={input}
-            id="assigneeSearch"
-            value={draft}
-            maxLength={160}
-            onChange={(event) => setDraft(event.target.value)}
-            autoComplete="off"
-          />
-        </div>
-        <Button type="submit" variant="outline">
-          Search
-        </Button>
-        {draft && (
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => {
-              setDraft("");
-              setQuery("");
-              eligible.reload();
-              input.current?.focus();
+      {!readOnly && (
+        <>
+          <form
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              setQuery(draft);
+              if (query === draft) eligible.reload();
             }}
+            className="flex max-w-xl flex-wrap items-end gap-3"
           >
-            Clear clinician search
-          </Button>
-        )}
-      </form>
-      {!eligible.data ? (
-        <LoadState error={eligible.error} retry={eligible.reload} />
-      ) : (
-        <div>
-          <h3 className="text-sm font-semibold">Eligible clinicians</h3>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Showing up to 20 matches. Refine the search to find another clinician.
-          </p>
-          <ul className="mt-2 divide-y divide-border">
-            {eligible.data.eligiblePatientAssignees
-              .filter(
-                (staff) =>
-                  !grants.data?.patientAccessGrants.some(
-                    (grant) => grant.membershipId === staff.membershipId && grant.active,
-                  ),
-              )
-              .map((staff) => (
-                <li
-                  key={staff.membershipId}
-                  className="flex flex-wrap items-center justify-between gap-3 py-4"
-                >
-                  <div>
-                    <span className="text-sm font-medium">{staff.displayName}</span>
-                    <p className="mt-1 text-xs text-muted-foreground">{staff.branchLabel}</p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    disabled={busy || grants.loading}
-                    onClick={() => {
-                      void change(staff, true);
-                    }}
-                  >
-                    Grant access
-                  </Button>
-                </li>
-              ))}
-          </ul>
-          {!eligible.data.eligiblePatientAssignees.length && (
-            <p className="py-4 text-sm text-muted-foreground">
-              No eligible clinicians match this search.
-            </p>
+            <div className="min-w-0 flex-1 basis-48">
+              <label htmlFor="assigneeSearch" className="mb-2 block text-sm font-medium">
+                Find a clinician by name
+              </label>
+              <Input
+                ref={input}
+                id="assigneeSearch"
+                value={draft}
+                maxLength={160}
+                onChange={(event) => setDraft(event.target.value)}
+                autoComplete="off"
+              />
+            </div>
+            <Button type="submit" variant="outline">
+              Search
+            </Button>
+            {draft && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setDraft("");
+                  setQuery("");
+                  eligible.reload();
+                  input.current?.focus();
+                }}
+              >
+                Clear clinician search
+              </Button>
+            )}
+          </form>
+          {!eligible.data ? (
+            <LoadState error={eligible.error} retry={eligible.reload} />
+          ) : (
+            <div>
+              <h3 className="text-sm font-semibold">Eligible clinicians</h3>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Showing up to 20 matches. Refine the search to find another clinician.
+              </p>
+              <ul className="mt-2 divide-y divide-border">
+                {eligible.data.eligiblePatientAssignees
+                  .filter(
+                    (staff) =>
+                      !grants.data?.patientAccessGrants.some(
+                        (grant) => grant.membershipId === staff.membershipId && grant.active,
+                      ),
+                  )
+                  .map((staff) => (
+                    <li
+                      key={staff.membershipId}
+                      className="flex flex-wrap items-center justify-between gap-3 py-4"
+                    >
+                      <div>
+                        <span className="text-sm font-medium">{staff.displayName}</span>
+                        <p className="mt-1 text-xs text-muted-foreground">{staff.branchLabel}</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        disabled={busy || grants.loading}
+                        onClick={() => {
+                          void change(staff, true);
+                        }}
+                      >
+                        Grant access
+                      </Button>
+                    </li>
+                  ))}
+              </ul>
+              {!eligible.data.eligiblePatientAssignees.length && (
+                <p className="py-4 text-sm text-muted-foreground">
+                  No eligible clinicians match this search.
+                </p>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
       {error ? (
         <p role="alert" className="text-sm leading-6 text-destructive">
