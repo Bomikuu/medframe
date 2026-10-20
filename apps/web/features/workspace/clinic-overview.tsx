@@ -13,11 +13,14 @@ import { PageHeading, LoadState, dateLabel } from "@/features/patients/feedback"
 import { useWorkspace } from "./workspace-provider";
 import { ClinicalWidgets } from "./clinical-widgets";
 
-import { SetupChecklist } from "./setup-checklist";
+import { SetupChecklist, useClinicSetup } from "./setup-checklist";
 import { PlatformLink } from "@/features/platform/clinic-invitations";
 
 export function ClinicOverview() {
   const { workspace, can, href } = useWorkspace();
+  const setup = useClinicSetup();
+  const checkingSetup = setup.loading && !setup.state;
+  const firstRun = setup.state?.available && !setup.state.dismissed && !setup.state.has_patient;
   return (
     <>
       <PageHeading
@@ -40,13 +43,24 @@ export function ClinicOverview() {
       <div className="mb-4">
         <PlatformLink />
       </div>
-      <SetupChecklist />
-      {can("billing.read") && (
+      <SetupChecklist model={setup} />
+      {can("billing.read") && !firstRun && !checkingSetup && (
         <div className="mb-6">
           <FinancialOverviewPanel compact />
         </div>
       )}
-      {can("patients.demographics.read") ? (
+      {checkingSetup ? (
+        <LoadState
+          error={setup.error}
+          retry={setup.reload}
+          title="Checking clinic setup"
+          detail="Retrieving saved setup progress before showing your clinic summaries."
+        />
+      ) : firstRun ? (
+        <p className="max-w-prose text-sm leading-7 text-muted-foreground">
+          Your patient and activity summaries will appear here as your team begins using the clinic.
+        </p>
+      ) : can("patients.demographics.read") ? (
         <PatientOverview />
       ) : (
         <p className="max-w-prose text-sm leading-7 text-muted-foreground">

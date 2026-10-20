@@ -4,7 +4,9 @@ import { useState } from "react";
 import { FinancialOverviewDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "@/features/patients/use-remote";
+import { ReportRangeControls, type ReportRange } from "@/features/analytics/report-range-controls";
 import { FormSelect } from "@/features/patients/form-controls";
+import { snapshotTime } from "@/features/analytics/snapshot-time";
 import { dateLabel, LoadState } from "@/features/patients/feedback";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,19 +17,25 @@ export function FinancialOverviewPanel({
   branchId,
   compact = false,
   periodDays,
+  periodRange,
 }: {
   branchId?: string;
   compact?: boolean;
   periodDays?: number;
+  periodRange?: ReportRange;
 }) {
   const { organizationId, workspace, can, href } = useWorkspace();
   const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
-  const [days, setDays] = useState("30");
+  const [range, setRange] = useState<ReportRange>({ days: 30 });
   const [currency, setCurrency] = useState("");
   const selectedBranch = branchId ?? branch;
   const remote = useRemote(
     FinancialOverviewDocument,
-    { organizationId, branchId: selectedBranch, days: periodDays ?? Number(days) },
+    {
+      organizationId,
+      branchId: selectedBranch,
+      ...(periodRange ?? (periodDays ? { days: periodDays } : range)),
+    },
     { enabled: can("billing.read") && !!selectedBranch },
   );
   const parsed = financialOverviewSchema.safeParse(remote.data?.financialOverview);
@@ -71,17 +79,16 @@ export function FinancialOverviewPanel({
             />
           </div>
         )}
-        {periodDays === undefined && (
-          <div className="min-w-40 flex-1">
-            <FormSelect
-              id={compact ? "dashboard-finance-period" : "billing-finance-period"}
-              label="Comparison period"
-              value={days}
-              onChange={setDays}
-              options={[7, 30, 90].map((day) => ({
-                value: String(day),
-                label: `Last ${day} completed days`,
-              }))}
+        {periodDays === undefined && !periodRange && (
+          <div className="min-w-0 flex-1 basis-64">
+            <ReportRangeControls
+              id={compact ? "dashboard-finance" : "billing-finance"}
+              range={range}
+              timezone={data?.timezone ?? workspace.organization.timezone}
+              currentFrom={data?.current_from}
+              currentTo={data?.current_to}
+              onApply={setRange}
+              compact={compact}
             />
           </div>
         )}
@@ -136,9 +143,9 @@ export function FinancialOverviewPanel({
                 detail: compare(value.current.issued, value.previous.issued),
               },
               {
-                label: "Total outstanding",
-                amount: value.outstanding,
-                detail: `${money(value.due_now, value.currency)} due through today · ${money(value.future, value.currency)} future`,
+                label: "Payments recorded",
+                amount: value.current.payments,
+                detail: compare(value.current.payments, value.previous.payments),
               },
               {
                 label: "Refunds recorded",
@@ -155,13 +162,51 @@ export function FinancialOverviewPanel({
               </div>
             ))}
           </dl>
+          <section
+            aria-label="Current balance snapshot"
+            className="rounded-lg bg-muted/40 p-4 sm:p-5"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="text-sm font-semibold">Current balances · {value.currency}</h3>
+              <p className="text-xs text-muted-foreground">
+                As of {snapshotTime(data.as_of, data.timezone)} · {data.timezone}
+              </p>
+            </div>
+            <dl className="mt-4 grid gap-5 sm:grid-cols-3">
+              {[
+                {
+                  label: "Total outstanding",
+                  amount: value.outstanding,
+                  detail: `${value.unpaid_count} invoices with a balance`,
+                },
+                {
+                  label: "Due through today",
+                  amount: value.due_now,
+                  detail: `${money(value.overdue, value.currency)} overdue`,
+                },
+                {
+                  label: "Scheduled for later",
+                  amount: value.future,
+                  detail: "Future installments and amounts not yet due",
+                },
+              ].map((metric) => (
+                <div key={metric.label} className="min-w-0">
+                  <dt className="text-xs font-medium text-muted-foreground">{metric.label}</dt>
+                  <dd className="mt-2 text-xl font-semibold break-words tabular-nums">
+                    {money(metric.amount, value.currency)}
+                  </dd>
+                  <dd className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
           <div
             className={
               compact ? "min-w-0" : "grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_260px]"
             }
           >
             <ComparisonChart
-              key={`${data.days}:${value.currency}:${data.branch_id}`}
+              key={`${data.current_from}:${data.current_to}:${value.currency}:${data.branch_id}`}
               value={value}
             />
             {!compact && (
@@ -169,7 +214,7 @@ export function FinancialOverviewPanel({
                 <section>
                   <h3 className="text-sm font-semibold">Receivables aging</h3>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    As of now · {money(value.overdue, value.currency)} overdue
+                    Current snapshot · {money(value.overdue, value.currency)} overdue
                   </p>
                   <dl className="mt-4 space-y-3">
                     {value.aging.map((row) => (

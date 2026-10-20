@@ -1,8 +1,7 @@
 """Native financial reporting only: closed clinic-day comparisons, no money movement."""
 
-from datetime import datetime, time, timedelta
+from datetime import timedelta
 from decimal import Decimal
-from zoneinfo import ZoneInfo
 
 from django.db import transaction
 from django.db.models import F, Sum
@@ -10,6 +9,7 @@ from django.db.models.functions import TruncDate
 from django.utils import timezone
 
 from config.errors import DomainError
+from medframe_apps.analytics.periods import report_period
 from medframe_apps.auditing.services import audit
 from medframe_apps.billing.calculations import amount_text
 from medframe_apps.billing.models import BillingSettings, Payment, Refund
@@ -30,16 +30,16 @@ def period_totals(points):
 
 
 @transaction.atomic
-def financial_overview(request, organization_id, branch_id, days=30):
+def financial_overview(
+    request, organization_id, branch_id, days=30, *, start_date=None, end_date=None
+):
     member = staff_member(request, organization_id)
     branch = scoped_branches(member).filter(id=branch_id).first()
     if branch is None:
         raise DomainError("NOT_FOUND", "Choose a permitted clinic branch.", 404)
-    if type(days) is not int or days not in {7, 30, 90}:
-        raise DomainError("INVALID_INPUT", "Choose a 7, 30 or 90 day comparison.")
-    zone = ZoneInfo(member.organization.timezone)
-    today = timezone.now().astimezone(zone).date()
-    current_start, previous_start = today - timedelta(days=days), today - timedelta(days=days * 2)
+    period = report_period(member.organization, days, start_date=start_date, end_date=end_date)
+    zone, today, days = period["zone"], period["today"], period["days"]
+    current_start, previous_start, end = period["start"], period["previous"], period["end"]
     invoices = invoice_scope(member).filter(branch=branch, state="issued")
     currencies = set(invoices.values_list("currency", flat=True))
     configured = (
@@ -49,10 +49,7 @@ def financial_overview(request, organization_id, branch_id, days=30):
         or "PHP"
     )
     currencies.add(configured)
-    start_time, end_time = (
-        datetime.combine(previous_start, time.min, zone),
-        datetime.combine(today, time.min, zone),
-    )
+    start_time, _, end_time = period["bounds"]
     issued = (
         invoices.filter(issued_at__gte=start_time, issued_at__lt=end_time)
         .annotate(day=TruncDate("issued_at", tzinfo=zone))
@@ -64,14 +61,14 @@ def financial_overview(request, organization_id, branch_id, days=30):
         "paid_date",
         "invoice__currency",
         previous_start,
-        today,
+        end,
     )
     refunds = series_rows(
         Refund.objects.filter(payment__invoice__in=invoices),
         "paid_date",
         "payment__invoice__currency",
         previous_start,
-        today,
+        end,
     )
     daily = {}
     for metric, rows, field in [
@@ -86,7 +83,7 @@ def financial_overview(request, organization_id, branch_id, days=30):
     snapshot = financial_due_snapshot(invoices, today)
     methods = (
         Payment.objects.filter(
-            invoice__in=invoices, paid_date__gte=current_start, paid_date__lt=today
+            invoice__in=invoices, paid_date__gte=current_start, paid_date__lt=end
         )
         .values("invoice__currency", "method")
         .annotate(amount=Sum("amount"))
@@ -145,7 +142,7 @@ def financial_overview(request, organization_id, branch_id, days=30):
         "timezone": str(zone),
         "days": days,
         "current_from": current_start.isoformat(),
-        "current_to": (today - timedelta(days=1)).isoformat(),
+        "current_to": (end - timedelta(days=1)).isoformat(),
         "previous_from": previous_start.isoformat(),
         "previous_to": (current_start - timedelta(days=1)).isoformat(),
         "as_of": timezone.now().isoformat(),

@@ -18,7 +18,9 @@ def safe_cell(value):
     return "'" + text if dangerous else text
 
 
-def render_csv(request, organization_id, branch_id, days, sections):
+def render_csv(
+    request, organization_id, branch_id, days, sections, *, start_date=None, end_date=None
+):
     if (
         not isinstance(sections, list)
         or not sections
@@ -27,7 +29,9 @@ def render_csv(request, organization_id, branch_id, days, sections):
         or len(set(sections)) != len(sections)
     ):
         raise DomainError("INVALID_INPUT", "Choose supported report sections.")
-    data = clinic_insights(request, organization_id, branch_id, days)
+    data = clinic_insights(
+        request, organization_id, branch_id, days, start_date=start_date, end_date=end_date
+    )
     rows = [["Section", "Metric", "Period or category", "Value", "Currency"]]
     rows.extend(
         [
@@ -45,7 +49,13 @@ def render_csv(request, organization_id, branch_id, days, sections):
     )
     for section in sections:
         if section == "finance":
-            finance = financial_overview(request, organization_id, branch_id, days)
+            finance = financial_overview(
+                request,
+                organization_id,
+                branch_id,
+                start_date=data["current_from"],
+                end_date=data["current_to"],
+            )
             for currency in finance["currencies"]:
                 for period in ("current", "previous"):
                     for key, amount in currency[period].items():
@@ -82,5 +92,5 @@ def render_csv(request, organization_id, branch_id, days, sections):
             rows.extend([[section, metric, r["date"], r["count"], ""] for r in summary["series"]])
     output = io.StringIO(newline="")
     csv.writer(output).writerows([[safe_cell(cell) for cell in row] for row in rows])
-    audit(request.user, f"analytics.export.{days}", organization_id, branch_id)
+    audit(request.user, f"analytics.export.{data['days']}", organization_id, branch_id)
     return output.getvalue()

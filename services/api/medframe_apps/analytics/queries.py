@@ -47,7 +47,9 @@ def count_series(query, field, period, days):
 
 
 @transaction.atomic
-def clinic_insights(request, organization_id, branch_id, days=30):
+def clinic_insights(
+    request, organization_id, branch_id, days=30, *, start_date=None, end_date=None
+):
     require_native_staff(request)
     member = require_membership(request.user, organization_id, "workspace.read")
     codes = permissions_for(member)
@@ -56,14 +58,15 @@ def clinic_insights(request, organization_id, branch_id, days=30):
     branch = scoped_branches(member).filter(id=branch_id).first()
     if branch is None:
         raise DomainError("NOT_FOUND", "Choose a permitted clinic branch.", 404)
-    period = report_period(member.organization, days)
+    period = report_period(member.organization, days, start_date=start_date, end_date=end_date)
+    days = period["days"]
     result = {
         "branch_id": str(branch.id),
         "branch": branch.name,
         "timezone": str(period["zone"]),
         "days": days,
         "current_from": period["start"].isoformat(),
-        "current_to": (period["today"] - timedelta(days=1)).isoformat(),
+        "current_to": (period["end"] - timedelta(days=1)).isoformat(),
         "previous_from": period["previous"].isoformat(),
         "previous_to": (period["start"] - timedelta(days=1)).isoformat(),
         "as_of": timezone.now().isoformat(),

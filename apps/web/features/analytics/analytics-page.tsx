@@ -7,29 +7,26 @@ import { errorMessage } from "@/lib/auth/client";
 import { FinancialOverviewPanel } from "@/features/billing/analytics/financial-overview";
 import { downloadFile } from "@/features/consultations/export/client";
 import { FormSelect } from "@/features/patients/form-controls";
-import {
-  PageHeading,
-  LoadState,
-  RemoteNotice,
-  dateLabel,
-  timeLabel,
-} from "@/features/patients/feedback";
+import { PageHeading, LoadState, RemoteNotice } from "@/features/patients/feedback";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { insightsSchema } from "./schema";
 import { MetricComparison } from "./metric-comparison";
+import { ReportRangeControls, type ReportRange } from "./report-range-controls";
+import { ReportPeriodContext } from "./report-period-context";
 import { ReportTable } from "./report-table";
 
 export function AnalyticsPage() {
   const { organizationId, workspace, can } = useWorkspace();
   const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
-  const [days, setDays] = useState("30");
+  const [range, setRange] = useState<ReportRange>({ days: 30 });
+  const [pendingRange, setPendingRange] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const allowed = can("operations.read") || can("patients.clinical.read") || can("billing.read");
   const remote = useRemote(
     ClinicInsightsDocument,
-    { organizationId, branchId: branch, days: Number(days) },
+    { organizationId, branchId: branch, ...range },
     { enabled: allowed && !!branch },
   );
   const parsed = insightsSchema.safeParse(remote.data?.clinicInsights);
@@ -59,21 +56,20 @@ export function AnalyticsPage() {
                 options={workspace.branches.map((b) => ({ value: b.id, label: b.name }))}
               />
             </div>
-            <div className="min-w-52 flex-1">
-              <FormSelect
-                id="analytics-period"
-                label="Comparison period"
-                value={days}
-                onChange={setDays}
-                options={[7, 30, 90].map((d) => ({
-                  value: String(d),
-                  label: `Last ${d} completed days`,
-                }))}
+            <div className="min-w-0 flex-1 basis-80">
+              <ReportRangeControls
+                id="analytics"
+                range={range}
+                timezone={data?.timezone ?? workspace.organization.timezone}
+                currentFrom={data?.current_from}
+                currentTo={data?.current_to}
+                onApply={setRange}
+                onPendingChange={setPendingRange}
               />
             </div>
             <Button
               variant="outline"
-              disabled={busy || !data}
+              disabled={busy || !data || pendingRange}
               onClick={async () => {
                 setBusy(true);
                 setError("");
@@ -83,7 +79,9 @@ export function AnalyticsPage() {
                     {
                       organization_id: organizationId,
                       branch_id: branch,
-                      days: Number(days),
+                      days: range.days,
+                      start_date: range.startDate,
+                      end_date: range.endDate,
                       sections,
                     },
                     "medframe-analytics.csv",
@@ -111,11 +109,7 @@ export function AnalyticsPage() {
             />
           ) : (
             <>
-              <p className="text-sm leading-6 text-muted-foreground">
-                {dateLabel(data.current_from)}–{dateLabel(data.current_to)} compared with{" "}
-                {dateLabel(data.previous_from)}–{dateLabel(data.previous_to)} · {data.timezone}.
-                Today is excluded. As of {timeLabel(data.as_of)}.
-              </p>
+              <ReportPeriodContext period={data} />
               {data.operations && (
                 <section
                   aria-label="Clinic operations"
@@ -174,7 +168,11 @@ export function AnalyticsPage() {
                 </section>
               )}
               {can("billing.read") && (
-                <FinancialOverviewPanel branchId={branch} periodDays={Number(days)} />
+                <FinancialOverviewPanel
+                  branchId={branch}
+                  periodDays={data.days}
+                  periodRange={{ startDate: data.current_from, endDate: data.current_to }}
+                />
               )}
             </>
           )}

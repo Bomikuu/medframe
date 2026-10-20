@@ -17,6 +17,8 @@ def analytics_csv(request):
         UUID(data["branch_id"]),
         data.get("days", 30),
         data["sections"],
+        start_date=data.get("start_date"),
+        end_date=data.get("end_date"),
     )
     response = HttpResponse(body, content_type="text/csv; charset=utf-8")
     response["Content-Disposition"] = 'attachment; filename="medframe-analytics.csv"'

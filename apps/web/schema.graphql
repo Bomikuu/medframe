@@ -233,7 +233,7 @@ type ProviderType {
 }
 
 type Query {
-  clinicInsights(organizationId: UUID!, branchId: UUID!, days: Int! = 30): JSON!
+  clinicInsights(organizationId: UUID!, branchId: UUID!, days: Int! = 30, startDate: Date = null, endDate: Date = null): JSON!
   clinicSpecialties(organizationId: UUID!): JSON!
   servicePatients(organizationId: UUID!, branchId: UUID!, search: String! = ""): JSON!
   serviceCatalog(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null): JSON!
@@ -252,7 +252,7 @@ type Query {
   diagnosticRequest(organizationId: UUID!, requestId: UUID!, context: String! = "clinic"): JSON!
   diagnosticHistory(organizationId: UUID!, requestId: UUID!, context: String! = "clinic", kind: String! = "events", after: String = null): JSON!
   diagnosticPreview(organizationId: UUID!, requestId: UUID!): JSON!
-  financialOverview(organizationId: UUID!, branchId: UUID!, days: Int! = 30): JSON!
+  financialOverview(organizationId: UUID!, branchId: UUID!, days: Int! = 30, startDate: Date = null, endDate: Date = null): JSON!
   billingSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
   billingInvoices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
   billingInvoice(organizationId: UUID!, invoiceId: UUID!): JSON!

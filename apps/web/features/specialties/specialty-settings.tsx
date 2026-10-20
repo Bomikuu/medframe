@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
+import { ButtonLink } from "@/components/ui/button-link";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { ClinicSpecialtiesDocument, SaveClinicSpecialtiesDocument } from "@/lib/graphql/generated";
@@ -43,7 +44,7 @@ export function SpecialtySettings() {
 }
 
 function SpecialtyForm({ initial }: { initial: SpecialtySetup }) {
-  const { organizationId } = useWorkspace();
+  const { organizationId, can, href } = useWorkspace();
   const { confirm } = useSafety();
   const capture = useRequestScope();
   const form = useForm({
@@ -93,6 +94,18 @@ function SpecialtyForm({ initial }: { initial: SpecialtySetup }) {
         provider’s specialty. Removing a selection preserves existing consultations and template
         history.
       </p>
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
+        <p className="text-sm">
+          {codes.length} specialties selected
+          {form.formState.isDirty ? " · not saved yet" : " · saved"}. Standard Other, Dentistry and
+          General medicine guidance is always available.
+        </p>
+        {can("encounters.write") && (
+          <ButtonLink variant="outline" href={href("/clinic/settings/templates")}>
+            Open consultation templates
+          </ButtonLink>
+        )}
+      </div>
       <fieldset disabled={busy} className="grid gap-6 lg:grid-cols-2">
         {["dental", "medicine"].map((category) => (
           <section key={category} className="rounded-xl border border-border bg-card p-5 sm:p-6">
@@ -109,6 +122,15 @@ function SpecialtyForm({ initial }: { initial: SpecialtySetup }) {
                   >
                     <span className="text-sm">
                       {o.name}
+                      {o.active && (
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {codes.includes(o.code)
+                            ? form.formState.isDirty
+                              ? "Selected · save to apply"
+                              : "Enabled for new templates"
+                            : "Not selected"}
+                        </span>
+                      )}
                       {!o.active && (
                         <span className="ml-2 text-xs text-muted-foreground">
                           Unavailable for new selection

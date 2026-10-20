@@ -10,7 +10,7 @@ from medframe_apps.common import check_version
 from medframe_apps.onboarding.invitations import issue_invitation, manage_invitation, serialize
 from medframe_apps.onboarding.models import ClinicInvitation, ClinicOnboarding, SetupChecklistState
 from medframe_apps.onboarding.policy import require_platform_admin
-from medframe_apps.organizations.policy import require_membership
+from medframe_apps.organizations.policy import permissions_for, require_membership
 from medframe_apps.patients.models import Patient
 
 
@@ -38,7 +38,7 @@ class OnboardingAdminQuery:
 
     @strawberry.field
     def clinic_setup_checklist(self, info: Info, organization_id: UUID) -> JSON:
-        require_membership(info.context.user, organization_id, "workspace.read")
+        member = require_membership(info.context.user, organization_id, "workspace.read")
         if not ClinicOnboarding.objects.filter(
             organization_id=organization_id, status="completed"
         ).exists():
@@ -46,11 +46,36 @@ class OnboardingAdminQuery:
         state = SetupChecklistState.objects.filter(
             organization_id=organization_id, user=info.context.user
         ).first()
+        from zoneinfo import ZoneInfo
+
+        from django.utils import timezone
+
+        from medframe_apps.encounters.models import ConsultationTemplate
+        from medframe_apps.onboarding.models import OrganizationSpecialty
+        from medframe_apps.operations.models import ProviderSchedule
+
+        codes = permissions_for(member)
+        schedules = ProviderSchedule.objects.filter(
+            branch__organization_id=organization_id,
+            active=True,
+            effective_to__gte=timezone.localdate(timezone=ZoneInfo(member.organization.timezone)),
+        )
+        if member.branch_id:
+            schedules = schedules.filter(branch_id=member.branch_id)
         return {
             "available": True,
             "dismissed": state.dismissed if state else False,
             "version": state.version if state else 0,
             "has_patient": Patient.objects.filter(organization_id=organization_id).exists(),
+            "has_specialty": OrganizationSpecialty.objects.filter(
+                organization_id=organization_id, specialty__active=True
+            ).exists(),
+            "has_template": ConsultationTemplate.objects.filter(
+                organization_id=organization_id, active=True
+            ).exists()
+            if "encounters.write" in codes
+            else None,
+            "has_schedule": schedules.exists() if "operations.read" in codes else None,
         }
 
 

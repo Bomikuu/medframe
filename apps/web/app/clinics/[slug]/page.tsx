@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ClinicSite } from "@/features/websites/site-page";
+import { publicClinicUrl } from "@/features/websites/public-url";
 import { publicWebsite } from "@/features/websites/public-data";
 import { webOrigin } from "@/lib/server/backend-proxy";
 
@@ -12,8 +12,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const site = await publicWebsite(slug);
   if (!site)
     return { title: "Clinic website unavailable", robots: { index: false, follow: false } };
-  const host = (await headers()).get("x-medframe-site-host");
-  const canonical = host ? `https://${host}/` : `${webOrigin}/clinics/${slug}`;
+  const canonical = await publicClinicUrl(slug);
   return {
     title: site.content.seo_title,
     description: site.content.seo_description,
@@ -38,7 +37,7 @@ export default async function Page({ params }: Props) {
     telephone: site.content.phone || undefined,
     email: site.content.email || undefined,
     address: site.content.address || undefined,
-    url: `${webOrigin}/clinics/${slug}`,
+    url: await publicClinicUrl(slug),
   };
   return (
     <>

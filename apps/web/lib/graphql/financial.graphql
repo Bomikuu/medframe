@@ -73,8 +73,20 @@ query NotificationInbox($organizationId: UUID!, $unread: Boolean!, $after: Strin
   notificationInbox(organizationId: $organizationId, unread: $unread, after: $after)
 }
 
-query FinancialOverview($organizationId: UUID!, $branchId: UUID!, $days: Int!) {
-  financialOverview(organizationId: $organizationId, branchId: $branchId, days: $days)
+query FinancialOverview(
+  $organizationId: UUID!
+  $branchId: UUID!
+  $days: Int = 30
+  $startDate: Date
+  $endDate: Date
+) {
+  financialOverview(
+    organizationId: $organizationId
+    branchId: $branchId
+    days: $days
+    startDate: $startDate
+    endDate: $endDate
+  )
 }
 
 query BillingHistory($organizationId: UUID!, $invoiceId: UUID!, $kind: String!, $after: String) {

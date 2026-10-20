@@ -1,4 +1,5 @@
 "use client";
+import { ButtonLink } from "@/components/ui/button-link";
 import { EmptyState } from "@/components/application/empty-state";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -11,7 +12,12 @@ import { getGraphqlClient } from "@/lib/graphql/client";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useSafety, useUnsavedChanges } from "@/features/workspace/safety-provider";
-import { specialtyOptions, specialtySetupSchema } from "@/features/specialties/schema";
+import {
+  specialtyOptions,
+  specialtySetupSchema,
+  specialtyName,
+  specialtyStatus,
+} from "@/features/specialties/schema";
 import { useRequestScope } from "@/features/patients/use-request-scope";
 import { FormSelect } from "@/features/patients/form-controls";
 import { FormField } from "@/components/form-field";
@@ -34,7 +40,7 @@ const empty = {
   requestId: "",
 };
 export function TemplateEditor() {
-  const { organizationId, can } = useWorkspace();
+  const { organizationId, can, href } = useWorkspace();
   const { confirm } = useSafety();
   const setupRemote = useRemote(
     ClinicSpecialtiesDocument,
@@ -43,9 +49,11 @@ export function TemplateEditor() {
   );
   const setup = specialtySetupSchema.safeParse(setupRemote.data?.clinicSpecialties);
   const [after, setAfter] = useState<string>();
+  const [filter, setFilter] = useState("all");
   const remote = useRemote(ConsultationTemplatesDocument, {
     organizationId,
     includeArchived: true,
+    specialty: filter === "all" ? undefined : filter,
     after,
   });
   const form = useForm({ defaultValues: { ...empty, requestId: crypto.randomUUID() } });
@@ -69,6 +77,26 @@ export function TemplateEditor() {
         className="min-w-0 rounded-xl border border-border bg-card p-5"
       >
         <h2 className="mb-4 text-lg font-semibold">Saved templates</h2>
+        <div className="mb-5">
+          <FormSelect
+            id="saved-template-specialty"
+            label="Filter by specialty"
+            value={filter}
+            onChange={(value) => {
+              setFilter(value);
+              setAfter(undefined);
+            }}
+            options={[
+              { value: "all", label: "All specialties" },
+              ...specialtyOptions(setup.success ? setup.data : undefined),
+            ]}
+          />
+        </div>
+        {form.formState.isDirty && (
+          <p className="mb-4 text-xs leading-5 text-muted-foreground">
+            Save or discard this draft before opening another template.
+          </p>
+        )}
         {!remote.data ? (
           <LoadState error={remote.error} retry={remote.reload} />
         ) : parsed.success ? (
@@ -76,7 +104,11 @@ export function TemplateEditor() {
             {!parsed.data.items.length && (
               <EmptyState
                 title="No templates yet"
-                description="Create reusable prompts with the form. Patient information stays in the consultation."
+                description={
+                  filter === "all"
+                    ? "Create reusable prompts with the form. Patient information stays in the consultation."
+                    : "No saved templates for this specialty on this page. Choose another specialty or create a template."
+                }
               />
             )}
             <ul className="grid gap-3">
@@ -85,10 +117,17 @@ export function TemplateEditor() {
                   key={item.revision_id}
                   className="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3"
                 >
-                  <span>
-                    {item.name} · v{item.version}
-                    {!item.active && " · Archived"}
-                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium wrap-anywhere">{item.name}</p>
+                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                      {specialtyName(item.specialty, setup.success ? setup.data : undefined)} ·
+                      Version {item.version}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {item.active ? "Active" : "Archived"} ·{" "}
+                      {specialtyStatus(item.specialty, setup.success ? setup.data : undefined)}
+                    </p>
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
@@ -152,6 +191,31 @@ export function TemplateEditor() {
           }
         })}
       >
+        {!!setupRemote.error && (
+          <p role="status" className="text-sm text-muted-foreground">
+            Specialty starters are unavailable. Standard documentation remains available.{" "}
+            <Button type="button" variant="link" onClick={setupRemote.reload}>
+              Retry specialty starters
+            </Button>
+          </p>
+        )}
+        {setup.success && setup.data.starters.length === 0 && (
+          <section
+            aria-label="Standard guidance"
+            className="grid gap-3 border-b border-border pb-5"
+          >
+            <h2 className="font-semibold">Start with standard guidance</h2>
+            <p className="max-w-prose text-sm leading-6 text-muted-foreground">
+              Other, Dentistry and General medicine remain available. Create your own documentation
+              prompts below. No specialty starter is enabled for this clinic.
+            </p>
+            {can("organization.manage") && (
+              <ButtonLink variant="outline" href={href("/clinic/settings/specialties")}>
+                Choose clinic specialties
+              </ButtonLink>
+            )}
+          </section>
+        )}
         {setup.success && setup.data.starters.length > 0 && (
           <section
             aria-label="Specialty starters"
@@ -189,7 +253,7 @@ export function TemplateEditor() {
                     setSaved("");
                   }}
                 >
-                  Use {starter.specialty.replaceAll("_", " ")}
+                  Use {specialtyName(starter.specialty, setup.data)}
                 </Button>
               ))}
             </div>
@@ -260,13 +324,42 @@ export function TemplateEditor() {
           />
         )}
         {error !== null && <p role="alert">{failureText(error)}</p>}
-        {saved && <p role="status">{saved}</p>}
-        <div className="flex gap-3">
+        <p role="status" className="text-sm text-muted-foreground">
+          {form.formState.isSubmitting
+            ? "Saving template…"
+            : form.formState.isDirty
+              ? "Unsaved template changes"
+              : saved || "No unsaved changes"}
+        </p>
+        <div className="flex flex-wrap gap-3">
           <Button disabled={form.formState.isSubmitting}>Save template version</Button>
+          {form.formState.isDirty && (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={form.formState.isSubmitting}
+              onClick={async () => {
+                if (
+                  await confirm({
+                    title: "Discard template changes?",
+                    description:
+                      "Your unsaved edits will be replaced by the last loaded template or blank draft.",
+                    action: "Discard changes",
+                  })
+                ) {
+                  form.reset();
+                  setError(null);
+                  setSaved("");
+                }
+              }}
+            >
+              Discard changes
+            </Button>
+          )}
           <Button
             type="button"
             variant="outline"
-            disabled={form.formState.isDirty}
+            disabled={form.formState.isDirty || form.formState.isSubmitting}
             onClick={() => form.reset({ ...empty, requestId: crypto.randomUUID() })}
           >
             New template

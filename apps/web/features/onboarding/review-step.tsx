@@ -1,3 +1,12 @@
+"use client";
+
+import {
+  providerCounts,
+  walkInPolicies,
+  operatingDays,
+  selectedProviderTypes,
+} from "./review-labels";
+import { useSavedLogo } from "./use-saved-logo";
 import { Button } from "@/components/ui/button";
 import { WorkspacePreview } from "./workspace-preview";
 import type { Snapshot, Step, References } from "./schema";
@@ -17,12 +26,18 @@ export function ReviewStep({
   error: string;
 }) {
   const { clinic, specialties, branding, practice } = snapshot.data;
+  const logo = useSavedLogo(snapshot.logo);
   const groups: [Step, string, [string, string][]][] = [
     [
       "clinic",
       "Clinic information",
       [
         ["Clinic", String(clinic.name)],
+        [
+          "Practice type",
+          references.clinicTypes.find((item) => item.value === clinic.clinic_type)?.label ??
+            "Not specified",
+        ],
         ["Contact", `${clinic.email} · ${clinic.phone}`],
         [
           "Location",
@@ -42,11 +57,11 @@ export function ReviewStep({
             .map((code) => references.specialties.find((item) => item.code === code)?.name ?? code)
             .join(", "),
         ],
+        ["Provider types", selectedProviderTypes(specialties.provider_types)],
         [
-          "Provider types",
-          (specialties.provider_types as string[]).join(", ").replaceAll("_", " "),
+          "Estimated providers",
+          providerCounts[String(specialties.provider_count)] ?? "Not specified",
         ],
-        ["Estimated providers", String(specialties.provider_count).replaceAll("_", "–")],
       ],
     ],
     [
@@ -63,10 +78,11 @@ export function ReviewStep({
       "Practice details",
       [
         ["Branch", String(practice.branch_name)],
+        ["Operating days", operatingDays(practice.days)],
         ["Hours", `${practice.opens}–${practice.closes} · ${practice.timezone}`],
         [
           "Appointment preference",
-          `${practice.duration_minutes} minutes · ${String(practice.walk_in_policy).replaceAll("_", " ")}`,
+          `${practice.duration_minutes} minutes · ${walkInPolicies[String(practice.walk_in_policy)] ?? "Not specified"}`,
         ],
       ],
     ],
@@ -74,6 +90,7 @@ export function ReviewStep({
       "account",
       "Administrator",
       [
+        ["Name", snapshot.administrator_name || "Complete account verification"],
         ["Verified email", snapshot.email],
         [
           "Account",
@@ -84,6 +101,14 @@ export function ReviewStep({
   ];
   return (
     <div className="space-y-7">
+      <div>
+        <h2 className="text-2xl font-semibold wrap-anywhere">
+          Review {String(clinic.name) || "your clinic"}
+        </h2>
+        <p className="mt-2 max-w-prose text-sm leading-6 text-muted-foreground">
+          Check the saved details below. Edit any section before creating your workspace.
+        </p>
+      </div>
       {groups.map(([step, title, rows]) => (
         <section key={step} className="border-b pb-6">
           <div className="mb-4 flex items-center justify-between">
@@ -96,7 +121,7 @@ export function ReviewStep({
             {rows.map(([label, value]) => (
               <div key={label} className="grid gap-1 text-sm sm:grid-cols-[150px_minmax(0,1fr)]">
                 <dt className="text-muted-foreground">{label}</dt>
-                <dd className="wrap-anywhere capitalize">{value}</dd>
+                <dd className="wrap-anywhere">{value}</dd>
               </div>
             ))}
           </dl>
@@ -104,6 +129,7 @@ export function ReviewStep({
       ))}
       <WorkspacePreview
         name={String(clinic.name)}
+        logo={logo}
         primary={String(branding.primary)}
         secondary={String(branding.secondary)}
         accent={String(branding.accent)}

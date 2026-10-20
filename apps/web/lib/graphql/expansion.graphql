@@ -1,5 +1,17 @@
-query ClinicInsights($organizationId: UUID!, $branchId: UUID!, $days: Int!) {
-  clinicInsights(organizationId: $organizationId, branchId: $branchId, days: $days)
+query ClinicInsights(
+  $organizationId: UUID!
+  $branchId: UUID!
+  $days: Int = 30
+  $startDate: Date
+  $endDate: Date
+) {
+  clinicInsights(
+    organizationId: $organizationId
+    branchId: $branchId
+    days: $days
+    startDate: $startDate
+    endDate: $endDate
+  )
 }
 
 query ClinicSpecialties($organizationId: UUID!) {

@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 import strawberry
@@ -15,11 +16,19 @@ from medframe_apps.billing.queries import billing_setup, invoice_detail, invoice
 class BillingQuery:
     @strawberry.field
     def financial_overview(
-        self, info: Info, organization_id: UUID, branch_id: UUID, days: int = 30
+        self,
+        info: Info,
+        organization_id: UUID,
+        branch_id: UUID,
+        days: int = 30,
+        start_date: date | None = None,
+        end_date: date | None = None,
     ) -> JSON:
         from medframe_apps.billing.analytics import financial_overview
 
-        return financial_overview(info.context, organization_id, branch_id, days)
+        return financial_overview(
+            info.context, organization_id, branch_id, days, start_date=start_date, end_date=end_date
+        )
 
     @strawberry.field
     def billing_setup(

@@ -920,7 +920,9 @@ export type QueryClinicDashboardArgs = {
 export type QueryClinicInsightsArgs = {
   branchId: Scalars['UUID']['input'];
   days?: Scalars['Int']['input'];
+  endDate?: InputMaybe<Scalars['Date']['input']>;
   organizationId: Scalars['UUID']['input'];
+  startDate?: InputMaybe<Scalars['Date']['input']>;
 };
 
 
@@ -1094,7 +1096,9 @@ export type QueryEncountersArgs = {
 export type QueryFinancialOverviewArgs = {
   branchId: Scalars['UUID']['input'];
   days?: Scalars['Int']['input'];
+  endDate?: InputMaybe<Scalars['Date']['input']>;
   organizationId: Scalars['UUID']['input'];
+  startDate?: InputMaybe<Scalars['Date']['input']>;
 };
 
 

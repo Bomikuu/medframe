@@ -106,7 +106,9 @@
     ".next-tablet-editor/types/**/*.ts",
     ".next-tablet-editor/dev/types/**/*.ts",
     ".next-station-operations/types/**/*.ts",
-    ".next-station-operations/dev/types/**/*.ts"
+    ".next-station-operations/dev/types/**/*.ts",
+    ".next-onboarding-reporting/types/**/*.ts",
+    ".next-onboarding-reporting/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

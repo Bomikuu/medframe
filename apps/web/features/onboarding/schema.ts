@@ -26,6 +26,7 @@ export const snapshotSchema = z.object({
   data: z.record(z.string(), z.record(z.string(), z.unknown())),
   email: z.string(),
   contact_name: z.string(),
+  administrator_name: z.string().nullable().optional(),
   account_ready: z.boolean(),
   last_saved_at: z.string(),
   logo: z

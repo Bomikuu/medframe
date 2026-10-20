@@ -28,6 +28,7 @@ def snapshot(request):
         "last_saved_at": draft.last_saved_at.isoformat(),
         "email": draft.invitation.email,
         "contact_name": draft.invitation.contact_name,
+        "administrator_name": draft.user.display_name if draft.user_id else None,
         "account_ready": bool(draft.user_id),
         "logo": {
             "id": str(logo.id),

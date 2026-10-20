@@ -1,7 +1,12 @@
 "use client";
 import { useState } from "react";
 import { ClinicSpecialtiesDocument, ConsultationTemplatesDocument } from "@/lib/graphql/generated";
-import { specialtyOptions, specialtySetupSchema } from "@/features/specialties/schema";
+import {
+  specialtyOptions,
+  specialtySetupSchema,
+  specialtyName,
+  specialtyStatus,
+} from "@/features/specialties/schema";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -63,10 +68,26 @@ export function TemplatePicker({
               { value: "none", label: "Choose guidance" },
               ...parsed.data.items.map((item) => ({
                 value: item.revision_id,
-                label: `${item.name} · version ${item.version}`,
+                label: `${item.name} · ${specialtyName(item.specialty, setup.success ? setup.data : undefined)} · version ${item.version}`,
               })),
             ]}
           />
+          {!parsed.data.items.length && (
+            <p className="text-sm leading-6 text-muted-foreground">
+              No active guidance for this selection. You can document the consultation without a
+              template.
+            </p>
+          )}
+          {selected !== "none" &&
+            (() => {
+              const item = parsed.data.items.find((entry) => entry.revision_id === selected);
+              return item ? (
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {specialtyStatus(item.specialty, setup.success ? setup.data : undefined)}. Prompts
+                  remain separate from recorded findings.
+                </p>
+              ) : null;
+            })()}
           <Button
             type="button"
             variant="outline"
