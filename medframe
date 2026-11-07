@@ -16,10 +16,11 @@ import urllib.request
 from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
 STATE = ROOT / ".medframe-runtime"
-SERVICES = ("api", "worker", "scheduler", "web")
+SERVICES = ("api", "worker", "scheduler", "media", "web")
 INFRA = ("db", "redis", "mail", "storage", "scanner")
 UV = ["uv", "run", "--locked", "--project", "services/api"]
 MANAGE = [*UV, "python", "services/api/manage.py"]
@@ -43,14 +44,52 @@ def require(*commands):
         raise RuntimeError("Install these prerequisites first: " + ", ".join(missing))
 
 
+def backend_port():
+    """Keep local API port choices private and consistent across restarts."""
+    path = STATE / "backend-port.json"
+    saved = json.loads(path.read_text()).get("port", 8000) if path.exists() else 8000
+    value = str(os.environ.get("MEDFRAME_API_PORT", saved))
+    if not value.isdecimal() or not 1024 <= int(value) <= 65535:
+        raise RuntimeError("MEDFRAME_API_PORT must be a port between 1024 and 65535.")
+    return int(value)
+
+
 def environment():
     if not (ROOT / ".env").is_file():
         raise RuntimeError("Missing .env. Run ./medframe setup first.")
     # Django reads .env itself. Never evaluate it as shell code or print its secrets.
+    public_origin = os.environ.get("MEDFRAME_PUBLIC_ORIGIN", "").strip()
+    if public_origin:
+        origin = urlsplit(public_origin)
+        if (
+            origin.scheme != "https"
+            or not origin.hostname
+            or origin.path
+            or origin.query
+            or origin.fragment
+            or origin.username
+            or origin.password
+        ):
+            raise RuntimeError(
+                "MEDFRAME_PUBLIC_ORIGIN must be a trusted HTTPS origin without a path."
+            )
     return {
         **os.environ,
-        "WEB_ORIGIN": "http://localhost:3000",
-        "BACKEND_URL": "http://127.0.0.1:8000",
+        **({"COOKIE_SECURE": "true", "APP_ENV": "production"} if public_origin else {}),
+        "WEB_ORIGIN": public_origin or "http://localhost:3000",
+        "BACKEND_URL": f"http://127.0.0.1:{backend_port()}",
+        "NEXT_PUBLIC_CALL_WS_ORIGIN": os.environ.get("NEXT_PUBLIC_CALL_WS_ORIGIN")
+        or (
+            public_origin.replace("https://", "wss://", 1)
+            if public_origin
+            else f"ws://localhost:{backend_port()}"
+        ),
+        "NEXT_PUBLIC_OPERATIONS_WS_URL": os.environ.get("NEXT_PUBLIC_OPERATIONS_WS_URL")
+        or (
+            public_origin.replace("https://", "wss://", 1) + "/ws/operations"
+            if public_origin
+            else f"ws://localhost:{backend_port()}/ws/operations"
+        ),
         "SMTP_HOST": "127.0.0.1",
         "SMTP_PORT": "51025",
         "SMS_LIVE_ENABLED": "false",
@@ -116,7 +155,7 @@ def require_stopped():
             "Stop the app with ./medframe stop before setup or migrations."
         )
     available(3000)
-    available(8000)
+    available(backend_port())
 
 
 def migrate():
@@ -228,12 +267,41 @@ def start(args):
     dependencies()
     env = environment()
     names = selected(args.only)
+    origin_file = STATE / "active-origin.json"
+    previous_origin = (
+        json.loads(origin_file.read_text()).get("origin")
+        if origin_file.exists()
+        else "http://localhost:3000"
+    )
+    previous_port = (
+        json.loads(origin_file.read_text()).get("api_port", backend_port())
+        if origin_file.exists()
+        else backend_port()
+    )
+    if (
+        previous_origin != env["WEB_ORIGIN"] or previous_port != backend_port()
+    ) and any(saved_process(name) for name in SERVICES):
+        raise RuntimeError(
+            "Stop all owned services before changing the access origin or API port."
+        )
+    if os.environ.get("MEDFRAME_PUBLIC_ORIGIN") and not os.environ.get(
+        "MEDFRAME_MEDIA_PUBLIC_IP"
+    ):
+        raise RuntimeError(
+            "Public call access needs the media server's explicit public IPv4 address."
+        )
+    if os.environ.get("MEDFRAME_PUBLIC_ORIGIN") and not args.production:
+        raise RuntimeError(
+            "Public access requires an existing production frontend. The development server will not be published."
+        )
     current_web = saved_process("web")
     if current_web and args.dist_dir is None and not args.production:
         # A plain start is idempotent, including an already-running saved build.
         args.dist_dir = current_web["dist_dir"]
         args.production = current_web["production"]
     directory = dist_directory(args)
+    if "media" in names:
+        run([sys.executable, "scripts/prepare-call-media.py"])
     if (
         "web" in names
         and args.production
@@ -242,13 +310,14 @@ def start(args):
         raise RuntimeError(
             f"No production build in {directory}. Run ./medframe build first."
         )
-    for name, port in (("api", 8000), ("web", 3000)):
+    for name, port in (("api", backend_port()), ("web", 3000)):
         if name in names and not saved_process(name):
             available(port)
     infrastructure()
     if "api" in names:
         run([*MANAGE, "migrate", "--check"], env=env)
     commands = {
+        "media": [*MANAGE, "run_call_media"],
         "api": [
             *UV,
             "uvicorn",
@@ -258,7 +327,7 @@ def start(args):
             "--host",
             "127.0.0.1",
             "--port",
-            "8000",
+            str(backend_port()),
             "--no-access-log",
         ],
         "worker": [
@@ -324,7 +393,9 @@ def start(args):
             )
             added.append(name)
             if name == "api":
-                wait_http(name, "http://127.0.0.1:8000/health/ready", 60)
+                wait_http(name, f"{env['BACKEND_URL']}/health/ready", 60)
+            elif name == "media":
+                wait_http(name, f"{env['BACKEND_URL']}/calls/health", 30)
             elif name == "web":
                 wait_http(name, "http://127.0.0.1:3000/login", 120)
         time.sleep(1)
@@ -335,12 +406,15 @@ def start(args):
     except BaseException:
         stop(added)
         raise
-    print("Ready: http://localhost:3000 | API: http://127.0.0.1:8000", flush=True)
+    origin_file.write_text(
+        json.dumps({"origin": env["WEB_ORIGIN"], "api_port": backend_port()})
+    )
+    print(f"Ready: {env['WEB_ORIGIN']} | API: {env['BACKEND_URL']}", flush=True)
     print("Services run in the background. Use ./medframe stop to end them.")
 
 
 def selected(only):
-    return {"all": SERVICES, "backend": SERVICES[:3], "frontend": ("web",)}[only]
+    return {"all": SERVICES, "backend": SERVICES[:4], "frontend": ("web",)}[only]
 
 
 def main():
