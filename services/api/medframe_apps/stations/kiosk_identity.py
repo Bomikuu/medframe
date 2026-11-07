@@ -166,12 +166,50 @@ def patient_session(request, *, lock=False, function=None):
             "Your kiosk session ended. Start again or ask reception for help.",
             403,
         )
+    if session.proof.method == "staff_terminal_selection":
+        from medframe_apps.operations.policy import require_operations
+
+        member = require_operations(
+            request,
+            session.proof.branch.organization_id,
+            "appointments.manage",
+            session.proof.branch_id,
+        )
+        if (
+            member.id != session.proof.membership_id
+            or request.user.id != session.proof.issued_by_id
+        ):
+            raise DomainError(
+                "PATIENT_SESSION_ENDED", "Select the patient again in staff mode.", 403
+            )
+        if function == "payments":
+            require_operations(
+                request,
+                session.proof.branch.organization_id,
+                "billing.read",
+                session.proof.branch_id,
+            )
+    if (
+        session.proof.method == "terminal_identifier"
+        and credential.device.approved_by_id != session.proof.issued_by_id
+    ):
+        raise DomainError(
+            "PATIENT_SESSION_ENDED", "This terminal’s approval changed. Start again.", 403
+        )
     return session
 
 
 def session_summary(session):
+    functions = list(session.credential.device.functions)
+    if session.proof.method == "staff_terminal_selection" and "billing.read" not in permissions_for(
+        session.proof.membership
+    ):
+        functions = [value for value in functions if value != "payments"]
     return {
         "patient_name": session.proof.patient.full_name,
+        "patient_reference": session.proof.patient.reference,
+        "entry_method": session.proof.method,
+        "functions": functions,
         "expires_at": session.expires_at.isoformat(),
         "idle_expires_at": (session.last_active_at + timedelta(seconds=IDLE_SECONDS)).isoformat(),
     }

@@ -1,4 +1,6 @@
 "use client";
+
+import { RecordUnavailable } from "@/components/application/record-unavailable";
 import { useState } from "react";
 import { z } from "zod";
 import { AnatomyComparisonDocument } from "@/lib/graphql/generated";
@@ -77,7 +79,10 @@ function ComparisonPage({
   });
   const parsed = comparisonSchema.safeParse(remote.data?.anatomyComparison);
   if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
-  if (!parsed.success) return <p role="alert">Comparison could not be read.</p>;
+  if (!parsed.success)
+    return (
+      <RecordUnavailable description="Comparison could not be read. Contact your clinic administrator if the problem continues." />
+    );
   return (
     <>
       <p className="text-sm text-muted-foreground">{parsed.data.notice}</p>

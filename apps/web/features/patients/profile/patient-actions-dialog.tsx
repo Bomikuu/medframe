@@ -1,11 +1,12 @@
 "use client";
 
+import { RecordUnavailable } from "@/components/application/record-unavailable";
+
 import { useRef, useState, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import {
   X,
   ArrowLeft,
-  ArrowUpRight,
   CalendarDays,
   CalendarClock,
   ClipboardCheck,
@@ -53,9 +54,17 @@ import { ReportReview } from "@/features/portal/report-review";
 import { PatientPhotoDialog } from "./patient-photo-dialog";
 import { PatientAppointmentAction } from "./patient-appointment-action";
 import { PatientPaymentAction } from "./patient-payment-action";
-import { cn } from "@/lib/utils";
+import { PatientRecordBrowse } from "./patient-record-browse";
+import { useStationDetails } from "@/features/stations/access-session";
+import { StationConsultations } from "@/features/stations/station-consultations";
+import { DiagnosticRequestDetail } from "@/features/diagnostics/request-detail";
+import { STATION_PATIENT_ACTIONS } from "./station-action-scope";
+import { PatientActionGrid } from "./patient-action-grid";
+import type { ProfileSummary } from "./summary";
+import { localDate } from "@/features/operations/schema";
+import { calendarDay } from "@/features/operations/calendar-dates";
 
-type ActionId =
+export type ActionId =
   | "consultation"
   | "continue-consultation"
   | "edit"
@@ -94,6 +103,10 @@ export function PatientActionsDialog({
   onOpenChange,
   returnFocus,
   updated,
+  station = false,
+  initialAction = null,
+  navigate,
+  summary,
 }: {
   patient: PatientDetailsFragment;
   portraitId?: string | null;
@@ -101,11 +114,24 @@ export function PatientActionsDialog({
   onOpenChange: (open: boolean) => void;
   returnFocus: RefObject<HTMLButtonElement | null>;
   updated: () => void;
+  station?: boolean;
+  initialAction?: ActionId | null;
+  navigate?: (href: string, close: () => void) => void;
+  summary?: ProfileSummary | null;
 }) {
   const { can, href } = useWorkspace();
+  const stationDetails = useStationDetails();
+  const stationPayment =
+    !station ||
+    (!!stationDetails?.doctor_profile &&
+      (!stationDetails.device ||
+        ["billing.read", "payments.record"].every((key) =>
+          stationDetails.device!.functions.includes(key),
+        )));
+  const [diagnosticId, setDiagnosticId] = useState<string | null>(null);
   const { guard, clearDirty } = useSafety();
   const router = useRouter();
-  const [active, setActive] = useState<ActionId | null>(null);
+  const [active, setActive] = useState<ActionId | null>(initialAction);
   const [search, setSearch] = useState("");
   const [photo, setPhoto] = useState<"edit" | "remove" | null>(null);
   const openingPhoto = useRef(false);
@@ -129,7 +155,7 @@ export function PatientActionsDialog({
       icon: Stethoscope,
       visible: clinical && can("encounters.write"),
       tone: "care",
-      href: `${href("/clinic/consultations/new")}&patient=${patient.id}`,
+      href: `${href(station ? "/station/clinician/walk-in" : "/clinic/consultations/new")}&patient=${patient.id}`,
     },
     {
       id: "medical",
@@ -196,7 +222,7 @@ export function PatientActionsDialog({
       description: "Select an invoice and record money received",
       group: "Visits & payments",
       icon: CreditCard,
-      visible: can("billing.read") && can("payments.record"),
+      visible: can("billing.read") && can("payments.record") && stationPayment,
       tone: "finance",
     },
     {
@@ -210,10 +236,16 @@ export function PatientActionsDialog({
     },
     {
       id: "services",
-      label: can("services.work") ? "Services & payment plans" : "View patient services",
-      description: can("services.work")
-        ? "Start a service and manage its agreement"
-        : "Review this patient’s service workflows",
+      label: station
+        ? "Service progress"
+        : can("services.work")
+          ? "Services & payment plans"
+          : "View patient services",
+      description: station
+        ? "Review service stages without editing the agreement"
+        : can("services.work")
+          ? "Start a service and manage its agreement"
+          : "Review this patient’s service workflows",
       group: "Visits & payments",
       icon: ListChecks,
       visible: can("services.read"),
@@ -239,7 +271,7 @@ export function PatientActionsDialog({
     {
       id: "photo",
       label: portraitId ? "Change patient photo" : "Upload patient photo",
-      description: "Choose a circular profile photo",
+      description: "Upload a photo to update the patient’s profile",
       group: "Patient record",
       icon: ImagePlus,
       visible: editPhoto,
@@ -285,8 +317,32 @@ export function PatientActionsDialog({
       visible: true,
       href: href(`/clinic/patients/${patient.id}/history`),
     },
-  ].filter((action) => action.visible) as Action[];
+  ].filter(
+    (action) => action.visible && (!station || STATION_PATIENT_ACTIONS.has(action.id)),
+  ) as Action[];
   const current = actions.find((action) => action.id === active);
+  const hasOpenVisit = summary?.clinical?.recent.some((visit) =>
+    ["draft", "in_progress", "completed"].includes(visit.status),
+  );
+  const hasTodayBooking = summary?.operations?.upcoming.some(
+    (booking) =>
+      booking.status === "booked" &&
+      calendarDay(booking.start, summary.timezone) === localDate(summary.timezone),
+  );
+  const hasBalance = summary?.financial?.balances.some(
+    (balance) => Number(balance.outstanding) > 0,
+  );
+  const suggested = [
+    ...(hasOpenVisit ? ["continue-consultation"] : []),
+    ...(hasTodayBooking ? ["check-in"] : []),
+    ...(hasBalance ? ["payment"] : []),
+    "consultation",
+    "book",
+    "medical",
+    "history",
+  ]
+    .filter((id) => actions.some((action) => action.id === id))
+    .slice(0, 3);
   const identity = { id: patient.id, name: patient.fullName, reference: patient.reference };
 
   function dismiss() {
@@ -300,8 +356,11 @@ export function PatientActionsDialog({
   function choose(action: Action) {
     void guard(() => {
       if (action.href) {
-        onOpenChange(false);
-        router.push(action.href);
+        if (navigate) navigate(action.href, () => onOpenChange(false));
+        else {
+          onOpenChange(false);
+          router.push(action.href);
+        }
         return;
       }
       if (action.id === "photo" || action.id === "remove-photo") {
@@ -382,19 +441,46 @@ export function PatientActionsDialog({
                   }}
                 >
                   {!current ? (
-                    <p role="alert">Your access to this action has changed.</p>
+                    <RecordUnavailable
+                      title="This action is unavailable"
+                      description="Your access to this action has changed. Choose another permitted action or contact your clinic administrator."
+                    />
                   ) : (
                     <>
-                      {active === "continue-consultation" && (
-                        <ConsultationList patientId={patient.id} />
-                      )}
+                      {active === "continue-consultation" &&
+                        (station ? (
+                          <StationConsultations patientId={patient.id} />
+                        ) : (
+                          <ConsultationList patientId={patient.id} />
+                        ))}
                       {active === "medical" && <ClinicalHistorySection patientId={patient.id} />}
                       {active === "treatments" && <TreatmentPlans patientId={patient.id} />}
-                      {active === "diagnostics" && <DiagnosticList patientId={patient.id} />}
+                      {active === "diagnostics" &&
+                        (station && diagnosticId ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              onClick={() => void guard(() => setDiagnosticId(null))}
+                            >
+                              Back to diagnostic requests
+                            </Button>
+                            <DiagnosticRequestDetail id={diagnosticId} />
+                          </>
+                        ) : (
+                          <DiagnosticList
+                            patientId={patient.id}
+                            onOpen={station ? setDiagnosticId : undefined}
+                          />
+                        ))}
                       {active === "documents" && <DocumentPanel patientId={patient.id} />}
-                      {active === "services" && (
-                        <PatientServices patientId={patient.id} branchId={patient.branchId} />
-                      )}
+                      {active === "services" &&
+                        (station ? (
+                          <PatientRecordBrowse>
+                            <PatientServices patientId={patient.id} branchId={patient.branchId} />
+                          </PatientRecordBrowse>
+                        ) : (
+                          <PatientServices patientId={patient.id} branchId={patient.branchId} />
+                        ))}
                       {active === "invoices" && (
                         <PatientBilling patientId={patient.id} branchId={patient.branchId} />
                       )}
@@ -421,7 +507,7 @@ export function PatientActionsDialog({
                       {active === "sharing" && (
                         <>
                           <StaffReleases patientId={patient.id} />
-                          <ReportReview patientId={patient.id} />
+                          {!station && <ReportReview patientId={patient.id} />}
                         </>
                       )}
                     </>
@@ -437,68 +523,21 @@ export function PatientActionsDialog({
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
-                {["Clinical care", "Visits & payments", "Patient record"].map((group) => {
-                  const items = actions.filter(
-                    (action) =>
-                      action.group === group &&
-                      `${action.label} ${action.description}`
-                        .toLowerCase()
-                        .includes(search.toLowerCase().trim()),
-                  );
-                  if (!items.length) return null;
-                  return (
-                    <section key={group} className="grid gap-3">
-                      <h2 className="text-sm font-semibold">{group}</h2>
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {items.map((action) => (
-                          <button
-                            key={action.id}
-                            type="button"
-                            onClick={() => choose(action)}
-                            className={cn(
-                              "group flex min-h-28 items-start gap-3 rounded-xl border border-border p-4 text-left outline-offset-4 transition-colors hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring",
-                              action.id === "consultation" &&
-                                "border-primary bg-primary text-primary-foreground hover:bg-primary/90",
-                            )}
-                          >
-                            <span
-                              className={cn(
-                                "grid size-9 shrink-0 place-items-center rounded-lg",
-                                action.id === "consultation"
-                                  ? "bg-primary-foreground/10"
-                                  : action.tone === "finance"
-                                    ? "bg-warning-soft text-warning"
-                                    : action.tone === "care"
-                                      ? "bg-teal-soft text-teal-ink"
-                                      : "bg-info-soft text-info",
-                              )}
-                            >
-                              <action.icon aria-hidden className="size-4" />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="flex items-start justify-between gap-2 text-sm font-semibold">
-                                {action.label}
-                                {action.href && (
-                                  <ArrowUpRight aria-hidden className="mt-0.5 size-3.5 shrink-0" />
-                                )}
-                              </span>
-                              <span
-                                className={cn(
-                                  "mt-1 block text-xs leading-5",
-                                  action.id === "consultation"
-                                    ? "text-primary-foreground/85"
-                                    : "text-muted-foreground",
-                                )}
-                              >
-                                {action.description}
-                              </span>
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </section>
-                  );
-                })}
+                {station &&
+                  stationDetails?.doctor_profile &&
+                  (!stationPayment || !can("billing.read") || !can("payments.record")) && (
+                    <p className="rounded-lg bg-info-soft p-3 text-xs leading-6 text-info">
+                      Payment recording needs payment access on your account and this device. Your
+                      clinic administrator can enable it.
+                    </p>
+                  )}
+                <PatientActionGrid
+                  actions={actions}
+                  search={search}
+                  choose={choose}
+                  suggested={suggested}
+                  contextual={!!(hasOpenVisit || hasTodayBooking || hasBalance)}
+                />
                 {!actions.some((action) =>
                   `${action.label} ${action.description}`
                     .toLowerCase()

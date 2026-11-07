@@ -3,8 +3,10 @@ fragment PatientRow on PatientSummary {
   reference
   fullName
   dateOfBirth
+  portraitId
 }
 fragment PatientDetails on PatientDemographics {
+  portraitId
   id
   reference
   fullName

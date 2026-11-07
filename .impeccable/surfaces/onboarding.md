@@ -16,3 +16,15 @@ name and first-run actions have staged responsive browser evidence. The manual
 review fixture omitted some defaults; its future preparer is corrected without a
 third browser run. Default-value and new logo image-load acceptance remain open.
 See docs/operations/onboarding-reporting-refinement-verification.md.
+
+## October 20 refinement — current visual contract
+
+Operate mode. The user explicitly replaces the introductory simulated workspace with a generic clinic photograph inside a card and requests circle/dot background motifs. Use the generated local clinic-welcome.png decoratively, never as an actual clinic identity or patient image. Keep white/navy/teal tokens and shared shadcn controls. Group setup in cards; use semantic field errors, status feedback and a subdued current-step pulse with reduced-motion support. Phone navigation is a compact six-step row. Specialty cards have one useful icon and a selected check. Daily hours are independent, closed days explicit; preserve server validation and legacy draft compatibility. Password checks are local guidance, not a security assessment or replacement password policy. No AI integration, account/MFA bypass or live email delivery. Verification is visual only under the user's latest instruction.
+
+## October 20 supplied three-column reference
+
+Use the supplied reference as visual authority for setup: connected step icons, real percentage/count, a wide form card, compact branded header and contextual guidance. Add restrained concentric circles and diagonal lines around the cards. Preserve saved native step order, guards and form owners. Collapse contextual guidance below the form on tablet/phone; keep mobile progress compact. The photograph-led welcome remains the introduction. No authenticated avatar/menu is implied before account verification. Local dev activation; visual-only verification, no build or automated tests.
+
+Header refinement: move save status and Save and exit out of the form body into the persistent header. Compact second header row on phones; native save and guarded exit owners retained.
+
+Specialty cards include a concise description of each native catalog specialty, consistent icon, explicit Selected/check state and full-card interaction. Search matches names/descriptions and preserves selections when filtered. Hide empty category headings and keep one-column readable cards on phones.

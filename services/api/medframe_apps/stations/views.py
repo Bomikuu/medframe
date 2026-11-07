@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from config.errors import DomainError
 from config.middleware import domain_view, json_object
+from medframe_apps.accounts.sign_in_policy import authenticated_session
 from medframe_apps.accounts.session_realms import require_session_realm
 from medframe_apps.accounts.throttling import throttle
 from medframe_apps.organizations.models import Branch
@@ -17,7 +18,7 @@ from medframe_apps.stations.context import DEVICE_COOKIE, EDITOR_COOKIE, digest
 from medframe_apps.stations.inputs import DeviceInput, OfferInput
 from medframe_apps.stations.middleware import heartbeat
 from medframe_apps.stations.models import DeviceCredential, StationDevice
-from medframe_apps.stations.policy import administrator
+from medframe_apps.stations.policy import administrator, clinician_device
 
 
 def identifier(data, key):
@@ -75,6 +76,46 @@ def context(request):
             result["error"] = "This device has expired or been revoked. Pair it again with staff."
     elif request.COOKIES.get(DEVICE_COOKIE):
         result["error"] = "This device credential is unavailable. Pair it again with staff."
+    if (
+        credential
+        and request.user.is_authenticated
+        and authenticated_session(request.user, request.session)
+        and request.session.get("auth_realm", "staff") == "staff"
+        and not getattr(request, "station_doctor", None)
+        and not getattr(request, "station_access", None)
+    ):
+        try:
+            clinician_device(
+                request,
+                credential.device.organization_id,
+                credential.device.branch_id,
+                required=True,
+            )
+        except DomainError:
+            pass
+        else:
+            result["staff_workspace"] = True
+    from medframe_apps.providers.models import ProviderProfile
+
+    raw_context_org = (
+        credential.device.organization_id
+        if credential
+        else json_object(request).get("organization_id")
+    )
+    try:
+        context_org = UUID(str(raw_context_org)) if raw_context_org else None
+    except (ValueError, TypeError):
+        context_org = None
+    result["doctor_profile"] = bool(
+        context_org
+        and request.user.is_authenticated
+        and ProviderProfile.objects.filter(
+            membership__user=request.user,
+            membership__active=True,
+            membership__user__is_active=True,
+            membership__organization_id=context_org,
+        ).exists()
+    )
     response = JsonResponse(result)
     doctor = getattr(request, "station_doctor", None)
     if doctor:
@@ -105,13 +146,6 @@ def pair(request):
     data = json_object(request)
     throttle(request, "station.pair", digest(str(data.get("code", ""))), 5, 300)
     secret, credential = pairing.redeem(request, data.get("code", ""))
-    if request.user.is_authenticated:
-        from django.contrib.auth import logout
-
-        from medframe_apps.accounts.models import ClinicalSession
-
-        ClinicalSession.objects.filter(session_key=request.session.session_key).update(revoked=True)
-        logout(request)
     return cookie(JsonResponse({"state": "pending"}), DEVICE_COOKIE, secret)
 
 

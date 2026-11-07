@@ -32,12 +32,13 @@ export function PortalReports() {
   useUnsavedChanges(`portal-report:${linkId}`, form.formState.isDirty, () => form.reset());
   return (
     <section className="grid gap-6">
-      <h2 className="text-xl font-semibold">My reports</h2>
-      <p className="max-w-prose text-sm leading-6 text-muted-foreground">
-        Share history, allergies, medication, or other information for your clinic to review. Your
-        submission stays separate from confirmed clinical history. Contact your clinic directly for
-        care requests.
-      </p>
+      <header>
+        <h2 className="text-xl font-semibold">My reports</h2>
+        <p className="mt-2 max-w-prose text-sm leading-6 text-muted-foreground">
+          Share health information for clinic review. Reports don’t update confirmed medical
+          history. Contact your clinic directly for care requests.
+        </p>
+      </header>
       <form
         noValidate
         className="grid max-w-2xl gap-4 rounded-xl border border-border bg-card p-5"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useInStation } from "@/features/stations/access-session";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/application/status-badge";
@@ -21,6 +22,7 @@ export function PatientPaymentAction({
   branchId: string;
   updated: () => void;
 }) {
+  const inStation = useInStation();
   const { organizationId } = useWorkspace();
   const { guard } = useSafety();
   const [after, setAfter] = useState<string | null>(null);
@@ -90,8 +92,9 @@ export function PatientPaymentAction({
       <RemoteNotice error={remote.error} retry={remote.reload} />
       {!rows.length && (
         <p className="rounded-lg border border-dashed border-border p-6 text-sm">
-          No payable invoices on this page. Check other invoice pages or create and issue an invoice
-          in Invoices & adjustments.
+          {inStation
+            ? "No payable invoices on this page. Check other pages, or ask the clinic billing team to issue the appropriate invoice."
+            : "No payable invoices on this page. Check other invoice pages or create and issue an invoice in Invoices & adjustments."}
         </p>
       )}
       {rows.map((row) => (

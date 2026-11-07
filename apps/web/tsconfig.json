@@ -116,7 +116,9 @@
     ".next-patient-photo/types/**/*.ts",
     ".next-patient-photo/dev/types/**/*.ts",
     ".next-patient-actions/types/**/*.ts",
-    ".next-patient-actions/dev/types/**/*.ts"
+    ".next-patient-actions/dev/types/**/*.ts",
+    ".next-local-dev/types/**/*.ts",
+    ".next-local-dev/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

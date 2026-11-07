@@ -8,7 +8,21 @@ from medframe_apps.patients.models import Patient
 
 def staff_member(request, organization_id, permission="billing.read"):
     require_session_realm(request, "staff")
-    return require_membership(request.user, organization_id, permission)
+    member = require_membership(request.user, organization_id, permission)
+    if (
+        getattr(request, "station_doctor", None)
+        or getattr(request, "station_credential", None)
+        or request.headers.get("X-Medframe-Workspace") == "station"
+    ):
+        from medframe_apps.providers.models import ProviderProfile
+
+        if not ProviderProfile.objects.filter(
+            membership=member, membership__active=True, membership__user__is_active=True
+        ).exists():
+            raise DomainError(
+                "FORBIDDEN", "Station payments require an active doctor profile.", 403
+            )
+    return member
 
 
 def scoped_branches(member):
@@ -34,9 +48,25 @@ def financial_patient(member, branch_id, patient_id):
 
 
 def invoice_scope(member):
-    return Invoice.objects.filter(
+    query = Invoice.objects.filter(
         organization_id=member.organization_id, branch_id__in=scoped_branches(member).values("id")
     )
+    from medframe_apps.stations.context import current_request
+
+    request = current_request.get()
+    if request and (
+        getattr(request, "station_doctor", None)
+        or getattr(request, "station_credential", None)
+        or request.headers.get("X-Medframe-Workspace") == "station"
+    ):
+        from medframe_apps.patients.services import scoped_patients
+
+        query = query.filter(
+            patient_id__in=scoped_patients(
+                request.user, member.organization_id, "patients.clinical.read"
+            ).values("id")
+        )
+    return query
 
 
 def get_invoice(member, identifier, *, lock=False):

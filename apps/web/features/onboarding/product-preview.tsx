@@ -1,5 +1,6 @@
+import { Brand } from "@/components/brand";
 import Image from "next/image";
-import { CalendarDays, Check, ClipboardList, HeartPulse, Users, ArrowUpRight } from "lucide-react";
+import { CalendarDays, Check, ClipboardList, Users, ArrowUpRight } from "lucide-react";
 export function ProductPreview({ slide = 0 }: { slide?: number }) {
   return (
     <div
@@ -7,8 +8,7 @@ export function ProductPreview({ slide = 0 }: { slide?: number }) {
       aria-label="Illustrative Medframe workspace"
     >
       <div className="flex items-center gap-2 border-b px-5 py-4 text-xs">
-        <HeartPulse className="size-5 text-teal-700" />
-        <span className="font-semibold">Medframe</span>
+        <Brand className="text-base [&_img]:size-8" />
         <span className="ml-auto text-muted-foreground">Example workspace</span>
       </div>
       <div className="grid grid-cols-[58px_minmax(0,1fr)] sm:grid-cols-[120px_minmax(0,1fr)]">

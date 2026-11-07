@@ -1,5 +1,8 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { normalizeEmail } from "@/lib/contact-format";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -11,6 +14,17 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         className,
       )}
       {...props}
+      {...(type === "email"
+        ? {
+            inputMode: "email" as const,
+            autoCapitalize: "none",
+            spellCheck: false,
+            onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+              event.target.value = normalizeEmail(event.target.value);
+              props.onChange?.(event);
+            },
+          }
+        : {})}
     />
   );
 }

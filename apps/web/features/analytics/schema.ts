@@ -6,6 +6,7 @@ export const metricSchema = z.object({
   previous: z.number().int().nonnegative(),
   statuses: z.array(group),
   series: z.array(z.object({ date: z.string(), count: z.number().int().nonnegative() })),
+  previous_series: z.array(z.object({ date: z.string(), count: z.number().int().nonnegative() })),
   distinct_current: z.number().optional(),
   distinct_previous: z.number().optional(),
 });
@@ -20,6 +21,9 @@ export const insightsSchema = z.object({
   previous_from: z.string(),
   previous_to: z.string(),
   as_of: z.string(),
+  patients: z
+    .object({ total: z.number().int().nonnegative(), registrations: metricSchema })
+    .nullable(),
   operations: z.object({ appointments: metricSchema, queue: metricSchema }).nullable(),
   clinical: z.object({ encounters: metricSchema, specialties: z.array(group) }).nullable(),
 });

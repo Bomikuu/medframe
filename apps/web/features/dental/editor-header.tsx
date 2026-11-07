@@ -41,8 +41,15 @@ export function DentalEditorHeader({
     <>
       <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 xl:px-6">
         <div className="flex max-w-full min-w-0 items-center gap-3 xl:gap-5">
-          <Button type="button" variant="ghost" onClick={onExit} aria-label="Back to consultation">
+          <Button
+            type="button"
+            variant="ghost"
+            className="min-h-11 shrink-0"
+            onClick={onExit}
+            aria-label="Back to consultation"
+          >
             <ArrowLeftIcon />
+            <span className="xl:hidden">Notes</span>
             <span className="hidden xl:inline">Back to consultation</span>
           </Button>
           <div className="flex min-w-0 items-center gap-3 border-l border-border pl-3 xl:pl-5">

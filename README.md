@@ -1,3 +1,5 @@
+<p align="center"><img src="apps/web/public/brand/medframe-logo.webp" alt="Medframe logo" width="180"></p>
+
 # Medframe
 
 The Foundation of Modern Care.
@@ -9,6 +11,20 @@ The integrated Django Batch 1 includes patient management, providers, walk-in co
 Batch 2 adds exact dental comparisons/tooth procedure history, versioned plan editing and ordering, dated follow-ups, filtered records, private image/PDF previews, reusable guidance templates, clinic-verified self/guardian invitations, explicit immutable clinical releases, and separate patient reports/review. See [Batch 2 verification and activation evidence](docs/operations/django-batch-2-verification.md).
 
 The previous implementation and database are preserved: commit `77bf229`, tag `checkpoint/pre-django-2026-10-18`, and a private encrypted backup. See [checkpoint notes](docs/operations/pre-django-checkpoint.md), [Django amendment](docs/superpowers/specs/2026-10-18-medframe-django-amendment.md), and [Batch 1 plan](docs/superpowers/plans/2026-10-18-medframe-django-batch-1.md).
+
+## Workspace capabilities
+
+The current source also includes clinic scheduling and queues, billing and payment tracking, diagnostic requests, patient services, staff invitations, patient registration review, shared stations, appointment rooms, clinic websites, and scoped analytics. Features remain subject to tenant permissions and the verification limitations recorded in `docs/operations/`; source availability is not a claim of production or clinical validation.
+
+## Repository map
+
+- `apps/web/`: Next.js frontend, shared components, and feature workspaces.
+- `services/api/`: Django backend, permissions, migrations, GraphQL, and background tasks.
+- `infrastructure/`: local service configuration and appointment-call infrastructure.
+- `scripts/`: setup, checkpoint, storage, and maintenance helpers.
+- `docs/`: requirements, design decisions, implementation plans, and verification evidence.
+
+Keep patient records, private attachments, database backups, runtime logs, and real credentials outside Git. Use `.env.example` as a configuration reference rather than committing `.env`.
 
 ## Local development
 

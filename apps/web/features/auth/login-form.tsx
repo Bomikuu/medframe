@@ -35,7 +35,7 @@ export function LoginForm({
   });
   const remember = useWatch({ control, name: "remember" });
   return (
-    <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
+    <form noValidate onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       <FormField
         id="email"
         label={portal ? "Account email" : "Work email"}
@@ -46,7 +46,7 @@ export function LoginForm({
           type="email"
           autoComplete="username"
           autoCapitalize="none"
-          placeholder="you@yourclinic.com"
+          placeholder={portal ? "you@example.com" : "you@yourclinic.com"}
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "email-help" : undefined}
           {...register("email")}
@@ -66,7 +66,7 @@ export function LoginForm({
           <label
             htmlFor="remember"
             className={
-              sharedDevice ? "hidden" : "flex min-h-8 cursor-pointer items-center gap-2 text-sm"
+              sharedDevice ? "hidden" : "flex min-h-11 cursor-pointer items-center gap-2 text-sm"
             }
           >
             <Controller
@@ -89,7 +89,7 @@ export function LoginForm({
           </label>
           <Link
             href={portal ? "/portal/recover" : "/auth/recover"}
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+            className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
             Forgot password?
           </Link>

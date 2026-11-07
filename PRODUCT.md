@@ -52,7 +52,7 @@ Name: Medframe. Tagline: The Foundation of Modern Care.
 
 The October 19 application-wide reconstruction brief supersedes earlier visual defaults. Manrope headings and Plus Jakarta Sans body/UI are self-hosted with next/font/google. The light default uses a cool `#F7F9FC` canvas, white task surfaces, navy `#102A43`, teal `#0D9488`, readable text and semantic status tints. Clinic branding and allowed personal preferences remain centralized and validated; explicit legacy font choices and dark/system modes are retained. Avoid excessive gradients, cartoon illustration, unnecessary decoration and uniform nested cards.
 
-The original concept-11 logo asset is unavailable. A Lucide HeartPulse companion mark accompanies the wordmark without claiming to reproduce that asset. Clinic logos preserve proportions.
+The October 22 user-supplied doctor illustration is the shared Medframe brand mark, alongside the existing wordmark. The supplied simplified vector illustration library supports contextual onboarding and empty states with editable palette colors. Clinic-uploaded logos retain their intended proportions and identity.
 
 The reconstruction is active locally on `codex/visual-reconstruction` with `.next-reconstruction`; its source/data checkpoint, tool evidence, verification and remaining dental acceptance gap are recorded in `docs/operations/visual-reconstruction-verification.md`.
 
@@ -65,7 +65,7 @@ The reconstruction is active locally on `codex/visual-reconstruction` with `.nex
 - `docs/superpowers/plans/2026-10-18-medframe-django-batch-1.md`: one integrated implementation plan covering all connected Batch 1 features.
 - `docs/operations/pre-django-checkpoint.md`: source/data recovery locations and verified baseline evidence.
 - `docs/requirements/medframe-master-v3.txt` and the older foundation/patient plans: historical context and unchanged requirements, not the current stack/release authority.
-- The approved logo remains unavailable. Two licensed Dundee dental assets are integrated locally with attribution; independent clinical validation and dimensional calibration remain unavailable. See `assets/dental/ATTRIBUTION.md` and `docs/operations/anatomical-dental-verification.md`. No production infrastructure, clinical validation, or compliance evidence is supplied.
+- The October 22 uploaded brand mark is available locally. Two licensed Dundee dental assets are integrated locally with attribution; independent clinical validation and dimensional calibration remain unavailable. See `assets/dental/ATTRIBUTION.md` and `docs/operations/anatomical-dental-verification.md`. No production infrastructure, clinical validation, or compliance evidence is supplied.
 
 ## Product Principles
 
@@ -116,3 +116,13 @@ Active locally in .next-onboarding-reporting; exact staged evidence, unchanged
 identity/data, current advisory/runtime inventory and browser limits are in
 docs/operations/onboarding-reporting-refinement-verification.md. No AI/live
 payment/message integration or public deployment was added.
+
+
+## Clinic-controlled routine staff sign-in — October21 amendment
+
+The user approved Strict, Password only and Remember for30 days in clinic Security settings.
+This supersedes mandatory-MFA-at-every-routine-staff-login wording for explicitly configured clinics.
+Strict remains the default; strongest active clinic policy wins, and platform/Django privileged
+accounts retain Strict. Initial activation, patient proof and first Google linking retain their
+checks. Native permissions/grants remain independent of sign-in assurance. See actual implementation
+and acceptance limits in docs/operations/clinic-sign-in-policy-verification.md.

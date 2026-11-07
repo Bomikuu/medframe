@@ -119,6 +119,8 @@ function PaymentContext({ invoice }: { invoice: InvoiceDetail }) {
       )}
       <dl className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm">
         {[
+          ["Payments recorded", invoice.paid],
+          ["Refunds returned", invoice.refunded],
           ["Received after refunds", invoice.net_received],
           ["Total outstanding", invoice.outstanding],
           ["Due through today", invoice.due?.due_now],

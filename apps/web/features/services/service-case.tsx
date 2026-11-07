@@ -1,8 +1,12 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FormSelect } from "@/features/patients/form-controls";
 import { LoadState, RemoteNotice, dateLabel } from "@/features/patients/feedback";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
@@ -35,9 +39,13 @@ export function ServiceCaseDetail({ caseId, updated }: { caseId: string; updated
       <div>
         <h2 className="text-xl font-semibold">{row.name}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          {row.patient_name} · {row.reference}
+          <PersonIdentity kind="patient" name={row.patient_name} /> · {row.reference}
         </p>
         <p className="mt-2 text-sm capitalize">Workflow: {row.status}</p>
+        <p className="mt-2 text-xs leading-5 text-muted-foreground">
+          Captured catalog version {row.service_version}. Later catalog changes do not replace this
+          patient’s agreed service workflow or price.
+        </p>
       </div>
       <RemoteNotice error={remote.error} retry={remote.reload} />
       <FinancialNotice error={action.error} />
@@ -68,15 +76,14 @@ export function ServiceCaseDetail({ caseId, updated }: { caseId: string; updated
       </div>
       {can("services.work") && row.status === "active" && (
         <div className="grid gap-4">
-          <label className="grid gap-2 text-sm font-medium">
-            Reason for skipping, reopening or cancelling
-            <Input
-              value={reason}
-              maxLength={500}
-              placeholder="Required for these changes"
-              onChange={(e) => setReason(e.target.value)}
-            />
-          </label>
+          <ReasonField
+            id={`service-reason-${row.id}`}
+            label="Reason for skipping, reopening or cancelling"
+            value={reason}
+            onValueChange={setReason}
+            suggestions={reasonSuggestions.service}
+            maxLength={500}
+          />
           <div className="flex flex-wrap gap-3">
             <Button
               disabled={

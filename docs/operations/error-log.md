@@ -941,3 +941,551 @@ launchers and preserves a native service-view card for service readers. Those
 last small catalog/browse changes have final build/lint coverage only. No fresh
 Continue consultation/service-reader-card browser assertion or third round. This
 is a coverage limit, not evidence of a product failure or authorization bypass.
+
+## ONBOARD-EXPERIENCE-001 — development preview refresh mismatch
+
+During the first visual preview at /onboarding-preview, React reported old WelcomeSlides server markup against the new client card markup (October 20, approximately16:28 Asia/Manila). The preview recovered on the client; one desktop photo capture was incomplete during that refresh. No application repair or broad retest was attempted. After an ordinary frontend restart, a fresh preview tab rendered the new card and full photo without the visible issue badge. This is staged visual evidence, not automated hydration acceptance. The temporary preview was removed; native authenticated completion, account-leave confirmation, saved daily-hour roundtrip, sent-code/expiry and full keyboard acceptance remain unverified.
+
+## PATIENT-REGISTRATION-001 — activation proxy allowlist
+
+October20 native visual activation: opening the new synthetic branch link showed “Registration is unavailable / This endpoint is unavailable.” The frontend backend-proxy exact allowlist omitted the two new registration endpoints, so requests never reached Django. Necessary activation repair adds only `portal/registration` and `portal/registration/manage` to the established proxy; native CSRF, origin and staff/patient policy remain. Confirmation is recorded in patient-self-registration-verification.md. No unrelated deferred issue was changed.
+
+## PATIENT-REGISTRATION-002 — bounded acceptance gaps
+
+October20 visual-only patient self-registration pass confirms local email delivery/code verification and synthetic intake submission, with responsive public/details/review presentation. Native staff accept/link/decline, link creation/copy/disable, guardian authority flow, denial/race/expiry/attempt boundaries and final account activation were not exercised end to end. Source delegates to existing owners, but this is not runtime acceptance. Keep these gaps explicit; no automated suite/build or repeated broad browser pass was run.
+
+## SMS-GOOGLE-001 — configuration and live acceptance pending
+
+October20: Google Web Client ID and SMSGate local endpoint/credentials are absent. Native registration correctly disables Mobile and Sign up with Google, with visible email fallback at desktop and phone widths. Configure locally using smsgate-google-setup.md, then verify with a permitted recipient/account. Real SMS delivery/status/worker failure, Google callback/MFA/approved-invitation completion, configured UI and concurrency/permission boundaries remain unverified. No automated checks/build or external message was run; this is an acceptance gap, not evidence of successful live integration. Native schema/services are active; synthetic visual link disabled.
+
+## SMS-GOOGLE-002 — placeholder Google Client ID
+
+October20: after the user reported adding a Client ID, the native backend was restarted via ./medframe (API3345105/worker3345294/scheduler3345295; existing web retained). One public patient-login browser observation rendered the official GIS button, but its visible iframe client_id was the documented placeholder `your-client-id.apps.googleusercontent.com`. Button presence therefore does not establish a valid Google configuration. No Google login/signup was attempted and no credentials/config were altered. User needs to copy the actual OAuth Web Client ID from Google Cloud Clients, then restart backend. Live acceptance remains pending.
+
+SMS-GOOGLE-002 follow-up October20: user replaced the example. Sanitized settings inspection confirms non-placeholder expected Web Client ID format; backend reloaded and official Google button visible. Actual Google authorization/signup is still unverified; no account action attempted.
+
+## CONTACT-INPUT-001 — development preview hydration warning / acceptance limits
+
+October20 approximately20:16 Asia/Manila: the temporary contact preview server markup included the prior single onboarding tel input, while the client rendered the new PhoneInput wrapper. React reported hydration mismatch and recovered on the client. Digit filtering, PH spacing, email/postal formatting then worked in the focused desktop/phone preview. No source fix or repeated broad check was attempted. Temporary route removed; ordinary frontend activation restart follows. This does not establish warning resolution. Real native staff/kiosk/website saving, caret/undo/autofill, uncommon prefix flows and legacy-value editing remain unverified; see contact-input-formatting-verification.md. No build/automated tests/live messaging.
+
+## CONTACT-INPUT-002 — foreign paste into PH-only verification
+
+Source review after the single visual pass identifies an unconfirmed edge case: a full foreign international number pasted into the PH-mobile-only PhoneInput can select that foreign prefix while its prefix editor is disabled. The existing verification handler rejects it, so no foreign SMS is sent, but returning to PH may require replacing the full value with +63. The configured mobile screen was not exercised (SMSGate remains unavailable). Logged without a repair/retest loop under the user's bounded-verification preference. General editable contact-phone controls are not PH-only.
+
+## PHOTO-AUTO-001 — native browser acceptance blocked by staff session
+
+October20: one attempt to open /clinic/patients for photo review redirected to /login; browser has no staff session. Gallery/manual-selection removal and scan-triggered versioned portrait selection are implemented, but actual upload/scan/automatic-profile/remove/responsive acceptance was not exercised. No credential reset, test grant, private-image upload or authentication bypass was attempted. No build/automated tests/repeated browser loop. See patient-photo-auto-profile-verification.md.
+
+## RECOVERY-MESSAGE-001 — input focus acceptance
+
+October20 explicit missing-account recovery amendment: both actual staff/patient forms show the requested inline error, and the input becomes editable. Final browser AX focus remained on the page rather than the email input after the failed request; the send handler calls setError with focus while busy disables the input. Logged without repair per bounded verification preference. Keyboard/screen-reader announcement/focus acceptance remains open; visible notification is confirmed. No build/automated test or broader repair loop.
+
+## REASON-POPUP-001 — authenticated workflow acceptance unavailable
+
+October20 one desktop/phone shared-component preview confirms suggested reasons/Other/custom string and no phone overflow. Actual /clinic/consultations/new redirected to staff sign-in. Authenticated popup interception/back/forward/dirty close, creation/queue link and reason saves across native workflows remain unverified. No credential reset, grant fixture, auth bypass, build or automated test was used. Temporary preview removed; bounded pass ends here. See reason-consultation-popup-verification.md.
+
+## REASON-POPUP-002 — Graphify sequential fallback
+
+October20 focused graph helper triggered a Python3.14 forkserver bootstrap error because it lacked the multiprocessing main guard. Graphify explicitly fell back to sequential extraction and completed exit0 with24files/356nodes/827edges. No product repair or repeat extraction loop was attempted; source and successful fallback output are the evidence, not a claim that parallel extraction passed.
+
+## CLINIC-NAVIGATION-001 — reported global page failure, routing rollback/cache reset
+
+October20 user reported repeated could-not-open/Try again failures across pages. Removed the newly added unverified clinic-wide parallel modal slot, restoring original layout contract; retained consultation dialog/reason choices on the existing route. Preserved old cache outside app and restarted fresh .next-local-dev. Previously hundreds of idle0–4ms compiles stopped in observed new runtime. Native public sign-in/missing-page/Open home and anonymous clinic redirect work. Exact authenticated failure was not reproduced; signed-in clinic recovery/consultation creation remain pending user confirmation. No auth/data changes, production build or automated tests. Historical icon serialization stack was already addressed in current source, so was not guessed at. Details: clinic-navigation-recovery-verification.md.
+
+## STATION-LOGIN-001 — Authenticated pairing confirmation remains open (2026-10-20)
+
+User reported device pairing removed staff access. Source repair removes pair-time logout/revocation and isolates native clinic requests from device-cookie constraints while preserving Station/delegated restrictions. One anonymous native Station entry visual check passes; the review browser has no authenticated staff session/device, so sign in → pair/approve → open Station → return to clinic remains unverified. No build/automated tests or fixture account/session bypass. See `station-login-coexistence-verification.md`. Existing sessions already revoked need one legitimate sign-in. Graphify's partial TSX extraction warning is recorded there; source inspected directly.
+
+## LOADING-UNIFY-001 — Mobile and authenticated transition acceptance open (2026-10-20)
+
+The shared startup loader is desktop-verified using the actual presentation component. The390x844 viewport screenshot returned ambiguous scaled geometry; no phone-centering claim or repair cycle. Native authenticated stage transitions remain unverified because the review browser lacks staff login. No build/automated tests. Temporary preview removed; override reset. See `unified-loading-verification.md`.
+
+## DASHBOARD-MERGE-001 — Preview hydration warning / native reporting acceptance (2026-10-20)
+
+Temporary synthetic-aggregate preview rendered shared ActivityOverview/ComparisonChart on desktop/phone, but React reported an SSR/client hydration mismatch at the dynamic SVG title inside PeriodComparisonChart. Client recovery and keyboard day inspection worked. This is not established on authenticated Dashboard, whose charts load after client data. User requests logging issues without repair; no fix/retest loop. Live native aggregate correctness/permissions/date changes/CSV/redirect/full finance integration remain unverified; no build or automated tests. Preview removed. See `dashboard-consolidation-verification.md`.
+
+## STAFF-ACCESS-001 — Authenticated management/onboarding acceptance remains open (2026-10-21)
+
+Staff directory/card/control presentation is desktop/phone reviewed using actual components and synthetic preview-only staff; search works. Native invalid-invite recovery and anonymous staff-page redirect are observed. Review browser has no staff session: actual edit/save, cross-tenant/branch/last-admin/self restrictions, individual billing effects, approved-Station-only enforcement, invite copy/regen/revoke, email/Google/account/MFA acceptance, photo scan/remove/stream and schedule integration remain unverified. No real account/permission/photo/invitation mutation, build or automated suite. Malformed-ID/concurrent/mixed-clinic cases are not claimed. Preview removed and override reset. See `staff-access-verification.md` for source/checkpoint/activation/tool evidence. No further verification loop.
+
+# CALENDAR-001 — short booking text clipping and open authenticated acceptance
+
+October21,2026 provider-calendar phase. In the synthetic desktop day/week and390x844 day preview,
+secondary status text clips at the bottom of a one-hour booking block (four text lines inside a
+time-scaled height). Time/patient remain visible; the accessible name contains status. Reproduce
+with a60-minute appointment in AppointmentCalendar. Impact: secondary information may require
+opening the appointment. Logged without repair per the user's instruction; no visual repair loop.
+Native booking/current-care modal, actual other-patient search/create, queue transitions, scopes,
+reschedule, pagination/reconnect and timezone/concurrent-conflict boundaries remain unverified:
+the review browser has no staff session and /clinic/appointments redirected to /login. No automated
+tests/build were run. See docs/operations/provider-calendar-verification.md for actual evidence.
+
+# CALL-001 — online room two-party/security acceptance remains open
+
+October21,2026. Local implementation/launcher readiness and a bounded synthetic presentation pass
+are recorded in docs/operations/online-appointment-rooms-verification.md. No authenticated doctor/
+patient clients were available in the review browser. Actual native room/PIN/claim/start, camera/
+audio, realtime message delivery, file scan/download, extension/conflicts, forced expiry/replay,
+revocation/concurrent claims and external-network flow were not exercised. Do not claim a validated
+two-party or strict-expiry result. Current media is loopback-only; a localhost link cannot serve a
+different-device or internet patient. No build/automated tests performed per user preference.
+
+# CALL-002 — dependency install advisory report
+
+October21,2026 npm install of the official media client reported12high-severity vulnerabilities in
+the workspace dependency tree. Attribution/baseline were not investigated; this is not proof that
+the media package introduced them. No automatic audit fix, forced upgrade or broad dependency
+repair attempted under the user's log-first/bounded-check preference.
+
+# CALL-003 — media supervisor shutdown cleanup warnings
+
+October21,2026. After controlled ./medframe stop --only backend/start cycles, the appended media
+log contains “coroutine ignored GeneratorExit” and a destroyed pending enforce task during
+shutdown. Owned services stopped and final media readiness passed; graceful asyncio cleanup has
+not been confirmed. Reproduce with an owned backend restart and inspect .medframe-runtime/media.log.
+Impact: noisy/incomplete async cleanup on shutdown; do not infer a successful in-call termination
+test from process readiness. Deferred without repair; necessary child-kill/parent-death mechanisms
+are implemented but adversarial failure-path acceptance remains CALL-001.
+
+# CALENDAR-002 — weekly/month scheduling authenticated acceptance remains open
+
+October21,2026. The requested multi-weekday/date override/month/duration/written-date refinement
+is implemented and locally active. One synthetic component visual pass established rendered
+controls, independent weekday fields, duration Other, correct preview selection, day drill-down
+and narrow layouts. Actual schedules entry in the review browser redirects to sign-in; no
+authenticated save, overlap rollback, version/retry, native42day count/preview query or clinical
+action was exercised. Reproduce acceptance with an authorized synthetic clinic/provider and native
+weekly save/date override/month query flows. Impact: source and presentation evidence do not prove
+end-to-end correctness. No build or automated tests per user instruction; no grant/credential
+changes to overcome the review gate. See scheduling-refinement-verification.md. Existing
+CALENDAR-001 short-block context was refined within the user request; broad native acceptance
+remains unclaimed. Other deferred findings were not repaired or retested.
+
+# CALL-REFINE-001 — conversation tabs retain a scroll offset
+
+October 21, 2026. In the single synthetic room visual pass, scroll/read Chat, then switch to Files.
+The shared scrollport can retain its prior offset, initially placing the first filename above the
+visible area. Scrolling up reveals it; no data loss was observed. Impact: a small discoverability
+issue for the first file, not a scan/access bypass. CUA desktop file-tab screenshot and native AX
+content show all three synthetic file states. Deferred without repair or another pass per user
+preference. See call-room-refinement-verification.md.
+
+# CALL-REFINE-002 — live media/device and native room acceptance remains open
+
+October 21, 2026. Refined room/device/chat/file presentation is active locally. One synthetic
+desktop/phone pass and native missing-room recovery establish UI evidence only. Actual camera,
+physical device switching, two-party media, permission/reconnect/late-capture cleanup, native
+message/upload/history/retry and strict expiry/security flows were not exercised. Reproduce with
+authorized synthetic doctor/patient room sessions and supported hardware/browser/network. No
+build, automated tests or typecheck per user preference. CALL-001's acceptance limits continue;
+loopback media still cannot serve a remote/different-device patient. No credential/grant changes
+were made to overcome the review limitation.
+
+## CALL-ADMISSION-001 — acceptance and internet prerequisites remain open (October 21)
+
+Implemented waiting-room admission, self-reported device checks and prepared pixelsbymiku.dev
+configuration; activated locally after additive operations.0004 and restore verification. One bounded
+synthetic desktop/phone visual pass confirms presentation only. Native doctor/PIN admission/removal,
+waiting direct API/file/media rejection, concurrent/expiry behavior, physical device/permission
+cleanup and actual two-party media are unverified. Public server/DNS/HTTPS status is still needed;
+no public profile was activated. Impact: internet appointments and native security/hardware
+acceptance cannot be claimed. Reproduce later with authorized synthetic native sessions and real
+external devices after secure hosting is configured. Initial missing-room navigation hit a CUA
+timeout; subsequent observation showed centered recovery, without a repeated browser run. No
+unrelated repair attempted. See call-admission-readiness-verification.md for actual evidence.
+
+## CALL-CONTINUITY-001 — reconnect stage fallback wording (October 21)
+
+Synthetic visual review: switch an admitted started room to reconnecting with no remote video.
+The new recovery banner/status correctly says reconnecting, but existing CallStage fallback says
+Join when you’re ready/check devices. It can confuse recovery with initial joining. Logged without
+repair under user preference. No media/native state loss was established.
+
+## CALL-CONTINUITY-002 — native/live continuity acceptance remains open
+
+Synthetic visual pass and local migration/service readiness do not verify authenticated clinical
+context/create/link, editing lease/version save, finalized records/release, aftercare direct API
+authorization/concurrency/expiry/generation, physical media, actual network quality/offline events
+or two-party reconnect/audio-only. Follow up using authorized synthetic native sessions and real
+devices, without claiming complete acceptance now. Domain hosting/DNS/HTTPS remains pending.
+See call-continuity-verification.md for exact scope/checkpoint/tool evidence.
+
+## CALL-CONTINUITY-003 — phone review title/close spacing
+
+At390×844, exact next-step review heading is close to the shared Dialog close icon. Title and
+share/keep-editing controls are visible, but spacing merits later refinement. Logged without repair.
+The separate activation-blocking drawerz120/dialogz50 coverage was repaired narrowly with drawerz40
+and one focused visual confirmation; no repeated broad pass.
+
+## STATION-ACTIONS-001 — authenticated native acceptance remains open (October 21)
+
+Doctor Station actions are locally active; one desktop/phone pass used synthetic presentation.
+Native clinical save/version/lease, photos/recent data, visit mutations, diagnostics/releases, payment
+review/record/retry, grant denials, device/source-session revocation and concurrency were not exercised.
+Reproduce later with authorized synthetic native doctor sessions and explicit allowed/denied scopes.
+No actual payment/clinical save made. Complete native/security/financial acceptance cannot be claimed.
+No tests/build/typecheck or second visual pass. See station-patient-actions-verification.md.
+
+## STATION-ACTIONS-002 — focused Graphify Station entry coverage warning
+
+51-file AST extraction reports existing station-entry.tsx syntax errors at line160 and only two
+symbols extracted there. Focused graph has306 nodes/791 edges; queries truncated. This is a graph
+parser limitation, not compiler diagnosis. Entry relationships may be incomplete; inspect source.
+No unrelated repair/compiler/test run. See station-patient-actions-verification.md.
+
+## SIGNIN-POLICY-001 — native authentication/security acceptance remains open (October 21)
+
+Three-mode clinic settings, session assurance, remembered-browser proof and live source/socket
+policy checks are locally active after two additive migrations. One synthetic desktop/phone pass
+and native anonymous login rendering establish presentation only. Native allowed/denied settings,
+strict/password/trusted login, Google-link continuity, multi-clinic/privileged policy, token rotation/
+fixed expiry/revocation/forget, source Station/session/socket changes and concurrency were not
+exercised. Reproduce later with authorized synthetic accounts/clinics and real browser cookies;
+never weaken a real clinic to obtain test evidence. No builds/tests/typecheck. Complete security
+acceptance cannot be claimed. See clinic-sign-in-policy-verification.md.
+
+## SIGNIN-POLICY-002 — Google helper copy assumes mandatory authenticator
+
+Native anonymous login visual pass shows the pre-existing Google helper: “Your authenticator is
+still required; the first verification connects your Google account.” Initial linking still requires
+MFA, but routine already-linked Google sign-in can follow a reduced clinic policy. This unconditional
+copy may confuse staff at password-only/remember clinics. Logged without repair under user preference.
+Reproduce at /login with Google configured. No credential/account/policy change was made.
+
+## SIGNIN-POLICY-003 — activation import-placement blocker (repaired)
+
+Ruff format reported unexpected indentation at Station middleware line83 after moving a newly added
+import; launcher showmigrations could not start. No migration had run. Restored the import to module
+scope, formatted that file and resumed launcher migration/startup. Both additive migrations applied
+and services are running. No automated tests/build/typecheck or repeated broad visual pass. Retain
+this failure as historical evidence; native assurance acceptance remains SIGNIN-POLICY-001.
+
+## SCHEDULE-REF-001 — page horizontal overflow at phone width (October 21)
+
+In the one synthetic390x844 Provider schedules visual pass, week table content remained in its341px
+scroll region, but document scrollWidth946 exceeded viewport390 and a page-level horizontal scrollbar
+was visible. Root cause not established. Impact: phone users may encounter sideways page movement
+outside the intended table scroller. Reproduce later on the active native schedules route using an
+authorized synthetic setup with multiple providers/windows/resources and date overrides. Presentation
+source retained privately at .medframe-runtime/schedule-reference-presentation.tsx. Logged without
+repair or a second visual pass, per user preference. No full responsive acceptance claim.
+
+## SCHEDULE-REF-002 — authenticated native schedule acceptance remains open
+
+One synthetic desktop/phone pass verifies presentation and local week/filter/search controls only.
+Actual branch switching, provider-prefilled weekly save, resource add/rename/enable/disable, native
+reservation/version/conflict/permission enforcement and date-override persistence were not exercised.
+Use authorized synthetic native accounts/records later. No original scheduling data mutated and no
+build/tests/typecheck ran. See schedule-reference-ui-verification.md for staged evidence, including
+the switch locator-name change and observed closed-day presentation without a native save.
+
+## SCHEDULE-REF-003 — JSX construction parse blocker (repaired)
+
+Prettier caught mismatched div/fragment closing tag at schedule-week.tsx line101 while constructing
+the responsive week toolbar. Replaced the matching closing tag before activation/visual review;
+formatting parsed and the actual component rendered in the one visual pass. No build/typecheck/test
+or repeated broad visual cycle. Preserve failure history; native acceptance/phone overflow remain
+SCHEDULE-REF-002/001.
+
+## SCHEDULE-PHOTO-001 — authenticated provider-photo acceptance remains open (October 21)
+
+Missing schedule photo plumbing is repaired and locally active: current provider photo metadata,
+shared private staff avatar, scoped image access and error fallback. One desktop/phone fallback
+presentation pass confirms missing/failed images become initials. No real photo/account was changed.
+Successful authenticated current-photo rendering, own/admin/reception/provider branch scope and
+foreign/inactive/archived-image denial were not exercised. Follow up using authorized synthetic staff
+portraits/accounts; no builds/tests/typecheck. See schedule-provider-photo-verification.md. Existing
+SCHEDULE-REF-001 overflow and other deferred issues remain untouched.
+
+## APPOINTMENT-LIVE-001 — native transport/photo and broader identity acceptance open (October 21)
+
+Repeated calendar invalidations and detail replacement are repaired in source and active locally.
+One synthetic desktop/phone visual pass shows deduplicated changed revisions, greeting suppression,
+retained selection/draft and circular placeholders. It does not establish real authenticated clinic
+WebSocket reconnects, successful private doctor/patient photo reads, access-denial cases or stale-detail
+mutation denial. Shared read-only identities and secondary selectors are formatted/source-reviewed,
+not each browser-accepted. Phone calendar block was not separately captured after the contained
+scroller moved to later hours. Use authorized synthetic accounts/photos for later native acceptance;
+no builds/tests/typecheck were run. See appointments-live-identity-verification.md for exact evidence,
+current runtime and preservation. Previous deferred issues remain untouched.
+
+## APPOINTMENT-EDIT-001 — authenticated edit/portal acceptance open (October 21)
+
+Native editor modal/current-date defaults/scoped self-reservation exclusion and dated early-room
+recovery are implemented/active. One synthetic visual pass covers the room notice and editor frame;
+it does not exercise the real authenticated BookingForm, save/versions/conflicts, wrong-org/booking
+exclusion denial, portal CTA auto-open/confirmation or online access regeneration. Follow up with
+existing authorized synthetic accounts; no builds/automated tests/typecheck were run. See
+appointment-edit-room-recovery-verification.md for exact evidence/runtime/preservation. The public
+CTA opens the existing patient-owned reschedule flow; it does not create a pending clinic request.
+
+## APPOINTMENT-EDIT-002 — phone editor fixture overflow (October 21, deferred)
+
+At390×844 the temporary editor-frame preview showed a horizontal scrollbar and clipped the right
+edge of its representative controls/footer. The preview's non-wrapping footer differs from native
+BookingForm's wrapping footer, so native reproduction/root cause remain unverified. Its DateInput
+used defaultValue and visibly said Choose a date; native form is controlled. Do not claim phone edit
+acceptance or silently repair/retest. Desktop dialog and responsive room notice/CTA were readable.
+Temporary route removed, private fixture retained. One visual pass only, no repair loop.
+
+## CALENDAR-DAY-001 — native day-modal acceptance open (October 21)
+
+Fixed-height month cells and scoped/paginated day-modal owner are implemented and locally active.
+One synthetic desktop/phone visual pass confirms seven equal176px cells, all five listed bookings,
+contained modal scrolling and fifth-row selection. It does not establish authenticated day queries,
+
+> 50cursor pagination, provider/status/access boundaries, live/error recovery or actual details/edit/
+> back integration. Follow up with authorized synthetic accounts. No build/tests/typecheck. See
+> calendar-day-modal-verification.md for exact tools/runtime/preservation and limits.
+
+## CALENDAR-DAY-002 — inherited singular count wording (October 21, deferred)
+
+Visual review showed “1 visits” on the compact month count button. Five-booking count/list and cell
+height are correct. Minor pre-existing singular wording was retained rather than starting another
+repair/visual round. No data/permission impact. Correct later when requested.
+
+## WAITING-REF-001 — stale development route/image activation blocker (October 21)
+
+Initial generated-image entry review reached RoomEntry, then the dev overlay reported deleted
+review-calendar-day-list/page.tsx (“Can't resolve './page.tsx'”). Web log also reported image404 for
+an existing new public PNG. A restarted dev server reused its stale persisted module/public graph.
+Necessary activation repair disables only Turbopack development filesystem caching using the installed
+Next16 documented flag; previous config preserved. Production cache/settings/data unchanged. Only
+launcher-owned frontend is restarted, with normal port guard. This records the initial failure;
+final confirmation/remaining gaps are in waiting-room-reference-verification.md.
+
+WAITING-REF-001 focused repair confirmation: dev-cache flag removes stale deleted-route overlay.
+Public image optimization still404'd; using the native static PNG import resolved it without changing
+host-routing/proxy policy. Desktop screenshot shows generated photo; phone shows compact form.
+Initial failures retained. Final preview route removed with frontend stopped, then native restart.
+See phase evidence for browser connection-error tab/cleanup limitation and exact staged verification.
+
+## WAITING-REF-002 — native appointment-entry acceptance remains open (October 21)
+
+Reference-guided RoomEntry with generated interior is implemented and locally activated. Focused
+synthetic desktop/phone confirmation establishes photo delivery, six-box input/enabling, dated opening
+notice, portal href and local inline feedback. It does not establish a real room/PIN join, doctor
+eligibility/denial, patient portal login/reschedule or camera/microphone/media/expiry behavior. Those
+native owners remain unchanged. No build/automated tests/typecheck. Existing call gaps remain deferred.
+See waiting-room-reference-verification.md and docs/assets/appointment-waiting-room.md.
+
+### FOCUSED-CALL-001 — Native room acceptance remains open (October 21)
+
+Full-viewport call UI was visually reviewed using synthetic presentation data at four requested sizes. Real hardware/two-person connection, room mutations/expiry, secured uploads and clinical navigation were not exercised under the user's visual-only preference. Existing native callbacks and hook owners remain unchanged; browser presentation alone cannot establish end-to-end acceptance. See focused-call-workspace-verification.md for actual evidence and the bounded locator interruption.
+
+### FOCUSED-CALL-002 — Local media supervisor timeout (October 21)
+
+During local activation, `./medframe status` showed media stopped. Existing `.medframe-runtime/media.log` ended in TimeoutError from `media_supervisor.py` enforce/allowed_rooms sync-to-async wait_for (two seconds). Impact: local live media service unavailable until restarted. Used one launcher backend start to restore the stopped process; root cause remains deferred and supervisor code was not changed. This is separate from UI acceptance and does not establish internet call readiness.
+
+### INTERACTIVE-CALL-001 - Shared-model browser coverage limits (October21)
+
+The native two-session review browser has GPU/WebGL disabled (`GL_VENDOR=Disabled`, `GL_RENDERER=Disabled`, context creation failure). Dental/anatomy safely use their fallback/list/map. Real room-channel evidence confirms presentation start/switch, doctor-enable notices, patient tooth/surface/body pointer delivery, doctor focus, local view-only, revocation, reconnect snapshot, stop and retained chat draft. Free3D rotation/zoom/highlights/camera interpolation remain unverified; no fake model/camera result or GPU bypass was used. Pending-lobby/forged/race/rate/reset/natural-expiry boundaries, media/files/internet/Skeleton-specific behavior and full keyboard/device coverage also remain unverified. See interactive-call-models-verification.md. No broad retest or deferred repair authorized by this evidence.
+
+### INTERACTIVE-CALL-002 - Dedicated presentation receive timeout repaired; default channel deferred
+
+Initial native presentation connections repeatedly closed with Redis read timeouts during the channel layer's blocking receive. Added a presentation-only channel alias with10s socket timeout and30s group renewal; focused native confirmation passed real cross-session selection/mode/reconnect events over several minutes. The original default RoomUpdates channel still logs Redis timeouts and patient UI may show “Connection lost” independently. It was not changed. Investigate separately when requested; source/log context and scope are in the phase evidence.
+
+### INTERACTIVE-CALL-003 - Nonblocking fallback/room refinements deferred
+
+During the same visual pass: patient header uses existing “Waiting for patient” copy; unselected dental fallback shows an empty tooth label; narrow fallback map/helper content can be partly covered/clipped by the collapsible video tile. Earlier waiting-room sticky Image fill/LCP warnings and Three.Clock deprecation also appear. Shared Parts, view-only/permission controls and anchored call controls remain available. Logged without an unrelated repair/polish loop.
+
+## INSTANT-ROOM-001 — bounded manual-room visual findings (October21,2026)
+
+- Reproduction: create an Instant appointment room with an eligible synthetic doctor; open its public PIN page, then enter the PIN into preflight.
+- Evidence: one native CUA pass shows the correct Instant/no scheduled window card and successful PIN admission despite past appointment start/end. The inherited footer still says “Room access ends with your appointment”, which can suggest a scheduled cutoff. Primary mode instructions and server policy use manual closure.
+- Existing patient preflight also displayed “Connection lost. Check your connection and try again.” after successful snapshot/PIN entry, matching the default RoomUpdates channel issue already deferred in INTERACTIVE-CALL-002. No new root cause or live-media acceptance claim.
+- Impact: misleading secondary copy and existing live-update feedback. Doctor management/conversion, responsive variants, media, midnight/cache renewal, concurrency/security boundaries and complete start/end browser flow remain unverified. Native fixture cleanup ended its synthetic room and disabled its review identities only.
+- Action: logged without fixing/retesting under the user's visual-only bounded verification preference. See `docs/operations/instant-room-verification.md`.
+
+## HEADER-BRANCH-001 — Dashboard subtitle lists all branches (October21,2026)
+
+One bounded native visual pass selected Second review branch in the header of a new synthetic two-branch clinic. Patients and Dashboard metrics correctly followed that branch (one synthetic patient), but the existing Dashboard subtitle still displayed both branch names. Impact: minor context ambiguity in read-only subtitle; no observed scope/authorization failure. Source owner: features/workspace/clinic-overview.tsx. Logged without fixing/retesting under the user's preference. Full responsive/assignment-save/unsaved guard/delegated security acceptance was not run. See docs/operations/header-branch-verification.md.
+
+## UI-CLEANUP-001 — Diagnostic status label needs focused confirmation (deferred)
+
+- During the October 22 native desktop visual pass, the first Diagnostics empty-state screenshot showed a narrow blank status trigger while the accessibility state listed “All statuses.”
+- Reproduction context: synthetic clinician/administrator clinic, Diagnostics, initial empty status filter; capture after first route navigation. Whether hydration timing alone caused the presentation was not established.
+- Impact: the selected filter may be visually unclear; no failed filter request or backend authorization issue was demonstrated.
+- Status: observed presentation logged; no separate diagnosis/repair/retest loop. See `docs/operations/ui-cleanup-verification.md` for coverage limits.
+
+## UI-CLEANUP-002 — Patient Stations loading title is overly general (deferred)
+
+- Opening Patient Stations briefly displayed “Opening Devices & Stations” in the shared loading container before its department/access content appeared.
+- Impact: location-specific loading copy does not distinguish department management from device management; the page did load.
+- Status: copy follow-up logged, without changing the shared loader in this phase.
+
+### UI-CLEANUP-001/002 — October 22 follow-up implementation
+
+The user requested further improvements. Shared FormSelect now maps empty domain choices to a stable internal Radix value and back; native synthetic Diagnostics review confirmed a visible All statuses label, selection of draft, and return to All statuses. UI-CLEANUP-001 is resolved for this checked caller; every select caller was not exhaustively verified. Route-specific loading copy now distinguishes Patient Stations/departments, device settings and Station workspaces, addressing UI-CLEANUP-002 in source without forced-loading browser acceptance. Historical observations remain above.
+
+## UI-REFINEMENT-001 — Written date label after native browser fill (deferred)
+
+- During the bounded visual pass, browser fill set invoice native date inputs to 2026-10-01 and 2026-10-21 in the DOM, but their text labels continued to show Choose a date.
+- Impact: edited-date propagation to React state/filter submission was not established; this could be a review-tool native date event limitation or an application issue. No claim of a working edited-date filter is made.
+- Custom report range defaults did render their expected written dates. No real financial mutation was performed.
+- Status: uncertainty logged; no event-handler repair or repeated picker/browser investigation. See ui-refinement-verification.md.
+
+## BRAND-ILLUSTRATIONS-001 — Narrow-phone introduction header (deferred)
+
+- October 22 bounded native visual pass: mount the existing WelcomeSlides with the new shared logo, at a 390px viewport. The inline brand and Skip introduction control produce slight horizontal overflow (document scrollWidth 386px versus body layout width 375px with reserved scrollbar).
+- Impact: a small horizontal scroll is present on the introduction at this checked width. The slide text, controls and contextual illustration remain available. The shared empty-state preview stacked normally on the same phone width.
+- Status: logged without responsive repair or repeated visual rounds, following the user's visual-only/log-findings preference. See brand-illustrations-verification.md.
+
+## BRAND-ILLUSTRATIONS-002 — Supplied vector-trace fidelity on dark surfaces (deferred)
+
+- October 22 native component preview: the supplied simplified doctor-profile.svg has transparent/reduced areas in clothing, documents and fine lines. On a dark sample surface these areas show the dark background and are more conspicuous than on the light application surfaces.
+- Impact: dark-mode illustration fidelity is limited by the supplied traced paths. This is decorative artwork; no clinical model or patient image changes. The exact uploaded WebP brand mark remains transparent and renders on light and dark samples.
+- Status: source-pack limitation recorded; no retracing, raster substitution or new background treatment attempted after the bounded visual pass.
+
+## BRAND-ILLUSTRATIONS-003 — Misplaced client directive (corrected)
+
+- User reported Next compilation failure in `features/platform/clinic-invitations.tsx`: the Brand import preceded the client directive, formatted as a parenthesized expression.
+- Corrected by restoring the standalone directive as the first statement and keeping imports below it. Source inspection found no other matching misplaced directives across web TS/TSX files.
+- Native `/clinic` navigation compiled and reached the expected unauthenticated login page with the normal sign-in form. No authenticated workflow or automated/build acceptance is claimed. Active locally via development refresh; unrelated visual findings 001/002 remain deferred.
+
+## WAITING-STATION-ART-001 — Focused graph extraction limitation (deferred)
+
+- October 22 focused Graphify AST extraction warns that `features/stations/station-entry.tsx` near line 161 may be partially extracted (two symbols); 43 nodes / 72 edges were exported for nine files.
+- The location is ordinary JSX copy containing Devices & Stations. Native desktop Station rendered without a compilation error. This is an extraction coverage limitation, not evidence of a product syntax failure.
+- No parser workaround or source rewrite attempted. See waiting-station-art-verification.md for actual graph truncation and bounded visual coverage.
+
+## Alternate API-port call address — October 22 activation follow-up
+
+- Source inspection during scene integration found local callSocket fallback still targeted port 8000 after Medframe's previous local API move to 8001. The unrelated project at 8000 remains untouched.
+- Corrected as a necessary activation-blocker repair: the launcher supplies NEXT_PUBLIC_CALL_WS_ORIGIN using its selected API port (or an explicit override); public origins derive same-origin wss. Frontend restart loads the selected value. This preserves the client protocol and room authorization.
+- No WebSocket/media handshake or actual call acceptance is claimed; broader call verification remains outside this artwork task.
+
+## STATION-REFERENCE-001 — Native review-tool interaction limits (deferred)
+
+- The bounded October 22 `/station` visual pass first attempted role=button for Advanced recovery. The native summary did not match that locator; selecting its visible text opened/closed the existing disclosure successfully. No product repair was needed.
+- Browser fill('') on the virtual OTP input removed the last character of the synthetic value rather than clearing it fully. This could be the tool's input-selection/event handling or the shared OTP interaction; clearing behavior was not established. No code was submitted and no input-handler change/retest was attempted.
+- Impact: no claim of complete automated/native-clear or end-to-end pairing acceptance. Basic lowercase entry/normalization and eight-character submit enablement were visible. See station-reference-ui-verification.md. Existing Graphify partial extraction remains documented in WAITING-STATION-ART-001, with the current location near line149.
+
+## TERMINAL-WORKFLOWS-001 — Stale reception generation after clearing (corrected activation blocker)
+
+- October22 native visual pass: enter a synthetic exact clinic ID, complete a walk-in, return Home, then Finish/change patient. A receive poll restarted with the previous setup generation while end/setup was pending, raised403 and discarded the fresh setup; entry became a recovery screen.
+- Necessary activation repair: useKiosk.reset clears setup immediately before end/setup, suspending reception polling until the new boundary is available. Older in-flight responses already fail the epoch guard. No backend scope relaxation was made.
+- Bounded confirmation: staff Change patient returned to an empty search; subsequent identifier-only email entry and public Finish returned to an empty ID field without recovery. No broad race/timeout/security test claim; no automated tests/builds run.
+
+## TERMINAL-WORKFLOWS-002 — Assisted menu redundancy and inherited loading copy (deferred)
+
+- In the staff-selected patient home, both the wrapper's Change patient button and the shared menu's Finish/change patient button are visible. Both use the same native clear operation. Impact is redundant controls, not a blocked workflow.
+- The inherited bill-loading message says “verified patient session” even for the new identifier-only method. The patient menu and journey source labels distinguish ID selection correctly; this transient text remains an inaccurate assurance label.
+- Logged during the single bounded visual pass, without an additional polish/fix loop. Staff-only financial denial, strict mode, inactivity timing, full booking/check-in and keyboard accessibility remain unverified; see terminal-workflows-verification.md.
+
+## APP-AUDIT-20261022 — Source-confirmed improvement register (no repairs)
+
+The October22 audit records A01–A10 in `docs/operations/2026-10-22-application-improvement-audit.md`: staff mode-switch wording calls global staff logout; identifier-only journey assurance copy; duplicate patient-change controls; policy-inaccurate Google helper; blanket form-retention claim; instant-room scheduled label; room-information identity placeholders missing; light-only waiting banner; installment dates bypass written DateInput; dormant operations socket fallback remains8000 while active API is8001.
+
+These are source-confirmed inconsistencies/risks, not ten reproduced runtime failures. Google helper wording was also observed in the bounded public-screen visual pass. The dormant operations hook is not mounted by current appointment/queue pages, so it is not evidence of active live-refresh regression. No fixes were attempted under the audit request. The six-phase roadmap owns follow-up; historical schedule/editor/media gaps retain their original evidence and need scoped reproduction. No build, automated tests, permission changes or messages occurred.
+
+## IMPROVEMENTS12-001 — Mobile staff-search submit lacks an accessible name (deferred)
+
+- In the bounded Phase1–2 phone review, staff search's Find submit button disappears from the named accessibility tree. Source confirms terminal-entry.tsx hides its Find span below sm while the Search icon is aria-hidden, leaving the button unnamed.
+- Impact: sighted touch users still have the visible search icon and keyboard users can submit the form, but screen-reader users lack a useful button name. This is a scoped accessibility issue, not a failed patient-search service.
+- Logged without repair or a repeated visual cycle under the user's preference. Add a persistent accessible name when this issue is explicitly scheduled. See improvements-phase-1-2-verification.md.
+
+## IMPROVEMENTS12-002 — Bounded visual tool and acceptance limits
+
+- Reading a textarea value attribute in the synthetic shared-feedback preview timed out; read-only DOM value inspection confirmed the edited draft remained. This was a tool/attribute mismatch, not evidence of lost application data.
+- A viewport override initially affected the other open preview tab; later single-tab tablet/phone captures and DOM dimensions establish the recorded responsive evidence. Do not infer layout failure from the first immediate resized screenshot.
+- Staff inactivity completed automatic sign-out before the intermediate warning was captured. No second idle cycle, Keep staff mode open, arbitrary delayed-network clear, backend outage, full role/strict/security, physical touch or broader accessibility acceptance is claimed. No product repair loop followed.
+
+## APP-AUDIT phase1–2 status — October22
+
+A01's staff-exit wording, A02's selected-session wording, A03's duplicate patient-switch control, A04's Google helper and A05's unconditional retention claim are corrected in source. Representative native/shared-component evidence is in improvements-phase-1-2-verification.md; historical authentication/security/media gaps are not closed by these UI changes. TERMINAL-WORKFLOWS-002's two specific redundancy/loading-copy findings are superseded by these corrections. A06–A10 remain assigned to later phases. New mobile search accessibility issue IMPROVEMENTS12-001 remains deferred.
+
+## IMPROVEMENTS3-001 — Historical navigation error not reproduced; acceptance stays open
+
+October22 Phase3 current-development native saved-editor→notes→Station home→walk-in→notes probe did not reproduce TABLET-IMPROVE-002. No component implicated and no speculative fix. Final profile→saved read-only draft→dental→notes→anatomy→patient succeeded. Final iframe did not own the earlier editing lease, so dirty exit/new save/reopen were not exercised. Do not close the historical production error or infer write acceptance.
+
+## IMPROVEMENTS3-002 — WebGL and remaining drawer review limits
+
+Review browser cannot create a WebGL context (GL disabled). Both native editors exposed existing fallbacks; eight sampled errors were WebGL/Canvas-boundary failures. No clean-console/GPU claim. Phone dental drawer close measured44×44px; settled Escape focus returned to its opener and parent selection remained. Anatomy close/navigation observed, pointer-close focus not conclusively sampled. Physical safe areas, GPU overlays and model rotation remain unverified. Log only; no further repair/retest loop. See improvements-phase-3-verification.md.
+
+## IMPROVEMENTS4-001 — Call connection warnings and transport acceptance remain open
+
+October22 Phase4 native synthetic waiting-room view shows Connection lost while remaining usable; API log inspection also finds Redis channel-layer TimeoutError entries. No causal diagnosis or service repair attempted. Doctor information opens; native Admit patient transitions the patient into the workspace and the doctor's local unsent draft remains. This is partial admission/UI evidence, not clean transport or media acceptance. Forced disconnected/reconnect/4403/deadline-extension races, request-count baselines and physical two-party media remain unverified. No extra review loop.
+
+The initial final-review doctor join correctly returns ROOM_OCCUPIED because the pre-edit probe already claimed that room in another credentialless browser. Synthetic native manager regeneration and private proof retention correct the fixture only; no product access bypass. All synthetic rooms later ended through native services, review session revoked and synthetic clinic/user/membership deactivated. See improvements-phase-4-verification.md.
+
+## IMPROVEMENTS4-002 — Remaining instant-room copy and unsampled views
+
+Bounded Phase4 review observes existing CallStage doctor copy telling an instant-room doctor to start at its scheduled time, and ConversationPanel footer saying access closes at appointment end. Corrected RoomInformation separately labels instant Created/manual closure. These remaining stage/footer phrases are logged without repair under the user's verification preference. Portal manual-refresh UI, dark/custom contrast and scheduled private information were not visually sampled; no full cross-surface acceptance claim.
+
+## SCHEDULE-REF-001 — October22 Phase4 targeted resolution
+
+Current native phone reproduction measured client375/scroll968. Hidden Provider actions text atx967 escaped its scroll boundary. Relative section/table containment and a narrow day/provider view now yield375/375 phone and1265/1265 desktop; date closure matches both day/week presentations. The demonstrated page overflow is resolved in this scope. Historical evidence retained; this does not certify every resource/name/theme combination.
+
+## IMPROVEMENTS5-001 — Billing return recovery; remaining acceptance deferred
+
+October22,2026, single Phase5 native visual pass. After successful Dashboard→issued-period invoices→overdue invoices, draft preview/recalculation/save, issued installment review and Patient services navigation, returning directly to native Billing through the localhost synthetic review launcher displayed “This record is unavailable or your access has changed.” The subsequent future-filter locator had no match; fresh DOM confirmed recovery. The sampled page console had no errors. Read-only inspection confirmed the synthetic clinic/user/membership active and ClinicalSession present, unrevoked and unexpired. Cause is undetermined; these facts do not establish a session or authorization defect.
+
+Impact: that later return could not continue the future-only and empty-branch visual checks. Earlier successful paths remain staged evidence, not whole-flow acceptance. No retry or speculative repair under the visual-only/no-repair-loop preference. Review access was subsequently revoked and the synthetic identities deactivated as planned. Native issue submission, new-case arithmetic, expanded service-payment context, refunds/credits, denial/revocation/cursor races, delayed preview responses and high-volume behavior also remain unverified. The candidate projection scans scoped issued invoices before pagination; no performance claim is made. See `improvements-phase-5-verification.md`.
+
+## IMPROVEMENTS6-001 — Setup/access acceptance boundary remains open
+
+October22–23,2026: one native desktop/phone visual pass confirmed unsaved staff access summaries, existing staff invitation copy feedback, native synthetic patient intake→pending/reference/status, clinic step save/pause, staff recipient access presentation, dark phone management and Escape focus return. No new product error was observed in the sampled paths. This entry records incomplete acceptance, not a reproduced defect or a clean security/delivery suite.
+
+Unexecuted: platform fresh clinic create/replacement response link and retries/lost response, actual email/SMS queue failure/delivery, verification expiry/replay, account activation/MFA/Google, saved staff permission/revocation races, accepted/declined/guardian/duplicate patient review, actual photo upload/scan/remove, complete keyboard/200% zoom, custom palettes/reduced-motion emulation and physical Station/internet media. The setup panel reports configuration only and links the existing reminder log; it does not provide per-invitation email delivery receipts. No original roles/grants/account/MFA changes or live messages occurred. See `improvements-phase-6-verification.md`; Phase5 Billing recovery remains separately deferred.
+
+## IMPROVEMENTS7-001 — Navigation reliability evidence and remaining boundary
+
+October23: current native Billing→invoice→Billing and settled future filter succeeded; empty-branch list and valid-proof paused setup resume rendered. IMPROVEMENTS5-001’s prior intermittent failure was not reproduced and is not causally closed. Source-confirmed transport-code misclassification, unbounded/parallel token GET and forced re-verification risks were addressed in this authorized phase, without identifying them as the proven historical cause. Initial cold-navigation and searchbox-vs-textbox locator waits were review-tool timing/role mismatches; settled DOM supplied the recorded evidence.
+
+Native component preview distinguishes CSRF403, real permission denial, expiry, rate limit and invalid response; it is not an injected backend security failure. Actual token concurrency/abort/timeout/rotation, queued refresh races, real denial/revocation-data clearing, expired/revoked/network-failed resume, malformed backend Billing response, portal/Station/sensitive-write and wider theme/keyboard/physical acceptance remain unverified under the user's no-tests preference. Final source review caught that precise403 classification must not retain protected data; a necessary narrow discardRejectedData guard preserves prior401/403/domain rejection clearing before completion. No second browser round or security-suite claim. See improvements-phase-7-verification.md.
+
+## IMPROVEMENTS12-001 — Phase7 accessible-name correction
+
+TerminalPatientSearch now gives its compact submit button aria-label Find patient. The phone native-component preview exposed that named enabled button after a synthetic query, and Tab focused it. The prior unnamed-control defect is corrected in this scope; real staff kiosk search/session/selection authorization was not re-exercised. Historical evidence remains above.
+
+### UI-WORKFLOW-001 — Dashboard context key blocked opening the page
+
+October 23, 2026. First bounded synthetic UI review of the approved refinement. Opening Dashboard rendered the shared interruption page. Browser console identified `ReferenceError: organizationId is not defined` in ClinicOverview: the new Today workspace key used the organization identifier without destructuring it from useWorkspace. This is a new activation blocker, repaired under standing local activation authorization by reading the existing context value. No permission/data change or build/test run. Focused visual confirmation is recorded in the batch evidence; do not infer broader acceptance from this repair.
+
+### UI-WORKFLOW-002 — Dashboard section separation follow-up
+
+October 23, 2026. Bounded synthetic desktop review, 1280×900, `.medframe-runtime/ui-workflow-dashboard.jpg`. The Today workspace ends directly against the following comparison-period card. Both sections work, but additional separation would improve visual grouping. Cosmetic follow-up; left unchanged under the user's log-without-repair preference. No further polish loop.
+
+### UI-WORKFLOW-003 — Mobile schedule selector restores focus to the trigger
+
+October 23, 2026. Bounded synthetic phone review, 390×844. Choose Date overrides from Schedule section. The target heading scrolls to approximately117px below the viewport top, with375px document client/scroll widths and no horizontal overflow. However, a read-only DOM observation shows the heading is not the focused element after selection; the select's close behavior restores focus. The section remains reachable and visible, but keyboard continuation should be reviewed. Non-blocking follow-up left unchanged; this is not full keyboard acceptance.
+
+### SIGNIN-UI-001 — Google SDK rejects configured localhost origin
+
+October 23, 2026. Bounded headerless-login visual review of `/login` and `/portal/login`. The official Google button rendered, but the browser console twice logged `[GSI_LOGGER]: The given origin is not allowed for the given client ID.` No Google account was selected and no login was submitted; Google authentication success is unverified. Product changes in this phase affect layout/default explanatory copy only, with Google identity configuration and backend flows unchanged. Impact: Google sign-in may be unavailable on the reviewed origin until its provider configuration is corrected. OAuth setup was not changed under the user's log-without-repair preference. See headerless-login-verification.md; unrelated findings remain open.
+
+
+### SETTINGS-GROUPS-001 — visual review limits (October 23, 2026)
+
+One browser locator timed out after Keep editing while reading the Display name field. A subsequent native accessibility snapshot confirms the unsaved value remained, Cancel restored the saved name, and Appearance navigation committed. No product exception was established. Profile upload initially used patient wording; the new account context now uses the profile label. The first desktop photo column was too narrow for the shared upload control; the account composition now stacks until xl, then uses two balanced columns. No unrelated page repair or automated test run. Remaining acceptance: role-by-role denials, conflict/race cases, scan-failure recovery and browser-history traversal are not exercised in this bounded visual pass.
+
+
+### DASHBOARD-REFERENCE-001 — bounded acceptance and deferred refinements (October 23, 2026)
+
+Native synthetic browser evidence confirms eight distinct explicitly linked daily visit representations, Waiting=1, In consultation=1, Completed=2 and Needs attention=4; older notes are not daily visits. Waiting filter, complete attention list, native appointment dialog/current-patient context, Analytics and responsive bounds are observed. No automated tests/build/typecheck/lint were run. Distinct-role denial cases, multitenant concurrency/revocation, multi-page datasets above eight rows, nonzero payment/refund cases, diagnostic-result mutations and CSV contents remain unverified. Native billing/report calculations are reused, not independently revalidated.
+
+Observed refresh/filter loading temporarily replaces the daily body and restores the selected filter; keyboard focus can return to the main region. The existing shared header is crowded at the 1024px breakpoint. These are deferred UX refinements, not permission or data failures, and were not repaired in this phase. Final dental-chart shortcut uses the existing patient dental URL and provider specialty; direct browser navigation of that shortcut is unexecuted.
+
+### MODULE-AUDIT-20261023 — Module improvement register, no implementation
+
+See `docs/operations/2026-10-23-module-improvement-audit.md` for the 28-module/63-route source audit, nine concrete findings M01–M09, proposed improvements and six connected phases. Source confirms refresh-result replacement (M01; also historically observed), incomplete portrait propagation (M02), per-keystroke service requests (M03), component-only list/tab state (M04), separate SMSGate OTP/Twilio reminder boundaries (M05), repeated unavailable-logo polling (M06), duplicate Dashboard branch switch (M07), record-feed-focused portal home (M08) and concentrated encounter-editor ownership (M09). These vary between inconsistencies, operational risks and improvement opportunities; they are not nine reproduced runtime failures. No repair or live check occurred, and existing historical acceptance limits remain open. Original app/data/access configuration and the already-stopped runtime were unchanged.
+
+### MODULE-IMPROVE12-001 — Bounded activation evidence and remaining acceptance
+
+October23 module-audit Phases1–2 are implemented together. Native synthetic review confirms retained Dashboard content and (after the single correction batch) retained Refresh focus; search clear, sort/tab URL state, private portrait transport, saved-draft resume/autosave/completion/readback, scan-state presentation, follow-up due context and diagnostic progress. Existing browser WebGL support is disabled and four renderer/context errors were handled by the existing 2D fallback; 3D/anatomy interaction is unverified, not repaired. The completed-editor screenshot retains its current scroll position beneath the sticky toolbar; no broad geometry/polish pass is claimed. Role/tenant/revocation races, multi-page/Back permutations, scan execution, finalization/amendment, result-release and physical Station acceptance remain unexercised. See `module-improvements-phases-1-2-verification.md` for actual evidence, tool limits and preservation. No automated tests/build/lint/typecheck were run; unrelated deferred findings remain unchanged.
+
+## MODULE-IMPROVE34-001 — Phase 3/4 acceptance limits (October 23, 2026)
+
+Status: open acceptance work, not a newly reproduced production failure. One bounded native visual pass establishes reservation-impact warning, calendar/queue URL continuity, provider setup, same-visit loaded-stage presentation, native day payment/refund totals, local cash count, source-payment refund traceability and exact catalog installment cents. Phone cashier/service modal bounds were checked. No application console errors in the bounded final read.
+
+Remaining reproduction/acceptance work: role/tenant/revocation races; concurrent schedule-save booking conflicts; multi-currency, refund-only/backdated days; complete dated installment issue/credit/refund cycle and portal confirmation; physical Station pairing/expiry/revocation, editing transfer and offline/idle expiry; many-page cursor traversal. Use synthetic fixtures and the respective native permission/mutation owner. Device/terminal/lease presentation changes are implemented but their complete physical flows were not visually exercised. No repeated broad checks or unrelated repairs were attempted. Programmatic native-date fill and one post-viewport stale locator required supported native UI navigation; these tool limitations were resolved and are not classified as application bugs. Evidence: `docs/operations/module-improvements-phases-3-4-verification.md` and private `.medframe-runtime/module-improvements34` screenshots. No builds or automated tests, per user preference.
+## MODULE-IMPROVE56-001 — Native two-party room continuity remained blocked
+
+October23,2026. In the bounded local native review, isolated doctor/patient credentialless contexts opened the same synthetic scheduled room. Doctor Admit patient saved successfully and doctor information showed Patient admitted/Access granted. The patient context remained Waiting for your doctor to admit you with a connection-lost notice. A doctor chat submission retained its unsent draft with Connection lost. Check your connection and try again. Doctor connection facts separately showed media idle and shared model ready, with no model being presented. Screenshots: private `module-improvements56/call-connection-facts.png` and `call-patient-waiting.png`.
+
+Impact: successful two-party admission propagation/chat/media continuity is not established. Root cause is unconfirmed; credentialless review/local transport may matter. Existing CALL findings are not causally closed or asserted identical. No real camera/mic permission was requested and no media call joined. Per the user's bounded visual-only/log-without-repair preference, no transport fix or repeated call loop followed. Synthetic access was subsequently revoked and room ended. See `module-improvements-phases-5-6-verification.md`.
+
+## MODULE-IMPROVE56-002 — Remaining Phase5/6 acceptance boundaries
+
+October23,2026. No build/automated test/lint/typecheck was run. Browser WebGL is disabled; first Dental mount used existing handled2D recovery and produced four renderer/context console errors. Notes-first had zero canvas elements, and native saved note version2 survived chart return, but GPU/3D/anatomy performance is unverified. Read-only browser scope did not expose performance timing, so no bytes/memory/load-time claim. Logo polling cap/cancellation was source-reviewed, without a timed scan flow. Other open acceptance includes portal guardian/multicurrency/revocation and many-page communications cases, real delivery/retry, publication/images/public queue, security denials/races, actual backup restore, physical Stations and internet/reconnect/expiry/media. These are explicit limits, not all newly reproduced product defects. No backup was deleted, website published or external message sent.

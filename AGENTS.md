@@ -1,4 +1,25 @@
+## Latest verification and disk-space preference
+
+The user requested no builds or automated tests on October 20, 2026; use visual checks only for subsequent work. Inactive generated Next.js build directories were removed at the user's request to reclaim disk space. Preserve the currently serving build; historical build-artifact rollback references may no longer exist. Source checkpoints, database backups, and private storage remain preserved.
+
 # Medframe working instructions
+
+The October20 patient-first registration implementation is active locally in the current
+working tree with `.next-local-dev` and additive portal.0004. Email verification precedes
+minimal self/guardian intake and explicit clinic review; mobile verification is deferred
+by user choice until SMS is configured. Patients → Registration requests manages reusable
+branch links and review. Acceptance delegates atomically to native patient creation or
+authorized matching and existing portal invitation/account/MFA. Submission grants no
+patient access. Local native email/code/submission/pending-resume browser evidence and
+responsive reviewer-detail presentation are recorded in
+`docs/operations/patient-self-registration-verification.md`; staff review/link management,
+denial/race/expiry/guardian and account-activation end-to-end acceptance remain open as
+PATIENT-REGISTRATION-002. Necessary proxy allowlist repair PATIENT-REGISTRATION-001 is
+confirmed. No build/automated tests were run under the user's visual-only preference.
+Launcher checkpoint/isolated restore verified154 original tables before migration;
+original credentials/MFA/roles/grants remain unchanged. Synthetic visual entry is disabled;
+no real clinic is auto-enabled. Native/no-subagent, bounded checks and local activation
+continue. Existing unrelated working-tree changes/deferred findings remain untouched.
 
 The user-approved Batch8 local expansion is active on `codex/django-expansion-batch-8`, implementation `bee1592`, artifact `.next-batch8`, original `medframe_django`. Native analytics separates scoped operations/accessible clinical workload/current financial projections; versioned catalog-linked specialty settings/templates add optional Pediatrics/Dermatology/Orthopedics documentation starters; reviewed local clinical JSON exports bind exact immutable revisions/sections and reauthorize after preview. This is native Medframe JSON, not FHIR/HL7/DICOM; no import/external connector or AI integration. Thirty-three distinct backend cases have staged passing evidence (29initial,4annotation-repair confirmations); production build/TypeScript/scoped checks/drift pass. Two allowed browser rounds capture responsive analytics but stop on invalid attachment response-text assertions; specialty/export/reader UI acceptance remains open as B8-002, with no third round or full browser claim. Fresh encrypted checkpoint/isolated restore and fingerprints preserve all6,381 original rows/152 original tables and51objects; only additive providers.0002 is applied, now153tables. No original clinic/template/credential/MFA/grant changes or review import; new model metadata permissions are unassigned. Prior `.next-service-context` and the user's unchanged uncommitted width snippet remain intact. See `docs/operations/django-batch-8-verification.md` for actual Graphify/Jev usage, evidence, runtime and rollback. Native execution, bounded checks and standing local activation continue; unrelated deferred findings remain deferred.
 
@@ -150,3 +171,170 @@ credential/MFA/grant changes. User main layout remains byte-identical and unstag
 See `docs/operations/patient-actions-hub-verification.md` for exact tool usage,
 runtime, evidence/preservation and rollback. Native execution and standing local
 activation continue; no live messaging/money movement or AI integration.
+
+The October20 patient registration SMSGate/Google extension is active in native dev `.next-local-dev` with additive portal.0005. Google Web Client ID and SMSGate local credentials remain unconfigured, so both public options are truthfully disabled; email remains available. SMSGate is registration OTP only, private-IP local mode, development HTTP, bounded retry without blind uncertain resend. Google contact proof preserves clinic review; approved new users may create an unusable-password Google identity before native MFA for resumability, while existing accounts never link by email matching alone. No real SMS/Google operation, credential/MFA/grant change, build or automated suite was performed. One desktop/phone visual batch confirms unconfigured states; synthetic link disabled. Launcher checkpoint/isolated restore verified157original tables before migration. See docs/operations/smsgate-google-registration-verification.md and setup guide; SMS-GOOGLE-001 records live acceptance gaps. Native/no-subagent, visual-only verification and standing local activation continue.
+
+October20 contact-formatting refinement uses shared PhoneInput across registration/onboarding/patient/emergency/guardian/Station/kiosk/communications/website contact forms: separate default PH +63, digit filtering, PH national spacing and canonical international form values; email Input normalization and PH four-digit clinic postal codes. No backend/data/credential/migration change. Source preserved privately in .medframe-runtime/contact-inputs-before-20261020-201236. One desktop/phone synthetic component preview establishes formatting/no overflow; hydration recovery warning and unverified real saving/caret/autofill/legacy paths are CONTACT-INPUT-001. Preview removed; frontend activated with root launcher in .next-local-dev. No build/automated tests or live SMS/Google operation. Actual focused Graphify15files/195nodes/374edges and sanitized Jev usage are documented in docs/operations/contact-input-formatting-verification.md. Native/no-subagent, visual-only and standing local activation continue.
+
+October20 patient-photo refinement removes clinical-image gallery/manual selection from PatientPhotoDialog. One circular upload preview automatically selects the newly uploaded exact document version after a clean scan through unchanged versioned portrait endpoint. Fixed profile label is hidden; remove/cancel/status/errors remain. Previous portrait is preserved on failure; no files/data/backend/schema/credentials changed by implementation. Source preserved under .medframe-runtime/patient-photo-before-20261020-202417. One browser attempt redirected to login, so actual upload/scan/auto-select/remove/responsive acceptance remains PHOTO-AUTO-001. No build/automated tests or auth bypass. Root launcher frontend activation uses .next-local-dev. See docs/operations/patient-photo-auto-profile-verification.md for actual Graphify/Jev and evidence limits. Native/no-subagent, visual-only verification and standing local activation continue.
+
+October20 password-recovery UI is active via native Next dev .next-local-dev (PID3429769), shared staff/patient RecoveryRequestForm with generic acknowledgement, entered-email/change,60s resend cooldown, duplicate-submit guard and existing server-throttle errors. Local-only Mailpit inbox link explains captured email and native15min expiry/latest-link semantics. Backend/token/auth/MFA unchanged; source preserved under .medframe-runtime/password-recovery-before-20261020-210856. One desktop/phone visual batch confirms generic request/resend/correction/cooldown and no phone overflow using a nonexistent synthetic address. No real reset email/password change, build or automated tests. Actual delivery/reset completion/production/throttle boundaries remain unverified. Actual Graphify10files/108nodes/213edges and sanitized Jev usage are recorded in docs/operations/password-recovery-ui-verification.md. Native/no-subagent/visual-only and standing local activation continue.
+
+October20 user explicitly amended recovery to notify unknown email accounts. Shared native recovery now raises ACCOUNT_NOT_FOUND/404 for no active matching User, shown inline in both staff/patient forms; successful request wording no longer says if-account-matches. This supersedes older generic acknowledgement presentation requirements, with existing throttles/token/MFA/matching/delivery unchanged. Native backend reloaded API3517081/worker3517293/scheduler3517294; Next dev unchanged. One actual staff/patient visual pass confirms missing-account errors with synthetic nonexistent addresses. No real account changes, build or automated tests. Focus handoff/screen-reader and matching-account delivery remain unverified. Preservation and actual Graphify/Jev use are appended in docs/operations/password-recovery-ui-verification.md.
+
+October20 reason/consultation UI refinement adds shared ReasonField with context-specific choices and Other, no preselection, retaining native string/form/required/audit owners across16controls. Existing StartForm is extracted and reused in a routed Dialog; clinic @modal parallel/intercept slot preserves underlying pages, direct-link fallback, patient/provider/clinical summary/draft/idempotency/exact queue linking. No backend/migration/data/auth change. Source preserved in .medframe-runtime/reason-consultation-before-20261020-220958. One desktop/phone shared-component visual pass confirms suggestions/custom reason/no overflow; real consultation route redirects to login, leaving authenticated interception/creation/queue/persistence acceptance open (REASON-POPUP-001). Preview removed. Graphify24files/356nodes/827edges completed via sequential fallback after helper main-guard warning; actual sanitized Jev and limits are docs/operations/reason-consultation-popup-verification.md. No build/automated tests or agents. Native frontend activation .next-local-dev, original backend retained; older findings deferred.
+
+October20 navigation recovery supersedes the parallel/intercepting popup design: user reported global page errors. Removed clinic @modal slot and restored original ClinicLayout children contract; consultation popup remains at /clinic/consultations/new with reason choices/native owners. Pre-repair source preserved in .medframe-runtime/navigation-repair-before-20261020-222752, old dev cache moved intact to .medframe-runtime/frontend-cache-before-navigation-repair-20261020-222754. Fresh .next-local-dev frontend PID3659039 is active via root launcher; backend/data/auth unchanged. Public sign-in/not-found/Open home and anonymous clinic redirect pass native visual checks; idle repeated compilation stopped in observed runtime. Exact signed-in symptom/recovery remains unverified, needing existing user-tab hard refresh/confirmation. No build/automated tests/subagents. See docs/operations/clinic-navigation-recovery-verification.md for actual Graphify/Jev and limits. Do not claim underlying-page interception/back-forward behavior or reintroduce the slot without further requested work.
+
+October21 native Staff & Access is implemented in .next-local-dev. Settings/staff adds branch-scoped directory, doctor specialties, versioned role/module/billing management, private scanned circular portraits and recipient-bound invitation/profile/native MFA (optional configured Google) onboarding. User explicitly requires approved Stations only for Station-only membership; native membership policy and navigation enforce that, preserving patient grants and device functions. Absent profile rows retain all original role behavior; global roles/credentials/MFA/grants were not rewritten. Additive organizations.0002/0003 applied after launcher encrypted checkpoint/isolated restore of157original tables; three staff tables added. No real staff invitation/account/photo/role mutation in verification. One synthetic presentation desktop/phone batch confirms directory/control layout/search; native invalid-invite and anonymous redirect observed. Authenticated save/invite/OTP/Google/MFA/photo/scope/negative/concurrent acceptance remains STAFF-ACCESS-001, with no build/automated tests or broad follow-up pass. Preview removed; source checkpoint and actual Graphify27files/239nodes/574edges/Jev usage are docs/operations/staff-access-verification.md. Exact user clinic-shell width snippet is preserved. Native/no-agent, visual-only and standing local activation continue; unrelated prior findings remain deferred.
+
+October21 provider availability/calendar is active in the launcher-owned .next-local-dev runtime: day/week/agenda booking views, configured working hours, scoped current in-service context, preserved booking identity, native other-patient consultation setup and read-only weekly schedules for operations readers. No schema/identity/grant changes. Source copies are private in .medframe-runtime/calendar-before-20261021-005217. One synthetic desktop/phone presentation pass confirms basic calendar layout/selection; CALENDAR-001 tracks clipped secondary status text and all authenticated workflow acceptance remains open. No builds or automated tests. See docs/operations/provider-calendar-verification.md for actual Graphify/Jev use and runtime. Do not silently repair/retest this or unrelated deferred findings.
+
+October21 online appointment rooms are implemented locally with operations.0003 (four additive room tables), .next-local-dev and root launcher-owned media supervision. Existing appointments remain in-person; explicit online booking/detail management supports saved PIN/link, native assigned/eligible doctor claims, realtime chat, scan-gated private files, extension and end controls. Generated media credentials/binary are private under .medframe-runtime/media; raw JWTs remain upstream of the cookie-authorized gateway. Media is loopback-only: no same-Wi-Fi/internet claim. Encrypted checkpoint/isolated restore verified160 original tables before migration; no credentials/MFA/grants/role mutation or synthetic clinical import. One synthetic presentation round/native missing-room recovery only; no builds/tests or authenticated two-party/security acceptance. CALL-001/002/003 retain acceptance gaps, dependency advisory report and shutdown cleanup warnings without repair. See docs/operations/online-appointment-rooms-verification.md for actual source/runtime/Graphify/Jev evidence. Native/no-agent, bounded visual-only work and standing local activation continue.
+
+The October21 weekly/month scheduling refinement is locally active on the existing development
+runtime (.next-local-dev, original medframe_django), with no new migration/identity change. Native
+weekly_schedule batches reuse schedule scope/versions/reservation checks/idempotency atomically;
+per-date overrides retain their owner. Month uses a bounded42day scoped query with full daily
+counts and three previews per day; Day/Week/Agenda retain native cursor paging. Shared duration
+presets/Other and written date input/labels are implemented. Prettier/Ruff format and one synthetic
+CUA desktop/phone pass were performed; no build/typecheck/automated tests. Actual native schedules
+entry required sign-in, so authenticated save/month-query acceptance remains CALENDAR-002. See
+docs/operations/scheduling-refinement-verification.md for exact Graphify/Jev calls, scope, runtime,
+backup and limits. Do not claim complete acceptance, repair unrelated deferred issues, or restore
+a clone over original data. Native execution and standing local activation remain in force.
+
+The October 21 online appointment room refinement is active through the existing .next-local-dev
+frontend, original medframe_django and unchanged backend. Larger named video stage, explicit media
+phases, device settings, collapsible draft-preserving conversation, Enter/Shift+Enter chat, scan-state
+file context and written clinic-time dates reuse native room owners. No recording/AI/new vendor,
+migration, identity/grant change or external deployment. Actual Graphify/Jev use, private source
+backup and one synthetic desktop/phone visual pass are recorded in
+docs/operations/call-room-refinement-verification.md. No build/typecheck/automated tests. File-tab
+retained scroll is deferred as CALL-REFINE-001; live hardware/media/native delivery/expiry acceptance
+remains CALL-REFINE-002/CALL-001. Loopback media is still local-only. Preserve unrelated changes,
+serving artifacts and existing deferred findings; native/no-subagent/local activation continues.
+
+October21 call admission/device readiness is active locally in launcher-owned .next-local-dev and
+original medframe_django after additive operations.0004. Existing authorized participant rows are
+preserved; new patients wait for native doctor admission before conversation/files/media. Local
+microphone meter/speaker tone and self-reported boolean readiness are implemented. Exact room-route
+Permissions-Policy permits same-origin device prompts. pixelsbymiku.dev configuration is prepared
+only; no DNS/cert/server/public deployment or actual internet call. Encrypted checkpoint/isolated
+restore verified164 original tables before migration; no original identity/grant reset or fixture
+import. One synthetic desktop/phone presentation pass and native missing-room recovery; no build,
+typecheck or automated tests. CALL-ADMISSION-001 retains native/hardware/public acceptance gaps. See
+docs/operations/call-admission-readiness-verification.md for actual Graphify/Jev, runtime and limits.
+Keep unrelated deferred findings unchanged, native execution and visual-only bounded verification.
+
+October21 online appointment continuity items4–6 are locally active in .next-local-dev after additive
+operations.0005: SDK quality/reconnect feedback, explicit outgoing-camera audio-only, mounted doctor
+clinical panel reusing native editor/history/leases/releases with bound encounter orchestration,
+and reviewed authored next-step snapshots/end presentation. End shows only instructions already
+delivered while admitted/live; no expired guest API, automatic release/booking or clinical
+finalization. Public hosting remains unconfigured. Launcher encrypted checkpoint/isolated restore
+verified164 original tables before the nullable FK/new aftercare table; no identity/grant reset or
+fixture import. One synthetic desktop/phone visual pass and native missing-room recovery, with one
+focused drawer-layer activation repair confirmation. No build/typecheck/tests. CALL-CONTINUITY-001/
+002/003 retain wording/native-live acceptance/phone title spacing findings. See
+docs/operations/call-continuity-verification.md for exact preservation, runtime and Graphify/Jev
+evidence. Keep native/no-agent, visual-only and unrelated deferred findings unchanged.
+
+October21 doctor Station patient actions are locally active in launcher .next-local-dev and original
+medframe_django. Profile/consultation share curated native actions, identity/safety overview, recent
+patients and guarded switching. Payment recording requires existing doctor/account/device/patient
+scope; refunds/admin/access changes/service mutations excluded. No original identity/MFA/grant,
+schema or device-function changes. Encrypted checkpoint/isolated restore verified165 tables; no
+post-traffic fingerprints claimed. Prettier/Ruff format and one synthetic desktop/phone pass only;
+no build/tests/typecheck. Native acceptance STATION-ACTIONS-001, graph parser warning STATION-ACTIONS-002
+remain open. Temporary review route removed. See docs/operations/station-patient-actions-verification.md
+for exact scope/runtime/Graphify/Jev. Preserve native/no-agent, visual-only and unrelated findings.
+
+October21 clinic sign-in policy is locally active in launcher .next-local-dev/original medframe_django.
+Settings -> Security has user-approved Strict, Password only, Remember for30 days. Existing clinics
+remain Strict until an authorized password-confirmed change. Strongest eligible clinic mode wins;
+platform/Django privileged accounts stay Strict. Reduced staff sessions have separate assurance and
+live policy/epoch/trust checks including Station sources/socket authority. Initial activation/patient
+proof/Google linking retain MFA. No original account/MFA/grant/device-function changes or real policy
+saves during review. Launcher encrypted checkpoint/isolated restore verified165 original tables,
+then additive accounts.0006 and organizations.0004 applied. No post-traffic fingerprint claim. One
+synthetic desktop/phone pass plus native anonymous login; no builds/tests/typecheck. Native security
+acceptance SIGNIN-POLICY-001 and Google copy SIGNIN-POLICY-002 remain open. Narrow import-placement
+activation blocker was repaired (003); temporary route removed. See docs/operations/clinic-sign-in-policy-verification.md
+for actual runtime/Graphify/Jev/preservation/limits. Native/no-agent/visual-only and existing unrelated
+changes/findings remain preserved.
+
+October21 reference-guided Provider schedules is locally active in launcher .next-local-dev/original
+medframe_django. Existing shell and native scheduling owners remain; header/section navigation,
+compact week table/provider menus, saved window rows, resource search/add/rename/status and date
+panels follow the supplied image. No backend/schema/account/MFA/grant or original scheduling writes.
+Fresh encrypted checkpoint/isolated restore verified167 tables; no migration/post-traffic fingerprint
+claim. One synthetic desktop/phone pass, Prettier only; no builds/tests/typecheck. Phone page overflow
+SCHEDULE-REF-001 and native acceptance002 remain open; JSX construction blocker003 repaired before
+activation. Temporary route removed. See docs/operations/schedule-reference-ui-verification.md for
+exact Graphify/Jev/preservation/runtime/evidence. Preserve unrelated changes/deferred findings,
+native/no-agent and bounded visual-only workflow.
+
+October21 schedule-provider photo plumbing is repaired/active in launcher .next-local-dev/original DB.
+Setup includes current StaffProfile photo ID; weekly/saved rows reuse StaffAvatar and failed images
+fall back to initials. Added private image-read path uses native operations/provider scope and only
+current active portraits; original roles/grants/images are unchanged. No migration. Fresh encrypted
+checkpoint/isolated restore verified167 tables. Format and one desktop/phone fallback visual pass only;
+no build/tests/typecheck. Authenticated image/scope acceptance stays SCHEDULE-PHOTO-001; previous phone
+overflow remains deferred. Temporary route removed. See docs/operations/schedule-provider-photo-verification.md
+for actual preservation/runtime/Graphify/Jev and limits. Native/no-agent/visual-only continue.
+
+October21 appointment live/identity repair is active locally in launcher .next-local-dev/original DB.
+Meaningful revision invalidation replaces greeting/close refresh storms; calendars poll only offline,
+queue/portal callers retain estimate polling. Detail content remains mounted with stale actions blocked.
+Shared person fields/calendar/secondary surfaces show circular private photos or initials; staff API
+metadata is batched and patient portraits stay clinical-scope filtered. No schema/roles/credentials/
+original images changed. Fresh encrypted checkpoint/isolated restore verified167tables. One synthetic
+visual pass only, no builds/tests/typecheck; real transport/photo and wider acceptance remain
+APPOINTMENT-LIVE-001. Temporary route removed. See docs/operations/appointments-live-identity-verification.md
+for actual Graphify/Jev, source preservation, runtime and gaps. Native/no-agent/visual-only continue.
+
+October21 appointment-edit/room recovery is active in launcher .next-local-dev/original DB. Editing
+uses a modal and current booking date/time; native availability excludes only the authorized same
+booking while retaining conflicts. Dated early-room copy/clinic timezone and Request reschedule
+portal deep link are implemented; matching is patient-authorized, no public edit grant or new pending
+request subsystem. No migration/credential/grant change. Fresh checkpoint/isolated restore verified167
+tables. One synthetic visual pass only, no builds/tests/typecheck; native acceptance and phone fixture
+overflow remain APPOINTMENT-EDIT-001/002. Temporary route removed. See
+appointment-edit-room-recovery-verification.md for actual tools/runtime/preservation/limits.
+
+October21 compact month/day modal is active in launcher .next-local-dev/original DB. Month cells fixed
+at176px; one patient/doctor preview plus exact counts opens a scoped scrollable day list with native
+pagination, details/back and existing edit owner. No backend/schema/identity changes. Fresh checkpoint/
+isolated restore verified167tables. One synthetic desktop/phone visual pass only, no builds/tests/
+typecheck; native acceptance CALENDAR-DAY-001 and minor singular wording002 remain deferred. Temporary
+route removed. See docs/operations/calendar-day-modal-verification.md for actual tools/runtime/limits.
+
+October21 reference-guided RoomEntry is implemented with generated public waiting-nook image and one
+schedule/PIN/reschedule card; phone hides decorative hero. Native admission/join/time/portal/doctor/
+media owners unchanged, no schema/identity changes. Fresh encrypted checkpoint/isolated restore
+verified167tables. Necessary local activation repairs disable only Turbopack dev filesystem caching
+(stale removed preview route) and use native static image import (public-image optimizer404) without
+proxy changes. Focused synthetic desktop/phone continuation confirms rendering/PIN/inline feedback;
+no builds/tests/typecheck, real native acceptance WAITING-REF-002 remains open. Preview source removed,
+working tab closed/viewport reset; initial error tab close blocked by browser URL policy. See
+waiting-room-reference-verification.md for exact tools/provenance/runtime/limits. Native/no-agent and
+visual-only continue.
+
+The October21 focused online appointment room UI is implemented in the current tree with `.next-local-dev`. Full-viewport video, anchored controls, native Tabs in a mounted nonmodal conversation dock, settings Dialog, appointment/admission Sheet and time Popover replace the tall stacked room. Existing call/media/conversation/backend owners are unchanged; PIN entry/patient preflight remain separate. One synthetic native-renderer visual pass plus focused confirmation covered four requested sizes; no builds/tests/typechecks/lint. FOCUSED-CALL-001 records unverified native media/mutations/uploads/clinical flows. Local activation also found an existing media-supervisor TimeoutError, restarted through launcher with cause deferred as FOCUSED-CALL-002. See docs/operations/focused-call-workspace-verification.md for exact Graphify/Jev use and evidence. No public deployment or original identity/data changes.
+
+The October21 interactive appointment-model phase is implemented in the current tree with `.next-local-dev`, original Django/Redis and no migration. Present model shares generic permanent Dental/Body/Skeleton, with doctor-owned camera adapters, separate patient pointers, default view-only, optional selection and notices. No private chart findings/notes/history or clinician fetch provider is shared. A dedicated admitted-room Channels protocol and ephemeral room/generation/epoch/revision Redis state preserve native auth/clinical owners. Initial Redis receive-timeout activation blocker was repaired only for this presentation alias (10s receive timeout,30s group renewal); the default RoomUpdates timeout is deferred. Native independent doctor/patient browser contexts confirmed selection/surface/body pointer delivery, focus, view-only, revoked/reconnected view state, stop and draft retention; WebGL is disabled in the review browser, so free3D rotation/zoom/highlights/camera interpolation remain unverified (INTERACTIVE-CALL-001). Other native security/media/Skeleton cases and minor fallback/old room issues are logged; no broad retry or unrelated repair. No builds/tests/typechecks/lint; Prettier/Ruff formatting only. Fresh encrypted checkpoint/isolated restore verified167tables; original identities untouched. Synthetic native review clinic/account/sessions were ended/deactivated, temporary routes and review-only SAMEORIGIN header removed, default frame DENY restored. See docs/operations/interactive-call-models-verification.md for precise tools/runtime/preservation and limits.
+
+The October 22 UI cleanup is implemented natively in the current dirty working tree with 23 focused source refinements. Shared heading/empty presentation, collection redundancy, invoice grouping, single diagnostic entry, device help disclosure and compact/mode-correct room entry preserve native workflow owners. A 64-route source inventory and bounded 19-screen desktop review plus desktop/phone RoomEntry fixture are recorded in `docs/operations/ui-cleanup-verification.md`; this does not establish every route/role/save flow. Graphify refreshed 31 source files (180 nodes/388 edges); two sanitized Jev choices guided prioritization. Encrypted checkpoint/isolated restore verified 167 tables. Original credentials/MFA/permissions and existing clinic-shell width edits remain untouched; synthetic review identities were deactivated, temporary routes removed, original Next config restored. UI-CLEANUP-001/002 and other unrelated findings remain deferred. No builds or automated tests; root launcher activation uses `.next-local-dev`.
+
+October 22 further UI refinement updates ten focused source files: labeled empty select choices with boundary value preservation, quiet empty pagination, distinct result states/recovery, nonduplicated Appearance headings, route-specific loader copy and written report/invoice dates. Native synthetic desktop/phone review confirms the main presentation/filter paths; edited-date propagation remains UI-REFINEMENT-001 and is not claimed verified. Graphify refreshed13 source files (83 nodes/144edges), sanitized Jev prioritized focused cleanup. Fresh encrypted checkpoint/isolated restore verified167tables; original identities/roles/MFA and clinic-shell width edits unchanged. Review identities deactivated, temporary routes removed, exact Next config restored; launcher activation uses .next-local-dev. No builds or automated tests. See docs/operations/ui-refinement-verification.md.
+
+October22 sidebar responsiveness repair adds the clinic route loading boundary and transition-scoped immediate destination feedback through the existing shared loading container. The old page stays mounted/hidden during preparation; native unsaved-change capture and original authorization remain. One synthetic native desktop/phone pass observes immediate destination loading, completed navigation, Keep editing preservation and confirmed discard, plus mobile drawer close. This is responsiveness evidence, not a zero-latency/content-loading benchmark; dev cold compilation remains possible. Three focused source files, original ClinicShell width tag preserved byte-for-byte; no builds/tests/typecheck. Encrypted checkpoint/isolated restore verified167tables, synthetic review identities deactivated and temporary routes/config exception removed. Graphify eight-source corpus44nodes/80edges and sanitized Jev usage are recorded in docs/operations/sidebar-response-verification.md. Launcher activation remains .next-local-dev/original DB.
+
+October22 improvement Phase4 is active locally in launcher .next-local-dev/original DB. Narrow day/provider scheduling and shared hour precedence preserve the desktop week; positioned-label containment resolves the reproduced375/968 phone overflow to375/375. Native bounded calendar/day/edit entry and reason/timezone context remain. Room information adds identity placeholders/type-correct timestamps, waiting banner semantic tokens; coalesced serialized snapshots retain backend authority. Clinic and portal appointments/queues use manual refresh; selected API8001 supplies socket configuration. One diagnostic probe and one final native visual pass observed synthetic waiting→admitted and retained unsent doctor text, with connection warnings/Redis timeout entries retained as IMPROVEMENTS4-001; instant stage/footer copy and unsampled views remain002. No media/internet or forced-race acceptance claim. No builds/tests/typecheck/lint; no backend product/schema/original credential/MFA/grant changes. Encrypted checkpoint/isolated restore verified167tables. Synthetic rooms ended/session revoked/clinic-user-membership deactivated; review routes removed/exact config restored. Evidence: docs/operations/improvements-phase-4-verification.md. Native/no-agent, bounded visual-only and standing local activation continue.
+
+October22 Phase5 financial clarity is implemented in the current working tree and active through `./medframe` with `.next-local-dev`. Typed invoice balance/date/currency filters reuse native obligation projections before pagination; Dashboard issued-period links use issued dates, current balance links keep report context separate. Read-only installment previews reuse integer native calculations/month-end/remainder rules and hide after field changes; saved draft/issue owners remain intact. One native visual pass confirms issued-date/overdue paths, preview/zero-deposit save and patient service navigation; later Billing recovery and remaining acceptance are IMPROVEMENTS5-001, not repaired or broadly retested. No builds/automated tests/lint/typechecks. Fresh encrypted checkpoint/isolated restore verified167 tables. Temporary review access/routes/config are removed/restored and synthetic identity deactivated; original identities and unrelated dirty changes preserved. See `docs/operations/improvements-phase-5-verification.md`. Phase6 remains pending.
+
+October22–23 improvement Phase6 is implemented natively in the existing working tree and active via `./medframe`/`.next-local-dev`. Staff access summaries use current Role metadata and native billing override semantics; public recipient summaries use server-calculated invitation permissions. Own access controls are read-only. Admin readiness exposes only safe SMTP/Mailpit/SMSGate/reminder/media flags, with no network probes or delivery claim. Fresh platform clinic invitation responses expose their newly generated copyable link without token persistence; original hash-only list/replacement behavior remains. Patient request status clarifies review/activation/reference, and clinic/staff/patient step focus/modal return are improved. One native desktop/phone/dark pass covers presentation and synthetic intake→pending, not real platform mutation/MFA/delivery/security acceptance (IMPROVEMENTS6-001). No builds/tests/typechecks/lint; Prettier/Ruff format only. Fresh encrypted checkpoint/isolated restore verified167tables. Synthetic access/invitations/proofs revoked, exact config restored and review routes removed; original identities/grants/private storage and unrelated dirty work preserved. See docs/operations/improvements-phase-6-verification.md. Six-phase implementation is delivered with recorded acceptance gaps, not full application/security completion.
+
+October23 authorized follow-up Phase7 navigation/recovery reliability is active in current `.next-local-dev` via root launcher. Frontend transport-code classification distinguishes CSRF/origin403 from record denial; any HTTP401/403/domain denial still conservatively clears protected read data through a separate guard. Pending native CSRF GETs coalesce with8-second bounds, settled tokens discarded, request-local abort and no write replay. Read refresh queues one invalidation; malformed Billing setup shows recovery. Paused clinic setup revalidates native proof and resumes valid saved setup; mobile staff Find has an accessible name. Native Billing return/future/empty and saved resume plus representative recovery/phone keyboard samples observed in one pass; no builds/tests/typecheck/lint. Final source guard had no second browser round. Historical Billing cause is unconfirmed and broader races/security remain IMPROVEMENTS7-001. Fresh encrypted checkpoint/isolated restore verified167tables; no backend/schema/original identity/MFA/grant/private-object changes. Synthetic access revoked, routes removed/exact config restored. See docs/operations/improvements-phase-7-verification.md. Native/no-agent, visual-only and standing local activation remain.

@@ -203,6 +203,7 @@ export function PageControls({
   next: string | null;
   onChange: (after?: string) => void;
 }) {
+  if (!after && !next) return null;
   return (
     <div className="mt-4 flex flex-wrap gap-3">
       {after && (

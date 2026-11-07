@@ -1,0 +1,16 @@
+{
+  "appointment-booking": "0 0 376 332",
+  "appointment-calendar": "0 0 384 302",
+  "appointment-confirmed": "0 0 249 244",
+  "clinic-reception": "0 0 410 332",
+  "connection-lost": "0 0 245 244",
+  "doctor-profile": "0 0 364 332",
+  "document-upload": "0 0 256 244",
+  "empty-appointments": "0 0 253 244",
+  "medical-records": "0 0 377 302",
+  "notifications": "0 0 243 244",
+  "online-consultation": "0 0 383 302",
+  "patient-profile": "0 0 350 332",
+  "prescriptions": "0 0 247 244",
+  "waiting-room": "0 0 368 302"
+}

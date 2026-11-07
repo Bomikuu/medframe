@@ -9,8 +9,27 @@ def member(request, organization_id, permission="services.read"):
         getattr(request, "station_access", None)
         or getattr(request, "station_doctor", None)
         or getattr(request, "station_credential", None)
+        or request.headers.get("X-Medframe-Workspace") == "station"
     ):
-        raise DomainError("FORBIDDEN", "Open Services in the regular clinic workspace.", 403)
+        if permission != "services.read" or getattr(request, "station_access", None):
+            raise DomainError(
+                "FORBIDDEN", "Manage service agreements in the regular clinic workspace.", 403
+            )
+        from medframe_apps.stations.policy import clinician_device
+        from medframe_apps.providers.models import ProviderProfile
+
+        credential = getattr(request, "station_credential", None)
+        if not ProviderProfile.objects.filter(
+            membership__user=request.user,
+            membership__organization_id=organization_id,
+            membership__active=True,
+            membership__user__is_active=True,
+        ).exists():
+            raise DomainError(
+                "FORBIDDEN", "Service progress requires an approved doctor Station.", 403
+            )
+        if credential:
+            clinician_device(request, organization_id, credential.device.branch_id)
     return staff_member(request, organization_id, permission)
 
 
@@ -34,6 +53,21 @@ def case_record(member, identifier, *, lock=False):
     query = PatientServiceCase.objects.filter(
         organization_id=member.organization_id, branch_id__in=scoped_branches(member)
     )
+    from medframe_apps.stations.context import current_request
+
+    request = current_request.get()
+    if request and (
+        getattr(request, "station_doctor", None)
+        or getattr(request, "station_credential", None)
+        or request.headers.get("X-Medframe-Workspace") == "station"
+    ):
+        from medframe_apps.patients.services import scoped_patients
+
+        query = query.filter(
+            patient_id__in=scoped_patients(
+                request.user, member.organization_id, "patients.clinical.read"
+            ).values("id")
+        )
     if lock:
         query = query.select_for_update(of=("self",))
     row = query.select_related("patient", "service").filter(id=identifier).first()
@@ -43,4 +77,13 @@ def case_record(member, identifier, *, lock=False):
 
 
 def financial(member):
+    from medframe_apps.stations.context import current_request
+
+    request = current_request.get()
+    if request and (
+        getattr(request, "station_doctor", None)
+        or getattr(request, "station_credential", None)
+        or request.headers.get("X-Medframe-Workspace") == "station"
+    ):
+        return False
     return "billing.read" in permissions_for(member)

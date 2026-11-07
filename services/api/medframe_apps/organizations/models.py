@@ -32,3 +32,7 @@ class Membership(Record):
         constraints = [
             models.UniqueConstraint(fields=["user", "organization"], name="membership_user_org")
         ]
+
+
+from .staff_models import StaffInvitation, StaffPhoto, StaffProfile  # noqa: E402,F401
+from .sign_in_models import OrganizationSignInPolicy  # noqa: E402,F401

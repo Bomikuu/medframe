@@ -59,17 +59,21 @@ export function AnatomyHeader({
           <Button
             type="button"
             variant="ghost"
-            size="sm"
             onClick={consultation.onBack}
-            className="shrink-0 px-0"
+            aria-label="Back to consultation"
+            className="min-h-11 shrink-0"
           >
             <ArrowLeft />
             <span className="hidden sm:inline">Consultation</span>
-            <span className="sm:hidden">Back</span>
+            <span className="sm:hidden">Notes</span>
           </Button>
           <div className="hidden h-9 w-px bg-border sm:block" />
           <div className="flex min-w-0 items-center gap-3">
-            <PatientAvatar name={consultation.patientName} className="size-10 shrink-0" />
+            <PatientAvatar
+              name={consultation.patientName}
+              imageId={patient?.portraitId ?? undefined}
+              className="size-10 shrink-0"
+            />
             <div className="min-w-0">
               <p className="max-w-[240px] truncate text-sm font-semibold">
                 {consultation.patientName}
@@ -91,7 +95,7 @@ export function AnatomyHeader({
             </p>
           </div>
         </div>
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
           {consultation.stationActions}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

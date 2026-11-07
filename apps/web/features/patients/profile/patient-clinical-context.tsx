@@ -6,7 +6,9 @@ import { ClinicalRecordDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { useRemote } from "../use-remote";
-import { LoadState, RemoteNotice } from "../feedback";
+import { RemoteNotice } from "../feedback";
+import { LoadingInformation } from "@/components/application/loading-information";
+import { RecoveryState } from "@/components/application/recovery-state";
 import { reviewLabel } from "../clinical-summary";
 import { cn } from "@/lib/utils";
 
@@ -45,12 +47,42 @@ export function ProfileClinicalContext({
         </Button>
       </div>
       {!remote.data ? (
-        <div className="p-5">
-          <LoadState error={remote.error} retry={remote.reload} />
+        <div className="grid min-h-48 place-items-center p-5">
+          {remote.error ? (
+            <RecoveryState
+              compact
+              title="History could not be loaded"
+              description="Retry to check allergies, medications and history. No review state has been assumed."
+            >
+              <Button variant="outline" onClick={remote.reload}>
+                Retry history
+              </Button>
+            </RecoveryState>
+          ) : (
+            <LoadingInformation
+              title="Loading clinical history"
+              detail="Retrieving recorded allergies, medications and history review states."
+            />
+          )}
         </div>
       ) : (
         <div className="p-5">
           <RemoteNotice error={remote.error} retry={remote.reload} />
+          {(needsAllergyReview || revision?.medicationState === "unreviewed" || !revision) && (
+            <p
+              role="status"
+              className="mb-4 rounded-lg bg-warning-soft/60 p-3 text-sm leading-6 text-warning"
+            >
+              History review needed:{" "}
+              {[
+                needsAllergyReview ? "allergies" : null,
+                !revision || revision.medicationState === "unreviewed" ? "medications" : null,
+              ]
+                .filter(Boolean)
+                .join(" and ")}
+              . Unreviewed information does not mean none reported.
+            </p>
+          )}
           <div className="grid gap-5 @lg:grid-cols-2">
             <section
               className={cn(

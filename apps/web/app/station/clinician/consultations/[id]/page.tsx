@@ -1,6 +1,6 @@
-import { ConsultationPage } from "@/features/consultations/consultation-pages";
+import { StationEncounter } from "@/features/stations/station-encounter";
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <ConsultationPage encounterId={id} focused />;
+  return <StationEncounter encounterId={id} />;
 }

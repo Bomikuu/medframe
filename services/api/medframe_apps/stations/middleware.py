@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 
 from config.errors import DomainError
+from medframe_apps.accounts.sign_in_policy import authenticated_session
 from medframe_apps.stations.context import DEVICE_COOKIE, current_request
 from medframe_apps.stations.context import digest as token_digest
 from medframe_apps.stations.models import DeviceCredential, StationDevice
@@ -25,7 +26,31 @@ class StationMiddleware:
         request.station_credential = None
         request.station_error = None
         secret = request.COOKIES.get(DEVICE_COOKIE)
-        if secret:
+        # Native staff keep their normal clinic session in other tabs. A device
+        # cookie constrains Station requests, not every request from this browser.
+        native_staff = bool(
+            request.user.is_authenticated
+            and authenticated_session(request.user, request.session)
+            and request.session.get("auth_realm", "staff") == "staff"
+            and not doctor
+            and not access
+        )
+        station_request = request.headers.get(
+            "X-Medframe-Workspace"
+        ) == "station" or request.path in {
+            "/stations/context",
+            "/stations/pair",
+            "/stations/access",
+            "/stations/encounter",
+            "/stations/dashboard",
+            "/stations/portrait",
+            "/stations/patient",
+            "/stations/walk-in",
+            "/stations/handoff",
+            "/stations/kiosk",
+            "/stations/display",
+        }
+        if secret and (not native_staff or station_request):
             credential = (
                 DeviceCredential.objects.select_related("device")
                 .filter(digest=token_digest(secret))
@@ -78,6 +103,7 @@ class StationMiddleware:
                 "/stations/encounter",
                 "/stations/walk-in",
                 "/stations/dashboard",
+                "/stations/patient",
                 "/stations/portrait",
                 "/documents/download",
             } and not request.path.startswith("/documents/upload/"):

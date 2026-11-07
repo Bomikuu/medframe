@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "@/features/patients/use-remote";
 import { PatientDirectoryDocument, type PatientRowFragment } from "@/lib/graphql/generated";
+import { dateLabel } from "@/features/patients/feedback";
+import { PatientAvatar } from "@/components/application/patient-avatar";
+import { RecentPatients } from "./recent-patients";
 import { LoadState } from "@/features/patients/feedback";
 
 export function PatientPicker({ onSelect }: { onSelect: (patient: PatientRowFragment) => void }) {
@@ -22,6 +25,7 @@ export function PatientPicker({ onSelect }: { onSelect: (patient: PatientRowFrag
   });
   return (
     <section className="grid gap-4" aria-label="Choose an authorized patient">
+      {!query && <RecentPatients choose={onSelect} />}
       <div className="flex gap-2">
         <Input
           aria-label="Search patients"
@@ -60,10 +64,13 @@ export function PatientPicker({ onSelect }: { onSelect: (patient: PatientRowFrag
                   className="flex min-h-16 w-full flex-wrap items-center justify-between gap-2 p-4 text-left hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"
                   onClick={() => onSelect(patient)}
                 >
-                  <span className="font-semibold">{patient.fullName}</span>
+                  <span className="flex min-w-0 items-center gap-3">
+                    <PatientAvatar name={patient.fullName} />
+                    <span className="font-semibold wrap-anywhere">{patient.fullName}</span>
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {patient.reference}
-                    {patient.dateOfBirth ? ` · ${patient.dateOfBirth}` : ""}
+                    {patient.dateOfBirth ? ` · ${dateLabel(patient.dateOfBirth)}` : ""}
                   </span>
                 </button>
               </li>

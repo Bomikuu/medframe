@@ -1,12 +1,15 @@
 "use client";
 
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 
 import { usePatientDraft } from "./use-patient-draft";
 import { useRequestScope } from "./use-request-scope";
 
 import { useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
@@ -163,20 +166,22 @@ function ClinicalHistoryForm({
               </FormField>
             ))}
             <ClinicalListFields />
-            <FormField
-              id="revisionReason"
-              label="Reason for this update (optional)"
-              error={form.formState.errors.reason?.message}
-            >
-              <Textarea
-                id="revisionReason"
-                maxLength={240}
-                className="min-h-20 resize-none"
-                aria-invalid={!!form.formState.errors.reason}
-                aria-describedby={form.formState.errors.reason ? "revisionReason-help" : undefined}
-                {...form.register("reason")}
-              />
-            </FormField>
+            <Controller
+              name="reason"
+              control={form.control}
+              render={({ field }) => (
+                <ReasonField
+                  id="revisionReason"
+                  label="Reason for this update (optional)"
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  onBlur={field.onBlur}
+                  inputRef={field.ref}
+                  suggestions={reasonSuggestions.history}
+                  error={form.formState.errors.reason?.message}
+                />
+              )}
+            />
             {error ? (
               <div
                 ref={errorRef}

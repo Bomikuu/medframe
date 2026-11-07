@@ -1,7 +1,13 @@
 "use client";
 
+import { EmptyState } from "@/components/application/empty-state";
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { ButtonLink } from "@/components/ui/button-link";
 import { PortalKioskCode } from "@/features/stations/kiosk/portal-kiosk-code";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { calendarDay } from "@/features/operations/calendar-dates";
 import { Button } from "@/components/ui/button";
 import { FormSelect } from "@/features/patients/form-controls";
 import { LoadState, failureText } from "@/features/patients/feedback";
@@ -19,25 +25,25 @@ import {
   DateChoice,
   OperationNotice,
   OperationSection,
-  OperationsLiveStatus,
+  OperationsRefresh,
 } from "@/features/operations/controls";
 import {
   clock,
-  localDate,
   patientOperationsSchema,
   slotsSchema,
   type Appointment,
 } from "@/features/operations/schema";
-import { useOperationsLive } from "@/features/operations/use-operations";
 
 export function PatientOperations({ queue = false }: { queue?: boolean }) {
   const { linkId } = usePortal();
+  const search = useSearchParams();
+  const router = useRouter();
+  const requestedRoom = search.get("reschedule") === "1" ? search.get("room") : null;
   const remote = useRemote(
     MyOperationAppointmentsDocument,
     { linkId },
-    { client: getPortalClient },
+    { client: getPortalClient, refreshOnFocus: false },
   );
-  const connected = useOperationsLive({ link: linkId }, remote.reload);
   const parsed = patientOperationsSchema.safeParse(remote.data?.myAppointments);
   if (!parsed.success) return <LoadState error={remote.error} retry={remote.reload} />;
   const data = parsed.data;
@@ -50,7 +56,7 @@ export function PatientOperations({ queue = false }: { queue?: boolean }) {
         </p>
       </div>
       <PortalKioskCode key={linkId} />
-      <OperationsLiveStatus connected={connected} updated={data.updated_at} />
+      <OperationsRefresh refresh={remote.reload} busy={remote.loading} />
       {!!remote.error && (
         <p role="alert" className="text-sm text-destructive">
           {failureText(remote.error)}
@@ -73,7 +79,8 @@ export function PatientOperations({ queue = false }: { queue?: boolean }) {
             >
               <h3 className="text-lg font-semibold">Your ticket {row.number}</h3>
               <p className="text-sm">
-                {row.provider} · {row.status.replaceAll("_", " ")}
+                <PersonIdentity kind="provider" name={row.provider} /> ·{" "}
+                {row.status.replaceAll("_", " ")}
               </p>
               <p className="text-sm">
                 Position {row.position} · {row.ahead} ahead of you
@@ -97,16 +104,30 @@ export function PatientOperations({ queue = false }: { queue?: boolean }) {
             Keep, reschedule or cancel your future booking below. For a checked-in or past
             appointment, contact the clinic directly.
           </p>
+          {requestedRoom &&
+            !data.appointments?.some((row) => row.online_room_id === requestedRoom) && (
+              <p role="status" className="rounded-lg bg-muted p-4 text-sm leading-6">
+                This room is not listed for your selected patient connection. Choose the correct
+                patient and clinic above, or contact reception to request a schedule change.
+              </p>
+            )}
           {!data.appointments?.length && (
-            <p className="py-5 text-sm text-muted-foreground">
-              No appointments have been booked for this patient. Contact your clinic to arrange a
-              visit.
-            </p>
+            <EmptyState
+              illustration="empty-appointments"
+              title="No appointments yet"
+              description="Contact your clinic to arrange a visit. Your appointments will appear here."
+            />
           )}
           {data.appointments?.map((row) => (
             <PatientAppointment
               key={`${row.id}:${row.version}`}
               row={row}
+              requestReschedule={!!requestedRoom && row.online_room_id === requestedRoom}
+              requestOpened={() => {
+                const query = new URLSearchParams(search.toString());
+                query.delete("reschedule");
+                router.replace(`/portal/appointments?${query}`, { scroll: false });
+              }}
               zone={data.timezone}
               reload={remote.reload}
             />
@@ -121,10 +142,14 @@ function PatientAppointment({
   row,
   zone,
   reload,
+  requestReschedule = false,
+  requestOpened,
 }: {
   row: Appointment;
   zone: string;
   reload: () => void;
+  requestReschedule?: boolean;
+  requestOpened?: () => void;
 }) {
   const { linkId } = usePortal();
   const { confirm } = useSafety();
@@ -134,8 +159,18 @@ function PatientAppointment({
   const receipt = useRef({ payload: "", id: "" });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [rescheduling, setRescheduling] = useState(false);
-  const [date, setDate] = useState(localDate(zone));
+  const [rescheduling, setRescheduling] = useState(
+    requestReschedule && row.status === "booked" && new Date(row.start) > new Date(),
+  );
+  const [date, setDate] = useState(calendarDay(row.start, zone));
+  useEffect(() => {
+    if (!requestReschedule) return;
+    if (row.status === "booked" && new Date(row.start) > new Date()) setRescheduling(true);
+    document
+      .getElementById(`patient-booking-${row.id}`)
+      ?.scrollIntoView({ behavior: "auto", block: "start" });
+    requestOpened?.();
+  }, [requestReschedule, row.id, row.status, row.start, requestOpened]);
   const [selected, setSelected] = useState("");
   const slots = useRemote(
     MyOperationSlotsDocument,
@@ -196,75 +231,83 @@ function PatientAppointment({
   };
   const available = row.status === "booked" && new Date(row.start) > new Date();
   return (
-    <OperationSection title={clock(row.start, zone)}>
-      <p className="text-sm">
-        {row.provider} · {row.branch} · {row.status.replaceAll("_", " ")}
-      </p>
-      <OperationNotice message={message} error={error} />
-      {available && (
-        <div className="flex flex-wrap gap-3">
-          <Button type="button" disabled={busy} onClick={() => void run("keep")}>
-            Keep appointment
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => setRescheduling(!rescheduling)}
-          >
-            Reschedule appointment
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={busy}
-            onClick={() => void run("cancelled")}
-          >
-            Cancel appointment
-          </Button>
-        </div>
-      )}
-      {rescheduling && (
-        <div className="grid max-w-xl gap-4">
-          <DateChoice
-            id={`patient-new-date-${row.id}`}
-            value={date}
-            change={setDate}
-            label={`New date (${zone})`}
-          />
-          {slots.loading ? (
-            <p role="status" className="text-sm">
-              Checking available times…
-            </p>
-          ) : slots.error ? (
-            <p role="alert" className="text-sm text-destructive">
-              {failureText(slots.error)}
-            </p>
-          ) : parsed.success && parsed.data.length ? (
-            <FormSelect
-              id={`patient-new-time-${row.id}`}
-              label="New available time"
-              value={selectedValid ? selected : ""}
-              onChange={setSelected}
-              options={parsed.data.map((slot) => ({
-                value: slot.start,
-                label: clock(slot.start, zone),
-              }))}
+    <div id={`patient-booking-${row.id}`} className="scroll-mt-6">
+      <OperationSection title={clock(row.start, zone)}>
+        <p className="text-sm">
+          <PersonIdentity kind="provider" name={row.provider} /> · {row.branch} ·{" "}
+          {row.status.replaceAll("_", " ")}
+        </p>
+        <OperationNotice message={message} error={error} />
+        {row.online_room_id && (
+          <ButtonLink variant="outline" href={`/appointments/room/${row.online_room_id}`}>
+            Enter online appointment
+          </ButtonLink>
+        )}
+        {available && (
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" disabled={busy} onClick={() => void run("keep")}>
+              Keep appointment
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              onClick={() => setRescheduling(!rescheduling)}
+            >
+              Reschedule appointment
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              onClick={() => void run("cancelled")}
+            >
+              Cancel appointment
+            </Button>
+          </div>
+        )}
+        {rescheduling && (
+          <div className="grid max-w-xl gap-4">
+            <DateChoice
+              id={`patient-new-date-${row.id}`}
+              value={date}
+              change={setDate}
+              label={`New date (${zone})`}
             />
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No available times for this date. Choose another date or contact your clinic.
-            </p>
-          )}
-          <Button
-            type="button"
-            disabled={busy || !selectedValid}
-            onClick={() => void run("reschedule")}
-          >
-            Confirm new time
-          </Button>
-        </div>
-      )}
-    </OperationSection>
+            {slots.loading ? (
+              <p role="status" className="text-sm">
+                Checking available times…
+              </p>
+            ) : slots.error ? (
+              <p role="alert" className="text-sm text-destructive">
+                {failureText(slots.error)}
+              </p>
+            ) : parsed.success && parsed.data.length ? (
+              <FormSelect
+                id={`patient-new-time-${row.id}`}
+                label="New available time"
+                value={selectedValid ? selected : ""}
+                onChange={setSelected}
+                options={parsed.data.map((slot) => ({
+                  value: slot.start,
+                  label: clock(slot.start, zone),
+                }))}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No available times for this date. Choose another date or contact your clinic.
+              </p>
+            )}
+            <Button
+              type="button"
+              disabled={busy || !selectedValid}
+              onClick={() => void run("reschedule")}
+            >
+              Confirm new time
+            </Button>
+          </div>
+        )}
+      </OperationSection>
+    </div>
   );
 }

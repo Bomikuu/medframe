@@ -1,7 +1,9 @@
 "use client";
 
+import { workspaceHeaders } from "@/lib/auth/client";
+
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { DocumentDownloadDocument } from "@/lib/graphql/generated";
 import { getGraphqlClient } from "@/lib/graphql/client";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
@@ -12,13 +14,16 @@ export function SecureImage({
   avatar = false,
   alt,
   className,
+  fallback,
 }: {
   id: string;
   avatar?: boolean;
   alt: string;
   className?: string;
+  fallback?: ReactNode;
 }) {
   const { organizationId } = useWorkspace();
+  const [failed, setFailed] = useState<string | null>(null);
   const [source, setSource] = useState<{ id: string; organization: string; url: string } | null>(
     null,
   );
@@ -32,7 +37,7 @@ export function SecureImage({
             setSource({
               id,
               organization: organizationId,
-              url: `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}`,
+              url: `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}${workspaceHeaders()["X-Medframe-Workspace"] ? "&workspace=station" : ""}`,
             });
         })
         .catch(() => {
@@ -45,19 +50,27 @@ export function SecureImage({
       window.clearInterval(timer);
     };
   }, [id, organizationId]);
-  if (!source || source.id !== id || source.organization !== organizationId)
+  if (
+    !source ||
+    source.id !== id ||
+    source.organization !== organizationId ||
+    failed === source.url
+  )
     return (
-      <span
-        className={cn(
-          "inline-flex size-10 items-center justify-center bg-muted text-xs",
-          avatar && "rounded-full",
-          className,
-        )}
-        role="img"
-        aria-label={alt}
-      >
-        Image
-      </span>
+      fallback ?? (
+        <span
+          className={cn(
+            "inline-flex size-10 items-center justify-center bg-muted text-xs",
+            avatar && "rounded-full",
+            className,
+            fallback,
+          )}
+          role="img"
+          aria-label={alt}
+        >
+          Image
+        </span>
+      )
     );
   return (
     <Image
@@ -66,10 +79,12 @@ export function SecureImage({
       width={128}
       height={128}
       alt={alt}
+      onError={() => setFailed(source.url)}
       className={cn(
         "h-12 w-auto object-contain",
         avatar && "size-12 rounded-full object-cover",
         className,
+        fallback,
       )}
     />
   );

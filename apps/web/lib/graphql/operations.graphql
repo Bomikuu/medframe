@@ -28,3 +28,7 @@ mutation OperationsAction(
     requestId: $requestId
   )
 }
+
+query ScheduleOverridePreview($organizationId: UUID!, $data: JSON!) {
+  scheduleOverridePreview(organizationId: $organizationId, data: $data)
+}

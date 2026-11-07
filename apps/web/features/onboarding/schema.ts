@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { phoneError } from "@/lib/contact-format";
 export const steps = [
   "clinic",
   "specialties",
@@ -60,14 +61,16 @@ export type Fields = Record<string, unknown>;
 export function stepValidation(step: Step) {
   return z.record(z.string(), z.unknown()).superRefine((data, context) => {
     const fail = (path: string, message: string) =>
-      context.addIssue({ code: "custom", path: [path], message });
+      context.addIssue({ code: "custom", path: path.split("."), message });
     if (step === "clinic") {
       if (typeof data.name !== "string" || !data.name.trim())
         fail("name", "Enter your clinic name.");
       if (!z.string().email().safeParse(data.email).success)
         fail("email", "Enter a valid clinic email.");
-      if (!/^\+[0-9]{7,15}$/.test(String(data.phone)))
-        fail("phone", "Include a country prefix and 7–15 digits.");
+      if (!String(data.phone ?? "")) fail("phone", "Enter your clinic contact number.");
+      else if (phoneError(String(data.phone))) fail("phone", phoneError(String(data.phone))!);
+      if (data.country === "PH" && data.postal_code && !/^\d{4}$/.test(String(data.postal_code)))
+        fail("postal_code", "Enter a four-digit Philippine postal code.");
     }
     if (step === "specialties") {
       if (!Array.isArray(data.codes) || !data.codes.length)
@@ -75,14 +78,25 @@ export function stepValidation(step: Step) {
       if (!Array.isArray(data.provider_types) || !data.provider_types.length)
         fail("provider_types", "Choose a provider type.");
     }
+    if (step === "clinic" && String(data.country ?? "").length > 2)
+      fail("country", "Choose a supported country.");
     if (step === "branding")
       for (const key of ["primary", "secondary", "accent"])
         if (!/^#[0-9a-f]{6}$/i.test(String(data[key]))) fail(key, "Use a six-digit hex color.");
     if (step === "practice") {
       if (!String(data.branch_name ?? "").trim()) fail("branch_name", "Enter a branch name.");
       if (!Array.isArray(data.days) || !data.days.length) fail("days", "Choose an operating day.");
-      if (String(data.opens) >= String(data.closes))
-        fail("closes", "Closing time must follow opening time.");
+      const hours = data.daily_hours as
+        Record<string, { opens?: string; closes?: string }> | undefined;
+      for (const day of Array.isArray(data.days) ? data.days : []) {
+        const range = hours?.[String(day)] ?? { opens: data.opens, closes: data.closes };
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(range.opens)))
+          fail(`daily_hours.${day}.opens`, "Enter a valid opening time.");
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(String(range.closes)))
+          fail(`daily_hours.${day}.closes`, "Enter a valid closing time.");
+        else if (String(range.opens) >= String(range.closes))
+          fail(`daily_hours.${day}.closes`, "Closing time must follow opening time.");
+      }
       if (
         !Number.isInteger(data.duration_minutes) ||
         Number(data.duration_minutes) < 5 ||

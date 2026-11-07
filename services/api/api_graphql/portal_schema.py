@@ -70,6 +70,12 @@ class PortalQuery(PortalDiagnosticsQuery, PortalOperationsQuery, PortalBillingQu
         }
 
     @strawberry.field
+    def patient_task_home(self, info: Info, link_id: UUID) -> JSON:
+        from medframe_apps.portal.task_home import patient_task_home
+
+        return patient_task_home(info.context, link_id)
+
+    @strawberry.field
     def portal_records(self, info: Info, link_id: UUID, after: str | None = None) -> JSON:
         return portal_records(info.context, link_id, after)
 

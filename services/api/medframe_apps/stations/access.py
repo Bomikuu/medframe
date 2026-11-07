@@ -14,10 +14,14 @@ from medframe_apps.stations.models import StationAccessSession
 
 
 def source_session(request):
+    from medframe_apps.accounts.sign_in_policy import authenticated_session
+
     if getattr(request, "station_access", None) or getattr(request, "station_doctor", None):
         raise DomainError(
             "STATION_SCOPE", "Generate a new code from your authenticated workstation.", 403
         )
+    if not authenticated_session(request.user, request.session):
+        return None
     return ClinicalSession.objects.filter(
         session_key=getattr(request.session, "session_key", None),
         user=request.user,
@@ -29,6 +33,8 @@ def source_session(request):
 
 
 def live(access, credential, now=None):
+    from medframe_apps.accounts.sign_in_policy import clinical_assurance_valid
+
     now = now or timezone.now()
     row = access.handoff
     proof = getattr(row, "access_proof", None)
@@ -58,6 +64,7 @@ def live(access, credential, now=None):
         and access.session.last_seen_at > now - timedelta(minutes=10)
         and source
         and not source.revoked
+        and clinical_assurance_valid(source)
         and source.expires_at > now
         and row.sender.is_active
         and proof.source_auth_epoch == row.sender.auth_epoch
@@ -84,6 +91,8 @@ def find_session(session_key):
 
 @transaction.atomic
 def redeem(request, value):
+    from medframe_apps.accounts.sign_in_policy import clinical_assurance_valid
+
     from medframe_apps.stations import handoffs
     from medframe_apps.stations.policy import event
 
@@ -98,6 +107,7 @@ def redeem(request, value):
         or not row.sender.is_active
         or (proof and proof.source_auth_epoch != row.sender.auth_epoch)
         or source.revoked
+        or not clinical_assurance_valid(source)
         or source.expires_at <= now
         or source.realm != "staff"
         or source.user_id != row.sender_id

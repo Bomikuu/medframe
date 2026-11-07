@@ -25,6 +25,46 @@ def deliver_recovery_mail():
             item.attempts += 1
             try:
                 payload = json.loads(cipher().decrypt(item.encrypted_payload.encode()))
+                if item.kind in {"staff_invitation", "staff_email_code"}:
+                    from medframe_apps.organizations.models import StaffInvitation
+                    from medframe_apps.organizations.staff_onboarding import live_invitation
+                    from config.errors import DomainError
+
+                    invitation_record = (
+                        StaffInvitation.objects.select_related("organization", "issued_by")
+                        .filter(id=payload.get("invitation"), token_hash=payload.get("token_hash"))
+                        .first()
+                    )
+                    try:
+                        live_invitation(invitation_record)
+                        valid = item.kind == "staff_invitation" or (
+                            invitation_record.proof_hash == payload.get("proof_hash")
+                            and not invitation_record.verified_at
+                            and invitation_record.otp_expires_at > timezone.now()
+                            and invitation_record.attempts < 5
+                        )
+                    except DomainError:
+                        valid = False
+                    if valid:
+                        content = (
+                            (
+                                "Your staff verification code: "
+                                + payload["code"]
+                                + "\nExpires in 10 minutes."
+                            )
+                            if item.kind == "staff_email_code"
+                            else (
+                                "Your clinic invited you to join Medframe. Verify your email, complete your profile and secure your account:\n"
+                                + payload["link"]
+                            )
+                        )
+                        send_mail(
+                            "Medframe staff onboarding", content, None, [payload["recipient"]]
+                        )
+                    item.sent_at = timezone.now()
+                    item.encrypted_payload = ""
+                    item.save()
+                    continue
                 if item.kind in {"clinic_invitation", "clinic_email_code", "clinic_resume"}:
                     from medframe_apps.onboarding.models import ClinicInvitation
                     from medframe_apps.onboarding.policy import invitation_state
@@ -47,6 +87,65 @@ def deliver_recovery_mail():
                             else "Continue setting up your clinic:\n" + payload["link"]
                         )
                         send_mail("Medframe clinic setup", content, None, [payload["recipient"]])
+                    item.sent_at = timezone.now()
+                    item.encrypted_payload = ""
+                    item.save()
+                    continue
+                if item.kind == "patient_register_sms":
+                    from medframe_apps.portal.registration_models import RegistrationContact
+                    from medframe_apps.portal.smsgate import send_otp
+
+                    proof = RegistrationContact.objects.filter(
+                        id=payload.get("challenge"),
+                        channel="mobile",
+                        invalidated=False,
+                        verified_at__isnull=True,
+                        expires_at__gt=timezone.now(),
+                        attempts__lt=5,
+                        entry__enabled=True,
+                        entry__branch__organization__active=True,
+                    ).first()
+                    if proof:
+                        result = send_otp(
+                            payload["recipient"],
+                            payload["code"],
+                            proof.id,
+                            (proof.expires_at - timezone.now()).total_seconds(),
+                        )
+                        RegistrationContact.objects.filter(id=proof.id).update(
+                            delivery_state=result.state
+                        )
+                        if result.state == "retryable_failure" and item.attempts < 5:
+                            item.available_at = timezone.now() + timedelta(
+                                seconds=30 * 2**item.attempts
+                            )
+                            item.save()
+                            continue
+                    # Accepted, rejected or uncertain: never blindly retry a potentially sent OTP.
+                    item.sent_at = timezone.now()
+                    item.encrypted_payload = ""
+                    item.save()
+                    continue
+                if item.kind == "patient_register_code":
+                    from medframe_apps.portal.registration_models import RegistrationContact
+
+                    valid = RegistrationContact.objects.filter(
+                        id=payload.get("challenge"),
+                        invalidated=False,
+                        verified_at__isnull=True,
+                        expires_at__gt=timezone.now(),
+                        entry__enabled=True,
+                        entry__branch__organization__active=True,
+                    ).exists()
+                    if valid:
+                        send_mail(
+                            "Your Medframe registration code",
+                            "Your verification code is "
+                            + payload["code"]
+                            + "\nIt expires in 10 minutes.\nThis code verifies your email only; your clinic reviews registration separately.",
+                            None,
+                            [payload["recipient"]],
+                        )
                     item.sent_at = timezone.now()
                     item.encrypted_payload = ""
                     item.save()

@@ -35,11 +35,14 @@ def find_session(key):
 
 
 def source_live(row, now):
+    from medframe_apps.accounts.sign_in_policy import clinical_assurance_valid
+
     source = row.source_session
     member = row.provider.membership
     return bool(
         source.realm == "staff"
         and not source.revoked
+        and clinical_assurance_valid(source)
         and source.expires_at > now
         and source.user.is_active
         and source.user_id == member.user_id
@@ -81,7 +84,7 @@ def issue(request, organization_id, branch_id):
     source = source_session(request)
     if not source:
         raise DomainError(
-            "AUTH_REQUIRED", "Use your signed-in MFA workstation to create a code.", 403
+            "AUTH_REQUIRED", "Use your signed-in clinic workstation to create a code.", 403
         )
     if not Branch.objects.filter(id=branch_id, organization_id=organization_id).exists():
         raise DomainError("NOT_FOUND", "This branch is unavailable.", 404)

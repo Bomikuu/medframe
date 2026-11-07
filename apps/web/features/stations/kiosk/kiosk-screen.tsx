@@ -1,4 +1,6 @@
 "use client";
+
+import { PersonIdentity } from "@/components/application/person-identity";
 import { useCallback, useState } from "react";
 import {
   CalendarPlus,
@@ -10,15 +12,23 @@ import {
   ShieldCheck,
   Printer,
   HelpCircle,
+  RefreshCw,
+  MonitorSmartphone,
 } from "lucide-react";
+import { RecoveryState } from "@/components/application/recovery-state";
 import { Brand } from "@/components/brand";
 import { printTicket } from "./print-ticket";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/application/phone-input";
+import { phoneError } from "@/lib/contact-format";
 import { FormField } from "@/components/form-field";
 import { LoadingInformation } from "@/components/application/loading-information";
 import { AssistedKiosk } from "./assisted-kiosk";
+import { TerminalEntry } from "./terminal-entry";
+import { TerminalPatientContext } from "./terminal-patient-context";
+import { TerminalCompletedActions } from "./terminal-completed-actions";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -65,9 +75,27 @@ const empty: Selection = {
 };
 export function KioskScreen() {
   const kiosk = useKiosk();
-  return <KioskContent key={kiosk.cycle} kiosk={kiosk} />;
+  return (
+    <AssistedKiosk
+      active={kiosk.staffMode}
+      session={kiosk.session}
+      generation={kiosk.setup?.generation}
+      terminalBusy={kiosk.busy}
+      onSession={kiosk.acceptSession}
+      onActivity={kiosk.activity}
+      onExit={kiosk.leaveStaff}
+    >
+      <KioskContent key={kiosk.cycle} kiosk={kiosk} embedded={kiosk.staffMode} />
+    </AssistedKiosk>
+  );
 }
-function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
+function KioskContent({
+  kiosk,
+  embedded = false,
+}: {
+  kiosk: ReturnType<typeof useKiosk>;
+  embedded?: boolean;
+}) {
   const [selection, setSelection] = useState<Selection>(empty);
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -77,7 +105,6 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
   const [notice, setNotice] = useState("");
   const [help, setHelp] = useState(false);
   const onError = useCallback((message: string) => setNotice(message), []);
-  const exitStaff = useCallback(() => kiosk.setView("waiting"), [kiosk.setView]);
   function clearFields() {
     setSelection(empty);
     setCode("");
@@ -113,53 +140,86 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
     const result = await kiosk.run<Result>({ action, ...selection, request_id: requestId });
     if (result) kiosk.complete(result);
   }
+  const Container = embedded ? "section" : "main";
   const timed =
-    kiosk.view !== "staff" && (kiosk.view !== "home" || !!kiosk.session) && kiosk.remaining <= 30;
+    !kiosk.staffMode &&
+    kiosk.view !== "staff" &&
+    (kiosk.view !== "home" || !!kiosk.session) &&
+    kiosk.remaining <= 30;
   return (
-    <main
-      id="main"
-      className="min-h-dvh bg-background"
+    <Container
+      id={embedded ? undefined : "main"}
+      className={embedded ? "" : "min-h-dvh bg-background"}
       onPointerDown={kiosk.activity}
       onKeyDown={kiosk.activity}
     >
-      <header className="flex min-h-24 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-5 py-4 sm:px-10">
-        <Brand />
-        <div className="text-right">
-          <p className="text-sm font-semibold">{setup?.clinic ?? "Patient Station"}</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {setup?.branch ?? "Secure clinic kiosk"}
-          </p>
-        </div>
-      </header>
-      <div className="mx-auto max-w-5xl px-5 py-8 sm:px-10 sm:py-12">
+      {!embedded && (
+        <header className="flex min-h-24 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-5 py-4 sm:px-10">
+          <Brand />
+          <div className="text-right">
+            <p className="text-sm font-semibold">{setup?.clinic ?? "Patient Station"}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {setup?.branch ?? "Secure clinic kiosk"}
+            </p>
+          </div>
+        </header>
+      )}
+      <div className={embedded ? "" : "mx-auto max-w-5xl px-5 py-8 sm:px-10 sm:py-12"}>
         {!setup ? (
-          <section className="mx-auto grid max-w-lg gap-5 py-12">
-            <h1 className="text-2xl font-semibold">
-              {kiosk.busy ? "Opening the kiosk…" : "This kiosk needs attention"}
-            </h1>
+          <section className="mx-auto grid min-h-[calc(100svh-12rem)] place-items-center">
             {kiosk.busy ? (
               <LoadingInformation
                 title="Checking this kiosk"
                 detail="Checking device approval, clinic services and the secure connection. Earlier patient information is cleared before this screen opens."
               />
             ) : (
-              <p role="alert" className="leading-7 text-muted-foreground">
-                {kiosk.error}
-              </p>
-            )}
-            {!kiosk.busy && (
-              <>
-                <Button type="button" onClick={() => void home()}>
-                  Try again
-                </Button>
-                <ButtonLink href="/station" variant="outline">
-                  Device connection
-                </ButtonLink>
-              </>
+              <RecoveryState
+                level={1}
+                title="This kiosk needs attention"
+                description={
+                  kiosk.error ||
+                  "We couldn’t connect this kiosk to the clinic. Try again or ask clinic staff to check the device connection."
+                }
+                icon={MonitorSmartphone}
+              >
+                <div className="flex flex-col justify-center gap-3 sm:flex-row">
+                  <Button type="button" onClick={() => void home()}>
+                    <RefreshCw aria-hidden="true" />
+                    Try again
+                  </Button>
+                  <ButtonLink href="/station" variant="outline">
+                    <MonitorSmartphone aria-hidden="true" />
+                    Device connection
+                  </ButtonLink>
+                </div>
+              </RecoveryState>
             )}
           </section>
         ) : (
           <>
+            {kiosk.connectionError && (
+              <div
+                role="status"
+                className="mb-5 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950"
+              >
+                <p className="font-semibold">Connection interrupted</p>
+                <p className="mt-1 leading-6">
+                  Your selections are kept here while the terminal reconnects. A completed booking
+                  or payment is confirmed only when its result appears. Do not start the same task
+                  on another terminal; ask reception to check it.
+                </p>
+              </div>
+            )}
+            {kiosk.session && (
+              <TerminalPatientContext
+                session={kiosk.session}
+                staff={kiosk.staffMode}
+                busy={kiosk.busy}
+                remaining={kiosk.staffMode ? undefined : kiosk.remaining}
+                onFinish={() => void finish()}
+                showAction={kiosk.view !== "done"}
+              />
+            )}
             {kiosk.view !== "home" && kiosk.view !== "staff" && (
               <nav
                 aria-label="Kiosk navigation"
@@ -202,79 +262,75 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
               </nav>
             )}
             {kiosk.view === "home" ? (
-              <>
-                <div className="mb-10 max-w-2xl">
-                  <h1 className="text-3xl leading-tight font-semibold sm:text-4xl">
-                    Welcome. What brings you in today?
-                  </h1>
-                  <p className="mt-4 text-base leading-7 text-muted-foreground">
-                    Choose an option to get started. Reception is here if you need a hand.
+              !kiosk.session && !setup.strict_verification && !kiosk.staffMode ? (
+                <TerminalEntry
+                  clinic={setup.clinic}
+                  busy={kiosk.busy}
+                  onIdentify={kiosk.identify}
+                  onStaff={kiosk.enterStaff}
+                  onRegister={() => {
+                    setRequestId(crypto.randomUUID());
+                    kiosk.setView("register");
+                  }}
+                />
+              ) : (
+                <>
+                  <div className="mb-10 max-w-2xl">
+                    <h1 className="text-3xl leading-tight font-semibold sm:text-4xl">
+                      {kiosk.staffMode ? "Patient actions" : "What would you like to do?"}
+                    </h1>
+                    <p className="mt-4 text-base leading-7 text-muted-foreground">
+                      {setup.strict_verification && !kiosk.staffMode
+                        ? "Choose a task. Strict mode asks for a new patient verification code for each task."
+                        : "Choose a task for the selected patient. You can complete more than one before finishing."}
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {actions.map(({ task, title, detail, icon: Icon }) => (
+                      <button
+                        type="button"
+                        key={task}
+                        onClick={() => start(task)}
+                        disabled={
+                          kiosk.busy ||
+                          !setup.functions.includes(task) ||
+                          !!(kiosk.session?.functions && !kiosk.session.functions.includes(task))
+                        }
+                        className="group hover:bg-teal-wash/40 flex min-h-44 items-start gap-5 rounded-xl border border-border bg-card p-6 text-left transition-colors hover:border-teal-ink focus-visible:ring-3 focus-visible:ring-ring disabled:opacity-50 sm:p-7"
+                      >
+                        <Icon className="mt-1 size-8 shrink-0 text-teal-ink" strokeWidth={1.6} />
+                        <span className="grid gap-3">
+                          <strong className="text-xl leading-7 font-semibold">{title}</strong>
+                          <span className="text-sm leading-6 text-muted-foreground">
+                            {detail}
+                            {!setup.functions.includes(task)
+                              ? " · Not enabled on this device"
+                              : kiosk.session?.functions && !kiosk.session.functions.includes(task)
+                                ? " · Not available for your staff role"
+                                : ""}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <TerminalCompletedActions actions={kiosk.completed} timezone={setup.timezone} />
+                  <p className="mt-7 flex items-start gap-3 text-sm leading-6 text-muted-foreground">
+                    <ShieldCheck className="mt-0.5 size-5 shrink-0 text-teal-ink" />
+                    Your information is cleared when you finish or leave the kiosk inactive.
                   </p>
-                </div>
-                {kiosk.session ? (
-                  <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-5">
-                    <div>
-                      <p className="font-semibold">{kiosk.session.patient_name}</p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Selected by reception · continue with any task below
-                      </p>
-                    </div>
+                  {!kiosk.session && (
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => void finish()}
-                      disabled={kiosk.busy}
+                      className="mt-6 min-h-12"
+                      onClick={kiosk.enterStaff}
                     >
-                      Finish / change patient
+                      Staff-assisted mode
                     </Button>
-                  </div>
-                ) : (
-                  !setup.strict_verification && (
-                    <p className="mb-6 rounded-xl border border-border bg-card p-5 text-sm leading-6 text-muted-foreground">
-                      Enter your name and contact details to get started. Reception verifies your
-                      identity before opening your record. No patient search is shown on this
-                      screen.
-                    </p>
-                  )
-                )}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {actions.map(({ task, title, detail, icon: Icon }) => (
-                    <button
-                      type="button"
-                      key={task}
-                      onClick={() => start(task)}
-                      disabled={kiosk.busy || !setup.functions.includes(task)}
-                      className="group hover:bg-teal-wash/40 flex min-h-44 items-start gap-5 rounded-xl border border-border bg-card p-6 text-left transition-colors hover:border-teal-ink focus-visible:ring-3 focus-visible:ring-ring disabled:opacity-50 sm:p-7"
-                    >
-                      <Icon className="mt-1 size-8 shrink-0 text-teal-ink" strokeWidth={1.6} />
-                      <span className="grid gap-3">
-                        <strong className="text-xl leading-7 font-semibold">{title}</strong>
-                        <span className="text-sm leading-6 text-muted-foreground">
-                          {detail}
-                          {!setup.functions.includes(task) && " · Not enabled on this device"}
-                        </span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-7 flex items-start gap-3 text-sm leading-6 text-muted-foreground">
-                  <ShieldCheck className="mt-0.5 size-5 shrink-0 text-teal-ink" />
-                  Your information is cleared when you finish or leave the kiosk inactive.
-                </p>
-                {!kiosk.session && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="mt-6 min-h-12"
-                    onClick={() => kiosk.setView("staff")}
-                  >
-                    Staff-assisted mode
-                  </Button>
-                )}
-              </>
-            ) : kiosk.view === "staff" ? (
-              <AssistedKiosk onExit={exitStaff} />
-            ) : (
+                  )}
+                </>
+              )
+            ) : kiosk.view === "staff" ? null : (
               <section className="mx-auto max-w-3xl">
                 <div className="mb-8">
                   <h1 className="text-2xl font-semibold sm:text-3xl">
@@ -290,11 +346,6 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                               ? "Check before you confirm"
                               : taskNames[kiosk.task]}
                   </h1>
-                  {kiosk.session && (
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      {kiosk.session.patient_name} · verified for this kiosk session
-                    </p>
-                  )}
                 </div>
                 {kiosk.view === "waiting" && (
                   <div className="grid gap-5">
@@ -378,6 +429,7 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                     className="grid gap-5"
                     onSubmit={(event) => {
                       event.preventDefault();
+                      if (phoneError(phone)) return;
                       void kiosk
                         .run<Result>({
                           action: "register",
@@ -408,14 +460,16 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                       />
                     </FormField>
                     <div className="grid gap-5 sm:grid-cols-2">
-                      <FormField id="intake-phone" label="Contact number">
-                        <Input
+                      <FormField
+                        id="intake-phone"
+                        label="Contact number"
+                        hint="Philippines uses +63. Leave out the leading 0."
+                        error={phoneError(phone)}
+                      >
+                        <PhoneInput
                           id="intake-phone"
-                          type="tel"
                           value={phone}
-                          onChange={(event) => setPhone(event.target.value)}
-                          minLength={5}
-                          maxLength={40}
+                          onValueChange={setPhone}
                           autoComplete="off"
                           required
                           className="h-12"
@@ -466,7 +520,9 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                       {provider && (
                         <div>
                           <dt className="text-sm text-muted-foreground">Doctor / dentist</dt>
-                          <dd className="mt-1 font-semibold">{provider.name}</dd>
+                          <dd className="mt-1 font-semibold">
+                            <PersonIdentity kind="provider" name={provider.name} />
+                          </dd>
                         </div>
                       )}
                       {selection.start && (
@@ -535,12 +591,24 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                     {kiosk.result.appointment && (
                       <p className="text-xl font-semibold">
                         {clinicTime(kiosk.result.appointment.start, setup.timezone, true)} ·{" "}
-                        {kiosk.result.appointment.provider}
+                        <PersonIdentity kind="provider" name={kiosk.result.appointment.provider} />
                       </p>
                     )}
                     {kiosk.result.reference && (
                       <p className="text-xl font-semibold">
                         Reception reference: {kiosk.result.reference}
+                      </p>
+                    )}
+                    {kiosk.result.appointment && (
+                      <p className="rounded-lg bg-secondary p-4 text-sm leading-6">
+                        Next: check in when you arrive at the clinic. Booking an appointment does
+                        not add you to today’s queue.
+                      </p>
+                    )}
+                    {kiosk.task === "payments" && (
+                      <p className="rounded-lg bg-secondary p-4 text-sm leading-6">
+                        Next: wait for the cashier to call your number. Your bill is paid only after
+                        the clinic confirms payment.
                       </p>
                     )}
                     <div className="flex flex-wrap gap-3 print:hidden">
@@ -558,7 +626,7 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                           Print using this device
                         </Button>
                       )}
-                      {kiosk.session && !setup.strict_verification && (
+                      {kiosk.session && (!setup.strict_verification || kiosk.staffMode) && (
                         <Button
                           type="button"
                           variant="outline"
@@ -568,8 +636,15 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
                           Do another task
                         </Button>
                       )}
-                      <Button type="button" className="min-h-14 px-8" onClick={() => void finish()}>
-                        Finish and clear my information
+                      <Button
+                        type="button"
+                        disabled={kiosk.busy}
+                        className="min-h-14 px-8"
+                        onClick={() => void finish()}
+                      >
+                        {kiosk.staffMode
+                          ? "Finish for this patient"
+                          : "Finish and clear my information"}
                       </Button>
                     </div>
                   </div>
@@ -634,6 +709,6 @@ function KioskContent({ kiosk }: { kiosk: ReturnType<typeof useKiosk> }) {
           </Button>
         </AlertDialogContent>
       </AlertDialog>
-    </main>
+    </Container>
   );
 }

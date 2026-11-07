@@ -1,12 +1,15 @@
 "use client";
 
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
+import { AccessRequired } from "@/components/application/access-required";
+
 import Link from "next/link";
 import { useState } from "react";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { StatusBadge } from "@/components/application/status-badge";
 import { Button } from "@/components/ui/button";
-import { FormField } from "@/components/form-field";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DueSummary, InstallmentSchedule } from "./installment-schedule";
 import {
@@ -38,7 +41,12 @@ export function InvoicePage({ invoiceId }: { invoiceId: string }) {
   );
   const parsed = invoiceDetailSchema.safeParse(remote.data?.billingInvoice);
   if (!can("billing.read"))
-    return <p role="alert">Your clinic membership does not have billing access.</p>;
+    return (
+      <AccessRequired
+        title="Billing access required"
+        description="Your clinic membership does not have billing access."
+      />
+    );
   if (!parsed.success) return <LoadState error={remote.error} retry={remote.reload} />;
   return (
     <InvoiceWorkspace
@@ -78,6 +86,13 @@ function InvoiceWorkspace({
         title={invoice.number ?? "Draft invoice"}
         description={`${invoice.patient_name} · ${invoice.reference} · ${invoice.branch_name}`}
       >
+        {invoice.case_id && can("services.read") && can("patients.demographics.read") && (
+          <Button asChild variant="outline">
+            <Link href={`${href(`/clinic/patients/${invoice.patient_id}`)}&tab=services`}>
+              Patient services
+            </Link>
+          </Button>
+        )}
         {invoice.state === "draft" && can("billing.manage") && (
           <Button
             disabled={action.busy || !agreementReady}
@@ -192,14 +207,15 @@ function InvoiceWorkspace({
                   )}
                   {!Number(invoice.paid) && !Number(invoice.credits) && (
                     <div className="grid gap-3 border-t border-border pt-4">
-                      <FormField id="invoice-void-reason" label="Reason for voiding">
-                        <Input
-                          id="invoice-void-reason"
-                          maxLength={500}
-                          value={voidReason}
-                          onChange={(event) => setVoidReason(event.target.value)}
-                        />
-                      </FormField>
+                      <ReasonField
+                        id="invoice-void-reason"
+                        label="Reason for voiding"
+                        value={voidReason}
+                        onValueChange={setVoidReason}
+                        suggestions={reasonSuggestions.void}
+                        maxLength={500}
+                        required
+                      />
                       <Button
                         variant="outline"
                         disabled={action.busy || !voidReason.trim()}
@@ -289,9 +305,16 @@ export function InvoiceStatement({ invoice }: { invoice: InvoiceDetail }) {
           {[
             ["Subtotal", invoice.subtotal],
             ["Discount", invoice.discount],
-            ["Issued charge", invoice.total],
+            [
+              invoice.state === "draft"
+                ? "Proposed draft total"
+                : invoice.state === "void"
+                  ? "Original voided charge"
+                  : "Issued charge",
+              invoice.total,
+            ],
             ["Credits", invoice.credits],
-            ["Payments received", invoice.paid],
+            ["Payments recorded", invoice.paid],
             ["Refunds returned", invoice.refunded],
           ].map(([label, value]) => (
             <div key={label} className="flex justify-between gap-3">
@@ -302,7 +325,7 @@ export function InvoiceStatement({ invoice }: { invoice: InvoiceDetail }) {
             </div>
           ))}
           <div className="flex justify-between gap-3 border-t border-border pt-4 text-lg font-semibold">
-            <dt>Total outstanding</dt>
+            <dt>{invoice.state === "draft" ? "Amount due before issue" : "Total outstanding"}</dt>
             <dd>
               <Money value={invoice.outstanding} />
             </dd>
@@ -316,6 +339,29 @@ export function InvoiceStatement({ invoice }: { invoice: InvoiceDetail }) {
             </div>
           )}
         </dl>
+        {invoice.state === "issued" && (
+          <details className="rounded-lg bg-muted/40 p-4 text-xs leading-6 text-muted-foreground">
+            <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-2 focus-visible:outline-ring">
+              Understand this balance
+            </summary>
+            <p className="mt-2">
+              Issued charge − credits = adjusted charge. Payments − refunds = money retained.
+              Outstanding is any adjusted charge still unpaid; refundable excess is money retained
+              above that charge. A credit changes the charge, while a refund records money already
+              returned. They are separate actions.
+            </p>
+            <p className="mt-2">
+              Due through today and future payments divide the outstanding balance by due date.
+              Neither means an automatic charge or a clinic profit figure.
+            </p>
+          </details>
+        )}
+        {invoice.state === "draft" && (
+          <p className="text-sm text-muted-foreground">
+            This is a proposed agreement. No payment is due until the invoice is issued; installment
+            dates below are proposed dates.
+          </p>
+        )}
         {invoice.due && invoice.state === "issued" && !invoice.due.is_installment && (
           <DueSummary due={invoice.due} />
         )}

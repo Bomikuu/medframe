@@ -7,7 +7,7 @@ export function getPortalClient(): GraphQLClient {
       cache: "no-store",
       requestMiddleware: async (request) => {
         const headers = new Headers(request.headers);
-        headers.set("X-CSRF-Token", await getCsrfToken(true));
+        headers.set("X-CSRF-Token", await getCsrfToken(true, request.signal ?? undefined));
         return { ...request, headers };
       },
     },

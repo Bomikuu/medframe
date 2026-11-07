@@ -1,5 +1,8 @@
 "use client";
 
+import { LoadingInformation } from "@/components/application/loading-information";
+import { AccessRequired } from "@/components/application/access-required";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserPlus, Users, RefreshCw, CalendarDays } from "lucide-react";
@@ -8,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FormSelect } from "@/features/patients/form-controls";
 import { ClinicClock } from "./clinic-clock";
 import { ConsultationGallery } from "./consultation-gallery";
 import { UpcomingCare } from "./upcoming-care";
@@ -40,18 +42,22 @@ export function ClinicianHome() {
 }
 
 function FullClinicianHome() {
-  const { organizationId, href, can, workspace } = useWorkspace();
+  const { organizationId, href, can, workspace, branchId: branch } = useWorkspace();
   const access = useStationAccess();
   const router = useRouter();
   const [patientOpen, setPatientOpen] = useState(false);
   const [view, setView] = useState("today");
-  const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
   const [before, setBefore] = useState<string | null>(null);
   const [photo, setPhoto] = useState<GalleryItem | null>(null);
   const remote = useStationDashboard(organizationId, branch, view, before);
   const timezone = remote.data?.timezone ?? workspace.organization.timezone;
   if (!can("patients.clinical.read"))
-    return <p role="alert">A clinical membership and patient access are required.</p>;
+    return (
+      <AccessRequired
+        title="Clinical workspace access required"
+        description="A clinical membership and patient access are required."
+      />
+    );
   return (
     <div className="grid min-w-0 gap-7">
       <header className="flex min-w-0 flex-wrap items-start justify-between gap-5 border-b border-border pb-6">
@@ -83,18 +89,6 @@ function FullClinicianHome() {
           </Button>
         </div>
         <div className="flex min-w-0 flex-wrap gap-3">
-          {workspace.branches.length > 1 && (
-            <FormSelect
-              id="stationBranch"
-              label="Branch"
-              value={branch}
-              onChange={(value) => {
-                setBranch(value);
-                setBefore(null);
-              }}
-              options={workspace.branches.map((value) => ({ value: value.id, label: value.name }))}
-            />
-          )}
           {!access && can("encounters.write") && <DoctorCodeDialog />}
         </div>
       </div>
@@ -135,13 +129,27 @@ function FullClinicianHome() {
               onClick={remote.reload}
               disabled={remote.loading}
             >
-              <RefreshCw className={remote.loading ? "animate-spin" : ""} /> Refresh
+              <RefreshCw
+                className={
+                  remote.loading && remote.data ? "animate-spin motion-reduce:animate-none" : ""
+                }
+              />{" "}
+              Refresh
             </Button>
           </div>
           {!remote.data ? (
-            <p role="status" className="py-10 text-sm text-muted-foreground">
-              {remote.error ? "Use Retry to reconnect." : "Loading your clinical day…"}
-            </p>
+            remote.error ? (
+              <p role="status" className="py-10 text-sm text-muted-foreground">
+                Use Retry to reconnect.
+              </p>
+            ) : (
+              <div className="flex min-h-80 items-center justify-center px-6 py-10">
+                <LoadingInformation
+                  title="Loading your clinical day"
+                  detail="Retrieving today’s consultations and scheduled patients."
+                />
+              </div>
+            )
           ) : (
             <>
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">

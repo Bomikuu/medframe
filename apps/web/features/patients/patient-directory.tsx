@@ -1,12 +1,15 @@
 "use client";
+import { useCursorHistory } from "@/components/application/use-cursor-history";
 import { useState } from "react";
 import Link from "next/link";
 import { MoreHorizontal, Search, ArrowRight } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EntrySheet } from "@/components/application/entry-sheet";
+import { PatientRegistrationReview } from "@/features/portal/registration/registration-review";
 import { PatientForm } from "./patient-form";
 import { ButtonLink } from "@/components/ui/button-link";
-import { Input } from "@/components/ui/input";
+import { SearchField } from "@/components/application/search-field";
+import { useUrlState } from "@/features/workspace/use-url-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -27,12 +30,17 @@ import { useRemote } from "./use-remote";
 import { LoadState, PageHeading, RemoteNotice, dateLabel } from "./feedback";
 
 export function PatientDirectory() {
-  const { organizationId, overview, workspace, href, can } = useWorkspace();
+  const { organizationId, overview, branchId: branch, href, can } = useWorkspace();
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState("name_asc");
-  const [branch, setBranch] = useState("all");
-  const [cursors, setCursors] = useState<(string | null)[]>([null]);
+  const [sort, setSort] = useUrlState("patientSort", "name_asc", [
+    "name_asc",
+    "name_desc",
+    "reference",
+  ]);
+  const [cursors, setCursors] = useCursorHistory(
+    JSON.stringify({ organizationId, branch, sort, query }),
+  );
   const [view, setView] = useCollectionView(
     `${overview.currentUser.id}:${organizationId}:patients`,
     "cards",
@@ -41,7 +49,7 @@ export function PatientDirectory() {
     organizationId,
     query,
     sort,
-    branchId: branch === "all" ? null : branch,
+    branchId: branch || null,
     after: cursors.at(-1),
   });
   const page = remote.data?.clinicPatients;
@@ -58,7 +66,7 @@ export function PatientDirectory() {
           href={href(`/clinic/patients/${patient.id}`)}
           className="flex min-w-48 items-center gap-3 font-medium hover:text-primary"
         >
-          <PatientAvatar name={patient.fullName} />
+          <PatientAvatar name={patient.fullName} imageId={patient.portraitId ?? undefined} />
           <span className="max-w-72 wrap-anywhere whitespace-normal">{patient.fullName}</span>
         </Link>
       ),
@@ -112,8 +120,9 @@ export function PatientDirectory() {
     <>
       <PageHeading
         title="Patients"
-        description="Your authorized patient directory. Open a record to review history or begin care."
+        description="Find a patient, review their record or begin care."
       >
+        {can("portal.manage") && <PatientRegistrationReview onAccepted={remote.reload} />}
         {can("patients.register") && (
           <EntrySheet
             title="Register patient"
@@ -124,19 +133,6 @@ export function PatientDirectory() {
           </EntrySheet>
         )}
       </PageHeading>
-      {page && (
-        <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
-            <strong className="mr-2 text-xl font-semibold text-foreground">
-              {page.totalCount.toLocaleString()}
-            </strong>
-            {query || branch !== "all" ? "matching patient records" : "authorized patient records"}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Search, select a record and continue care.
-          </p>
-        </div>
-      )}
       <div className="mb-6 flex min-w-0 flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
         <form
           role="search"
@@ -152,14 +148,16 @@ export function PatientDirectory() {
             <label htmlFor="patientSearch" className="mb-2 block text-xs font-medium">
               Name or reference
             </label>
-            <Input
+            <SearchField
               id="patientSearch"
-              type="search"
+              label="Search patients"
               value={draft}
-              maxLength={160}
-              autoComplete="off"
               placeholder="Search patients…"
-              onChange={(event) => setDraft(event.target.value)}
+              onChange={setDraft}
+              onClear={() => {
+                setQuery("");
+                resetPage();
+              }}
             />
           </div>
           <Button type="submit" variant="outline" aria-label="Search patients">
@@ -180,19 +178,7 @@ export function PatientDirectory() {
             { value: "reference", label: "Reference" },
           ]}
         />
-        <FormSelect
-          id="directory-branch"
-          label="Branch"
-          value={branch}
-          onChange={(value) => {
-            setBranch(value);
-            resetPage();
-          }}
-          options={[
-            { value: "all", label: "All permitted branches" },
-            ...workspace.branches.map((branch) => ({ value: branch.id, label: branch.name })),
-          ]}
-        />
+
         <ViewSwitcher value={view} onChange={setView} />
       </div>
       {!page ? (
@@ -208,6 +194,7 @@ export function PatientDirectory() {
           )}
           {!page.items.length ? (
             <EmptyState
+              illustration="patient-profile"
               title={query ? "No matching patients" : "No patients available"}
               description={
                 query
@@ -246,7 +233,11 @@ export function PatientDirectory() {
                 >
                   <CardContent className="grid gap-4 px-5">
                     <div className="flex items-center gap-3">
-                      <PatientAvatar name={patient.fullName} className="size-14 text-base" />
+                      <PatientAvatar
+                        name={patient.fullName}
+                        imageId={patient.portraitId ?? undefined}
+                        className="size-14 text-base"
+                      />
                       <div className="min-w-0">
                         <Link
                           className="font-semibold wrap-anywhere hover:text-primary"

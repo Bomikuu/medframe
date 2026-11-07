@@ -66,7 +66,7 @@ existing Medframe MFA step after Google identity verification.
 
 **Creative North Star: A confident clinical desk.** Medframe is an Operate surface for clinicians documenting patient care. A cool neutral application canvas, white task surfaces, strong Manrope headings, Jakarta UI text, navy actions and teal selection make a recognizable clinical product. The October 19 reconstruction supersedes the earlier plain white visual system while preserving product behavior and customization.
 
-The local Django application implements these tokens; current build, browser limitations, visual self-review and local cutover evidence are recorded in `docs/operations/visual-reconstruction-verification.md`. The original concept-11 logo asset is unavailable. A Lucide HeartPulse medical symbol accompanies the Medframe wordmark without claiming to reproduce that original asset. Saved clinic logos identify the organization in its selector and preserve their proportions.
+The local Django application implements these tokens; current build, browser limitations, visual self-review and local cutover evidence are recorded in `docs/operations/visual-reconstruction-verification.md`. The October 22 user-supplied doctor illustration now accompanies the Medframe wordmark through shared Brand/BrandMark components. Saved clinic logos identify the organization in its selector and preserve their proportions.
 
 ## Colors
 
@@ -109,7 +109,7 @@ Private upload controls report real transfer/scan state, preserve uncropped clin
 - Preserve clinical readability, shared tokens, predictable navigation, and grouped expected-input fields.
 - Verify default white, explicit dark, keyboard/2D, failures/conflicts, long content, and narrow layouts with synthetic data.
 - Keep proposed treatment distinct from completed evidence and draft findings distinct from finalized history.
-- Do not claim the companion mark reproduces the unavailable original logo; never invent anatomical validation, diagnoses, metrics, notifications, or compliance claims.
+- Use the supplied brand mark unchanged. The editable illustration SVGs are simplified traces, not original vector source artwork. Never invent anatomical validation, diagnoses, metrics, notifications, or compliance claims.
 - Do not crop clinical imagery into avatars or expose files through public object URLs.
 
 ## Clinical Batch 2 interaction owners
@@ -246,3 +246,173 @@ passing browser evidence and3 appointment-scope tests pass; completed reschedule
 and final Continue/service-reader-card browser acceptance remain unverified.
 See docs/operations/patient-actions-hub-verification.md for actual tools, failures,
 activation repair, source-only refinements, preservation/runtime and rollback.
+
+## Shared loading presentation
+
+LoadingInformation centers its copy, section icon and visible teal spinner. LoadState centers this shared presentation in the available content region; clinic bootstrapping centers it in the viewport. Existing slow-request/retry and accessible status behavior remain. Spinner motion respects reduced-motion preferences.
+
+## Clinic onboarding experience refinement
+
+The introduction is a photo-led white card with a generic generated clinic reception, replacing the simulated app screenshot. Quiet outlined circles frame the page. Setup uses a shared card shell, interactive saved/unlocked steps, a reduced-motion-aware active dot, and a compact six-step phone navigator. Specialty cards use restrained Lucide icons and explicit selected checks. Forms show field errors and save/network feedback; email/phone normalization keeps canonical server values. Verification uses separate digit boxes, explicit busy/sent/error states and a resend countdown. Password guidance separates the required length from optional variety suggestions; native server password/MFA policy stays authoritative. Day-specific hours use existing draft JSON and native PracticeDay rows with legacy common-hour fallback; no schema migration. Contextual help explains each step, save/resume and local development mail.
+
+## Session recovery presentation
+
+Expired-session recovery uses the shared centered RecoveryState card: shield icon, heading, explanatory text and an emphasized realm-correct sign-in action. Retry/back remain secondary; workspace/sign-out controls use the More recovery options disclosure. Portal bootstrap/recovery fills the available viewport and has no dangling sign-in link. Existing session policy and recovery mutation owners remain.
+
+## Contextual page-level errors — supersedes earlier recovery actions
+
+Expired staff/patient sessions show one realm-correct Sign in action; Station expiry opens the code-entry Station instead. No Back to collection control remains. Advanced browser reset is available only for blocked/unknown access, never alongside the expired-session sign-in action. No-clinic/no-patient-connection states explain the signed-in context and suppress a workspace action that would loop. Shared AccessRequired and RecordUnavailable extend RecoveryState; compact embedded failures avoid a second card. Framework not-found and unexpected/root-layout failures use the same visual hierarchy and native home/retry actions. Kiosk/TV connection errors keep their device-specific controls and public-display typography. Field-level validation remains associated with the affected field.
+
+## Clinic setup — reference layout refinement
+
+The October 20 onboarding reference guides the existing setup flow: a compact Medframe/help header, connected icon step rail with true saved completion count, a wide bordered form card and a contextual “Why this matters” rail. The background uses sparse teal circles and diagonal lines. Preserve the canonical step order and native autosave/account guards. Desktop uses three columns from xl; tablet retains a navigation rail with expandable guidance after the form; phone uses six compact step icons and one content column. Guidance describes actual setup behavior rather than promising configured clinical permissions or communications. No pre-account avatar menu is fabricated.
+
+Clinic setup save status and Save and exit belong in the persistent page header. Keep the actual form-owned save/status handlers via the header slot; do not duplicate persistence logic. At phone widths, use a second compact header row. Account/review exit actions use the same header and existing guards.
+
+Onboarding specialty selection uses descriptive multi-select cards with a teal border/background and explicit selected check, not color alone. Keep descriptions in presentation metadata; catalog codes and clinical authorization are unchanged. Search by name or care description preserves hidden selections.
+
+## Patient-first registration
+
+Public branch registration is email-first: contact ownership code in six separated cells, minimal patient details, then an explicit clinic-review state. Use the onboarding circle/line canvas and white/navy/teal cards, without a staff shell. Do not imply verified email is verified patient identity or permission to see records. Distinguish registration pending/accepted/declined from account activation. Mobile verification remains unavailable until SMS configuration. Staff use Patients → Registration requests for one reusable branch link and a focused review modal; accepted requests use native invitation/account/MFA flows. Duplicate matches require explicit authorized linking and an identity/guardian attestation. Do not expose matching records to the applicant or invent new clinical access.
+
+Registration supports configured SMSGate contact verification and the shared official Google sign-up component. Disabled options explain missing configuration and leave email available. Mobile proof asks separately for an invitation email and labels that email unverified. Google first-factor proof still leads to clinic review and native account/MFA activation; existing accounts are never merged by matching email alone. SMS status distinguishes queued/gateway acceptance from confirmed delivery.
+
+Contact entry uses the shared PhoneInput: separate calling code (default Philippines +63), numeric keyboard, digits filtered on entry and paste, spaced national display and compact international form values. Do not require patients to type the +63 prefix twice or include the local leading0. Other calling codes remain editable; SMSGate verification stays PH-mobile-only. Email inputs consistently remove spaces/lowercase and retain existing validation; PH clinic postal code is four digits. Profile/contact forms share the same control rather than unrelated masks.
+
+Patient profile photos use a single circular preview and direct upload. A successful clean upload automatically becomes the portrait through the existing versioned endpoint; no clinical-image gallery, second image selection or Use selected photo action. Keep the old portrait until replacement succeeds, show scan/update/error status, and keep Remove photo. The original private image stays in the clinical record; profile display alone is circular. Hide editable document labeling for this fixed patient-photo upload context.
+
+Reason fields use shared context-specific suggested answers with explicit selection/checkmarks and Other for custom text. No default reasons, automatic diagnoses or placeholder audit assertions. Preserve required/optional semantics and original form ownership. Start consultation is a compact dialog at the existing consultation-start route, retaining patient/provider/queue context, allergy/medication review, draft/unsaved guards and the native encounter mutation. Closing returns to the patient record/directory. The clinic-wide parallel/intercepting modal slot was removed during navigation recovery; it is not the current interaction contract.
+
+Forgot-password entry and confirmation share the same staff/patient component and correct realm return link. Use restrained key/mail icons, explicit entered-email/change action, link-expiry/latest-message guidance and a resend control with 60-second client cooldown. Per the October20 user amendment, unknown/inactive account emails produce an explicit inline error; only a successful request advances to the requested-link state. Backend throttling stays authoritative. On native localhost development with Mailpit, clearly explain captured email and link its inbox; hide this help in production. Do not claim email delivery from request acknowledgement alone. The user explicitly requested missing-account notification in recovery.
+
+### Workspace loading consistency
+
+Clinic and Clinical Station startup gates share `WorkspaceLoading`: full-viewport centering, one loading group, stage-specific title and short copy within the same container. Keep native access gates separate; avoid a new visual screen per gate. Render existing recovery states on failure. Page-section loading stays within its section and action progress stays on its button; do not animate a second Refresh icon during initial section loading. The Next development badge is hidden so it cannot compete with product progress. See `docs/operations/unified-loading-verification.md` for scope and actual visual acceptance.
+
+### One clinic Dashboard
+
+Dashboard now owns reporting formerly split with Analytics. Use one branch/date selection, bookings/patient activity first and Financials second. Prior-period charts must plot actual prior daily values and name both date spans. Patient stock and financial balances are current snapshots; registrations/bookings/payments are date-based flows. Preserve scoped totals, explicit no-baseline wording, optional clinical widgets and exact tables. See `.impeccable/surfaces/clinic-analytics.md` and actual bounded verification.
+
+### Staff administration and onboarding
+
+Staff & Access unifies membership/doctor-profile/module settings under clinic administration. Circular private portraits and compact access summaries lead to focused Manage/Invite modals; role/active/Station-only controls use Switch. Staff invites use recipient verification, resumable profile, native identity/MFA and final authorized acceptance. Full permitted tools, approved-Station-only mode and billing level remain distinct from patient grants. See `.impeccable/surfaces/staff-access.md` and actual verification before claiming authenticated acceptance.
+
+Provider availability/calendar follows .impeccable/surfaces/provider-calendar.md: day/week time grid and agenda, explicit configured hours/timezone, booking selection separating scheduled identity from actual queue service, native action owners, and a semantic weekly schedule table. CALENDAR-001 records short-block secondary text clipping; no complete authenticated visual/behavior acceptance claim.
+
+Online appointment rooms follow .impeccable/surfaces/online-appointments.md: patient PIN entry, native doctor entry, dominant video with compact controls/timer and a shared chat/files rail. Ending and leaving use separate confirmations. Only entry/conversation/files presentation and missing-room recovery have visual evidence; native in-call behavior remains CALL-001.
+
+Scheduling now follows the weekly/month refinement in .impeccable/surfaces/provider-calendar.md.
+Use written dates (November 11, 2026) for user-facing date labels; keep
+ISO values for transport and date comparisons. Shared DateInput owns written scheduling entry
+labels with a native platform calendar, and DurationChoice owns suggested visit lengths plus Other.
+Apply this convention to touched legacy workflows rather than claiming a completed global retrofit.
+Calendar day numbers remain numeric within a clearly named month/year. Native schedule, reservation,
+version and permission owners remain authoritative.
+
+Online appointment refinement retains the current clinical desk tokens. CallWorkspace owns
+room layout; CallStage owns media framing; ConversationPanel is presentation with the native
+CallConversation request owner. Show media connection separately from camera preference, preserve
+drafts when the panel is hidden, and label file scans explicitly. Use the shared Dialog/FormSelect
+for device settings and written dates/clinic timezone. See .impeccable/surfaces/online-appointments.md
+and actual bounded evidence; synthetic UI does not establish a validated live clinical call.
+
+Online appointment waiting rooms separate PIN acceptance, device preflight, doctor admission and
+appointment start. Use the shared room surface guidance for optional self-reported readiness, local
+microphone meter and explicit speaker confirmation. Pending patients have no conversation/media
+access. Public connection metadata describes configured profile only. See actual phase evidence in
+docs/operations/call-admission-readiness-verification.md; hardware/native/internet acceptance is open.
+
+Online appointment continuity uses actual connection-quality/reconnect feedback and a mounted,
+collapsible doctor clinical overlay. Reuse clinical saves/leases/versions and patient context rather
+than parallel notes. Review/share next steps explicitly; the end view retains already-delivered
+instructions and directs released records and follow-up to the native portal. Room expiry remains
+authoritative. See .impeccable/surfaces/online-appointments.md and actual phase evidence.
+
+Doctor Station patient actions follow .impeccable/surfaces/clinical-station.md: stable patient header,
+circular native portrait, safety overview, authorized recent patients, guarded switching and one
+searchable grouped hub shared with the open consultation. Native clinical/visit/payment owners remain;
+services are read-only, payments require existing doctor/account/device authority. Exclude refunds/
+admin/access grants. Synthetic visual evidence only; native acceptance remains STATION-ACTIONS-001.
+See docs/operations/station-patient-actions-verification.md for actual scope/evidence/graph limitations.
+
+Clinic sign-in settings follow .impeccable/surfaces/clinic-security.md. Use three accessible native
+radio cards for Strict, Password only and Remember for30 days; show selected/current/effective modes,
+password-confirmed changes and explicit inline saved/error/conflict feedback. Keep browser trust
+opt-in in the existing six-cell MFA form and separate from Stay logged in/session expiry. Native
+permissions and assurance are authoritative. Existing clinics default Strict; platform accounts stay
+Strict. See docs/operations/clinic-sign-in-policy-verification.md for actual bounded evidence/limits.
+
+Reference-guided Provider schedules uses .impeccable/surfaces/provider-calendar.md: weekly table,
+compact real window rows and resource/date panels with in-page section navigation. Preserve existing
+shell/navigation, written dates, native scheduling rules and permissions; use circular initials when
+provider photos/specialties are absent. ScheduleSection owns this surface's section header variant,
+while DateAvailability retains native form persistence and exposes reusable fields/list. Phone page
+overflow is deferred as SCHEDULE-REF-001; native acceptance stays002. See actual phase evidence.
+
+Provider schedules now reuse StaffAvatar and the current staff portrait returned by native scoped
+setup, with circular compact framing and initials on absent/failed loads. Keep private image access
+and current-provider visibility; never use patient-document image IDs for staff portraits. See
+schedule-provider-photo-verification.md for actual fallback-only visual evidence and native gaps.
+
+Doctor/patient identity fields reuse PersonAvatar/PersonIdentity with circular private photos or
+initials, and typed FormSelect person options that retain names/references and typeahead text.
+Do not derive identity type from a label or broaden photo access. Calendar live changes invalidate
+snapshots by revision; background updates retain mounted content and block stale actions without
+replacing the selected record with a loading panel. See appointments-live-identity-verification.md.
+
+Appointment changes open AppointmentEditorDialog in the current viewport using the original
+BookingForm owner, current booking date and clear read-only identities. Room entry states exact
+appointment/opening dates and timezone; Request reschedule opens only an authorized patient's
+matching booking in the portal and requires native confirmation. It does not imply a pending request
+was sent. See appointment-edit-room-recovery-verification.md for actual visual/native gaps.
+
+Month appointments keep fixed-height cells and one small person preview. Date/count/View all opens a
+scrollable, paginated day list using native date/provider/status scope; details and editing reuse their
+existing owners. Preserve calendar context on close. See calendar-day-modal-verification.md.
+
+Pre-admission appointment entry now uses the supplied split reference: generated decorative navy
+clinic interior on desktop, focused schedule/PIN/reschedule card and secondary doctor entry/help.
+Phone keeps a compact brand and six responsive code boxes. Image uses native static import and HTML
+text; exact opening dates/permissions remain factual. See waiting-room-reference-verification.md.
+
+Online appointment rooms now use a focused full-viewport shell, preserving the established clinical tokens and dark media surface. Shared shadcn overlays expose secondary tools; the single mounted nonmodal conversation dock avoids draft loss and keeps call controls reachable. This surface exception replaces earlier natural room-page scrolling, without changing ordinary clinic page layout. Evidence: docs/operations/focused-call-workspace-verification.md.
+
+Interactive call models preserve the full-viewport room: shared model fills the stage, ongoing media stays mounted in a collapsible tile, and chat retains its existing owner. Doctor focus uses teal, patient pointer amber, with explicit role labels. Shared shadcn tools expose Parts, camera views and selection modes. Patient view-only is the default, and meaningful transitions use in-room notices rather than camera-event toast noise. Generic presentation remains separate from saved clinical data. See docs/operations/interactive-call-models-verification.md for scope and actual native/GPU limits.
+
+## Appointment lookup and current branch — October21
+
+Current branch selection belongs in the header's Clinic & branches dialog. Appointments consumes that branch without another selector. PatientSearchDialog is the shared modal suggestion owner for navigation and booking selection, with circular portraits/placeholders and explicit states. Appointment summary cards use existing semantic icon tints and border/shadow hover without implying a click action. Instant booking shows its actual link/PIN immediately and labels manual closure instead of presenting a scheduled interval. Existing shared primitives and clinical record owners remain authoritative; see docs/operations/appointment-flow-verification.md for limits.
+
+## Branch context placement — October21
+
+Remove duplicated page-context branch selectors and their empty panels. The header chooser is the shared owner across clinic screens; compact signed-in Station uses the same dialog through HeaderBranchControl. Device-bound Station context is read-only. Persisted Assigned/Registration/Device branch fields and service/website configuration remain distinct from page context. Branch transitions retain the unsaved-work guard and reset branch-scoped collection state. Actual verification and deferred subtitle follow-up: docs/operations/header-branch-verification.md.
+
+## October 22 interface cleanup
+
+Use one result count per collection view, one primary open destination per consultation card, and a single entry control for each diagnostic request form. Group invoice lookup and filter totals with invoices. Avoid an outer panel around already-contained calendar/queue content; retain real task boundaries. Device connection instructions belong in an expandable native disclosure. Shared page headings reserve enough width for their title before action groups wrap. Preserve essential clinical, consent, financial and access distinctions when shortening copy. See `docs/operations/ui-cleanup-verification.md` for actual review coverage.
+
+October 22 follow-up: keep empty select choices visibly named while retaining their domain values, omit cursor footers with no destination, distinguish initial and filtered empty states, and let selected Appearance tabs carry their own section name. Reuse written-date controls for report/invoice filters and keep loading copy specific to the route while preserving the shared container. See ui-refinement-verification.md for actual acceptance and date-entry uncertainty.
+
+### Contextual illustration library — October 22
+
+Use `MedframeIllustration` for decorative onboarding, records, appointments, documents, staff and notification empty states. Keep illustrations secondary to instructions and actions; retain compact Lucide icons for controls and clinical status. Same-origin SVG `<use>` instances inherit `--mf-*` palette variables; their path data stays outside JavaScript. The original traced shapes and skin colors are preserved. The library is decorative, never a patient portrait or clinical anatomical model. See `apps/web/public/illustrations/medframe/README.md` for source and palette details.
+
+### Patient terminal modes — October22
+
+Patient-facing entry has one exact ID/clinic-number/email field and one Continue action in a calm bordered card, with the supplied patient illustration supporting the task on desktop. Staff assistance has an explicit authenticated search and selectable identity rows with circular placeholders. Once selected, both modes reuse the existing large action cards and native journey screens. Do not imply that an ID-only terminal session is a verified portal account login. Keep patient switching, busy/recovery states and inactivity clearing visible; no patient directory appears in public mode. See terminal-workflows-verification.md for actual native visual coverage and limitations.
+
+### Shared feedback and terminal refinement — October22 Phases1–2
+
+Preserve the existing centered loading/recovery composition and contextual refresh notices; generic copy cannot guarantee draft preservation. A single terminal patient bar carries identity/reference/entry-method context across menu, review and result. Clear-patient actions differ from explicitly labeled staff sign-out. Confirmed-action summaries are quiet divided rows rather than a second tile grid, and never label a cashier ticket as payment. Details and remaining visual limits are recorded in improvements-phase-1-2-verification.md.
+
+### Clinical overview hierarchy — October22 Phase3
+
+Patient Overview leads with recorded clinical context and recent saved care, with upcoming appointments alongside. Demographics/contact support and activity totals are secondary expandable information. Preserve the five record groups and centralized Patient actions modal. A saved draft must not imply live treatment or current editing ownership.
+
+### Narrow scheduling — October22 Phase4
+
+Below the desktop breakpoint, weekly availability becomes a day selector and provider-hours list. Keep the seven-day table on desktop. Both read the same native closure/override/effective-date rules; hours are not a promise of bookable capacity. Keep screen-reader labels inside positioned scroll boundaries rather than hiding global document overflow.
+
+### Setup and team access — October23 Phase6
+
+Use a quiet, divided access summary directly before staff invitation/save/account decisions. Keep workspace/branch and billing/clinical capabilities distinct, with grant/device limits visible. Delivery and call configuration belongs in progressive disclosure, not another metric grid. Patient request status leads with its actual state, a copyable reference and concrete next steps. Preserve the existing white/navy/teal world, circular identity controls, semantic status colors and focus-visible behavior; no new animation or decorative setup shell. See improvements-phase-6-verification.md for scoped visual evidence and open acceptance.

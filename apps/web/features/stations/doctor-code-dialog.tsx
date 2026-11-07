@@ -4,16 +4,14 @@ import { useState } from "react";
 import { TabletSmartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { FormSelect } from "@/features/patients/form-controls";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { errorMessage } from "@/lib/auth/client";
 import { stationRequest, type Transfer } from "./client";
 import { TemporaryCode } from "./code-input";
 
 export function DoctorCodeDialog() {
-  const { organizationId, workspace, overview } = useWorkspace();
+  const { organizationId, workspace, overview, branchId: branch } = useWorkspace();
   const [open, setOpen] = useState(false);
-  const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
   const [transfer, setTransfer] = useState<Transfer | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -54,17 +52,10 @@ export function DoctorCodeDialog() {
             Generate your own one-use doctor code. On the paired, approved tablet, open Station and
             enter it to choose patients, continue consultations or start a walk-in.
           </DialogDescription>
-          <FormSelect
-            id="doctorCodeBranch"
-            label="Clinic branch"
-            value={branch}
-            onChange={(value) => {
-              setBranch(value);
-              setTransfer(null);
-            }}
-            disabled={busy}
-            options={workspace.branches.map((b) => ({ value: b.id, label: b.name }))}
-          />
+          <p className="text-sm text-muted-foreground">
+            Branch:{" "}
+            {workspace.branches.find((item) => item.id === branch)?.name ?? "Current branch"}
+          </p>
           {transfer && <TemporaryCode code={transfer.code} expiresAt={transfer.expires_at} />}
           <p className="text-xs leading-5 text-muted-foreground">
             Access lasts up to 30 minutes under your identity and existing patient permissions.

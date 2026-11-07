@@ -1,4 +1,7 @@
 "use client";
+
+import { PersonIdentity } from "@/components/application/person-identity";
+
 import { useEffect, useState } from "react";
 import { LoadingInformation } from "@/components/application/loading-information";
 import { Button } from "@/components/ui/button";
@@ -128,7 +131,7 @@ export function KioskJourney({
             ) : (
               <LoadingInformation
                 title="Loading your bills"
-                detail="Retrieving issued bills and recorded outstanding amounts for your verified patient session."
+                detail="Retrieving issued bills and recorded outstanding amounts for the patient selected on this terminal."
               />
             )
           ) : !bills.invoices.length ? (
@@ -182,6 +185,7 @@ export function KioskJourney({
           <FormSelect
             id="kiosk-provider"
             label="Doctor / dentist"
+            personKind="provider"
             value={selection.provider_id}
             onChange={(value) => change({ provider_id: value, start: "" })}
             options={setup.providers.map((item) => ({ value: item.id, label: item.name }))}
@@ -246,7 +250,7 @@ export function KioskJourney({
           {!snapshot ? (
             <LoadingInformation
               title="Finding your appointments"
-              detail="Retrieving booked appointments for your verified patient session. Reception can help if your booking is missing or outside its arrival window."
+              detail="Retrieving booked appointments for the selected patient. Reception can help if a booking is missing or outside its arrival window."
             />
           ) : !snapshot.appointments.length ? (
             <p>No booked appointments were found.</p>
@@ -265,7 +269,8 @@ export function KioskJourney({
                 <span className="grid gap-1">
                   <strong>{clinicTime(row.start, setup.timezone, true)}</strong>
                   <span>
-                    {row.provider} · {row.status.replaceAll("_", " ")}
+                    <PersonIdentity kind="provider" name={row.provider} /> ·{" "}
+                    {row.status.replaceAll("_", " ")}
                   </span>
                 </span>
               </Button>

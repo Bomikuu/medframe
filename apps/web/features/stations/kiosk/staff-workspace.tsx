@@ -1,15 +1,8 @@
 "use client";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import {
-  RefreshCw,
-  Plus,
-  MapPin,
-  Monitor,
-  UsersRound,
-  ListOrdered,
-  Layers3,
-  X,
-} from "lucide-react";
+
+import { AccessRequired } from "@/components/application/access-required";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RefreshCw, Plus, Monitor, UsersRound, ListOrdered, Layers3, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -17,7 +10,6 @@ import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useOperationsSetup } from "@/features/operations/use-operations";
 import { DepartmentOverview, DepartmentServices } from "./department-overview";
 import { RegistrationRequests, type Intake } from "./registration-requests";
-import { BranchChoice } from "@/features/operations/controls";
 import { LoadState, PageHeading } from "@/features/patients/feedback";
 import { stationRequest } from "../client";
 import { errorMessage } from "@/lib/auth/client";
@@ -38,9 +30,14 @@ type Data = {
 };
 export function KioskStaffWorkspace() {
   const { can, href } = useWorkspace();
-  const [branch, setBranch] = useState("");
-  const remote = useOperationsSetup(branch);
-  if (!can("operations.read")) return <p role="alert">Clinic operations access is required.</p>;
+  const remote = useOperationsSetup();
+  if (!can("operations.read"))
+    return (
+      <AccessRequired
+        title="Clinic operations access required"
+        description="Clinic operations access is required."
+      />
+    );
   if (!remote.setup) return <LoadState error={remote.error} retry={remote.reload} />;
   return (
     <div className="grid gap-7">
@@ -57,15 +54,11 @@ export function KioskStaffWorkspace() {
           </ButtonLink>
         )}
       </PageHeading>
-      <StaffBoard
-        key={remote.setup.branch_id}
-        branch={remote.setup.branch_id}
-        branchControl={<BranchChoice setup={remote.setup} change={setBranch} />}
-      />
+      <StaffBoard key={remote.setup.branch_id} branch={remote.setup.branch_id} />
     </div>
   );
 }
-function StaffBoard({ branch, branchControl }: { branch: string; branchControl: ReactNode }) {
+function StaffBoard({ branch }: { branch: string }) {
   const { organizationId, can } = useWorkspace();
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState("");
@@ -135,24 +128,7 @@ function StaffBoard({ branch, branchControl }: { branch: string; branchControl: 
           {error}
         </p>
       )}
-      <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
-        <section
-          aria-label="Clinic branch"
-          className="rounded-xl border border-border bg-card p-5 sm:p-6"
-        >
-          <div className="mb-5 flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-info-soft text-info">
-              <MapPin className="size-5" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 className="text-base font-semibold">Clinic branch</h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Select the branch to view patient stations and department queues.
-              </p>
-            </div>
-          </div>
-          {branchControl}
-        </section>
+      <div className="grid gap-5">
         <PatientAccessPanel
           kiosks={data.kiosks}
           timezone={data.timezone}
@@ -380,6 +356,7 @@ function StaffBoard({ branch, branchControl }: { branch: string; branchControl: 
         <StageDialog
           key={stage.id}
           row={stage}
+          peers={data.tickets}
           branchId={branch}
           timezone={data.timezone}
           departments={data.departments}

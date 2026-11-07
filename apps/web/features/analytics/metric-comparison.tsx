@@ -4,9 +4,7 @@ export function MetricComparison({ title, value }: { title: string; value: Metri
   const delta = value.current - value.previous;
   const change =
     value.previous === 0
-      ? value.current === 0
-        ? "No change"
-        : "No prior baseline"
+      ? "No previous-period data"
       : `${delta > 0 ? "+" : ""}${((delta / value.previous) * 100).toFixed(1)}% vs previous period`;
   return (
     <div>

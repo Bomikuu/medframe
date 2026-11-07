@@ -2,6 +2,8 @@
 
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { EntrySheet } from "@/components/application/entry-sheet";
+import { localDate } from "@/features/operations/schema";
+import { StatusBadge } from "@/components/application/status-badge";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -44,11 +46,18 @@ export function FollowUps({
   patientId: string;
   plans?: { id: string; title: string }[];
 }) {
-  const { organizationId, can } = useWorkspace();
+  const { organizationId, can, workspace } = useWorkspace();
   const readOnly = usePatientRecordReadOnly();
   const [after, setAfter] = useState<string>();
   const remote = useRemote(FollowUpsDocument, { organizationId, patientId, after });
   const parsed = recordPage(followUpSchema).safeParse(remote.data?.followUps);
+  const today = localDate(workspace.organization.timezone);
+  const pageItems = parsed.success ? parsed.data.items : [];
+  const openItems = pageItems.filter((item) => item.status === "open");
+  const overdue = openItems.filter((item) => item.due_date && item.due_date < today).length;
+  const next = openItems
+    .filter((item) => !!item.due_date)
+    .sort((a, b) => a.due_date!.localeCompare(b.due_date!))[0];
   const form = useForm({ defaultValues: { ...empty, requestId: crypto.randomUUID() } });
   const watchedForm = useWatch({ control: form.control });
   const capture = useRequestScope();
@@ -65,6 +74,19 @@ export function FollowUps({
         <LoadState error={remote.error} retry={remote.reload} />
       ) : parsed.success ? (
         <>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg bg-muted/40 p-3 text-sm">
+            <span>
+              <strong>{openItems.length}</strong> open on this page
+            </span>
+            <span className={overdue ? "text-warning" : "text-muted-foreground"}>
+              <strong>{overdue}</strong> overdue
+            </span>
+            {next && (
+              <span className="text-muted-foreground">
+                Earliest dated follow-up: {dateLabel(next.due_date!)}
+              </span>
+            )}
+          </div>
           <ul className="grid gap-4">
             {parsed.data.items.map((item) => (
               <li
@@ -72,6 +94,14 @@ export function FollowUps({
                 className="flex flex-wrap items-start justify-between gap-4 border-b border-border py-4"
               >
                 <div className="max-w-prose">
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    <StatusBadge value={item.status} />
+                    {item.status === "open" && item.due_date && item.due_date < today && (
+                      <span className="rounded-md bg-warning-soft px-2 py-1 text-xs font-medium text-warning">
+                        Overdue
+                      </span>
+                    )}
+                  </div>
                   <p className="whitespace-pre-wrap">{item.instructions}</p>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {item.due_date ? `Due ${dateLabel(item.due_date)}` : "No date set"} ·{" "}

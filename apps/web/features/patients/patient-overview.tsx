@@ -10,6 +10,7 @@ import { PatientActionsDialog } from "./profile/patient-actions-dialog";
 import { Button } from "@/components/ui/button";
 import { PatientProfileHeader } from "./profile/patient-profile-header";
 import { PatientProfileMetrics } from "./profile/patient-profile-metrics";
+import { PatientCareContinuity } from "./profile/patient-care-continuity";
 import { PatientProfileNotes } from "./profile/patient-profile-notes";
 import { PatientProfileSidebar } from "./profile/patient-profile-sidebar";
 import { profileSummarySchema } from "./profile/summary";
@@ -129,6 +130,7 @@ export function PatientOverview({
       <PatientActionsDialog
         key={patient.id}
         patient={patient}
+        summary={summary}
         portraitId={summary?.clinical?.portrait_id}
         open={actionsOpen}
         onOpenChange={setActionsOpen}
@@ -160,7 +162,6 @@ export function PatientOverview({
           </p>
         )}
       </div>
-      <PatientProfileMetrics summary={summary} loading={summaryRemote.loading} onTab={changeTab} />
       {summaryRemote.error !== null && (
         <div
           role="alert"
@@ -193,50 +194,69 @@ export function PatientOverview({
                     onReview={() => changeTab("medical")}
                   />
                 )}
-                {[
-                  ["Identity", identity],
-                  ["Contact & support", contact],
-                ].map(([heading, rows]) => (
-                  <Card
-                    key={String(heading)}
-                    data-panel
-                    className="rounded-xl border border-border py-0 ring-0"
-                  >
-                    <CardHeader className="border-b border-border p-5">
-                      <CardTitle>
-                        <h2 className="flex items-center gap-2 text-base font-semibold">
-                          {heading === "Identity" ? (
-                            <UserRound aria-hidden className="size-4 text-info" />
-                          ) : (
-                            <ContactRound aria-hidden className="size-4 text-teal-ink" />
-                          )}
-                          {String(heading)}
-                        </h2>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-5">
-                      <dl className="grid gap-5 sm:grid-cols-2">
-                        {(rows as string[][]).map(([label, value]) => (
-                          <div
-                            key={label}
-                            className={label === "Address" ? "sm:col-span-2" : undefined}
-                          >
-                            <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
-                            <dd className="mt-1 text-sm leading-6 wrap-anywhere whitespace-pre-wrap">
-                              {value || "Not recorded"}
-                            </dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </CardContent>
-                  </Card>
-                ))}
+                <PatientCareContinuity
+                  summary={summary}
+                  onNotes={() => changeTab("consultations")}
+                />
+                <details className="rounded-xl border border-border bg-card">
+                  <summary className="min-h-12 cursor-pointer px-5 py-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-ring">
+                    Patient details & activity totals
+                  </summary>
+                  <div className="border-t border-border px-5 pt-5">
+                    <PatientProfileMetrics
+                      summary={summary}
+                      loading={summaryRemote.loading}
+                      onTab={changeTab}
+                    />
+                    {[
+                      ["Identity", identity],
+                      ["Contact & support", contact],
+                    ].map(([heading, rows]) => (
+                      <Card
+                        key={String(heading)}
+                        data-panel
+                        className="rounded-none border-0 bg-transparent py-0 shadow-none ring-0"
+                      >
+                        <CardHeader className="px-0 pt-5 pb-3">
+                          <CardTitle>
+                            <h2 className="flex items-center gap-2 text-base font-semibold">
+                              {heading === "Identity" ? (
+                                <UserRound aria-hidden className="size-4 text-info" />
+                              ) : (
+                                <ContactRound aria-hidden className="size-4 text-teal-ink" />
+                              )}
+                              {String(heading)}
+                            </h2>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="px-0 pt-0 pb-5">
+                          <dl className="grid gap-5 sm:grid-cols-2">
+                            {(rows as string[][]).map(([label, value]) => (
+                              <div
+                                key={label}
+                                className={label === "Address" ? "sm:col-span-2" : undefined}
+                              >
+                                <dt className="text-xs font-medium text-muted-foreground">
+                                  {label}
+                                </dt>
+                                <dd className="mt-1 text-sm leading-6 wrap-anywhere whitespace-pre-wrap">
+                                  {value || "Not recorded"}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </details>
               </div>
               <PatientProfileSidebar
                 patientId={patientId}
                 summary={summary}
                 onTab={changeTab}
                 showContext={false}
+                showRecent={false}
               />
             </div>
           </TabsContent>

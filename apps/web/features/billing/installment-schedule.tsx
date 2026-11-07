@@ -123,6 +123,19 @@ export function InstallmentSchedule({
         Showing {visible.length} of {due.rows.length} scheduled payments
         {active ? ". Filters change this view only." : "."}
       </p>
+      {active && (
+        <details className="text-xs leading-5 text-muted-foreground">
+          <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-2 focus-visible:outline-ring">
+            How payments, credits and refunds affect this schedule
+          </summary>
+          <p className="mt-2 max-w-3xl">
+            Net payments cover the earliest installment first. Credits reduce the last installment
+            first. A refund reduces the money retained and can make an earlier installment unpaid
+            again. “Covered” is the current invoice-wide allocation, not a separate payment receipt
+            for that installment. Recorded payment confirmations show their own refund history.
+          </p>
+        </details>
+      )}
       <div id={tableId} className="overflow-x-auto">
         <Table>
           <TableHeader>

@@ -29,6 +29,7 @@ def communication_setup(request, organization_id, branch_id, patient_id=None, se
     config = CommunicationSettings.objects.filter(organization_id=organization_id).first()
     result = {
         "transport": "twilio" if settings.SMS_LIVE_ENABLED else "preview",
+        "readiness": communication_readiness(),
         "timezone": member.organization.timezone,
         "settings": {
             "appointment_automatic": config.appointment_automatic if config else False,
@@ -188,3 +189,16 @@ def communication_page(request, organization_id, branch_id, filters=None, after=
         after=after,
         serialize=reminder_summary,
     )
+
+
+def communication_readiness():
+    from config.runtime import get_settings
+    from medframe_apps.portal.smsgate import configured
+
+    runtime = get_settings()
+    return {
+        "verification_sms": configured(),
+        "email_local": runtime.app_env == "development"
+        and runtime.smtp_host in {"localhost", "127.0.0.1", "mail"}
+        and runtime.smtp_port in {51025, 1025},
+    }

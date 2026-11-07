@@ -43,6 +43,12 @@ def require_provider_scope(member, provider_id):
 
 
 def operational_patient(member, patient_id, branch_id):
+    from medframe_apps.stations.access_scope import doctor_scope
+
+    if doctor_scope():
+        from medframe_apps.patients.services import require_patient
+
+        require_patient(member.user, member.organization_id, patient_id, "patients.clinical.read")
     patient = Patient.objects.filter(
         id=patient_id, organization_id=member.organization_id, branch_id=branch_id
     ).first()

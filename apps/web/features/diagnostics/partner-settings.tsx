@@ -1,8 +1,11 @@
 "use client";
+
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
+import { AccessRequired } from "@/components/application/access-required";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/form-field";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useRemote } from "@/features/patients/use-remote";
 import { LoadState, PageHeading } from "@/features/patients/feedback";
@@ -24,7 +27,10 @@ export function DiagnosticPartnerSettings() {
   const [error, setError] = useState("");
   if (!can("diagnostics.partners.manage"))
     return (
-      <p role="alert">Clinic administrator access is required to manage diagnostic partnerships.</p>
+      <AccessRequired
+        title="Diagnostic administration access required"
+        description="Clinic administrator access is required to manage diagnostic partnerships."
+      />
     );
   return (
     <div className="grid gap-6">
@@ -32,14 +38,13 @@ export function DiagnosticPartnerSettings() {
         title="Diagnostic centers"
         description="Authorize patient choices without granting access to your clinic directory or unrelated records."
       />
-      <FormField id="dx-partner-reason" label="Reason for partnership change">
-        <Input
-          id="dx-partner-reason"
-          maxLength={240}
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-        />
-      </FormField>
+      <ReasonField
+        id="dx-partner-reason"
+        label="Reason for partnership change"
+        value={reason}
+        onValueChange={setReason}
+        suggestions={reasonSuggestions.partnership}
+      />
       {error && (
         <p role="alert" className="text-destructive">
           {error}

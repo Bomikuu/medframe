@@ -10,7 +10,7 @@ import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
 import { useEntrySheetActions } from "@/components/application/entry-sheet";
 import { useUnsavedChanges } from "@/features/workspace/safety-provider";
-import { currency } from "@/features/billing/schema";
+import { moneyInput, currency } from "@/features/billing/schema";
 import { FinancialNotice } from "@/features/billing/controls";
 import { serviceInput, serviceSchema, type Service, type ServiceValues } from "./schema";
 import { useServiceAction } from "./use-services";
@@ -48,8 +48,17 @@ export function ServiceForm({
   useUnsavedChanges(`service-definition:${service?.id ?? "new"}`, form.formState.isDirty, () =>
     form.reset(),
   );
-  const principal = Math.max(0, Number(values.price || 0) - Number(values.deposit || 0));
-  const regular = Math.floor((principal * 100) / (values.months || 1)) / 100;
+  const validPreset =
+    moneyInput.safeParse(values.price).success &&
+    moneyInput.safeParse(values.deposit).success &&
+    Number.isInteger(values.months) &&
+    Number(values.months) >= 1 &&
+    Number(values.months) <= 60;
+  const principal =
+    Math.round(Number(values.price || 0) * 100) - Math.round(Number(values.deposit || 0) * 100);
+  const count = values.months || 1;
+  const regular = Math.floor(principal / count);
+  const final = regular + (principal % count);
   return (
     <form
       noValidate
@@ -137,6 +146,11 @@ export function ServiceForm({
         <WorkflowFields form={form} />
         <section className="grid gap-4 border-t border-border pt-6">
           <h3 className="font-semibold">Price and payment preset</h3>
+          <p className="text-xs leading-5 text-muted-foreground">
+            {service
+              ? `Editing catalog version ${service.version}. These changes apply to newly assigned services; existing patient services keep their captured version, workflow and price. Issued invoices keep their agreed terms.`
+              : "A patient service captures this preset when assigned. Its invoice is reviewed separately before any amount becomes due."}
+          </p>
           <div className="max-w-xs">
             <FormField
               id="service-price"
@@ -182,14 +196,35 @@ export function ServiceForm({
                   />
                 </FormField>
               </div>
-              <div className="rounded-lg bg-muted/60 p-4 text-sm leading-6">
-                <p className="font-semibold">
-                  {currency(values.deposit || "0")} down + {values.months || 1} monthly payments
-                  from {currency(String(regular))}
-                </p>
-                <p className="text-muted-foreground">
-                  The final payment includes any cent rounding. Dates are chosen for each patient.
-                  This preset never records a payment automatically.
+              <div className="grid gap-3 rounded-lg bg-muted/40 p-4 text-sm leading-6">
+                <h4 className="font-semibold">Illustrative payment breakdown</h4>
+                {validPreset && principal >= count ? (
+                  <dl className="grid gap-2">
+                    {[
+                      ["Service total", values.price || "0"],
+                      ["Down payment", values.deposit || "0"],
+                      ["Amount split monthly", (principal / 100).toFixed(2)],
+                      ...(count > 1
+                        ? [[`${count - 1} monthly payments, each`, (regular / 100).toFixed(2)]]
+                        : []),
+                      ["Final monthly payment", (final / 100).toFixed(2)],
+                    ].map(([label, amount]) => (
+                      <div key={label} className="flex flex-wrap justify-between gap-2">
+                        <dt className="text-muted-foreground">{label}</dt>
+                        <dd className="font-medium tabular-nums">{currency(amount)}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p>
+                    Enter a valid price and down payment that leave at least one cent per monthly
+                    payment.
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  The final payment receives leftover cents. Patient invoice review chooses the
+                  dates and shows the exact agreement before issue. Saving a preset never records a
+                  payment.
                 </p>
               </div>
             </>

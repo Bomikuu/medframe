@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   WorkspaceOverviewDocument,
   ClinicWorkspaceDocument,
@@ -9,11 +9,15 @@ import {
   type WorkspaceOverviewQuery,
 } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
+import { WorkspaceLoading } from "@/components/application/workspace-loading";
 import { LoadState, RemoteNotice } from "@/features/patients/feedback";
 import { useSafety } from "./safety-provider";
 import { ThemeProvider } from "@/features/branding/theme-provider";
 
-import { SessionRecovery } from "@/features/auth/session-recovery";
+import { SessionRecoveryOptions } from "@/features/auth/session-recovery";
+import { RecoveryState } from "@/components/application/recovery-state";
+import { Button } from "@/components/ui/button";
+import { Building2 } from "lucide-react";
 import { PlatformLink } from "@/features/platform/clinic-invitations";
 
 type Workspace = {
@@ -23,15 +27,35 @@ type Workspace = {
   can: (permission: string) => boolean;
   href: (path: string) => string;
   switchOrganization: (id: string) => void;
+  branchId: string;
+  switchBranch: (id: string) => void;
 };
 const WorkspaceContext = createContext<Workspace | null>(null);
 
-export function WorkspaceProvider({ children }: { children: ReactNode }) {
+export function WorkspaceProvider({
+  children,
+  pinnedOrganizationId,
+}: {
+  children: ReactNode;
+  pinnedOrganizationId?: string;
+}) {
   const { data, error, reload } = useRemote(WorkspaceOverviewDocument, {});
   const params = useSearchParams();
+  useEffect(() => {
+    window.addEventListener("medframe:account-updated", reload);
+    return () => window.removeEventListener("medframe:account-updated", reload);
+  }, [reload]);
+  if (!data && !error)
+    return (
+      <WorkspaceLoading
+        title="Finding your clinics"
+        detail="Checking the clinic memberships available to your account."
+        retry={reload}
+      />
+    );
   if (!data)
     return (
-      <main className="p-8">
+      <main id="main" className="grid min-h-svh place-items-center p-6">
         <LoadState
           error={error}
           retry={reload}
@@ -42,37 +66,40 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     );
   if (!data.myOrganizations.length)
     return (
-      <main id="main" className="mx-auto max-w-2xl p-8">
-        <h1 className="text-2xl font-semibold">No organization assigned</h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Contact your clinic administrator to arrange access.
-        </p>
-        <div className="mt-6">
+      <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
+        <RecoveryState
+          level={1}
+          icon={Building2}
+          title="No clinic is assigned"
+          description="You’re signed in, but this account has no active clinic membership. Contact your clinic administrator to arrange access."
+        >
           <PlatformLink />
-        </div>
-        <div className="mt-6">
-          <SessionRecovery />
-        </div>
+          <SessionRecoveryOptions showWorkspace={false} />
+        </RecoveryState>
       </main>
     );
-  const requested = params.get("organization");
+  const requested = pinnedOrganizationId ?? params.get("organization");
   const organizationId = requested ?? data.myOrganizations[0].id;
   if (!data.myOrganizations.some((org) => org.id === organizationId))
     return (
-      <main id="main" className="p-8">
-        <h1 className="text-2xl font-semibold">Workspace unavailable</h1>
-        <p className="my-4 text-sm">
-          Your organization access has changed. Choose an authorized clinic.
-        </p>
-        {data.myOrganizations.map((org) => (
-          <a
-            className="my-3 block text-primary underline"
-            key={org.id}
-            href={`/clinic?organization=${org.id}`}
-          >
-            {org.name}
-          </a>
-        ))}
+      <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
+        <RecoveryState
+          level={1}
+          icon={Building2}
+          title="This clinic workspace is unavailable"
+          description="Your clinic access may have changed. Choose one of the clinics currently available to your account."
+        >
+          <div className="grid gap-3">
+            {data.myOrganizations.map((org) => (
+              <Button asChild variant="outline" key={org.id}>
+                <a href={`/clinic?organization=${org.id}`}>
+                  <Building2 aria-hidden="true" />
+                  {org.name}
+                </a>
+              </Button>
+            ))}
+          </div>
+        </RecoveryState>
       </main>
     );
   return (
@@ -95,6 +122,19 @@ function OrganizationWorkspace({
   const { data, error, reload } = useRemote(ClinicWorkspaceDocument, { organizationId });
   const router = useRouter();
   const { guard } = useSafety();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const branches = data?.clinicWorkspace.branches ?? [];
+  const [lastBranch, setLastBranch] = useState<string | null>(null);
+  const requestedBranch = branches.find((branch) => branch.id === params.get("branch"))?.id;
+  const branchId =
+    requestedBranch ??
+    branches.find((branch) => branch.id === lastBranch)?.id ??
+    branches[0]?.id ??
+    "";
+  useEffect(() => {
+    if (requestedBranch) setLastBranch(requestedBranch);
+  }, [requestedBranch]);
   const value = useMemo<Workspace | null>(
     () =>
       data
@@ -103,17 +143,35 @@ function OrganizationWorkspace({
             workspace: data.clinicWorkspace,
             overview,
             can: (permission) => data.clinicWorkspace.permissions.includes(permission),
-            href: (path) => `${path}?organization=${organizationId}`,
+            branchId,
+            href: (path) =>
+              `${path}?organization=${organizationId}${branchId ? `&branch=${branchId}` : ""}`,
+            switchBranch: (id) => {
+              if (!branches.some((branch) => branch.id === id)) return;
+              void guard(() => {
+                const next = new URLSearchParams(params.toString());
+                next.set("branch", id);
+                router.replace(`${pathname}?${next.toString()}`);
+              });
+            },
             switchOrganization: (id) => {
               void guard(() => router.push(`/clinic/patients?organization=${id}`));
             },
           }
         : null,
-    [data, overview, organizationId, guard, router],
+    [data, overview, organizationId, guard, router, branchId, pathname, params],
   );
+  if (!value && !error)
+    return (
+      <WorkspaceLoading
+        title="Opening your clinic"
+        detail="Loading your permitted branches, role and workspace tools."
+        retry={reload}
+      />
+    );
   if (!value)
     return (
-      <main id="main" className="p-8">
+      <main id="main" className="grid min-h-svh place-items-center p-6">
         <LoadState
           error={error}
           retry={reload}
@@ -124,7 +182,7 @@ function OrganizationWorkspace({
     );
   return (
     <WorkspaceContext.Provider value={value}>
-      <div key={value.workspace.permissions.join("|")}>
+      <div key={`${value.branchId}:${value.workspace.permissions.join("|")}`}>
         <RemoteNotice error={error} retry={reload} />
         <ThemeProvider organizationId={organizationId}>{children}</ThemeProvider>
       </div>

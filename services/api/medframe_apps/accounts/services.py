@@ -3,10 +3,9 @@ import json
 import re
 import secrets
 import time
-from datetime import timedelta
 
 import pyotp
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, logout
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -30,7 +29,14 @@ from medframe_apps.organizations.models import Membership
 
 @transaction.atomic
 def begin_login(
-    request, email, password, *, realm: SessionRealm = "staff", eligibility=None, remember=False
+    request,
+    email,
+    password,
+    *,
+    realm: SessionRealm = "staff",
+    eligibility=None,
+    remember=False,
+    shared_device=False,
 ):
     if (
         not isinstance(email, str)
@@ -60,15 +66,15 @@ def begin_login(
     )
     if realm not in {"staff", "patient"} or not allowed:
         raise DomainError("INVALID_CREDENTIALS", "Email or password is incorrect.", 401)
-    start_challenge(request, user, realm, remember=remember)
+    start_challenge(request, user, realm, remember=remember, shared_device=shared_device)
     audit(user, "auth.password_verified", resource_id=user.id)
-    return (
-        "verify" if MfaCredential.objects.filter(user=user, confirmed=True).exists() else "enroll"
-    )
+    from medframe_apps.accounts.session_completion import routine_sign_in
+
+    return routine_sign_in(request, user, realm)
 
 
-def start_challenge(request, user, realm: SessionRealm, *, remember=False):
-    if not isinstance(remember, bool):
+def start_challenge(request, user, realm: SessionRealm, *, remember=False, shared_device=False):
+    if not isinstance(remember, bool) or not isinstance(shared_device, bool):
         raise DomainError("INVALID_INPUT", "Choose whether to stay logged in.")
     ClinicalSession.objects.filter(session_key=request.session.session_key).update(revoked=True)
     logout(request)
@@ -78,6 +84,7 @@ def start_challenge(request, user, realm: SessionRealm, *, remember=False):
     request.session["challenge_epoch"] = user.auth_epoch
     request.session["challenge_expires"] = time.time() + 300
     request.session["challenge_remember"] = remember
+    request.session["challenge_shared"] = shared_device
     request.session.set_expiry(300)
 
 
@@ -108,8 +115,15 @@ def enroll(request, *, realm: SessionRealm = "staff"):
 
 @transaction.atomic
 def verify_mfa(
-    request, code, *, realm: SessionRealm = "staff", activation: SessionActivation | None = None
+    request,
+    code,
+    *,
+    realm: SessionRealm = "staff",
+    activation: SessionActivation | None = None,
+    trust_browser=False,
 ):
+    if not isinstance(trust_browser, bool):
+        raise DomainError("INVALID_INPUT", "Choose whether to remember this browser.")
     user = challenge_user(request, realm=realm)
     if activation is not None:
         activation.prepare(user, request)
@@ -159,23 +173,19 @@ def verify_mfa(
     from medframe_apps.accounts.google_signin import complete_google_link
 
     complete_google_link(request, user, realm)
-    remember = request.session.get("challenge_remember") is True
-    duration = timedelta(days=30) if remember else timedelta(hours=8)
-    request.session.flush()
-    login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-    request.session["mfa_verified"] = True
-    request.session["auth_realm"] = realm
-    request.session.set_expiry(int(duration.total_seconds()) if remember else 0)
-    request.session.save()
-    now = timezone.now()
-    ClinicalSession.objects.create(
-        user=user,
-        realm=realm,
-        session_key=request.session.session_key,
-        expires_at=now + duration,
-        last_seen_at=now,
+    from medframe_apps.accounts.session_completion import complete_session
+    from medframe_apps.accounts.sign_in_policy import (
+        effective_policy,
+        remember_browser,
+        shared_browser,
     )
-    audit(user, "auth.mfa_verified", resource_id=user.id)
+
+    if trust_browser and realm == "staff" and activation is None and not shared_browser(request):
+        policy = effective_policy(user)
+        if policy.mode == "remember" and request.session.get("challenge_trust_eligible") is True:
+            remember_browser(request, user, policy)
+            audit(user, "auth.browser_remembered", resource_id=user.id)
+    complete_session(request, user, realm)
     return codes
 
 
@@ -189,7 +199,11 @@ def request_password_reset(email, *, realm: SessionRealm = "staff"):
         User.objects.select_for_update().filter(email=email.strip().lower(), is_active=True).first()
     )
     if user is None:
-        return
+        raise DomainError(
+            "ACCOUNT_NOT_FOUND",
+            "No active Medframe account uses this email. Check the address or contact your clinic.",
+            404,
+        )
     PasswordReset.objects.filter(user=user, consumed=False).update(consumed=True)
     token = secrets.token_urlsafe(32)
     PasswordReset.objects.create(

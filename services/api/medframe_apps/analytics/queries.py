@@ -16,26 +16,36 @@ from medframe_apps.organizations.policy import permissions_for, require_membersh
 from medframe_apps.patients.services import scoped_patients
 
 
-def count_series(query, field, period, days):
+def count_series(query, field, period, days, *, include_status=True):
     """Group at the database boundary; never load patient rows into a report."""
     previous, start, end = period["bounds"]
     query = query.filter(**{f"{field}__gte": previous, f"{field}__lt": end})
-    groups = query.annotate(report_date=TruncDate(field, tzinfo=period["zone"])).values(
-        "report_date", "status"
-    )
-    daily, statuses = {}, {}
+    fields = ["report_date", "status"] if include_status else ["report_date"]
+    groups = query.annotate(report_date=TruncDate(field, tzinfo=period["zone"])).values(*fields)
+    daily, previous_daily, statuses = {}, {}, {}
     current = prior = 0
     for row in groups.annotate(count=Count("id")):
         if row["report_date"] >= period["start"]:
             current += row["count"]
             daily[row["report_date"]] = daily.get(row["report_date"], 0) + row["count"]
-            statuses[row["status"]] = statuses.get(row["status"], 0) + row["count"]
+            if include_status:
+                statuses[row["status"]] = statuses.get(row["status"], 0) + row["count"]
         else:
             prior += row["count"]
+            previous_daily[row["report_date"]] = (
+                previous_daily.get(row["report_date"], 0) + row["count"]
+            )
     return {
         "current": current,
         "previous": prior,
         "statuses": [{"label": key, "count": value} for key, value in sorted(statuses.items())],
+        "previous_series": [
+            {
+                "date": (day := period["previous"] + timedelta(days=offset)).isoformat(),
+                "count": previous_daily.get(day, 0),
+            }
+            for offset in range(days)
+        ],
         "series": [
             {
                 "date": (day := period["start"] + timedelta(days=offset)).isoformat(),
@@ -53,7 +63,12 @@ def clinic_insights(
     require_native_staff(request)
     member = require_membership(request.user, organization_id, "workspace.read")
     codes = permissions_for(member)
-    if not codes & {"operations.read", "patients.clinical.read", "billing.read"}:
+    if not codes & {
+        "operations.read",
+        "patients.demographics.read",
+        "patients.clinical.read",
+        "billing.read",
+    }:
         raise DomainError("FORBIDDEN", "Reporting access is required.", 403)
     branch = scoped_branches(member).filter(id=branch_id).first()
     if branch is None:
@@ -72,6 +87,7 @@ def clinic_insights(
         "as_of": timezone.now().isoformat(),
         "operations": None,
         "clinical": None,
+        "patients": None,
     }
     if "operations.read" in codes:
         require_membership(request.user, organization_id, "operations.read")
@@ -94,6 +110,23 @@ def clinic_insights(
             "appointments": summary,
             "queue": count_series(
                 QueueTicket.objects.filter(day__branch=branch), "created_at", period, days
+            ),
+        }
+    if codes & {"patients.demographics.read", "patients.clinical.read"}:
+        permission = (
+            "patients.demographics.read"
+            if "patients.demographics.read" in codes
+            else "patients.clinical.read"
+        )
+        visible_patients = (
+            scoped_patients(request.user, organization_id, permission)
+            .filter(branch=branch)
+            .distinct()
+        )
+        result["patients"] = {
+            "total": visible_patients.count(),
+            "registrations": count_series(
+                visible_patients, "created_at", period, days, include_status=False
             ),
         }
     if "patients.clinical.read" in codes:

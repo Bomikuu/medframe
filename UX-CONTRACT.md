@@ -182,3 +182,75 @@ provider scope and a pinned patient in BookingForm. Reschedule and Check in sele
 an existing booked appointment and use native versioned actions. Payments select
 an issued patient invoice and use PaymentForm; no charge or online transfer is
 implied. Service readers retain a view card even without workflow-write rights.
+
+## Header branch and patient lookup — October21
+
+WorkspaceProvider owns the permitted current branch and branch-carrying workspace URLs; ClinicSwitcherDialog is its header control. Appointments and default operations setup consume that branch. Backend membership/provider/patient checks remain authoritative. Shared PatientSearchDialog owns debounced current-branch suggestions: navigation callbacks open a patient/consultation destination; form callbacks select an explicit patient. Never silently select the first result. Instant booking uses its own authenticated, idempotent native room action and returns link/PIN together, without scheduled date/slot/duration fields or a fabricated reservation. See appointment-flow-verification.md for observed flows and limits.
+
+## Header-only page context — October21
+
+Clinic page branch context belongs exclusively to WorkspaceProvider.branchId and ClinicSwitcherDialog in the header. Billing/operations setup defaults, dashboard, directory, services, communications, review and clinical Station consume it. Branch changes keep the unsaved-work guard and remount branch-scoped UI state to clear stale pagination/panels. Compact signed-in Station headers reuse HeaderBranchControl; delegated devices show assigned context read-only. Record/device/staff branch assignments, service branch availability and public queue configuration remain genuine persisted settings. Patient-specific operations pin the record's actual branch. Preserve server authorization; never infer broader access from the selected header value. See header-branch-verification.md for source inventory, observed UI and limits.
+
+## Fast patient and assisted terminals — October22
+
+On an approved non-strict patient kiosk, exact patient UUID/clinic reference/email identifies one branch patient and opens a short device-bound terminal session without password or repeated task codes, per the user's explicit policy. Portal username means email. No public patient directory, partial matching or portal/clinical login is implied. Finish/change patient and inactivity clear the patient state. Setup must be cleared while resetting the device boundary so stale reception polls cannot discard new setup. Strict patient mode retains its existing verification flow.
+
+Authenticated staff assistance searches/selects a permitted branch patient and uses the native kiosk actions directly. Keep the staff wrapper mounted across patient changes; every staff-selected session request reauthorizes current staff membership/identity, with billing.read for bills. Returning to patient mode signs staff out. Device functions, live approval, native transaction/version/idempotency owners and audit source distinctions remain authoritative.
+
+## Shared feedback and terminal continuity — October22 Phases1–2
+
+Generic load/error/refresh messaging does not promise draft preservation; form owners name their real save state. Transient query refresh may retain the same scoped data, while rejected access including STATION_REQUIRED clears it. Expired and restricted recovery keep distinct actions. Google helper copy follows configurable clinic assurance rather than promising a mandatory authenticator.
+
+One TerminalPatientContext owns patient identity, reference, entry-method wording and clearing across the kiosk journey. Staff Change patient retains staff mode; Sign out of staff mode discloses browser-tab scope and keeps device pairing. Normal patients retain identifier-only multi-task sessions; strict patient mode remains separate. Completed actions list only native confirmed ticket/appointment results, deduplicate returned identities, stay in memory and clear with patient/proof boundaries. A cashier ticket never implies confirmed payment. Existing native transactions, session maximums, device/functions/role checks and audit remain authoritative.
+
+### Clinical overview and floating assistant continuity
+
+The profile reads existing permission-scoped history/summary facts before demographic totals; unreviewed is distinct from none reported. Recent-care navigation reuses the native encounter owner and honors its editing lease. Narrow chart return controls say Notes with the accessible name Back to consultation. The assistant overlays without changing the editor grid, keeps a 44px close target and restores its connected opener after dismissal. Sending remains disabled until separately integrated. Phase3 visual evidence does not establish GPU, dirty-exit or new-write acceptance.
+
+### Appointment and room continuity — October22 Phase4
+
+Clinic and portal appointment/queue pages use explicit manual refresh under the temporary user policy; online-room updates remain separate. Schedule day/week views share override precedence. Appointment detail keeps the selected patient/provider and native edit/version checks, with full time range/timezone and recorded reason. Instant information labels the creation reference and manual closure; scheduled information labels appointment time. Room snapshots are authoritative, invalidations are coalesced, and backend reauthorization confirms expiry/extensions. No transport optimization is proof of media/internet readiness.
+
+### Financial decisions and preview clarity — October22 Phase5
+
+Issued-period invoice navigation uses issued dates. Current outstanding/due/overdue/future links keep branch and currency while carrying report dates separately from unrestricted invoice dates. Native obligation projection chooses matching invoices before pagination; displayed filtered totals remain whole-invoice balances. A future installment does not become due because it appears in a list.
+
+Installment preview reuses server integer totals, month-end anchors and final-remainder allocation. It writes nothing and is shown only while its input fingerprint matches the form. Save/Issue retain case/version/agreement validation. Proposed draft totals, issued charges, recorded payments, returned refunds and current obligations have distinct labels. Invoice/installment dates use written DateInput. No preview or cashier continuation implies a charge or confirmed payment.
+
+### Setup and access continuity — October23 Phase6
+
+Staff invite/manage/account setup shows a reusable access summary derived from current native role metadata and billing overrides. Summaries describe workspace, branch, clinical tools and billing powers but never grant patient records. Self-access controls stay read-only; server permissions, version checks and Station restrictions remain authoritative. New step headings receive focus, named switches expose their meaning and modal dismissal returns to the opener.
+
+A created/queued invitation is not delivered or activated. Fresh platform clinic links may be copied from their authorized create/replacement response; existing hash-only links retain replacement recovery. Patient pending review retains a copyable reference and explains later portal verification/account setup, without implying a booking. Save/exit preserves clinic details, not unfinished passwords or verification inputs. Administrator readiness reports safe configuration facts only, with local Mailpit clearly distinguished from actual external delivery.
+
+### Request recovery and resumed setup — October23 Phase7
+
+Classify GraphQL domain or JSON transport error codes before HTTP copy fallbacks. Request-security403 and rate limits are not assertions of lost patient access; true access/session denial stays distinct. Protected read data is still discarded on any HTTP401/403 or native denial. Never replay writes or sign out automatically from a generic request failure. Share only pending native CSRF GETs, bound acquisition and discard settled tokens. Read refresh retains one queued invalidation so mutation completion is not lost.
+
+Paused clinic setup must revalidate through native bootstrap/proof/draft owners before choosing saved setup, contact verification, account verification or closed-invitation recovery. Failure to resume must remain visible. A malformed Billing setup response is a recovery state, not endless loading.
+
+## October 23 module improvements, Phases 1–2
+
+- Shared search fields use `components/application/search-field.tsx`: separate icon/text slots, accessible clear control, composition-safe Enter. Remote catalog searches debounce for 300ms; clearing resets immediately. Patient queries remain in memory; only non-sensitive sort/filter/tab choices use `features/workspace/use-url-state.ts` and native history, retaining organization/branch context.
+- Daily workspace retains the last successful result only within the same organization/branch while refreshing; loading and transient failures are nonblocking. Rejected authorization clears retained data. This is presentation retention, not offline mutation support.
+- Optional GraphQL portrait IDs follow the existing clinical patient scope and clean same-patient portrait selection. Demographics-only access retains initials; secure image requests independently reauthorize.
+- Consultation save/review presentation reuses the single encounter form, existing serialized autosave, version checks, explicit finalization and editing leases. Counts are review aids, not clinical completeness gates.
+- `DocumentScanState`, `ClinicalSelectionState` and `DiagnosticProgress` explain native facts. A clean scan is not a clinical endorsement; result review is not patient publication; chart selection creates no separate clinical record.
+
+## Operations and financial review continuity — October 23, 2026
+
+- Appointment calendar date/view/status/provider and Queue provider use validated non-sensitive URL state. Patient selections and opaque page cursors remain in memory. Staff Appointment/Queue reads remain manual; refresh retains the same filter/page scope.
+- Date-override impact is a read-only preview through the native `scheduling.windows` owner. A closure wins; otherwise provider date hours precede branch date hours and weekly windows. Preview never reserves a slot or bypasses the locked mutation's reservation checks.
+- Provider setup indicators describe profile, specialty and current/future weekly windows only. They are not credential verification, slot availability or patient authorization.
+- A department journey shows permitted loaded stages from one native visit. Stage completion, clinical finalization and financial settlement remain independent. Device approval is not a live connectivity claim.
+- Cashier day review uses native scoped payments/refunds by their own recorded dates. Refund grouping identifies the original payment method, not the unrecorded return method. The local cash-count worksheet is not a saved accounting close and does not include other till movements.
+- Catalog installment examples use integer cents and explicitly identify final rounding. Patient invoice preview/issue remains authoritative for dates, snapshots and allocations. Refund confirmations read the native source payment; no independent financial history is manufactured.
+## Patient tasks and administrative review — October23 module Phases5–6
+
+- Portal Home combines own next appointment, consultation queue and complete issued-invoice obligations through native portal-link authorization. Released clinical records remain explicitly separate. Due, overdue and future sums retain currency and native financial semantics; a cashier/room link creates no payment or clinical access.
+- SMSGate verification, reminder transport and invitation email are different channels. Configuration, queued, preview, accepted, delivered and read are not interchangeable. Unknown outcomes do not justify duplicate delivery. Patient identifiers/opaque cursors remain in memory; non-sensitive delivery filters may use URLs.
+- Only pending onboarding logos auto-check: serial capped backoff, cancelled by logo identity/state/unmount. Unavailable states and exhausted cycles offer explicit manual checking. Saved setup fields remain owned by the existing draft state.
+- Media, room admission/access and shared-model connection have independent status. Doctor permission and local patient view-only choice remain visible; temporary pointing never edits the clinical record. Existing server admission/expiry/permissions govern reconnect.
+- Specialty documentation previews identify built-in content revision separately from saved clinic templates, capabilities and credentials. Publication review is a read-only aid before explicit native publish, never proof of safety, delivery or privacy from search indexing alone.
+- Anatomy/dental first selection mounts their editor; visited editors retain their mounted state under one clinical form. Documentation composition may split into focused components without splitting autosave/version/lifecycle ownership.
+- Backup inventory is read-only. Table-name similarity is not schema/source/configuration equivalence or deletion authorization. Preserve baseline, verified recovery boundaries, unknowns and private storage; never restore rehearsal data over original.

@@ -9,6 +9,11 @@ import { LoginForm } from "./login-form";
 import { MfaVerificationForm } from "./mfa-form";
 import { RecoveryCodes } from "./recovery-codes";
 import { Button } from "@/components/ui/button";
+import { BrowserMemory } from "./browser-memory";
+type SignInResult = {
+  nextStep: "enroll" | "verify" | "authenticated";
+  canRememberBrowser?: boolean;
+};
 
 type Step = "login" | "enroll" | "verify" | "recovery";
 
@@ -28,6 +33,7 @@ export function AuthFlow({
   const [error, setError] = useState("");
   const [uri, setUri] = useState("");
   const [codes, setCodes] = useState<string[]>([]);
+  const [canRememberBrowser, setCanRememberBrowser] = useState(false);
   function enterWorkspace() {
     setCodes([]);
     if (onAuthenticated) {
@@ -51,10 +57,16 @@ export function AuthFlow({
   }
   async function login(values: LoginValues) {
     await run(async () => {
-      const result = await requestWithCsrf<{ nextStep: "enroll" | "verify" }>(
-        `${prefix}/login`,
-        onAuthenticated ? { ...values, remember: false } : values,
-      );
+      const result = await requestWithCsrf<SignInResult>(`${prefix}/login`, {
+        ...values,
+        remember: onAuthenticated ? false : values.remember,
+        shared_device: !!onAuthenticated,
+      });
+      if (result.nextStep === "authenticated") {
+        enterWorkspace();
+        return;
+      }
+      setCanRememberBrowser(result.canRememberBrowser === true && !portal && !onAuthenticated);
       if (result.nextStep === "enroll") {
         const enrollment = await requestWithCsrf<{ otpauthUri: string }>(
           `${prefix}/mfa/enroll`,
@@ -65,11 +77,11 @@ export function AuthFlow({
       setStep(result.nextStep);
     });
   }
-  async function verify(values: CodeValues) {
+  async function verify(values: CodeValues, trustBrowser = false) {
     await run(async () => {
       const result = await requestWithCsrf<{ recoveryCodes: string[] | null }>(
         `${prefix}/mfa/verify`,
-        values,
+        { ...values, trust_browser: canRememberBrowser && trustBrowser },
       );
       setUri("");
       if (result.recoveryCodes) {
@@ -82,10 +94,16 @@ export function AuthFlow({
   }
   async function googleLogin(credential: string, remember: boolean) {
     await run(async () => {
-      const result = await requestWithCsrf<{ nextStep: "verify" }>(`${prefix}/google/login`, {
+      const result = await requestWithCsrf<SignInResult>(`${prefix}/google/login`, {
         credential,
         remember: onAuthenticated ? false : remember,
+        shared_device: !!onAuthenticated,
       });
+      if (result.nextStep === "authenticated") {
+        enterWorkspace();
+        return;
+      }
+      setCanRememberBrowser(result.canRememberBrowser === true && !portal && !onAuthenticated);
       setStep(result.nextStep);
     });
   }
@@ -104,11 +122,11 @@ export function AuthFlow({
     recovery: "Your authenticator is connected. Keep a backup way to sign in.",
   }[step];
   return (
-    <div className="grid gap-8">
-      <header>
+    <div className="grid gap-6">
+      <div>
         <h1 className="font-heading text-3xl font-bold tracking-tight">{heading}</h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">{description}</p>
-      </header>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+      </div>
       {error && (
         <p
           role="alert"
@@ -121,6 +139,22 @@ export function AuthFlow({
         (invitation ? (
           <InvitationForm
             busy={busy}
+            onGoogleSubmit={async (token, credential) => {
+              await run(async () => {
+                const result = await requestWithCsrf<{ nextStep: "enroll" | "verify" }>(
+                  "portal/auth/invitations/google",
+                  { action: "activate", token, credential },
+                );
+                if (result.nextStep === "enroll") {
+                  const enrollment = await requestWithCsrf<{ otpauthUri: string }>(
+                    "portal/auth/mfa/enroll",
+                    {},
+                  );
+                  setUri(enrollment.otpauthUri);
+                }
+                setStep(result.nextStep);
+              });
+            }}
             onSubmit={async (values) => {
               await run(async () => {
                 const result = await requestWithCsrf<{ nextStep: "enroll" | "verify" }>(
@@ -153,8 +187,10 @@ export function AuthFlow({
           onSubmit={verify}
           busy={busy}
           enrollmentUri={step === "enroll" ? uri : undefined}
+          canRememberBrowser={canRememberBrowser}
         />
       )}
+      {step === "login" && !portal && !invitation && !onAuthenticated && <BrowserMemory />}
       {step === "recovery" && <RecoveryCodes codes={codes} onContinue={enterWorkspace} />}
       {(step === "enroll" || step === "verify") && (
         <Button

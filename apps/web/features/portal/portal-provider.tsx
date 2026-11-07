@@ -1,4 +1,7 @@
 "use client";
+import { RecoveryState } from "@/components/application/recovery-state";
+import { RecordUnavailable } from "@/components/application/record-unavailable";
+import { SessionRecoveryOptions } from "@/features/auth/session-recovery";
 import { ClinicalLocaleProvider } from "@/components/application/clinical-locale";
 import { createContext, useState, useContext, useEffect, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
@@ -42,17 +45,19 @@ export function PortalProvider({ children }: { children: ReactNode }) {
   }, [session.reload]);
   if (!session.data)
     return (
-      <main id="main" className="mx-auto grid max-w-xl gap-5 p-8">
+      <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
         <LoadState error={session.error} retry={session.reload} />
-        <Link href="/portal/login" className="text-primary underline">
-          Patient sign in
-        </Link>
       </main>
     );
   if (!parsed.success)
     return (
-      <main id="main" className="p-8">
-        Patient connections could not be read.
+      <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
+        <RecordUnavailable
+          compact={false}
+          title="Patient connections are unavailable"
+          description="We couldn’t read the patient connections for this account. Try again, or contact your clinic if the problem continues."
+          retry={session.reload}
+        />
       </main>
     );
   const link =
@@ -85,18 +90,20 @@ function PortalWorkspace({
   }, [remote.reload]);
   if (!remote.data)
     return (
-      <main id="main" className="mx-auto grid max-w-xl gap-5 p-8">
+      <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
         <LoadState error={remote.error} retry={remote.reload} />
-        <Link href="/portal/login" className="text-primary underline">
-          Patient sign in
-        </Link>
       </main>
     );
   if (!parsed.success)
     return (
-      <p role="alert" className="p-8">
-        The patient workspace could not be read.
-      </p>
+      <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
+        <RecordUnavailable
+          compact={false}
+          title="Your patient workspace is unavailable"
+          description="We couldn’t read your portal information. Try again, or contact your clinic if the problem continues."
+          retry={remote.reload}
+        />
+      </main>
     );
   return (
     <PortalShell workspace={parsed.data} link={link} links={links} reload={remote.reload}>
@@ -186,6 +193,7 @@ function PortalShell({
                 <FormSelect
                   id="portal-relationship"
                   label="Patient connection"
+                  personKind="patient"
                   value={link.id}
                   onChange={(value) =>
                     void guard(() => router.push(`/portal?link=${encodeURIComponent(value)}`))
@@ -206,7 +214,7 @@ function PortalShell({
                 href={href("/portal")}
                 className="text-primary hover:underline"
               >
-                Shared records
+                Home
               </Link>
               <Link
                 href={href("/portal/appointments")}
@@ -344,13 +352,14 @@ function NoPortalConnection() {
     clearDirty();
   }, [clearDirty]);
   return (
-    <main id="main" className="mx-auto grid max-w-xl gap-5 p-8">
-      <Brand />
-      <h1 className="text-2xl font-semibold">No active patient connection</h1>
-      <p>Contact your clinic to verify your identity or restore access.</p>
-      <Link href="/portal/login" className="text-primary underline">
-        Sign in again
-      </Link>
+    <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
+      <RecoveryState
+        level={1}
+        title="No active patient connection"
+        description="You’re signed in, but this account has no active patient-portal connection. Contact your clinic to verify your identity or restore access."
+      >
+        <SessionRecoveryOptions showWorkspace={false} />
+      </RecoveryState>
     </main>
   );
 }

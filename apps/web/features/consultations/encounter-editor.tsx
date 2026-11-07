@@ -1,14 +1,20 @@
 "use client";
+
+import { ConsultationSaveState, ConsultationReviewSummary } from "./consultation-save-state";
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { ExportRecord } from "./export/export-record";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { DocumentationPanels } from "./documentation-panels";
+import { useClinicalTabs } from "./use-clinical-tabs";
+import { LoadingInformation } from "@/components/application/loading-information";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/form-field";
 import { ButtonLink } from "@/components/ui/button-link";
 import {
   ApplyConsultationTemplateDocument,
@@ -28,15 +34,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/application/status-badge";
 import { PatientAvatar } from "@/components/application/patient-avatar";
 import { PageHeading, failureCode, failureText } from "@/features/patients/feedback";
-import { AnatomyEditor } from "@/features/anatomy/anatomy-editor";
-import { DentalEditor } from "@/features/dental/dental-editor";
-import { DocumentPanel } from "@/features/documents/document-panel";
 import { templateSchema } from "./templates/schema";
 import { editorAccessLabel } from "@/features/stations/editor-access-label";
 import { TemplatePicker, TemplatePrompts } from "./templates/template-picker";
-import { SoapFields } from "./soap-fields";
-import { DiagnosisFields } from "./diagnosis-fields";
-import { ProcedureFields } from "./procedure-fields";
 import { PatientContext } from "./patient-context";
 import { draftSchema, encounterFormSchema, type EncounterForm } from "./schema";
 import { useEditingLease, type EditingControl } from "@/features/stations/use-editing-lease";
@@ -47,11 +47,41 @@ import { TreatmentPlans } from "@/features/treatments/treatment-plans";
 import { ClinicalAlerts } from "@/features/stations/clinical-alerts";
 import { useStationAccess } from "@/features/stations/access-session";
 
+const AnatomyEditor = dynamic(
+  () => import("@/features/anatomy/anatomy-editor").then((module) => module.AnatomyEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid min-h-80 place-items-center">
+        <LoadingInformation
+          title="Opening anatomy"
+          detail="Loading the reference viewer. Your consultation notes stay in the same draft."
+        />
+      </div>
+    ),
+  },
+);
+const DentalEditor = dynamic(
+  () => import("@/features/dental/dental-editor").then((module) => module.DentalEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="grid min-h-80 place-items-center">
+        <LoadingInformation
+          title="Opening dental chart"
+          detail="Loading tooth selection and findings. Your consultation notes stay in the same draft."
+        />
+      </div>
+    ),
+  },
+);
+
 type EditorProps = {
   initial: EncounterFieldsFragment;
   exactRevision?: boolean;
   reload: () => void;
   focused?: boolean;
+  initialSection?: "notes";
 };
 
 export function EncounterEditor(props: EditorProps) {
@@ -72,6 +102,7 @@ function OwnedEncounterEditor({
   exactRevision = false,
   reload,
   focused = false,
+  initialSection,
   leaseControl,
 }: EditorProps & { leaseControl: EditingControl }) {
   const stationAccess = useStationAccess();
@@ -120,10 +151,12 @@ function OwnedEncounterEditor({
     lease: leaseControl.lease,
     error: leaseControl.error,
   });
-  const [clinicalTab, setClinicalTab] = useState(
-    leaseControl.initialSelection.tab ||
+  const clinicalTabs = useClinicalTabs(
+    (initialSection ?? leaseControl.initialSelection.tab) ||
       (initial.providerSpecialty === "general_medicine" ? "anatomy" : "dental"),
   );
+  const clinicalTab = clinicalTabs.active;
+  const setClinicalTab = clinicalTabs.select;
   const updateSelection = leaseControl.updateSelection;
   useEffect(() => {
     updateSelection({ tab: clinicalTab });
@@ -428,7 +461,11 @@ function OwnedEncounterEditor({
           data-panel
           className="flex min-w-0 flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-5 sm:p-6"
         >
-          <PatientAvatar name={encounter.patientName} className="size-16 border-0 text-lg" />
+          <PatientAvatar
+            name={encounter.patientName}
+            imageId={encounter.patientPortraitId ?? undefined}
+            className="size-16 border-0 text-lg"
+          />
           <div className="min-w-0 flex-1 basis-64 [&_[data-page-header]]:mb-0">
             <PageHeading title={encounter.patientName} description={encounter.reason}>
               {!stationAccess && (
@@ -460,9 +497,16 @@ function OwnedEncounterEditor({
               {encounter.isAmendment ? "Amendment draft" : encounter.status.replaceAll("_", " ")}
               {exactRevision ? " · historical revision" : ""}
             </p>
-            <p role="status" className="mt-1 text-sm text-muted-foreground">
-              {status}
-            </p>
+            <ConsultationSaveState
+              dirty={dirty}
+              busy={busy}
+              readOnly={readOnly}
+              historical={exactRevision}
+              failure={!!failure}
+              version={encounter.version}
+              savedAt={encounter.updatedAt}
+              message={status}
+            />
             {encounter.amendmentReason && (
               <p className="mt-2 text-sm">Amendment reason: {encounter.amendmentReason}</p>
             )}
@@ -516,6 +560,20 @@ function OwnedEncounterEditor({
             )}
           </div>
         </div>
+        {completed && !exactRevision && (
+          <ConsultationReviewSummary
+            notes={Object.values(watched.content?.soap ?? {}).some(
+              (value) => typeof value === "string" && !!value.trim(),
+            )}
+            diagnoses={watched.content?.diagnoses?.length ?? 0}
+            findings={
+              (watched.content?.findings?.length ?? 0) +
+              (watched.content?.anatomy_findings?.length ?? 0)
+            }
+            documents={watched.content?.document_ids?.length ?? 0}
+            pendingUpload={uploadPending}
+          />
+        )}
         {!exactRevision && can("encounters.write") && (
           <div
             role="status"
@@ -529,6 +587,18 @@ function OwnedEncounterEditor({
                     ? "Editing on this device · changes use the existing consultation draft"
                     : `Read only · ${leaseControl.lease.owner || "another clinician"} · ${leaseControl.lease.locked ? "Station locked" : leaseControl.lease.live ? leaseControl.lease.device : "editing lease expired"}`)}
             </p>
+            {leaseControl.lease && !leaseControl.error && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Saved revision {encounter.version} · Editing owner:{" "}
+                {leaseControl.lease.owner || "Not claimed"}
+                {leaseControl.lease.device ? ` · ${leaseControl.lease.device}` : ""}
+                {leaseControl.lease.expires_at
+                  ? ` · Lease checked against ${timeLabel(leaseControl.lease.expires_at)}`
+                  : ""}
+                . Transferring editing moves the last saved revision; unsaved input stays on its
+                original device.
+              </p>
+            )}
             {!leaseControl.canEdit && dirty && (
               <p className="text-muted-foreground">
                 Unsaved input is preserved here. Review it before loading another version.
@@ -601,179 +671,147 @@ function OwnedEncounterEditor({
                     type="hidden"
                     {...form.register("expectedVersion", { valueAsNumber: true })}
                   />
-                  <TabsContent value="notes" forceMount className="data-[state=inactive]:hidden">
-                    <div className="grid min-w-0 gap-6 rounded-xl border border-border bg-card p-4 sm:p-6">
-                      <SoapFields readOnly={readOnly || lifecycleBusy} />
-                      <DiagnosisFields
-                        readOnly={readOnly || lifecycleBusy}
-                        observationLabels={
-                          templateSchema.safeParse(encounter.template).data?.observation_labels
-                        }
-                      />
-                    </div>
-                  </TabsContent>
+                  <DocumentationPanels
+                    readOnly={readOnly || lifecycleBusy}
+                    patientId={encounter.patientId}
+                    encounterId={encounter.id}
+                    observationLabels={
+                      templateSchema.safeParse(encounter.template).data?.observation_labels
+                    }
+                    onUploadPending={setUploadPending}
+                  />
                   <TabsContent value="anatomy" forceMount className="data-[state=inactive]:hidden">
-                    <AnatomyEditor
-                      active={clinicalTab === "anatomy"}
-                      readOnly={readOnly || lifecycleBusy}
-                      patientId={encounter.patientId}
-                      save={save}
-                      consultation={{
-                        patientName: encounter.patientName,
-                        patientId: encounter.patientId,
-                        status: encounter.isAmendment ? "amendment draft" : encounter.status,
-                        saveStatus:
-                          leaseControl.error ||
-                          (!leaseControl.canEdit
-                            ? "Read only · editing control is unavailable on this device"
-                            : status),
-                        error: failure ? failureText(failure) : undefined,
-                        busy: busy || lifecycleBusy,
-                        canComplete: !readOnly,
-                        canFinalize:
-                          completed &&
-                          !exactRevision &&
-                          can("encounters.write") &&
-                          leaseControl.canEdit,
-                        stationActions,
-                        navigation: clinicalNavigation,
-                        clinicalContext: (
-                          <ClinicalAlerts
-                            patientId={encounter.patientId}
-                            revisionId={encounter.patientHistoryRevisionId}
-                            active={clinicalTab === "anatomy"}
-                          />
-                        ),
-                        onComplete: () => void transition("completed"),
-                        onFinalize: () => {
-                          setReview(true);
-                          void finalize();
-                        },
-                        onBack: () => setClinicalTab("notes"),
-                      }}
-                    />
+                    {clinicalTabs.visited("anatomy") && (
+                      <AnatomyEditor
+                        active={clinicalTab === "anatomy"}
+                        readOnly={readOnly || lifecycleBusy}
+                        patientId={encounter.patientId}
+                        save={save}
+                        consultation={{
+                          patientName: encounter.patientName,
+                          patientId: encounter.patientId,
+                          status: encounter.isAmendment ? "amendment draft" : encounter.status,
+                          saveStatus:
+                            leaseControl.error ||
+                            (!leaseControl.canEdit
+                              ? "Read only · editing control is unavailable on this device"
+                              : status),
+                          error: failure ? failureText(failure) : undefined,
+                          busy: busy || lifecycleBusy,
+                          canComplete: !readOnly,
+                          canFinalize:
+                            completed &&
+                            !exactRevision &&
+                            can("encounters.write") &&
+                            leaseControl.canEdit,
+                          stationActions,
+                          navigation: clinicalNavigation,
+                          clinicalContext: (
+                            <ClinicalAlerts
+                              patientId={encounter.patientId}
+                              revisionId={encounter.patientHistoryRevisionId}
+                              active={clinicalTab === "anatomy"}
+                            />
+                          ),
+                          onComplete: () => void transition("completed"),
+                          onFinalize: () => {
+                            setReview(true);
+                            void finalize();
+                          },
+                          onBack: () => setClinicalTab("notes"),
+                        }}
+                      />
+                    )}
                   </TabsContent>
                   <TabsContent value="dental" forceMount className="data-[state=inactive]:hidden">
                     <div className="min-w-0 rounded-xl border border-border bg-card p-4 sm:p-6">
-                      <DentalEditor
-                        editingNotice={editingNotice}
-                        onPendingChange={setChartPending}
-                        clinicalContext={
-                          <ClinicalAlerts
-                            patientId={encounter.patientId}
-                            revisionId={encounter.patientHistoryRevisionId}
-                            active={clinicalTab === "dental"}
-                          />
-                        }
-                        active={clinicalTab === "dental"}
-                        patientName={encounter.patientName}
-                        reason={encounter.reason}
-                        encounterStatus={exactRevision ? "historical" : encounter.status}
-                        onPatientRecord={() =>
-                          void guard(() =>
-                            router.push(href(`/clinic/patients/${encounter.patientId}`)),
-                          )
-                        }
-                        navigation={clinicalNavigation}
-                        onExit={() => setClinicalTab("notes")}
-                        actions={
-                          <>
-                            {stationActions}
-                            {!readOnly && (
-                              <>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  disabled={busy || lifecycleBusy || composing}
-                                  onClick={() => void save()}
-                                >
-                                  Save draft
-                                </Button>
-                                <Button
-                                  type="button"
-                                  disabled={busy || lifecycleBusy || composing || uploadPending}
-                                  onClick={() => void transition("completed")}
-                                >
-                                  Mark completed
-                                </Button>
-                              </>
-                            )}
-                            {completed &&
-                              !exactRevision &&
-                              can("encounters.write") &&
-                              leaseControl.canEdit && (
-                                <Button
-                                  type="button"
-                                  disabled={busy || lifecycleBusy || uploadPending}
-                                  onClick={() => {
-                                    setReview(true);
-                                    void finalize();
-                                  }}
-                                >
-                                  Review and finalize
-                                </Button>
+                      {clinicalTabs.visited("dental") && (
+                        <DentalEditor
+                          editingNotice={editingNotice}
+                          onPendingChange={setChartPending}
+                          clinicalContext={
+                            <ClinicalAlerts
+                              patientId={encounter.patientId}
+                              revisionId={encounter.patientHistoryRevisionId}
+                              active={clinicalTab === "dental"}
+                            />
+                          }
+                          active={clinicalTab === "dental"}
+                          patientName={encounter.patientName}
+                          reason={encounter.reason}
+                          encounterStatus={exactRevision ? "historical" : encounter.status}
+                          onPatientRecord={() =>
+                            void guard(() =>
+                              router.push(href(`/clinic/patients/${encounter.patientId}`)),
+                            )
+                          }
+                          navigation={clinicalNavigation}
+                          onExit={() => setClinicalTab("notes")}
+                          actions={
+                            <>
+                              {stationActions}
+                              {!readOnly && (
+                                <>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    disabled={busy || lifecycleBusy || composing}
+                                    onClick={() => void save()}
+                                  >
+                                    Save draft
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    disabled={busy || lifecycleBusy || composing || uploadPending}
+                                    onClick={() => void transition("completed")}
+                                  >
+                                    Mark completed
+                                  </Button>
+                                </>
                               )}
-                          </>
-                        }
-                        feedback={
-                          <>
-                            {failure !== null ? (
-                              <span role="alert" className="text-destructive">
-                                {failureText(failure)}
-                              </span>
-                            ) : (
-                              leaseControl.error ||
-                              (!leaseControl.canEdit
-                                ? "Read only · editing control is unavailable on this device"
-                                : status)
-                            )}
-                            {Object.keys(form.formState.errors).length > 0 && (
-                              <span className="ml-2 text-destructive">
-                                Check required findings and the combined draft size.
-                              </span>
-                            )}
-                          </>
-                        }
-                        readOnly={readOnly || lifecycleBusy}
-                        patientId={encounter.patientId}
-                        encounterId={encounter.id}
-                        revisionId={exactRevision ? initial.revisionId : null}
-                      />
+                              {completed &&
+                                !exactRevision &&
+                                can("encounters.write") &&
+                                leaseControl.canEdit && (
+                                  <Button
+                                    type="button"
+                                    disabled={busy || lifecycleBusy || uploadPending}
+                                    onClick={() => {
+                                      setReview(true);
+                                      void finalize();
+                                    }}
+                                  >
+                                    Review and finalize
+                                  </Button>
+                                )}
+                            </>
+                          }
+                          feedback={
+                            <>
+                              {failure !== null ? (
+                                <span role="alert" className="text-destructive">
+                                  {failureText(failure)}
+                                </span>
+                              ) : (
+                                leaseControl.error ||
+                                (!leaseControl.canEdit
+                                  ? "Read only · editing control is unavailable on this device"
+                                  : status)
+                              )}
+                              {Object.keys(form.formState.errors).length > 0 && (
+                                <span className="ml-2 text-destructive">
+                                  Check required findings and the combined draft size.
+                                </span>
+                              )}
+                            </>
+                          }
+                          readOnly={readOnly || lifecycleBusy}
+                          patientId={encounter.patientId}
+                          encounterId={encounter.id}
+                          revisionId={exactRevision ? initial.revisionId : null}
+                        />
+                      )}
                     </div>
-                  </TabsContent>
-                  <TabsContent
-                    value="procedures"
-                    forceMount
-                    className="data-[state=inactive]:hidden"
-                  >
-                    <div className="rounded-xl border border-border bg-card p-4 sm:p-6">
-                      <ProcedureFields readOnly={readOnly || lifecycleBusy} />
-                    </div>
-                  </TabsContent>
-                  <TabsContent
-                    value="documents"
-                    forceMount
-                    className="data-[state=inactive]:hidden"
-                  >
-                    {" "}
-                    <DocumentPanel
-                      patientId={encounter.patientId}
-                      encounterId={encounter.id}
-                      readOnly={readOnly || lifecycleBusy}
-                      onUploadPending={setUploadPending}
-                      attachedIds={watched.content?.document_ids}
-                      onAttach={(id, attach) =>
-                        form.setValue(
-                          "content.document_ids",
-                          attach
-                            ? [...form.getValues("content.document_ids"), id]
-                            : form
-                                .getValues("content.document_ids")
-                                .filter((value) => value !== id),
-                          { shouldDirty: true },
-                        )
-                      }
-                    />
                   </TabsContent>
                   {Object.keys(form.formState.errors).length > 0 && (
                     <p role="alert" className="text-sm text-destructive">
@@ -812,14 +850,15 @@ function OwnedEncounterEditor({
           can("encounters.write") && (
             <section className="grid max-w-2xl gap-4 border-t border-border pt-6">
               <h2 className="text-xl font-semibold">Amend finalized care</h2>
-              <FormField id="amendmentReason" label="Reason for amendment">
-                <Input
-                  id="amendmentReason"
-                  value={reason}
-                  onChange={(event) => setReason(event.target.value)}
-                  maxLength={500}
-                />
-              </FormField>
+              <ReasonField
+                id="amendmentReason"
+                label="Reason for amendment"
+                value={reason}
+                onValueChange={setReason}
+                suggestions={reasonSuggestions.amendment}
+                maxLength={500}
+                required
+              />
               <Button
                 type="button"
                 variant="outline"

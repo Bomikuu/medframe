@@ -21,6 +21,7 @@ export function PatientAvatar({
         <SecureImage
           id={imageId}
           avatar
+          fallback={<PatientAvatar name={name} className="size-full border-0" />}
           alt={`Photo of ${name}`}
           className="h-full w-full object-cover"
         />

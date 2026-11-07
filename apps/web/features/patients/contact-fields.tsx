@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
+import { PhoneInput } from "@/components/application/phone-input";
 import { FormField } from "@/components/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,19 +20,39 @@ function ContactField({
 }) {
   const {
     register,
+    control,
     formState: { errors },
   } = useFormContext<PatientFormValues>();
   return (
     <FormField id={name} label={label} error={errors[name]?.message}>
-      <Input
-        id={name}
-        type={type}
-        autoComplete="off"
-        maxLength={maxLength}
-        aria-invalid={!!errors[name]}
-        aria-describedby={errors[name] ? `${name}-help` : undefined}
-        {...register(name)}
-      />
+      {type === "tel" ? (
+        <Controller
+          name={name}
+          control={control}
+          render={({ field }) => (
+            <PhoneInput
+              id={name}
+              name={field.name}
+              ref={field.ref}
+              value={String(field.value)}
+              onValueChange={field.onChange}
+              onBlur={field.onBlur}
+              aria-invalid={!!errors[name]}
+              aria-describedby={errors[name] ? `${name}-help` : undefined}
+            />
+          )}
+        />
+      ) : (
+        <Input
+          id={name}
+          type={type}
+          autoComplete="off"
+          maxLength={maxLength}
+          aria-invalid={!!errors[name]}
+          aria-describedby={errors[name] ? `${name}-help` : undefined}
+          {...register(name)}
+        />
+      )}
     </FormField>
   );
 }

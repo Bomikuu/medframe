@@ -51,6 +51,15 @@
   --destructive: #ff9aab;
 }
 
+/* The supplied SVGs are instantiated with <use>, so these colors inherit into each instance. */
+.medframe-illustration {
+  --mf-teal: var(--brand-teal, #0d9488);
+  --mf-teal-dark: color-mix(in srgb, var(--brand-teal, #0d9488) 75%, #102a43);
+  --mf-mint: color-mix(in srgb, var(--brand-teal, #0d9488) 30%, white);
+  --mf-royal-blue: var(--clinic-primary, #3552a9);
+  --mf-navy: var(--clinic-primary, #173a87);
+}
+
 @theme inline {
   --text-sm: var(--app-font-size, 15px);
   --text-xs: calc(var(--app-font-size, 15px) * 0.866667);
@@ -419,4 +428,60 @@ h1 {
 /* Grid pages already own vertical rhythm; heading margins belong to flow layouts. */
 .grid > [data-page-header] {
   margin-bottom: 0;
+}
+
+/* Quiet onboarding motif; circles frame the content rather than compete with it. */
+.onboarding-backdrop {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(
+      circle at -5% 25%,
+      transparent 0 235px,
+      color-mix(in srgb, var(--brand-teal) 11%, transparent) 236px 237px,
+      transparent 238px 295px,
+      color-mix(in srgb, var(--brand-teal) 7%, transparent) 296px 297px,
+      transparent 298px
+    ),
+    radial-gradient(
+      circle at 105% 75%,
+      transparent 0 235px,
+      color-mix(in srgb, var(--brand-teal) 10%, transparent) 236px 237px,
+      transparent 238px 300px,
+      color-mix(in srgb, var(--brand-teal) 7%, transparent) 301px 302px,
+      transparent 303px
+    ),
+    repeating-linear-gradient(
+      135deg,
+      transparent 0 180px,
+      color-mix(in srgb, var(--brand-teal) 3%, transparent) 181px 182px,
+      transparent 183px 360px
+    );
+}
+@keyframes onboarding-step-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .onboarding-active-dot {
+    animation: onboarding-step-pulse 2s ease-in-out infinite;
+  }
+}
+
+/* Station portals must clear the session strip; nested portals keep DOM order. */
+body:has([data-station-shell])
+  :is(
+    [data-slot="dialog-overlay"],
+    [data-slot="dialog-content"],
+    [data-slot="sheet-overlay"],
+    [data-slot="sheet-content"]
+  ) {
+  z-index: 140;
+}
+body:has([data-station-shell]) :is([data-slot="select-content"], [data-slot="popover-content"]) {
+  z-index: 145;
 }

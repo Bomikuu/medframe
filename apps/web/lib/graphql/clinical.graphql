@@ -4,6 +4,7 @@ fragment EncounterFields on EncounterType {
   patientId
   providerSpecialty
   patientName
+  patientPortraitId
   branchId
   reason
   status

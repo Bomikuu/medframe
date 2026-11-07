@@ -13,6 +13,7 @@ import { useRemote } from "@/features/patients/use-remote";
 import { useRequestScope } from "@/features/patients/use-request-scope";
 import { failureText } from "@/features/patients/feedback";
 import { setupSchema } from "./schema";
+import { ApiError } from "@/lib/auth/client";
 
 export function financialFailure(error: unknown) {
   if (error instanceof ClientError) {
@@ -26,14 +27,22 @@ export function financialFailure(error: unknown) {
   return failureText(error);
 }
 export function useBillingSetup(branch?: string, search = "") {
-  const { organizationId } = useWorkspace();
+  const { organizationId, branchId } = useWorkspace();
   const remote = useRemote(BillingSetupDocument, {
     organizationId,
-    branchId: branch || null,
+    branchId: branch || branchId || null,
     search,
   });
   const parsed = setupSchema.safeParse(remote.data?.billingSetup);
-  return { ...remote, setup: parsed.success ? parsed.data : null };
+  return {
+    ...remote,
+    setup: parsed.success ? parsed.data : null,
+    error:
+      remote.error ??
+      (remote.data && !parsed.success
+        ? new ApiError("Billing settings could not be read.", "INVALID_RESPONSE", 502)
+        : null),
+  };
 }
 /** Keep the same receipt for an exact retry; changing fields creates a new request. */
 export function useFinancialAction(kind: "billing" | "communication" = "billing") {

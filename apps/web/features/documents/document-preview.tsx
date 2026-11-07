@@ -1,4 +1,6 @@
 "use client";
+
+import { workspaceHeaders } from "@/lib/auth/client";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +59,11 @@ export function DocumentPreview({
         ].includes(parsed.pathname)
       )
         throw new Error("Invalid transfer");
-      const response = await fetch(parsed, { cache: "no-store", signal: controller.signal });
+      const response = await fetch(parsed, {
+        headers: workspaceHeaders(),
+        cache: "no-store",
+        signal: controller.signal,
+      });
       if (!response.ok || response.headers.get("content-type")?.split(";")[0] !== contentType)
         throw new Error("File unavailable");
       const bytes = new Uint8Array(await response.arrayBuffer());

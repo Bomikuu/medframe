@@ -16,9 +16,9 @@ export function PortalAuthLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
         <p className="text-center text-xs leading-6 text-muted-foreground">
-          Patient access starts with a clinic-verified invitation.
+          Register through your clinic’s patient link or use a clinic invitation.
           <br />
-          Contact your clinic if you need access.
+          Your clinic reviews registration before granting portal access.
         </p>
         <Link
           className="text-center text-sm text-primary underline underline-offset-4"

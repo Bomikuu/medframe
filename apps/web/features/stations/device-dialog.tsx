@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
 import { useSafety } from "@/features/workspace/safety-provider";
+import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { errorMessage } from "@/lib/auth/client";
 import {
   functionLabels,
@@ -35,7 +36,7 @@ const functionDescriptions: Record<string, string> = {
   check_in: "Confirm arrival for an existing appointment.",
   walk_in: "Join the configured service queue.",
   payments: "Review bills and continue to the cashier.",
-  "queue.display": "Queue display content is planned for a later phase.",
+  "queue.display": "Show read-only queue numbers and clinic announcements.",
 };
 
 type Branch = { id: string; name: string };
@@ -53,9 +54,15 @@ export function DeviceDialog({
   onSaved: () => Promise<void>;
 }) {
   const { confirm } = useSafety();
+  const { branchId: currentBranch } = useWorkspace();
   const [device, setDevice] = useState(initial);
   const [name, setName] = useState(initial?.name ?? "");
-  const [branch, setBranch] = useState(initial?.branch_id ?? branches[0]?.id ?? "");
+  const [branch, setBranch] = useState(
+    initial?.branch_id ??
+      branches.find((item) => item.id === currentBranch)?.id ??
+      branches[0]?.id ??
+      "",
+  );
   const [mode, setMode] = useState<Mode>(initial?.mode ?? "clinician");
   const [functions, setFunctions] = useState(
     initial?.functions ?? ["clinical.read", "clinical.write"],
@@ -220,7 +227,7 @@ export function DeviceDialog({
             <div className="grid gap-4 sm:grid-cols-2">
               <FormSelect
                 id="deviceBranch"
-                label="Branch"
+                label="Device branch"
                 value={branch}
                 onChange={setBranch}
                 options={branches.map((b) => ({ value: b.id, label: b.name }))}
@@ -307,6 +314,17 @@ export function DeviceDialog({
                 </h3>
                 <span className="text-xs text-muted-foreground">{stateLabels[device.state]}</span>
               </div>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {device.state === "setup" || device.state === "revoked"
+                  ? "Next: open the separate Pairing code dialog, enter the code on the receiving device, then return here to approve its verification phrase."
+                  : device.state === "pending"
+                    ? "Next: compare this phrase with the receiving device before approval. Entering a code alone does not approve access."
+                    : "Approved for its enabled functions. Staff identity, patient grants and existing permissions still apply. Approval does not prove that this device is currently online."}
+              </p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Regenerating a pairing code ends the current device connection. Revoking access
+                keeps saved records and immediately blocks this device.
+              </p>
               {device.state === "pending" && (
                 <p className="rounded-lg bg-muted p-4 text-center font-mono text-xl tracking-widest">
                   {device.verification_phrase ??

@@ -76,6 +76,23 @@ export function IllustrationControls({
           </p>
         )}
       </fieldset>
+      <div
+        className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground"
+        aria-label="Tooth illustration legend"
+      >
+        <span className="flex items-center gap-1.5">
+          <span aria-hidden className="size-2.5 rounded-full bg-cyan-500" />
+          Selected
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span aria-hidden className="size-2.5 rounded-full bg-red-600" />
+          Missing reference
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span aria-hidden className="size-2.5 rounded-full bg-amber-500" />
+          Crown
+        </span>
+      </div>
       <p className="mt-3 text-xs leading-5 text-muted-foreground">
         Schematic reference only. Crown coverage, bracket position and impaction angle are
         illustrative, not patient measurements.

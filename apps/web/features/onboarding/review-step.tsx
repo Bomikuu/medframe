@@ -1,5 +1,6 @@
 "use client";
 
+import { Pencil, Building2 } from "lucide-react";
 import {
   providerCounts,
   walkInPolicies,
@@ -79,7 +80,19 @@ export function ReviewStep({
       [
         ["Branch", String(practice.branch_name)],
         ["Operating days", operatingDays(practice.days)],
-        ["Hours", `${practice.opens}–${practice.closes} · ${practice.timezone}`],
+        [
+          "Hours",
+          ((practice.days as number[]) ?? [])
+            .map((day) => {
+              const names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+              const hours = (
+                practice.daily_hours as
+                  Record<string, { opens: string; closes: string }> | undefined
+              )?.[String(day)] ?? { opens: practice.opens, closes: practice.closes };
+              return `${names[day]} ${hours.opens}–${hours.closes}`;
+            })
+            .join(" · ") + ` (${practice.timezone})`,
+        ],
         [
           "Appointment preference",
           `${practice.duration_minutes} minutes · ${walkInPolicies[String(practice.walk_in_policy)] ?? "Not specified"}`,
@@ -110,10 +123,11 @@ export function ReviewStep({
         </p>
       </div>
       {groups.map(([step, title, rows]) => (
-        <section key={step} className="border-b pb-6">
+        <section key={step} className="rounded-xl border p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold">{title}</h2>
             <Button type="button" variant="ghost" size="sm" onClick={() => onEdit(step)}>
+              <Pencil className="size-4" aria-hidden="true" />
               Edit<span className="sr-only"> {title}</span>
             </Button>
           </div>
@@ -152,6 +166,7 @@ export function ReviewStep({
         }
         onClick={onComplete}
       >
+        <Building2 aria-hidden="true" />
         {busy ? "Creating your clinic…" : "Create my clinic"}
       </Button>
     </div>

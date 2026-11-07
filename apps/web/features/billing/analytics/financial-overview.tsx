@@ -12,6 +12,7 @@ import { ButtonLink } from "@/components/ui/button-link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ComparisonChart } from "./comparison-chart";
 import { financialOverviewSchema, money } from "./schema";
+import { invoiceListHref, type InvoiceFilters } from "../invoice-list-links";
 
 export function FinancialOverviewPanel({
   branchId,
@@ -24,11 +25,10 @@ export function FinancialOverviewPanel({
   periodDays?: number;
   periodRange?: ReportRange;
 }) {
-  const { organizationId, workspace, can, href } = useWorkspace();
-  const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
+  const { organizationId, workspace, can, href, branchId: currentBranch } = useWorkspace();
   const [range, setRange] = useState<ReportRange>({ days: 30 });
   const [currency, setCurrency] = useState("");
-  const selectedBranch = branchId ?? branch;
+  const selectedBranch = branchId ?? currentBranch;
   const remote = useRemote(
     FinancialOverviewDocument,
     {
@@ -42,6 +42,16 @@ export function FinancialOverviewPanel({
   if (!can("billing.read")) return null;
   const data = parsed.success ? parsed.data : null;
   const value = data?.currencies.find((row) => row.currency === currency) ?? data?.currencies[0];
+  const invoicesHref = (filters: InvoiceFilters) =>
+    invoiceListHref(
+      href("/clinic/billing"),
+      {
+        ...filters,
+        branch: data!.branch_id,
+        currency: value!.currency,
+      },
+      { from: data!.current_from, to: data!.current_to },
+    );
   const compare = (current: string, previous: string) => {
     const delta = Number(current) - Number(previous);
     return `${delta >= 0 ? "+" : "−"}${money(Math.abs(delta), value!.currency)} vs previous period`;
@@ -53,9 +63,7 @@ export function FinancialOverviewPanel({
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">
-            {compact ? "Clinic finances" : "Financial overview"}
-          </h2>
+          <h2 className="text-lg font-semibold">{compact ? "Clinic finances" : "Financials"}</h2>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
             Recorded payments and invoice balances. Current receivables are shown separately from
             the comparison period.
@@ -68,17 +76,6 @@ export function FinancialOverviewPanel({
         )}
       </div>
       <div className="flex min-w-0 flex-wrap items-end gap-3">
-        {!branchId && (
-          <div className="min-w-48 flex-1">
-            <FormSelect
-              id="finance-branch"
-              label="Financial branch"
-              value={branch}
-              onChange={setBranch}
-              options={workspace.branches.map((row) => ({ value: row.id, label: row.name }))}
-            />
-          </div>
-        )}
         {periodDays === undefined && !periodRange && (
           <div className="min-w-0 flex-1 basis-64">
             <ReportRangeControls
@@ -141,6 +138,7 @@ export function FinancialOverviewPanel({
                 label: "Invoice value issued",
                 amount: value.current.issued,
                 detail: compare(value.current.issued, value.previous.issued),
+                action: "View invoices issued in this period",
               },
               {
                 label: "Payments recorded",
@@ -159,6 +157,22 @@ export function FinancialOverviewPanel({
                   {money(metric.amount, value.currency)}
                 </dd>
                 <dd className="mt-2 text-xs leading-5 text-muted-foreground">{metric.detail}</dd>
+                {"action" in metric && (
+                  <dd className="mt-2">
+                    <ButtonLink
+                      variant="link"
+                      className="h-auto p-0 text-left text-xs whitespace-normal"
+                      href={invoicesHref({
+                        status: "issued",
+                        date_basis: "issued",
+                        date_from: data.current_from,
+                        date_to: data.current_to,
+                      })}
+                    >
+                      {metric.action}
+                    </ButtonLink>
+                  </dd>
+                )}
               </div>
             ))}
           </dl>
@@ -178,16 +192,22 @@ export function FinancialOverviewPanel({
                   label: "Total outstanding",
                   amount: value.outstanding,
                   detail: `${value.unpaid_count} invoices with a balance`,
+                  balance: "outstanding",
+                  action: "View outstanding invoices",
                 },
                 {
                   label: "Due through today",
                   amount: value.due_now,
                   detail: `${money(value.overdue, value.currency)} overdue`,
+                  balance: "due",
+                  action: "View invoices due now",
                 },
                 {
                   label: "Scheduled for later",
                   amount: value.future,
                   detail: "Future installments and amounts not yet due",
+                  balance: "future",
+                  action: "View future payment invoices",
                 },
               ].map((metric) => (
                 <div key={metric.label} className="min-w-0">
@@ -196,6 +216,26 @@ export function FinancialOverviewPanel({
                     {money(metric.amount, value.currency)}
                   </dd>
                   <dd className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</dd>
+                  <dd className="mt-2">
+                    <ButtonLink
+                      variant="link"
+                      className="h-auto p-0 text-left text-xs whitespace-normal"
+                      href={invoicesHref({ balance: metric.balance, status: "issued" })}
+                    >
+                      {metric.action}
+                    </ButtonLink>
+                  </dd>
+                  {metric.balance === "due" && (
+                    <dd className="mt-2">
+                      <ButtonLink
+                        variant="link"
+                        className="h-auto p-0 text-left text-xs whitespace-normal"
+                        href={invoicesHref({ balance: "overdue", status: "issued" })}
+                      >
+                        View overdue invoices
+                      </ButtonLink>
+                    </dd>
+                  )}
                 </div>
               ))}
             </dl>
@@ -261,12 +301,48 @@ export function FinancialOverviewPanel({
               </div>
             )}
           </div>
-          <p className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
-            Net recorded payments = payments less refunds, using their recorded payment dates. These
-            figures are not profit or accounting revenue. Today is excluded from the period
-            comparison; receivables include today’s recorded changes. Medframe records settlement
-            made elsewhere.
-          </p>
+          <details className="border-t border-border pt-4 text-xs leading-5 text-muted-foreground">
+            <summary className="w-fit cursor-pointer rounded-sm font-medium text-foreground focus-visible:outline-2 focus-visible:outline-ring">
+              What these financial figures include
+            </summary>
+            <p className="mt-3">
+              Net recorded payments = payments less refunds, using their recorded payment dates.
+              These figures are not profit or accounting revenue. Today is excluded from the period
+              comparison; receivables include today’s recorded changes. Medframe records settlement
+              made elsewhere.
+            </p>
+            <dl className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div>
+                <dt className="font-medium text-foreground">Invoice value issued</dt>
+                <dd className="mt-1">
+                  Issued charges dated within the period, after invoice discounts. Later credits and
+                  payments do not rewrite the original issued value.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-foreground">Current balances</dt>
+                <dd className="mt-1">
+                  Issued invoices at the snapshot time, across all invoice dates. Credits reduce
+                  charges; refunds reduce retained payments. Drafts and voided invoices are
+                  excluded.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-foreground">Period comparison</dt>
+                <dd className="mt-1">
+                  Completed clinic days compared with the immediately preceding equal number of
+                  days. Current balances are not a historical balance for those dates.
+                </dd>
+              </div>
+              <div>
+                <dt className="font-medium text-foreground">Method totals</dt>
+                <dd className="mt-1">
+                  Gross recorded payments by method, before refunds. Cashier day review shows
+                  refunds separately by their return date.
+                </dd>
+              </div>
+            </dl>
+          </details>
         </>
       )}
     </section>

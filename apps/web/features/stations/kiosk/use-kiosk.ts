@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, errorMessage } from "@/lib/auth/client";
+import type { CompletedTerminalAction } from "./terminal-completed-actions";
 import {
   kioskRequest,
   type Setup,
@@ -18,10 +19,12 @@ export function useKiosk() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [task, setTask] = useState<Task>("booking");
   const [view, setView] = useState<View>("home");
+  const [staffMode, setStaffMode] = useState(false);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState("");
   const [connectionError, setConnectionError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [completed, setCompleted] = useState<CompletedTerminalAction[]>([]);
   const [remaining, setRemaining] = useState(120);
   const epoch = useRef(0);
   const lastActivity = useRef(0);
@@ -29,6 +32,7 @@ export function useKiosk() {
   const mounted = useRef(true);
   const active = useRef<PatientSession | null>(null);
   const resetting = useRef(false);
+  const staffModeRef = useRef(false);
   const halt = useCallback((message: string) => {
     epoch.current++;
     active.current = null;
@@ -36,8 +40,9 @@ export function useKiosk() {
     setSession(null);
     setSnapshot(null);
     setResult(null);
+    setCompleted([]);
     setSetup(null);
-    setView("home");
+    setView(staffModeRef.current ? "staff" : "home");
     setError(message);
     setConnectionError("");
     setBusy(false);
@@ -51,7 +56,10 @@ export function useKiosk() {
     setSession(null);
     setSnapshot(null);
     setResult(null);
-    setView("home");
+    setCompleted([]);
+    // Pause reception polling until the cleared device boundary has been reloaded.
+    setSetup(null);
+    setView(staffModeRef.current ? "staff" : "home");
     setError(message);
     setConnectionError("");
     setBusy(true);
@@ -117,10 +125,40 @@ export function useKiosk() {
     if (value) {
       active.current = value;
       setSession(value);
+      setCompleted([]);
       lastActivity.current = Date.now();
       setView("choose");
     }
   }
+  function acceptSession(value: PatientSession) {
+    active.current = value;
+    setSession(value);
+    setSnapshot(null);
+    setResult(null);
+    setCompleted([]);
+    setError("");
+    lastActivity.current = Date.now();
+    lastPing.current = 0;
+    setView("home");
+  }
+  async function identify(identifier: string) {
+    const value = await run<PatientSession>({
+      action: "identify",
+      identifier,
+      generation: setup?.generation,
+    });
+    if (value) acceptSession(value);
+  }
+  function enterStaff() {
+    staffModeRef.current = true;
+    setStaffMode(true);
+    setView("staff");
+  }
+  const leaveStaff = useCallback(() => {
+    staffModeRef.current = false;
+    setStaffMode(false);
+    void reset();
+  }, [reset]);
   const activity = useCallback(() => {
     lastActivity.current = Date.now();
     if (!active.current || Date.now() - lastPing.current < 20000) return;
@@ -145,7 +183,7 @@ export function useKiosk() {
   }, [halt]);
   const hasSession = !!session;
   useEffect(() => {
-    if (view === "staff" || (view === "home" && !hasSession)) return;
+    if (staffMode || view === "staff" || (view === "home" && !hasSession)) return;
     const timer = window.setInterval(() => {
       const absolute = active.current ? new Date(active.current.expires_at).getTime() : Infinity;
       const idle = active.current
@@ -156,7 +194,7 @@ export function useKiosk() {
       if (seconds <= 0) void reset("Session cleared for your privacy.");
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [view, hasSession, reset]);
+  }, [view, hasSession, reset, staffMode]);
   useEffect(() => {
     if (!hasSession) return;
     let cancelled = false;
@@ -186,7 +224,13 @@ export function useKiosk() {
     };
   }, [hasSession, halt]); // Polling never renews the patient's inactivity deadline.
   useEffect(() => {
-    if (!setup || setup.strict_verification || hasSession || !["home", "waiting"].includes(view))
+    if (
+      !setup ||
+      staffMode ||
+      setup.strict_verification ||
+      hasSession ||
+      !["home", "waiting"].includes(view)
+    )
       return;
     let cancelled = false;
     let pending = false;
@@ -225,22 +269,23 @@ export function useKiosk() {
       window.clearTimeout(initial);
       window.clearInterval(timer);
     };
-  }, [setup, hasSession, view, halt]);
+  }, [setup, hasSession, view, halt, staffMode]);
   function home() {
-    if (!active.current || setup?.strict_verification) return reset();
+    if (!active.current || (setup?.strict_verification && !staffMode)) return reset();
     setView("home");
     setResult(null);
     setError("");
   }
   function start(next: Task) {
     setTask(next);
-    if (setup?.strict_verification) {
+    if (setup?.strict_verification && !staffMode) {
       epoch.current++;
       active.current = null;
       setSession(null);
       setSnapshot(null);
+      setCompleted([]);
       setView("verify");
-    } else setView(active.current ? "choose" : "register");
+    } else setView(active.current ? "choose" : "home");
     setResult(null);
     setError("");
     lastActivity.current = Date.now();
@@ -248,10 +293,24 @@ export function useKiosk() {
   }
   function complete(value: Result) {
     setResult(value);
+    if (value.kind !== "intake") {
+      const identity = value.ticket?.id ?? value.appointment?.id;
+      setCompleted((previous) =>
+        identity &&
+        previous.some(({ result }) => (result.ticket?.id ?? result.appointment?.id) === identity)
+          ? previous
+          : [...previous, { task, result: value }],
+      );
+    }
     setView(value.kind === "intake" ? "waiting" : "done");
   }
   return {
     cycle,
+    staffMode,
+    enterStaff,
+    leaveStaff,
+    acceptSession,
+    identify,
     setup,
     session,
     snapshot,
@@ -259,7 +318,8 @@ export function useKiosk() {
     view,
     setView,
     busy,
-    error: error || connectionError,
+    error,
+    connectionError,
     remaining,
     reset,
     home,
@@ -268,6 +328,7 @@ export function useKiosk() {
     activity,
     start,
     result,
+    completed,
     complete,
   };
 }

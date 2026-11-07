@@ -51,6 +51,23 @@ class ResourceInput(Input):
     active: bool = True
 
 
+class WeeklyScheduleInput(Input):
+    branch_id: UUID
+    provider_id: UUID
+    windows: list[ScheduleInput] = Field(min_length=1, max_length=7)
+
+    @model_validator(mode="after")
+    def same_scope(self):
+        if len({row.weekday for row in self.windows}) != len(self.windows):
+            raise ValueError("Choose each weekday once per form")
+        if any(
+            row.branch_id != self.branch_id or row.provider_id != self.provider_id
+            for row in self.windows
+        ):
+            raise ValueError("Keep the same provider and branch for all weekdays")
+        return self
+
+
 class OverrideInput(Input):
     branch_id: UUID
     provider_id: UUID | None = None
@@ -71,6 +88,7 @@ class OverrideInput(Input):
 
 
 class AvailabilityInput(Duration):
+    appointment_id: UUID | None = None
     branch_id: UUID
     provider_id: UUID
     resource_id: UUID | None = None
@@ -85,6 +103,8 @@ class AvailabilityInput(Duration):
 
 
 class BookingInput(Duration):
+    online: bool = False
+    doctor_mode: Literal["assigned", "eligible"] = "assigned"
     branch_id: UUID
     provider_id: UUID
     patient_id: UUID

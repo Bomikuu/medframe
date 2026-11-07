@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { errorMessage, requestWithCsrf } from "@/lib/auth/client";
 
-type GoogleConfiguration = { enabled: false } | { enabled: true; clientId: string; nonce: string };
+export type GoogleConfiguration =
+  { enabled: false } | { enabled: true; clientId: string; nonce: string };
 type GoogleIdentityApi = {
   initialize: (options: {
     client_id: string;
@@ -24,8 +25,14 @@ export function GoogleSignIn({
   busy,
   remember,
   onSubmit,
+  prepare,
+  signup = false,
+  description,
 }: {
   portal: boolean;
+  prepare?: () => Promise<GoogleConfiguration>;
+  signup?: boolean;
+  description?: string;
   busy: boolean;
   remember: boolean;
   onSubmit: (credential: string, remember: boolean) => Promise<void>;
@@ -42,7 +49,13 @@ export function GoogleSignIn({
 
   useEffect(() => {
     let active = true;
-    requestWithCsrf<GoogleConfiguration>(`${portal ? "portal/auth" : "auth"}/google/prepare`, {})
+    (prepare
+      ? prepare()
+      : requestWithCsrf<GoogleConfiguration>(
+          `${portal ? "portal/auth" : "auth"}/google/prepare`,
+          {},
+        )
+    )
       .then((result) => {
         if (active) setConfiguration(result);
       })
@@ -52,7 +65,7 @@ export function GoogleSignIn({
     return () => {
       active = false;
     };
-  }, [portal]);
+  }, [portal, prepare]);
 
   useEffect(() => {
     if (!configuration?.enabled || !scriptReady || !container.current) return;
@@ -74,13 +87,13 @@ export function GoogleSignIn({
       type: "standard",
       theme: "outline",
       size: "large",
-      text: "continue_with",
+      text: signup ? "signup_with" : "continue_with",
       width: Math.min(host.clientWidth, 400),
     });
     return () => {
       host.replaceChildren();
     };
-  }, [configuration, scriptReady]);
+  }, [configuration, scriptReady, signup]);
 
   return (
     <div className="grid min-w-0 gap-3">
@@ -94,10 +107,16 @@ export function GoogleSignIn({
           <Script
             src="https://accounts.google.com/gsi/client"
             onReady={() => setScriptReady(true)}
-            onError={() => setError("Google could not load. Use your password or reload to retry.")}
+            onError={() =>
+              setError(
+                signup
+                  ? "Google could not load. Use email or reload to retry."
+                  : "Google could not load. Use your password or reload to retry.",
+              )
+            }
           />
           <div
-            aria-label="Continue with Google"
+            aria-label={signup ? "Sign up with Google" : "Continue with Google"}
             inert={busy}
             className="min-h-10 w-full overflow-hidden rounded-lg"
           >
@@ -108,20 +127,19 @@ export function GoogleSignIn({
             )}
             <div ref={container} className="w-full" />
           </div>
-          <p className="text-xs leading-5 text-muted-foreground">
-            Use the Google account matching your Medframe email. Your authenticator is still
-            required; the first verification connects your Google account.
-          </p>
+          {description && <p className="text-xs leading-5 text-muted-foreground">{description}</p>}
         </>
       ) : (
         <>
           <Button type="button" variant="outline" disabled aria-describedby="google-status">
-            Continue with Google
+            {signup ? "Sign up with Google" : "Continue with Google"}
           </Button>
           <p id="google-status" role="status" className="text-xs leading-5 text-muted-foreground">
             {error ||
               (configuration
-                ? "Google sign-in is not configured yet. Use your email and password."
+                ? signup
+                  ? "Google sign-up is not configured yet. Continue with email."
+                  : "Google sign-in is not configured yet. Use your email and password."
                 : "Checking Google sign-in availability…")}
           </p>
           {error && (

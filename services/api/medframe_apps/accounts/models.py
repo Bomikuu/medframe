@@ -47,6 +47,15 @@ class RecoveryCode(Record):
     consumed = models.BooleanField(default=False)
 
 
+class TrustedBrowser(Record):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token_hash = models.CharField(max_length=64, unique=True)
+    auth_epoch = models.PositiveIntegerField()
+    policy_fingerprint = models.CharField(max_length=64)
+    expires_at = models.DateTimeField()
+    revoked = models.BooleanField(default=False)
+
+
 class ClinicalSession(Record):
     realm = models.CharField(
         max_length=12, default="staff", choices=[("staff", "Staff"), ("patient", "Patient")]
@@ -56,6 +65,10 @@ class ClinicalSession(Record):
     last_seen_at = models.DateTimeField()
     expires_at = models.DateTimeField()
     revoked = models.BooleanField(default=False)
+    auth_method = models.CharField(max_length=16, default="mfa")
+    auth_epoch = models.PositiveIntegerField(default=0)
+    policy_fingerprint = models.CharField(max_length=64, default="")
+    trusted_browser = models.ForeignKey(TrustedBrowser, on_delete=models.SET_NULL, null=True)
 
 
 class PasswordReset(Record):

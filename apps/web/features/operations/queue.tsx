@@ -1,10 +1,19 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { writtenDate } from "@/components/application/date-input";
+
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
 import { Clock3, Stethoscope } from "lucide-react";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { StatusBadge } from "@/components/application/status-badge";
 import { MetricCard } from "@/components/application/metric-card";
 import { useState } from "react";
+import { useUrlState } from "@/features/workspace/use-url-state";
+import { useCursorHistory } from "@/components/application/use-cursor-history";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -16,15 +25,13 @@ import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { OperationQueueDocument } from "@/lib/graphql/generated";
-import { BranchChoice, OperationNotice, OperationSection, OperationsLiveStatus } from "./controls";
+import { OperationNotice, OperationSection, OperationsRefresh } from "./controls";
 import { queueSchema, type OperationsSetup, type Ticket } from "./schema";
-import { useOperationsAction, useOperationsLive, useOperationsSetup } from "./use-operations";
+import { useOperationsAction, useOperationsSetup } from "./use-operations";
 import { BookingForm } from "./booking-form";
 
 export function QueuePage() {
-  const [branch, setBranch] = useState("");
-  const remote = useOperationsSetup(branch);
-  const { guard } = useSafety();
+  const remote = useOperationsSetup();
   if (!remote.setup) return <LoadState error={remote.error} retry={remote.reload} />;
   return (
     <div className="grid gap-7">
@@ -32,46 +39,47 @@ export function QueuePage() {
         title="Clinic queue"
         description="Check in patients, coordinate care and communicate delays."
       />
-      <div className="rounded-xl border border-border bg-card p-5">
-        <BranchChoice setup={remote.setup} change={(value) => void guard(() => setBranch(value))} />
-      </div>
       <QueueBoard key={remote.setup.branch_id} setup={remote.setup} />
     </div>
   );
 }
 function QueueBoard({ setup }: { setup: OperationsSetup }) {
   const { organizationId, can } = useWorkspace();
-  const [provider, setProvider] = useState("all");
-  const [after, setAfter] = useState<string | null>(null);
-  const remote = useRemote(OperationQueueDocument, {
-    organizationId,
-    branchId: setup.branch_id,
-    providerId: provider === "all" ? null : provider,
-    after,
-  });
-  const connected = useOperationsLive(
-    { organization: organizationId, branch: setup.branch_id },
-    remote.reload,
+  const [provider, setProvider] = useUrlState("queueProvider", "all", [
+    "all",
+    ...setup.providers.map((row) => row.id),
+  ]);
+  const [cursors, setCursors] = useCursorHistory(`${setup.branch_id}:${provider}`);
+  const after = cursors[cursors.length - 1];
+  const setAfter = (value: string | null) => setCursors(value ? [...cursors, value] : [null]);
+  const remote = useRemote(
+    OperationQueueDocument,
+    {
+      organizationId,
+      branchId: setup.branch_id,
+      providerId: provider === "all" ? null : provider,
+      after,
+    },
+    { refreshOnFocus: false },
   );
   const parsed = queueSchema.safeParse(remote.data?.branchQueue);
   return (
     <>
-      <OperationsLiveStatus
-        connected={connected}
-        updated={parsed.success ? parsed.data.updated_at : undefined}
-      />
-      {can("queues.manage") && (
-        <EntrySheet
-          title="Check in a walk-in"
-          triggerVariant="default"
-          description="Record arrival and assign a provider. Clinical notes are documented in the consultation."
-        >
-          <div className="min-w-0">
-            <BookingForm setup={setup} reload={remote.reload} walkIn />
-          </div>
-        </EntrySheet>
-      )}
-      <OperationSection title="Patients in the clinic">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <OperationsRefresh refresh={remote.reload} busy={remote.loading} />
+        {can("queues.manage") && (
+          <EntrySheet
+            title="Check in a walk-in"
+            triggerVariant="default"
+            description="Record arrival and assign a provider. Clinical notes are documented in the consultation."
+          >
+            <div className="min-w-0">
+              <BookingForm setup={setup} reload={remote.reload} walkIn />
+            </div>
+          </EntrySheet>
+        )}
+      </div>
+      <OperationSection title="Patients in the clinic" surface={false}>
         <div className="max-w-sm">
           <FormSelect
             id="queue-provider"
@@ -83,7 +91,11 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
             }}
             options={[
               { value: "all", label: "All permitted providers" },
-              ...setup.providers.map((row) => ({ value: row.id, label: row.name })),
+              ...setup.providers.map((row) => ({
+                value: row.id,
+                label: row.name,
+                person: { kind: "provider" as const, name: row.name, imageId: row.photo_id },
+              })),
             ]}
           />
         </div>
@@ -92,6 +104,14 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
         ) : (
           <>
             <RemoteNotice error={remote.error} retry={remote.reload} />
+            <p className="text-xs leading-5 text-muted-foreground">
+              Manual updates · Last read{" "}
+              {new Intl.DateTimeFormat("en-PH", {
+                timeStyle: "short",
+                timeZone: setup.timezone,
+              }).format(new Date(parsed.data.updated_at))}{" "}
+              · {setup.timezone}. Refresh keeps this provider and queue page.
+            </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <MetricCard
                 label="Waiting"
@@ -116,7 +136,7 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
               <h3 className="text-base font-semibold">Service order</h3>
               <span className="text-xs text-muted-foreground">
-                Server order · live priority and recorded delays
+                Priority and recorded delays included
               </span>
             </div>
             {parsed.data.items.map((row) => (
@@ -128,6 +148,15 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
               />
             ))}
             <div className="flex flex-wrap gap-3">
+              {cursors.length > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setCursors(cursors.slice(0, -1))}
+                >
+                  Previous queue page
+                </Button>
+              )}
               {after && (
                 <Button type="button" variant="outline" onClick={() => setAfter(null)}>
                   First queue page
@@ -149,7 +178,17 @@ function QueueBoard({ setup }: { setup: OperationsSetup }) {
     </>
   );
 }
-function QueueRow({ row, peers, reload }: { row: Ticket; peers: Ticket[]; reload: () => void }) {
+export function QueueRow({
+  row,
+  peers,
+  reload,
+  compact = false,
+}: {
+  row: Ticket;
+  peers: Ticket[];
+  reload: () => void;
+  compact?: boolean;
+}) {
   const action = useOperationsAction();
   const { href, can } = useWorkspace();
   const { confirm } = useSafety();
@@ -190,10 +229,17 @@ function QueueRow({ row, peers, reload }: { row: Ticket; peers: Ticket[]; reload
             {row.number}
           </span>
           <div>
-            <h3 className="font-semibold wrap-anywhere">{row.patient}</h3>
+            <h3 className="font-semibold wrap-anywhere">
+              <PersonIdentity
+                kind="patient"
+                name={row.patient ?? "Patient"}
+                imageId={row.patient_portrait_id}
+              />
+            </h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {row.reference} · {row.provider} · <StatusBadge value={row.status} /> · Service day{" "}
-              {row.day}
+              {row.reference} ·{" "}
+              <PersonIdentity kind="provider" name={row.provider} imageId={row.provider_photo_id} />{" "}
+              · <StatusBadge value={row.status} /> · Service day {writtenDate(row.day)}
             </p>
           </div>
         </div>
@@ -267,154 +313,152 @@ function QueueRow({ row, peers, reload }: { row: Ticket; peers: Ticket[]; reload
           )}
         </div>
       )}
-      <details>
-        <summary className="min-h-11 cursor-pointer text-sm font-medium">
-          Queue controls and care link
-        </summary>
-        <div className="grid gap-4 pt-4">
-          <div className="grid max-w-3xl gap-4 sm:grid-cols-[1fr_10rem]">
-            <FormField
-              id={`queue-reason-${row.id}`}
-              label="Operational reason"
-              hint="Required for delays, reordering, absence and cancellation."
-            >
-              <Input
+      {!compact && (
+        <details>
+          <summary className="min-h-11 cursor-pointer text-sm font-medium">
+            Queue controls and care link
+          </summary>
+          <div className="grid gap-4 pt-4">
+            <div className="grid max-w-3xl gap-4 sm:grid-cols-[1fr_10rem]">
+              <ReasonField
                 id={`queue-reason-${row.id}`}
-                maxLength={240}
+                label="Operational reason"
+                hint="Required for delays, reordering, absence and cancellation."
                 value={reason}
-                onChange={(event) => setReason(event.target.value)}
+                onValueChange={setReason}
+                suggestions={reasonSuggestions.queue}
               />
-            </FormField>
-            <FormField id={`queue-minutes-${row.id}`} label="Minutes">
-              <Input
-                id={`queue-minutes-${row.id}`}
-                type="number"
-                min={0}
-                max={240}
-                step={5}
-                value={minutes}
-                onChange={(event) => setMinutes(event.target.value)}
-              />
-            </FormField>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={action.busy || !reason.trim()}
-              onClick={() => void transition("delay")}
-            >
-              Record delay
-            </Button>
-            {row.status === "in_service" && (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={action.busy || !reason.trim()}
-                onClick={() => void transition("extend")}
-              >
-                Extend service
-              </Button>
-            )}
-            {row.status !== "in_service" && (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={action.busy || !reason.trim()}
-                  onClick={() => void transition("cancelled")}
-                >
-                  Cancel ticket
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={action.busy || !reason.trim()}
-                  onClick={() => void transition("no_show")}
-                >
-                  Mark absent
-                </Button>
-              </>
-            )}
-          </div>
-          {row.status !== "in_service" && (
-            <div className="flex max-w-2xl flex-wrap items-end gap-3">
-              <FormSelect
-                id={`move-ticket-${row.id}`}
-                label="Move before ticket"
-                value={before}
-                onChange={setBefore}
-                options={[
-                  { value: "end", label: "End of this provider’s queue" },
-                  ...peers
-                    .filter(
-                      (item) =>
-                        item.id !== row.id &&
-                        item.provider_id === row.provider_id &&
-                        item.status !== "in_service",
-                    )
-                    .map((item) => ({ value: item.id, label: `Ticket ${item.number}` })),
-                ]}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={action.busy || !reason.trim()}
-                onClick={async () => {
-                  if (
-                    await confirm({
-                      title: "Reorder this ticket?",
-                      description: "The recorded reason will be retained in operational history.",
-                      action: "Move ticket",
-                    })
-                  )
-                    await action.run(
-                      "move",
-                      {
-                        id: row.id,
-                        expected_version: row.version,
-                        before_id: before === "end" ? null : before,
-                        reason,
-                      },
-                      reload,
-                    );
-                }}
-              >
-                Move ticket
-              </Button>
-            </div>
-          )}
-          {can("encounters.write") && !row.encounter_id && (
-            <form
-              noValidate
-              className="flex max-w-2xl flex-wrap items-end gap-3"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void action.run(
-                  "link",
-                  { id: row.id, encounter_id: encounter, expected_version: row.version },
-                  reload,
-                );
-              }}
-            >
-              <FormField
-                id={`queue-encounter-${row.id}`}
-                label="Existing consultation ID"
-                hint="Use the ID from the consultation address after saving care."
-              >
+              <FormField id={`queue-minutes-${row.id}`} label="Minutes">
                 <Input
-                  id={`queue-encounter-${row.id}`}
-                  value={encounter}
-                  onChange={(event) => setEncounter(event.target.value)}
+                  id={`queue-minutes-${row.id}`}
+                  type="number"
+                  min={0}
+                  max={240}
+                  step={5}
+                  value={minutes}
+                  onChange={(event) => setMinutes(event.target.value)}
                 />
               </FormField>
-              <Button type="submit" variant="outline" disabled={action.busy || !encounter}>
-                Link consultation
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={action.busy || !reason.trim()}
+                onClick={() => void transition("delay")}
+              >
+                Record delay
               </Button>
-            </form>
-          )}
-        </div>
-      </details>
+              {row.status === "in_service" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={action.busy || !reason.trim()}
+                  onClick={() => void transition("extend")}
+                >
+                  Extend service
+                </Button>
+              )}
+              {row.status !== "in_service" && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={action.busy || !reason.trim()}
+                    onClick={() => void transition("cancelled")}
+                  >
+                    Cancel ticket
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    disabled={action.busy || !reason.trim()}
+                    onClick={() => void transition("no_show")}
+                  >
+                    Mark absent
+                  </Button>
+                </>
+              )}
+            </div>
+            {row.status !== "in_service" && (
+              <div className="flex max-w-2xl flex-wrap items-end gap-3">
+                <FormSelect
+                  id={`move-ticket-${row.id}`}
+                  label="Move before ticket"
+                  value={before}
+                  onChange={setBefore}
+                  options={[
+                    { value: "end", label: "End of this provider’s queue" },
+                    ...peers
+                      .filter(
+                        (item) =>
+                          item.id !== row.id &&
+                          item.provider_id === row.provider_id &&
+                          item.status !== "in_service",
+                      )
+                      .map((item) => ({ value: item.id, label: `Ticket ${item.number}` })),
+                  ]}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={action.busy || !reason.trim()}
+                  onClick={async () => {
+                    if (
+                      await confirm({
+                        title: "Reorder this ticket?",
+                        description: "The recorded reason will be retained in operational history.",
+                        action: "Move ticket",
+                      })
+                    )
+                      await action.run(
+                        "move",
+                        {
+                          id: row.id,
+                          expected_version: row.version,
+                          before_id: before === "end" ? null : before,
+                          reason,
+                        },
+                        reload,
+                      );
+                  }}
+                >
+                  Move ticket
+                </Button>
+              </div>
+            )}
+            {can("encounters.write") && !row.encounter_id && (
+              <form
+                noValidate
+                className="flex max-w-2xl flex-wrap items-end gap-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void action.run(
+                    "link",
+                    { id: row.id, encounter_id: encounter, expected_version: row.version },
+                    reload,
+                  );
+                }}
+              >
+                <FormField
+                  id={`queue-encounter-${row.id}`}
+                  label="Existing consultation ID"
+                  hint="Use the ID from the consultation address after saving care."
+                >
+                  <Input
+                    id={`queue-encounter-${row.id}`}
+                    value={encounter}
+                    onChange={(event) => setEncounter(event.target.value)}
+                  />
+                </FormField>
+                <Button type="submit" variant="outline" disabled={action.busy || !encounter}>
+                  Link consultation
+                </Button>
+              </form>
+            )}
+          </div>
+        </details>
+      )}
     </article>
   );
 }

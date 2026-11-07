@@ -20,12 +20,12 @@ export function PageHeader({
   return (
     <header
       data-page-header
-      className={cn("mb-7 flex flex-wrap items-start justify-between gap-x-6 gap-y-4", className)}
+      className={cn("mb-6 flex flex-wrap items-start justify-between gap-x-6 gap-y-4", className)}
     >
-      <div className="min-w-0 flex-1 basis-56">
+      <div className="min-w-0 flex-1 basis-72">
         <Heading
           className={cn(
-            "font-semibold tracking-tight wrap-anywhere",
+            "leading-tight font-semibold tracking-tight text-balance wrap-anywhere",
             level === 1 ? "text-[1.75rem] sm:text-[2rem]" : "text-xl",
           )}
         >

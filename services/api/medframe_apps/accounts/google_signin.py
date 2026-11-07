@@ -1,4 +1,4 @@
-"""Google identity proves the first factor; existing Medframe MFA remains mandatory."""
+"""Google proves the first factor; first-time identity linking still requires native MFA."""
 
 import hmac
 import secrets
@@ -63,7 +63,7 @@ def verify_credential(credential, client_id):
 
 
 @transaction.atomic
-def begin(request, credential, remember, realm):
+def begin(request, credential, remember, realm, *, shared_device=False):
     client_id = get_settings().google_client_id
     if not client_id:
         raise DomainError("GOOGLE_UNAVAILABLE", "Google sign-in has not been configured.", 503)
@@ -107,11 +107,14 @@ def begin(request, credential, remember, realm):
             "first. Contact your clinic if you need access.",
             401,
         )
-    start_challenge(request, user, realm, remember=remember)
+    start_challenge(request, user, realm, remember=remember, shared_device=shared_device)
     # Bind only after the existing account's MFA succeeds. Never store Google tokens.
     request.session["challenge_google"] = {"subject": subject, "email": user.email}
     audit(user, "auth.google_verified", resource_id=user.id)
-    return "verify"
+    from medframe_apps.accounts.session_completion import routine_sign_in
+
+    # Only an already-linked identity can use a reduced-factor routine sign-in.
+    return routine_sign_in(request, user, realm, allow_reduced=identity is not None)
 
 
 def complete_google_link(request, user, realm):

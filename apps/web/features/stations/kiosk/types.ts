@@ -26,7 +26,14 @@ export type Setup = {
   generation: number;
   strict_verification: boolean;
 };
-export type PatientSession = { patient_name: string; expires_at: string; idle_expires_at: string };
+export type PatientSession = {
+  patient_name: string;
+  patient_reference?: string;
+  entry_method?: string;
+  functions?: string[];
+  expires_at: string;
+  idle_expires_at: string;
+};
 export type Appointment = {
   id: string;
   start: string;

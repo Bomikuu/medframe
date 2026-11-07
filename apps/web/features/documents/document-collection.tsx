@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { FileImage, FileText } from "lucide-react";
-import { StatusBadge } from "@/components/application/status-badge";
+import { DocumentScanState } from "./document-scan-state";
 import {
   Table,
   TableBody,
@@ -90,7 +90,7 @@ export function DocumentCollection({
             <CardContent className="grid gap-5 p-5">
               <FileIdentity file={file} />
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <StatusBadge value={file.scanState} />
+                <DocumentScanState state={file.scanState} />
                 <span className="text-xs text-muted-foreground">{fileSize(file.size)}</span>
               </div>
               <dl className="grid grid-cols-2 gap-3 text-xs">
@@ -151,7 +151,7 @@ export function DocumentCollection({
               </TableCell>
               <TableCell className="text-xs whitespace-nowrap">{fileSize(file.size)}</TableCell>
               <TableCell>
-                <StatusBadge value={file.scanState} />
+                <DocumentScanState state={file.scanState} />
               </TableCell>
               <TableCell className="pr-5">
                 <div className="flex items-center justify-end gap-2">{renderActions(file)}</div>

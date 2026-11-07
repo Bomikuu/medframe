@@ -112,3 +112,7 @@ query BillingPaymentReview(
     amount: $amount
   )
 }
+
+query CashierReconciliation($organizationId: UUID!, $branchId: UUID!, $day: Date!) {
+  cashierReconciliation(organizationId: $organizationId, branchId: $branchId, day: $day)
+}

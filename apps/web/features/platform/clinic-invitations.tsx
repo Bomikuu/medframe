@@ -1,8 +1,11 @@
 "use client";
+
+import { Brand } from "@/components/brand";
+import { RecoveryState } from "@/components/application/recovery-state";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { HeartPulse, Plus, ArrowLeft, ArrowRight } from "lucide-react";
+import { Plus, ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +45,7 @@ import {
 } from "@/lib/graphql/generated";
 import { z } from "zod";
 import { message } from "@/features/onboarding/client";
+import { InvitationLink } from "@/features/staff/staff-modals";
 const rowSchema = z.object({
   id: z.string(),
   email: z.string(),
@@ -86,6 +90,7 @@ export function ClinicInvitations() {
     [busy, setBusy] = useState(false),
     [action, setAction] = useState<{ item: Invitation; kind: "resend" | "revoke" } | null>(null),
     [refresh, setRefresh] = useState(0);
+  const [link, setLink] = useState("");
   const form = useForm({
     defaultValues: { email: "", contact_name: "", clinic_name: "", hours: 168 },
   });
@@ -131,10 +136,12 @@ export function ClinicInvitations() {
   }) {
     setBusy(true);
     try {
-      await getGraphqlClient().request(InviteClinicDocument, {
+      const result = await getGraphqlClient().request(InviteClinicDocument, {
         data: values,
         key: crypto.randomUUID(),
       });
+      const created = z.object({ link: z.string().optional() }).parse(result.inviteClinic);
+      setLink(created.link ?? "");
       setOpen(false);
       form.reset();
       setRefresh((value) => value + 1);
@@ -149,10 +156,16 @@ export function ClinicInvitations() {
     if (!action) return;
     setBusy(true);
     try {
-      await getGraphqlClient().request(
+      const result = await getGraphqlClient().request(
         action.kind === "resend" ? ResendClinicInvitationDocument : RevokeClinicInvitationDocument,
         { id: action.item.id, version: action.item.version },
       );
+      if (action.kind === "resend" && "resendClinicInvitation" in result) {
+        const replaced = z
+          .object({ link: z.string().optional() })
+          .parse(result.resendClinicInvitation);
+        setLink(replaced.link ?? "");
+      }
       toast.success(
         action.kind === "resend"
           ? "New invitation queued. Earlier links are invalid."
@@ -171,8 +184,7 @@ export function ClinicInvitations() {
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5">
           <Link href="/clinic" className="flex items-center gap-2 font-semibold">
-            <HeartPulse className="text-teal-700" />
-            Medframe{" "}
+            <Brand />
             <span className="ml-2 text-xs font-normal text-muted-foreground">
               Platform administration
             </span>
@@ -247,15 +259,30 @@ export function ClinicInvitations() {
         {allowed === null ? (
           <p role="status">Checking platform access…</p>
         ) : !allowed ? (
-          <div className="rounded-xl border bg-card p-7">
-            <h2 className="text-lg font-semibold">Platform administrator access required</h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              {error || "Clinic administrator access does not permit platform invitations."}
-            </p>
-            <Link className="mt-5 inline-block text-primary underline" href="/login">
-              Sign in to continue
-            </Link>
-          </div>
+          <RecoveryState
+            title={
+              error
+                ? "Clinic invitations are unavailable"
+                : "Platform administrator access required"
+            }
+            description={
+              error ||
+              "Clinic administrator access does not include platform invitations. Ask a platform administrator to manage this invitation."
+            }
+          >
+            {error && (
+              <Button type="button" onClick={() => setRefresh((value) => value + 1)}>
+                <RotateCcw aria-hidden="true" />
+                Try again
+              </Button>
+            )}
+            <Button asChild variant="outline">
+              <Link href="/auth/continue">
+                Open my workspace
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            </Button>
+          </RecoveryState>
         ) : (
           <>
             <div className="mb-5 max-w-56">
@@ -302,10 +329,18 @@ export function ClinicInvitations() {
                           </span>
                         </TableCell>
                         <TableCell className="text-xs whitespace-nowrap">
-                          {new Date(item.created_at).toLocaleDateString()}
+                          {new Date(item.created_at).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
                         </TableCell>
                         <TableCell className="text-xs whitespace-nowrap">
-                          {new Date(item.expires_at).toLocaleDateString()}
+                          {new Date(item.expires_at).toLocaleDateString("en-US", {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-1">
@@ -360,6 +395,7 @@ export function ClinicInvitations() {
           </>
         )}
       </main>
+      <InvitationLink key={link} link={link} kind="clinic" onClose={() => setLink("")} />
       <AlertDialog
         open={!!action}
         onOpenChange={(value) => {

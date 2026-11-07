@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit, urlunsplit
 
 from config.runtime import get_settings
 
@@ -180,6 +180,31 @@ CHANNEL_LAYERS = {
             "group_expiry": 60,
         },
     }
+}
+
+# Model presentation has its own blocking receive connection. A short timeout from
+# the general Redis URL must not interrupt the channel layer's five-second BRPOP.
+_model_redis = urlsplit(os.environ.get("OPERATIONS_REDIS_URL", runtime.redis_url))
+_model_query = urlencode(
+    [
+        (key, value)
+        for key, value in parse_qsl(_model_redis.query)
+        if key not in {"socket_timeout", "socket_connect_timeout"}
+    ]
+)
+CHANNEL_LAYERS["call_presentation"] = {
+    "BACKEND": "channels_redis.core.RedisChannelLayer",
+    "CONFIG": {
+        "hosts": [
+            {
+                "address": urlunsplit(_model_redis._replace(query=_model_query)),
+                "socket_timeout": 10,
+                "socket_connect_timeout": 2,
+            }
+        ],
+        "prefix": "medframe-call-presentation",
+        "group_expiry": 60,
+    },
 }
 
 # External SMS is disabled unless explicitly configured and enabled.

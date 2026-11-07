@@ -1,10 +1,13 @@
 "use client";
+
+import { PersonIdentity } from "@/components/application/person-identity";
+
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { StatusBadge } from "@/components/application/status-badge";
 import Link from "next/link";
 import { useRecordAuthors } from "@/features/records/use-record-authors";
+import { EmptyState } from "@/components/application/empty-state";
 import { PatientAvatar } from "@/components/application/patient-avatar";
-import { ButtonLink } from "@/components/ui/button-link";
 import { useState } from "react";
 import { ConsultationRecordsDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
@@ -46,9 +49,17 @@ export function FilteredConsultations({ patientId }: { patientId?: string }) {
       ) : parsed.success ? (
         <>
           {!parsed.data.items.length && (
-            <p className="p-5 text-sm text-muted-foreground">
-              No consultations match these filters.
-            </p>
+            <EmptyState
+              illustration="medical-records"
+              title={
+                Object.keys(filters).length ? "No matching consultations" : "No consultations yet"
+              }
+              description={
+                Object.keys(filters).length
+                  ? "Try another search or clear the filters to see more records."
+                  : "Consultations appear here once care has started."
+              }
+            />
           )}
           <ul className="mt-5 grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
             {parsed.data.items.map((item) => (
@@ -59,12 +70,15 @@ export function FilteredConsultations({ patientId }: { patientId?: string }) {
                     <div className="min-w-0">
                       <Link
                         href={href(`/clinic/consultations/${item.id}`)}
-                        className="text-base font-semibold hover:underline"
+                        className="inline-block rounded py-1 text-base font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring"
                       >
                         {item.patient_name}
                       </Link>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {item.provider_name ?? "Provider not recorded"}
+                        <PersonIdentity
+                          kind="provider"
+                          name={item.provider_name ?? "Provider not recorded"}
+                        />
                       </p>
                     </div>
                   </div>
@@ -81,16 +95,9 @@ export function FilteredConsultations({ patientId }: { patientId?: string }) {
                     <dd className="mt-1 leading-5">{timeLabel(item.updated_at)}</dd>
                   </div>
                 </dl>
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
-                  <span className="text-xs text-muted-foreground">Version {item.version}</span>
-                  <ButtonLink
-                    variant="outline"
-                    size="sm"
-                    href={href(`/clinic/consultations/${item.id}`)}
-                  >
-                    Open consultation
-                  </ButtonLink>
-                </div>
+                <p className="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">
+                  Version {item.version}
+                </p>
               </li>
             ))}
           </ul>

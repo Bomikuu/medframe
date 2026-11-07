@@ -5,8 +5,10 @@ export const setupSchema = z.object({
   branch_id: z.string(),
   timezone: z.string(),
   branches: z.array(identity),
-  providers: z.array(identity),
-  patients: z.array(identity.extend({ reference: z.string() })),
+  providers: z.array(identity.extend({ photo_id: z.string().nullable().optional() })),
+  patients: z.array(
+    identity.extend({ reference: z.string(), portrait_id: z.string().nullable().optional() }),
+  ),
   resources: z.array(identity.extend({ active: z.boolean(), version: z.number() })),
   schedules: z.array(
     z.object({
@@ -47,6 +49,8 @@ export const appointmentSchema = z.object({
   id: z.string(),
   provider_id: z.string(),
   provider: z.string(),
+  provider_photo_id: z.string().nullable().optional(),
+  patient_portrait_id: z.string().nullable().optional(),
   branch_id: z.string(),
   branch: z.string(),
   start: z.string(),
@@ -60,12 +64,29 @@ export const appointmentSchema = z.object({
   patient: z.string().optional(),
   reference: z.string().optional(),
   reason: z.string().optional(),
+  online_room_id: z.string().nullable().optional(),
+  online_timing_mode: z.enum(["scheduled", "instant"]).nullable().optional(),
+  ticket: z
+    .lazy(() => ticketSchema)
+    .nullable()
+    .optional(),
 });
 export type Appointment = z.infer<typeof appointmentSchema>;
 export const appointmentPageSchema = z.object({
   items: z.array(appointmentSchema),
   has_next_page: z.boolean(),
   end_cursor: z.string().nullable(),
+  calendar: z
+    .object({
+      hours: z.array(
+        z.object({ provider_id: z.string(), date: z.string(), start: z.string(), end: z.string() }),
+      ),
+      in_service: z.array(z.lazy(() => ticketSchema)),
+      daily_counts: z.array(z.object({ date: z.string(), count: z.number() })).default([]),
+      previews: z.array(appointmentSchema).default([]),
+      updated_at: z.string(),
+    })
+    .optional(),
 });
 const estimate = z.object({
   minimum: z.number().nullable(),
@@ -83,6 +104,8 @@ export const ticketSchema = z.object({
   delay: z.number(),
   duration: z.number(),
   provider: z.string(),
+  provider_photo_id: z.string().nullable().optional(),
+  patient_portrait_id: z.string().nullable().optional(),
   provider_id: z.string(),
   patient_id: z.string().optional(),
   patient: z.string().optional(),
@@ -90,6 +113,7 @@ export const ticketSchema = z.object({
   branch_id: z.string().optional(),
   encounter_id: z.string().nullable(),
   checked_in: z.string(),
+  service_start: z.string().nullable().optional(),
   estimate: estimate.nullable(),
   setup_blockers: z
     .array(z.object({ code: z.string(), message: z.string(), action: z.string() }))
@@ -125,8 +149,9 @@ export function localDate(zone = "Asia/Manila") {
 export function clock(value: string, zone: string) {
   return new Intl.DateTimeFormat("en-PH", {
     timeZone: zone,
-    month: "short",
+    month: "long",
     day: "numeric",
+    year: "numeric",
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(value));

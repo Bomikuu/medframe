@@ -33,6 +33,7 @@ type PortalQuery {
   portalSession: JSON!
   portalLinks: JSON!
   portalWorkspace(linkId: UUID!): JSON!
+  patientTaskHome(linkId: UUID!): JSON!
   portalRecords(linkId: UUID!, after: String = null): JSON!
   portalRecord(linkId: UUID!, releaseId: UUID!): JSON!
   portalReports(linkId: UUID!, after: String = null): JSON!

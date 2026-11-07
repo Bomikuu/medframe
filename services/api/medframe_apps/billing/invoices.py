@@ -151,6 +151,16 @@ def issue(request, row):
 
 @transaction.atomic
 def invoice_action(request, organization_id, action, data, request_id):
+    if (
+        getattr(request, "station_doctor", None)
+        or getattr(request, "station_credential", None)
+        or request.headers.get("X-Medframe-Workspace") == "station"
+    ) and action != "payment":
+        raise DomainError(
+            "STATION_SCOPE",
+            "Use the clinic workspace for invoice administration and adjustments.",
+            403,
+        )
     permission = (
         "billing.manage"
         if action in {"save", "issue"}

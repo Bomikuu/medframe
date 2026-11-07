@@ -32,6 +32,7 @@ def appointment_scope(request, identifier, *, lock=False):
         raise DomainError("NOT_FOUND", "This appointment is unavailable.", 404)
     member = require_operations(request, row.organization_id, "appointments.manage", row.branch_id)
     require_provider_scope(member, row.provider_id)
+    operational_patient(member, row.patient_id, row.branch_id)
     return row
 
 
@@ -53,6 +54,10 @@ def book_appointment(request, organization_id, data, request_id):
     patient = operational_patient(member, data.patient_id, branch.id)
     resource = resource_for(branch, data.resource_id)
     values = data.model_dump(mode="json")
+    if not data.online:
+        # Keep pre-room in-person idempotency receipts compatible.
+        values.pop("online", None)
+        values.pop("doctor_mode", None)
     previous = replay_request(request.user, organization_id, "operations.book", request_id, values)
     if previous:
         return Appointment.objects.get(id=previous)
@@ -78,6 +83,10 @@ def book_appointment(request, organization_id, data, request_id):
         created_by=request.user,
     )
     claim_reservation(row, provider, patient, resource, row.start, row.end)
+    if data.online:
+        from medframe_apps.operations.call_service import create_room
+
+        create_room(request, row, data.doctor_mode)
     event(request, branch, row, "appointment.booked", after=summary(row))
     record_request_result(
         request.user, organization_id, "operations.book", request_id, values, row.id
@@ -86,6 +95,12 @@ def book_appointment(request, organization_id, data, request_id):
 
 
 def reschedule_locked(request, row, data, request_id):
+    room = getattr(row, "online_room", None)
+    if room and room.timing_mode == "instant":
+        raise DomainError(
+            "INVALID_INPUT",
+            "Instant rooms have no scheduled slot. Book a separate scheduled appointment instead.",
+        )
     values = {"appointment": str(row.id), **data.model_dump(mode="json")}
     previous = replay_request(
         request.user, row.organization_id, "operations.reschedule", request_id, values
@@ -239,7 +254,7 @@ def appointment_page(request, organization_id, filters, after=None):
         raise DomainError("NOT_FOUND", "Choose a permitted branch.", 404)
     member = require_operations(request, organization_id, "operations.read", branch.id)
     query = Appointment.objects.filter(branch=branch).select_related(
-        "patient", "provider__membership__user", "resource"
+        "patient", "branch", "provider__membership__user", "resource", "online_room"
     )
     from medframe_apps.organizations.policy import permissions_for
 
@@ -248,6 +263,16 @@ def appointment_page(request, organization_id, filters, after=None):
         and not member.roles.filter(name="receptionist").exists()
     ):
         query = query.filter(provider__membership__user=request.user)
+    from medframe_apps.stations.access_scope import doctor_scope
+
+    if doctor_scope():
+        from medframe_apps.patients.services import scoped_patients
+
+        query = query.filter(
+            patient_id__in=scoped_patients(
+                request.user, organization_id, "patients.clinical.read"
+            ).values("id")
+        )
     if filters.get("patient_id"):
         from uuid import UUID
 
@@ -269,13 +294,19 @@ def appointment_page(request, organization_id, filters, after=None):
     if filters.get("date"):
         from datetime import date, datetime, time
 
-        day = date.fromisoformat(filters["date"])
+        from medframe_apps.operations.calendar import calendar_dates
+
+        if filters.get("calendar"):
+            day, last = calendar_dates(filters)
+        else:
+            day = date.fromisoformat(filters["date"])
+            last = day
         zone = ZoneInfo(branch.organization.timezone)
         query = query.filter(
             start__gte=datetime.combine(day, time.min, zone),
-            start__lt=datetime.combine(day + timedelta(days=1), time.min, zone),
+            start__lt=datetime.combine(last + timedelta(days=1), time.min, zone),
         )
-    return page_records(
+    result = page_records(
         query,
         scope=f"operations-appointments:{member.id}",
         filters=filters,
@@ -283,3 +314,12 @@ def appointment_page(request, organization_id, filters, after=None):
         first=50,
         serialize=appointment_details,
     )
+    if filters.get("calendar"):
+        from medframe_apps.operations.calendar import calendar_context
+
+        result["calendar"] = calendar_context(
+            request, member, branch, filters, result["items"], query
+        )
+    from medframe_apps.operations.portraits import attach_portraits
+
+    return attach_portraits(request, organization_id, result)

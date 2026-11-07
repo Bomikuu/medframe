@@ -1,4 +1,6 @@
 "use client";
+
+import { RecordUnavailable } from "@/components/application/record-unavailable";
 import { useClinicTime } from "@/components/application/clinical-locale";
 
 import { EmptyState } from "@/components/application/empty-state";
@@ -22,7 +24,7 @@ import { useRemote } from "@/features/patients/use-remote";
 import { LoadState } from "@/features/patients/feedback";
 import { ClinicalDashboardDocument } from "@/lib/graphql/generated";
 
-const schema = z.object({
+export const clinicalDashboardSchema = z.object({
   follow_ups: z.array(
     z.object({
       id: z.string(),
@@ -54,8 +56,11 @@ export function ClinicalWidgets({ recentPatients }: { recentPatients: ReactNode 
   const { appearance } = useTheme();
   const remote = useRemote(ClinicalDashboardDocument, { organizationId });
   if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
-  const parsed = schema.safeParse(remote.data.clinicDashboard);
-  if (!parsed.success) return <p role="alert">Dashboard information could not be loaded.</p>;
+  const parsed = clinicalDashboardSchema.safeParse(remote.data.clinicDashboard);
+  if (!parsed.success)
+    return (
+      <RecordUnavailable description="Dashboard information could not be loaded. Contact your clinic administrator if the problem continues." />
+    );
   const data = parsed.data;
   const titles: Record<string, string> = {
     recent_consultations: "Recent consultations",

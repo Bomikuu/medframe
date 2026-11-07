@@ -101,6 +101,7 @@ export function DiagnosticRequestForm({
         <FormSelect
           id="diagnostic-patient"
           label="Patient with clinical access"
+          personKind="patient"
           value={selectedPatient}
           onChange={(value) => {
             form.setValue("patient_id", value, { shouldDirty: true });

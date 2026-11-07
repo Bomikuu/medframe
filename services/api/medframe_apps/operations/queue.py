@@ -56,6 +56,12 @@ def new_ticket(request, branch, patient, provider, resource, duration, appointme
 def check_in(request, appointment_id, expected_version, request_id):
     row = appointment_scope(request, appointment_id, lock=True)
     require_operations(request, row.organization_id, "queues.manage", row.branch_id)
+    room = getattr(row, "online_room", None)
+    if room and room.timing_mode == "instant":
+        raise DomainError(
+            "INVALID_INPUT",
+            "Use the instant room's PIN and doctor admission instead of queue check-in.",
+        )
     values = {"appointment": str(row.id), "version": expected_version}
     previous = replay_request(
         request.user, row.organization_id, "operations.check-in", request_id, values

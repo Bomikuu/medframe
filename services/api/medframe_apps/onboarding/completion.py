@@ -105,7 +105,10 @@ def complete_onboarding(request, expected_version, request_id):
     PracticeDay.objects.bulk_create(
         [
             PracticeDay(
-                practice=settings, weekday=day, opens=practice["opens"], closes=practice["closes"]
+                practice=settings,
+                weekday=day,
+                opens=practice["daily_hours"].get(str(day), practice)["opens"],
+                closes=practice["daily_hours"].get(str(day), practice)["closes"],
             )
             for day in practice["days"]
         ]

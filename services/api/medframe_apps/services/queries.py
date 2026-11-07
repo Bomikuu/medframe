@@ -44,6 +44,21 @@ def case_page(request, organization_id, branch_id, filters=None, patient_id=None
     query = PatientServiceCase.objects.filter(
         organization_id=organization_id, branch_id=branch_id
     ).select_related("patient")
+    from medframe_apps.stations.context import current_request
+
+    active_request = current_request.get()
+    if active_request and (
+        getattr(active_request, "station_doctor", None)
+        or getattr(active_request, "station_credential", None)
+        or active_request.headers.get("X-Medframe-Workspace") == "station"
+    ):
+        from medframe_apps.patients.services import scoped_patients
+
+        query = query.filter(
+            patient_id__in=scoped_patients(
+                active_request.user, organization_id, "patients.clinical.read"
+            ).values("id")
+        )
     if patient_id:
         query = query.filter(patient_id=patient_id)
     if criteria.status and criteria.status != "all":

@@ -35,7 +35,7 @@ export function ClinicalAssistantPreview({
   ];
   return (
     <div className="flex h-full min-h-0 flex-col" aria-label="Medframe AI preview">
-      <header className="flex shrink-0 items-start gap-3 border-b border-border p-5">
+      <header className="relative z-10 flex shrink-0 items-start gap-3 border-b border-border bg-card p-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <span className="bg-teal-wash grid size-10 shrink-0 place-items-center rounded-xl border border-teal-ink/15 text-teal-ink">
           <Bot className="size-5" />
         </span>
@@ -51,14 +51,16 @@ export function ClinicalAssistantPreview({
         <Button
           type="button"
           variant="ghost"
-          size="icon-sm"
+          size="icon"
+          className="size-11 shrink-0"
           aria-label="Close AI sidebar"
+          title="Return to the clinical editor"
           onClick={onClose}
         >
           <X />
         </Button>
       </header>
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-6">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6">
         <div className="flex items-start gap-3">
           <Bot className="mt-2 size-5 shrink-0 text-teal-ink" />
           <div className="rounded-xl rounded-tl-sm border border-border/60 bg-muted/45 p-4 text-sm leading-6">
@@ -106,7 +108,7 @@ export function ClinicalAssistantPreview({
           </p>
         </div>
       </div>
-      <div className="shrink-0 border-t border-border bg-card p-4">
+      <div className="shrink-0 border-t border-border bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <label htmlFor={composerId} className="sr-only">
           AI message preview
         </label>

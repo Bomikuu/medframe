@@ -1,11 +1,15 @@
 "use client";
 
-import { useForm, useWatch } from "react-hook-form";
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -119,7 +123,7 @@ export function PaymentForm({
     >
       <div className="grid gap-2 rounded-xl bg-muted/70 p-5 text-sm">
         <p className="font-semibold">
-          {invoice.number} · {invoice.patient_name}
+          {invoice.number} · <PersonIdentity kind="patient" name={invoice.patient_name} />
         </p>
         <p>
           Outstanding: <Money value={invoice.outstanding} />
@@ -197,18 +201,26 @@ export function PaymentForm({
           </div>
         )}
         {kind !== "payment" && (
-          <FormField
-            id={`financial-reason-${kind}`}
-            label="Reason"
-            error={form.formState.errors.reason?.message}
-          >
-            <Textarea
-              id={`financial-reason-${kind}`}
-              maxLength={500}
-              rows={4}
-              {...form.register("reason")}
-            />
-          </FormField>
+          <Controller
+            name="reason"
+            control={form.control}
+            render={({ field }) => (
+              <ReasonField
+                id={`financial-reason-${kind}`}
+                label="Reason"
+                value={field.value}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+                inputRef={field.ref}
+                suggestions={
+                  kind === "refund" ? reasonSuggestions.refund : reasonSuggestions.financial
+                }
+                maxLength={500}
+                error={form.formState.errors.reason?.message}
+                required
+              />
+            )}
+          />
         )}
         {kind === "payment" && (
           <section

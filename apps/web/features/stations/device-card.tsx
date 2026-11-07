@@ -128,6 +128,9 @@ export function DeviceCard({
             </p>
           </div>
         </div>
+        <p className="text-xs leading-5 text-muted-foreground">
+          Last contact is a recorded timestamp, not a live connection check.
+        </p>
         {device.mode === "kiosk" && (
           <p className="text-xs leading-5 text-muted-foreground">
             {device.strict_verification
@@ -137,7 +140,7 @@ export function DeviceCard({
         )}
         {device.mode === "display" && (
           <p className="text-xs leading-5 text-muted-foreground">
-            Queue-display content is planned for a later Station phase.
+            Read-only queue numbers and announcements. Staff control the queue separately.
           </p>
         )}
       </div>

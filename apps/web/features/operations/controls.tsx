@@ -2,31 +2,11 @@
 
 import { StatusBadge } from "@/components/application/status-badge";
 import type { ReactNode } from "react";
-import { FormSelect } from "@/features/patients/form-controls";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/form-field";
-import { Input } from "@/components/ui/input";
-import type { OperationsSetup } from "./schema";
+import { DateInput } from "@/components/application/date-input";
 
-export function BranchChoice({
-  setup,
-  change,
-}: {
-  setup: OperationsSetup;
-  change: (id: string) => void;
-}) {
-  return (
-    <div className="w-full max-w-sm min-w-0">
-      <FormSelect
-        id="operations-branch"
-        label="Clinic branch"
-        value={setup.branch_id}
-        onChange={change}
-        options={setup.branches.map((row) => ({ value: row.id, label: row.name }))}
-      />
-    </div>
-  );
-}
 export function OperationNotice({ message, error }: { message: string; error: string }) {
   return (
     <>
@@ -61,11 +41,44 @@ export function OperationsLiveStatus({
     </p>
   );
 }
-export function OperationSection({ title, children }: { title: string; children: ReactNode }) {
+/** Temporary manual mode for clinic appointments and queues. */
+export function OperationsRefresh({ refresh, busy }: { refresh: () => void; busy: boolean }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <span className="text-xs text-muted-foreground">Manual updates</span>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          if (!busy) refresh();
+        }}
+        aria-disabled={busy}
+        aria-busy={busy}
+      >
+        <RefreshCw aria-hidden className="size-4" />
+        {busy ? "Refreshing…" : "Refresh"}
+      </Button>
+    </div>
+  );
+}
+export function OperationSection({
+  title,
+  children,
+  surface = true,
+}: {
+  title: string;
+  children: ReactNode;
+  surface?: boolean;
+}) {
   return (
     <section
-      data-panel
-      className="@container grid min-w-0 gap-5 rounded-xl border border-border bg-card p-4 sm:p-6"
+      data-panel={surface ? "" : undefined}
+      className={
+        surface
+          ? "@container grid min-w-0 gap-5 rounded-xl border border-border bg-card p-4 sm:p-6"
+          : "@container grid min-w-0 gap-5"
+      }
     >
       <h2 className="text-xl font-semibold">{title}</h2>
       {children}
@@ -86,7 +99,7 @@ export function DateChoice({
   return (
     <div className="max-w-xs">
       <FormField id={id} label={label}>
-        <Input id={id} type="date" value={value} onChange={(event) => change(event.target.value)} />
+        <DateInput id={id} value={value} onChange={(event) => change(event.target.value)} />
       </FormField>
     </div>
   );

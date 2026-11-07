@@ -1,3 +1,4 @@
+import { WorkspaceLoading } from "@/components/application/workspace-loading";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { readBrowserSession } from "@/lib/server/session-route";
@@ -26,9 +27,10 @@ export default async function Layout({ children }: { children: React.ReactNode }
   return (
     <Suspense
       fallback={
-        <p role="status" className="p-8">
-          Opening your clinic Station…
-        </p>
+        <WorkspaceLoading
+          title="Opening your Clinical Station"
+          detail="Preparing this device’s clinical workspace."
+        />
       }
     >
       <SafetyProvider>

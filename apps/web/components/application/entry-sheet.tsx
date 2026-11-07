@@ -45,7 +45,7 @@ export function EntrySheet({
   triggerVariant?: "default" | "outline";
   title: string;
   description?: string;
-  trigger?: string;
+  trigger?: ReactNode;
   children: ReactNode;
 }) {
   const [localOpen, setLocalOpen] = useState(false);

@@ -4,20 +4,26 @@ import { useEffect, useState } from "react";
 import { Check, Clock3, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { cn } from "@/lib/utils";
 
 export function StationCode({
   value,
   onChange,
   label = "Pairing code",
   disabled = false,
+  id,
+  size = "default",
 }: {
   value: string;
   onChange: (value: string) => void;
   label?: string;
   disabled?: boolean;
+  id?: string;
+  size?: "default" | "large";
 }) {
   return (
     <InputOTP
+      id={id}
       maxLength={8}
       value={value}
       onChange={(next) => onChange(next.toUpperCase())}
@@ -27,13 +33,21 @@ export function StationCode({
       aria-label={label}
       disabled={disabled}
       pasteTransformer={(text) => text.replace(/[\s-]/g, "").toUpperCase()}
+      containerClassName={size === "large" ? "w-full" : undefined}
     >
-      <InputOTPGroup className="gap-1.5">
+      <InputOTPGroup
+        className={size === "large" ? "grid w-full grid-cols-8 gap-1 sm:gap-2" : "gap-1.5"}
+      >
         {Array.from({ length: 8 }, (_, index) => (
           <InputOTPSlot
             key={index}
             index={index}
-            className="size-8 rounded-md border text-base font-semibold first:rounded-md last:rounded-md sm:size-10 sm:text-lg"
+            className={cn(
+              "border text-base font-semibold",
+              size === "large"
+                ? "h-11 w-full min-w-0 rounded-lg first:rounded-lg last:rounded-lg sm:h-12 sm:text-lg lg:h-14"
+                : "size-8 rounded-md first:rounded-md last:rounded-md sm:size-10 sm:text-lg",
+            )}
           />
         ))}
       </InputOTPGroup>

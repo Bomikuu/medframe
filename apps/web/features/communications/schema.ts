@@ -14,6 +14,7 @@ export const preferenceSchema = z.object({
 });
 export const communicationSetupSchema = z.object({
   transport: z.string(),
+  readiness: z.object({ verification_sms: z.boolean(), email_local: z.boolean() }).optional(),
   timezone: z.string(),
   can_configure: z.boolean(),
   settings: z.object({

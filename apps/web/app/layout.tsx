@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: "Medframe | Clinical workspace",
   description: "The Foundation of Modern Care.",
   robots: { index: false, follow: false },
+  icons: { icon: "/brand/medframe-logo.webp", apple: "/brand/medframe-logo.webp" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

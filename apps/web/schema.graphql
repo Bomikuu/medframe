@@ -58,6 +58,7 @@ type EncounterType {
   id: UUID!
   patientId: UUID!
   patientName: String!
+  patientPortraitId: UUID
   branchId: UUID!
   reason: String!
   status: String!
@@ -172,6 +173,7 @@ type PatientDemographics {
   reference: String!
   fullName: String!
   dateOfBirth: Date
+  portraitId: UUID
   branchId: UUID!
   sex: String!
   email: String
@@ -207,6 +209,7 @@ type PatientSummary {
   reference: String!
   fullName: String!
   dateOfBirth: Date
+  portraitId: UUID
 }
 
 type PatientTimelineEvent {
@@ -253,6 +256,7 @@ type Query {
   diagnosticHistory(organizationId: UUID!, requestId: UUID!, context: String! = "clinic", kind: String! = "events", after: String = null): JSON!
   diagnosticPreview(organizationId: UUID!, requestId: UUID!): JSON!
   financialOverview(organizationId: UUID!, branchId: UUID!, days: Int! = 30, startDate: Date = null, endDate: Date = null): JSON!
+  cashierReconciliation(organizationId: UUID!, branchId: UUID!, day: Date!): JSON!
   billingSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
   billingInvoices(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null, patientId: UUID = null): JSON!
   billingInvoice(organizationId: UUID!, invoiceId: UUID!): JSON!
@@ -263,6 +267,7 @@ type Query {
   communicationSetup(organizationId: UUID!, branchId: UUID!, patientId: UUID = null, search: String! = ""): JSON!
   communicationReminders(organizationId: UUID!, branchId: UUID!, filters: JSON = null, after: String = null): JSON!
   operationsSetup(organizationId: UUID!, branchId: UUID = null, search: String! = ""): JSON!
+  scheduleOverridePreview(organizationId: UUID!, data: JSON!): JSON!
   appointmentAvailability(organizationId: UUID!, data: JSON!): JSON!
   appointments(organizationId: UUID!, filters: JSON!, after: String = null): JSON!
   branchQueue(organizationId: UUID!, branchId: UUID!, providerId: UUID = null, after: String = null): JSON!

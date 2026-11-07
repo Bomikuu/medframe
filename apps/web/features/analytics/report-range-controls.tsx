@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/application/date-input";
 import { FormField } from "@/components/form-field";
 import { FormSelect } from "@/features/patients/form-controls";
 
@@ -94,9 +94,8 @@ export function ReportRangeControls({
         <>
           <div className="grid gap-3 sm:grid-cols-2">
             <FormField id={`${id}-from`} label="From date">
-              <Input
+              <DateInput
                 id={`${id}-from`}
-                type="date"
                 max={lastCompleted}
                 value={start}
                 onChange={(event) => {
@@ -107,9 +106,8 @@ export function ReportRangeControls({
               />
             </FormField>
             <FormField id={`${id}-to`} label="Through date">
-              <Input
+              <DateInput
                 id={`${id}-to`}
-                type="date"
                 max={lastCompleted}
                 value={end}
                 onChange={(event) => {

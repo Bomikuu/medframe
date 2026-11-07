@@ -24,8 +24,8 @@ def render_csv(
     if (
         not isinstance(sections, list)
         or not sections
-        or len(sections) > 3
-        or any(s not in {"operations", "clinical", "finance"} for s in sections)
+        or len(sections) > 4
+        or any(s not in {"operations", "clinical", "finance", "patients"} for s in sections)
         or len(set(sections)) != len(sections)
     ):
         raise DomainError("INVALID_INPUT", "Choose supported report sections.")
@@ -71,6 +71,11 @@ def render_csv(
         value = data[section]
         if value is None:
             raise DomainError("FORBIDDEN", "This report section is unavailable.", 403)
+        if section == "patients":
+            rows.append(
+                [section, "Accessible patient records", "Current snapshot", value["total"], ""]
+            )
+            value = {"registrations": value["registrations"]}
         for metric, summary in value.items():
             if metric == "specialties":
                 rows.extend(
@@ -90,6 +95,12 @@ def render_csv(
                 ]
             )
             rows.extend([[section, metric, r["date"], r["count"], ""] for r in summary["series"]])
+            rows.extend(
+                [
+                    [section, metric + " previous", r["date"], r["count"], ""]
+                    for r in summary["previous_series"]
+                ]
+            )
     output = io.StringIO(newline="")
     csv.writer(output).writerows([[safe_cell(cell) for cell in row] for row in rows])
     audit(request.user, f"analytics.export.{data['days']}", organization_id, branch_id)

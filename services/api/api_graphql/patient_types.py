@@ -78,6 +78,7 @@ class PatientSummary:
     reference: str
     full_name: str
     date_of_birth: date | None
+    portrait_id: UUID | None
 
 
 @strawberry.type
@@ -98,23 +99,39 @@ class PatientDemographics(PatientSummary):
     updated_at: datetime
 
 
-def patient_summary(patient):
+def authorized_portraits(user, organization_id, patient_ids):
+    """Optional portrait projection retains the existing clinical grant/Station boundary."""
+    from medframe_apps.patients.services import scoped_patients
+    from medframe_apps.stations.portraits import portrait_map
+
+    try:
+        allowed = scoped_patients(user, organization_id, "patients.clinical.read")
+    except DomainError:
+        return {}
+    ids = list(allowed.filter(id__in=patient_ids).values_list("id", flat=True))
+    return portrait_map(ids)
+
+
+def patient_summary(patient, portrait_id=None):
     return PatientSummary(
         id=patient.id,
         reference=patient.reference,
         full_name=patient.full_name,
         date_of_birth=patient.date_of_birth,
+        portrait_id=UUID(portrait_id) if portrait_id else None,
     )
 
 
-def patient_details(patient):
+def patient_details(patient, portrait_id=None):
     import dataclasses
 
     return PatientDemographics(
         **{
             field.name: getattr(patient, field.name)
             for field in dataclasses.fields(PatientDemographics)
-        }
+            if field.name != "portrait_id"
+        },
+        portrait_id=UUID(portrait_id) if portrait_id else None,
     )
 
 

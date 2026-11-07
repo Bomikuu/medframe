@@ -8,6 +8,7 @@ from django.utils import timezone
 
 from config.errors import DomainError
 from medframe_apps.accounts.models import ClinicalSession
+from medframe_apps.accounts.sign_in_policy import authenticated_session
 from medframe_apps.operations.policy import require_operations
 from medframe_apps.portal.policy import require_portal_link
 
@@ -20,7 +21,7 @@ def socket_authority(session_key, params):
     if (
         not user.is_authenticated
         or not user.is_active
-        or not session.get("mfa_verified")
+        or not authenticated_session(user, session)
         or not ClinicalSession.objects.filter(
             user=user,
             session_key=session_key,

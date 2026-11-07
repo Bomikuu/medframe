@@ -1,5 +1,8 @@
 "use client";
 
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
@@ -294,14 +297,13 @@ export function PatientPortalAccess({ patientId }: { patientId: string }) {
         <p role="alert">Patient access could not be read.</p>
       )}
       {!readOnly && (
-        <FormField id="revoke-reason" label="Reason for revocation">
-          <Input
-            id="revoke-reason"
-            maxLength={240}
-            value={reason}
-            onChange={(event) => setReason(event.target.value)}
-          />
-        </FormField>
+        <ReasonField
+          id="revoke-reason"
+          label="Reason for revocation"
+          value={reason}
+          onValueChange={setReason}
+          suggestions={reasonSuggestions.access}
+        />
       )}
       {error !== null && <p role="alert">{failureText(error)}</p>}
       {message && <p role="status">{message}</p>}

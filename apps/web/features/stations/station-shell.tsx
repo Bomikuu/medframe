@@ -7,13 +7,14 @@ import { ClinicalLocaleProvider } from "@/components/application/clinical-locale
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { EndSessionControl } from "./end-session-control";
 import { useStationAccess } from "./access-session";
+import { HeaderBranchControl } from "@/features/workspace/header-branch-control";
 
 export function StationShell({ children }: { children: ReactNode }) {
-  const { workspace, href } = useWorkspace();
+  const { workspace, href, overview, branchId } = useWorkspace();
   const access = useStationAccess();
   return (
     <ClinicalLocaleProvider timezone={workspace.organization.timezone}>
-      <div className="min-h-dvh bg-background">
+      <div data-station-shell className="min-h-dvh bg-background">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-3 sm:px-6">
           <div className="flex items-center gap-4">
             <Brand />
@@ -22,7 +23,18 @@ export function StationShell({ children }: { children: ReactNode }) {
               {workspace.organization.name}
             </span>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {access ? (
+              <span className="text-xs text-muted-foreground">
+                {workspace.branches.find((branch) => branch.id === branchId)?.name ??
+                  "Assigned branch"}
+              </span>
+            ) : (
+              <HeaderBranchControl />
+            )}
+            <span className="mr-2 text-xs text-muted-foreground">
+              {overview.currentUser.displayName || "Clinician"}
+            </span>
             <ButtonLink
               href={href(
                 access && access.kind !== "doctor"

@@ -1,4 +1,9 @@
 "use client";
+
+import { PatientTaskHome } from "./patient-task-home";
+import { EmptyState } from "@/components/application/empty-state";
+
+import { RecordUnavailable } from "@/components/application/record-unavailable";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { useState } from "react";
 import Link from "next/link";
@@ -22,48 +27,55 @@ export function PortalDashboard() {
   const remote = useRemote(PortalRecordsDocument, { linkId, after }, { client: getPortalClient });
   const parsed = recordPage(releaseRowSchema).safeParse(remote.data?.portalRecords);
   return (
-    <section className="grid gap-5">
-      <h2 className="text-xl font-semibold">Shared care records</h2>
-      <p className="max-w-prose text-sm text-muted-foreground">
-        Each release preserves the versions your clinician selected at that time.
-      </p>
-      {!remote.data ? (
-        <LoadState error={remote.error} retry={remote.reload} />
-      ) : parsed.success ? (
-        <>
-          {!parsed.data.items.length && (
-            <div className="rounded-lg border border-dashed border-border p-6">
-              <h3 className="font-medium">No records shared yet</h3>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Your connection is active. Records appear after your clinician reviews and publishes
-                them.
-              </p>
-            </div>
-          )}
-          <ul className="grid gap-4 lg:grid-cols-2">
-            {parsed.data.items.map((item) => (
-              <li key={item.id} className="rounded-xl border border-border bg-card p-5">
-                <Link
-                  href={href(`/portal/records/${item.id}`)}
-                  className="font-semibold text-primary hover:underline"
-                >
-                  Release {item.sequence}
-                </Link>
-                <p className="mt-2 max-w-prose text-sm leading-6 whitespace-pre-wrap">
-                  {item.summary}
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {item.author} · {timeLabel(item.created_at)}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <PageControls after={after} next={parsed.data.end_cursor} onChange={setAfter} />
-        </>
-      ) : (
-        <p role="alert">Shared records could not be read.</p>
-      )}
-    </section>
+    <div className="grid gap-8">
+      <PatientTaskHome key={linkId} />
+      <section className="grid gap-5">
+        <header>
+          <h2 className="text-xl font-semibold">Shared care records</h2>
+          <p className="mt-2 max-w-prose text-sm leading-6 text-muted-foreground">
+            Records reviewed and shared by your clinician.
+          </p>
+        </header>
+        {!remote.data ? (
+          <LoadState error={remote.error} retry={remote.reload} />
+        ) : parsed.success ? (
+          <>
+            {!parsed.data.items.length && (
+              <EmptyState
+                illustration="medical-records"
+                title="No records shared yet"
+                description="Your connection is active. Records appear after your clinician reviews and publishes them."
+              />
+            )}
+            <ul className="grid gap-4 lg:grid-cols-2">
+              {parsed.data.items.map((item) => (
+                <li key={item.id} className="rounded-xl border border-border bg-card p-5">
+                  <Link
+                    href={href(`/portal/records/${item.id}`)}
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Release {item.sequence}
+                  </Link>
+                  <p className="mt-2 max-w-prose text-sm leading-6 whitespace-pre-wrap">
+                    {item.summary}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {item.author} · {timeLabel(item.created_at)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+            <PageControls after={after} next={parsed.data.end_cursor} onChange={setAfter} />
+          </>
+        ) : (
+          <RecordUnavailable
+            title="Shared records are unavailable"
+            description="We couldn’t read your released records. Try again, or contact your clinic if the problem continues."
+            retry={remote.reload}
+          />
+        )}
+      </section>
+    </div>
   );
 }
 export function PortalRecord({ releaseId }: { releaseId: string }) {
@@ -78,7 +90,10 @@ export function PortalRecord({ releaseId }: { releaseId: string }) {
     .extend({ payload: releasePayloadSchema })
     .safeParse(remote.data?.portalRecord);
   if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
-  if (!parsed.success) return <p role="alert">This released record could not be read.</p>;
+  if (!parsed.success)
+    return (
+      <RecordUnavailable description="This released record could not be read. Contact your clinic administrator if the problem continues." />
+    );
   return (
     <article className="grid gap-7">
       <Link href={href("/portal")} className="text-sm text-primary underline">

@@ -17,6 +17,9 @@ from medframe_apps.patients.models import Patient
 from medframe_apps.providers.models import ProviderProfile
 
 
+from medframe_apps.operations.portraits import patient_portraits, provider_portrait
+
+
 def setup(request, organization_id, branch_id=None, search=""):
     require_session_realm(request, "staff")
     member = require_membership(request.user, organization_id, "operations.read")
@@ -28,7 +31,9 @@ def setup(request, organization_id, branch_id=None, search=""):
         raise DomainError("NOT_FOUND", "No permitted branch is available.", 404)
     require_operations(request, organization_id, "operations.read", branch.id)
     profiles = (
-        ProviderProfile.objects.select_related("membership__user")
+        ProviderProfile.objects.select_related(
+            "membership__user", "membership__staffprofile__photo"
+        )
         .filter(
             membership__organization_id=organization_id,
             membership__active=True,
@@ -46,6 +51,8 @@ def setup(request, organization_id, branch_id=None, search=""):
         patients = patients.filter(
             Q(full_name__icontains=str(search)[:160]) | Q(reference__icontains=str(search)[:160])
         )
+    patients = list(patients.order_by("full_name")[:50])
+    portraits = patient_portraits(request.user, organization_id, [row.id for row in patients])
     return {
         "branches": [{"id": str(row.id), "name": row.name} for row in branches],
         "branch_id": str(branch.id),
@@ -54,12 +61,18 @@ def setup(request, organization_id, branch_id=None, search=""):
             {
                 "id": str(row.id),
                 "name": row.membership.user.display_name or row.membership.user.email,
+                "photo_id": provider_portrait(row),
             }
             for row in profiles
         ],
         "patients": [
-            {"id": str(row.id), "name": row.full_name, "reference": row.reference}
-            for row in patients.order_by("full_name")[:50]
+            {
+                "id": str(row.id),
+                "name": row.full_name,
+                "reference": row.reference,
+                "portrait_id": portraits.get(str(row.id)),
+            }
+            for row in patients
         ],
         "resources": [
             {"id": str(row.id), "name": row.name, "active": row.active, "version": row.version}
@@ -107,6 +120,12 @@ class OperationsQuery:
         return setup(info.context, organization_id, branch_id, search)
 
     @strawberry.field
+    def schedule_override_preview(self, info: Info, organization_id: UUID, data: JSON) -> JSON:
+        from medframe_apps.operations.schedule_preview import override_preview
+
+        return override_preview(info.context, organization_id, data)
+
+    @strawberry.field
     def appointment_availability(self, info: Info, organization_id: UUID, data: JSON) -> JSON:
         return scheduling.available_slots(info.context, organization_id, data)
 
@@ -140,6 +159,8 @@ class OperationsMutation:
         request = info.context
         if action == "schedule":
             row = scheduling.save_schedule(request, organization_id, data, request_id)
+        elif action == "weekly_schedule":
+            row = scheduling.save_weekly_schedule(request, organization_id, data, request_id)
         elif action == "resource":
             row = scheduling.save_resource(request, organization_id, data, request_id)
         elif action == "override":

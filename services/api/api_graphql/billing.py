@@ -5,10 +5,7 @@ import strawberry
 from strawberry.scalars import JSON
 from strawberry.types import Info
 
-from medframe_apps.billing.calculations import amount_text, draft_totals
-from medframe_apps.billing.inputs import DraftInput
-from medframe_apps.billing.invoices import invoice_action, validate_input
-from medframe_apps.billing.policy import financial_patient, staff_member
+from medframe_apps.billing.invoices import invoice_action
 from medframe_apps.billing.queries import billing_setup, invoice_detail, invoice_page, staff_invoice
 
 
@@ -29,6 +26,14 @@ class BillingQuery:
         return financial_overview(
             info.context, organization_id, branch_id, days, start_date=start_date, end_date=end_date
         )
+
+    @strawberry.field
+    def cashier_reconciliation(
+        self, info: Info, organization_id: UUID, branch_id: UUID, day: date
+    ) -> JSON:
+        from medframe_apps.billing.reconciliation import day_reconciliation
+
+        return day_reconciliation(info.context, organization_id, branch_id, day)
 
     @strawberry.field
     def billing_setup(
@@ -92,15 +97,9 @@ class BillingQuery:
 
     @strawberry.field
     def billing_preview(self, info: Info, organization_id: UUID, data: JSON) -> JSON:
-        member = staff_member(info.context, organization_id, "billing.manage")
-        parsed = validate_input(DraftInput, data)
-        financial_patient(member, parsed.branch_id, parsed.patient_id)
-        return {
-            key: amount_text(value)
-            for key, value in draft_totals(
-                parsed.lines, parsed.discount_kind, parsed.discount_value
-            ).items()
-        }
+        from medframe_apps.billing.preview import draft_preview
+
+        return draft_preview(info.context, organization_id, data)
 
 
 @strawberry.type

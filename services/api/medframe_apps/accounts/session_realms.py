@@ -14,7 +14,9 @@ class SessionActivation(Protocol):
 
 
 def require_session_realm(request, realm: SessionRealm):
-    if not request.user.is_authenticated or not request.session.get("mfa_verified"):
+    from medframe_apps.accounts.sign_in_policy import authenticated_session
+
+    if not authenticated_session(request.user, request.session):
         raise DomainError("UNAUTHENTICATED", "Sign in to continue.", 401)
     if request.session.get("auth_realm", "staff") != realm:
         raise DomainError("FORBIDDEN", "Sign in to the appropriate workspace to continue.", 403)

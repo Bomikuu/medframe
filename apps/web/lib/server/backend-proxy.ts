@@ -1,4 +1,10 @@
 const allowedPaths = new Set([
+  "organizations/security",
+  "auth/browser",
+  "calls/rooms",
+  "staff/manage",
+  "staff/onboarding",
+  "staff/photo/upload",
   "analytics/export",
   "interoperability/preview",
   "interoperability/download",
@@ -11,6 +17,7 @@ const allowedPaths = new Set([
   "stations/doctor",
   "stations/dashboard",
   "stations/portrait",
+  "stations/patient",
   "stations/walk-in",
   "stations/pair",
   "stations/manage",
@@ -23,11 +30,14 @@ const allowedPaths = new Set([
   "onboarding/logo/upload",
   "graphql",
   "portal/graphql",
+  "portal/registration",
+  "portal/registration/manage",
   "portal/auth/csrf",
   "portal/auth/login",
   "portal/auth/google/prepare",
   "portal/auth/google/login",
   "portal/auth/invitations/prepare",
+  "portal/auth/invitations/google",
   "portal/auth/mfa/enroll",
   "portal/auth/mfa/verify",
   "portal/auth/logout",
@@ -35,6 +45,8 @@ const allowedPaths = new Set([
   "portal/auth/recovery/reset",
   "auth/csrf",
   "auth/session",
+  "auth/profile",
+  "workspace/today",
   "auth/login",
   "auth/google/prepare",
   "auth/google/login",
@@ -50,10 +62,20 @@ export const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:3000";
 
 export async function proxyBackend(request: Request, path: string): Promise<Response> {
   const postAttachment = ["analytics/export", "interoperability/download"].includes(path);
+  const callUpload = /^calls\/upload\/[0-9a-f-]{36}$/.test(path);
+  const callDownload = /^calls\/files\/[0-9a-f-]{36}$/.test(path);
+  const staffUpload = path === "staff/photo/upload";
+  const staffPhoto = /^staff\/photo\/[0-9a-f-]{36}$/.test(path);
   const logoUpload = path === "onboarding/logo/upload";
   const logoDownload = /^onboarding\/logo\/[0-9a-f-]{36}\/content$/.test(path);
-  const upload = logoUpload || /^(?:diagnostics\/)?documents\/upload\/[0-9a-f-]{36}$/.test(path);
+  const upload =
+    callUpload ||
+    staffUpload ||
+    logoUpload ||
+    /^(?:diagnostics\/)?documents\/upload\/[0-9a-f-]{36}$/.test(path);
   const download =
+    callDownload ||
+    staffPhoto ||
     logoDownload ||
     ["documents/download", "portal/documents/download", "diagnostics/documents/download"].includes(
       path,
@@ -73,6 +95,14 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
     upload ? (request.headers.get("content-type") ?? "") : "application/json",
   );
   headers.set("x-csrf-token", request.headers.get("x-csrf-token") ?? "");
+  // Context can only narrow an authenticated request. Delegated and anonymous
+  // device sessions remain constrained even when this header is absent.
+  if (
+    request.headers.get("X-Medframe-Workspace") === "station" ||
+    (download && new URL(request.url).searchParams.get("workspace") === "station")
+  ) {
+    headers.set("X-Medframe-Workspace", "station");
+  }
   let body: Uint8Array | undefined;
   if (request.method === "POST") {
     const chunks: Uint8Array[] = [];
@@ -83,7 +113,10 @@ export async function proxyBackend(request: Request, path: string): Promise<Resp
         const { done, value } = await reader.read();
         if (done) break;
         size += value.byteLength;
-        if (size > (logoUpload ? 2 * 1024 * 1024 + 65536 : upload ? 21 * 1024 * 1024 : 65_536)) {
+        if (
+          size >
+          (logoUpload || staffUpload ? 2 * 1024 * 1024 + 65536 : upload ? 21 * 1024 * 1024 : 65_536)
+        ) {
           await reader.cancel();
           return Response.json({ message: "The request is too large." }, { status: 413 });
         }

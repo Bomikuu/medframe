@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { MOUSE } from "three";
 import type { OrbitControls as OrbitControlsInstance } from "three-stdlib";
+import { SharedCameraBridge, type SharedSceneControl } from "@/lib/three/shared-camera";
 import { Button } from "@/components/ui/button";
 import type { Finding } from "@/features/consultations/schema";
 import type { AnnotationInteraction } from "./annotation-pins";
@@ -39,7 +40,11 @@ export default function Dental3D({
   workspace,
   onAnnotate,
   onOpen2D,
+  sharing,
+  patientPointer,
 }: {
+  sharing?: SharedSceneControl;
+  patientPointer?: string;
   editor?: boolean;
   annotations?: AnnotationInteraction;
   workspace?: DentalViewport;
@@ -79,8 +84,9 @@ export default function Dental3D({
     <div role="status" className="grid gap-4 rounded-xl border border-border bg-card p-6 text-sm">
       <h3 className="font-semibold">3D is unavailable</h3>
       <p className="max-w-prose leading-6 text-muted-foreground">
-        The model could not load or its graphics context was lost. Your notes, findings and selected
-        tooth are retained. Continue charting with the 2D selector.
+        {sharing
+          ? "The 3D model could not load. Use the labeled parts list to continue this presentation."
+          : "The model could not load or its graphics context was lost. Your notes, findings and selected tooth are retained. Continue charting with the 2D selector."}
       </p>
       <p className="font-medium">
         Selected · tooth {selected}
@@ -97,7 +103,10 @@ export default function Dental3D({
   return (
     <ModelBoundary fallback={fallback}>
       <div className={editor ? "flex h-full min-h-0 min-w-0 flex-col gap-3" : "grid min-w-0 gap-4"}>
-        <div role="status" className="flex flex-wrap items-center gap-2 text-xs">
+        <div
+          role="status"
+          className={sharing ? "hidden" : "flex flex-wrap items-center gap-2 text-xs"}
+        >
           <span className="rounded-md bg-cyan-800 px-3 py-2 font-semibold text-white">
             Selected · {selected}
             {selectedSurface ? ` · ${selectedSurface}` : " · whole tooth"}
@@ -110,10 +119,12 @@ export default function Dental3D({
           )}
           {condition.bracket && <span>Bracket present</span>}
         </div>
-        <CanvasToolbar viewport={viewport} annotations={annotations} onAnnotate={onAnnotate} />
+        {!sharing && (
+          <CanvasToolbar viewport={viewport} annotations={annotations} onAnnotate={onAnnotate} />
+        )}
         <div
           aria-label="Interactive anatomical dental model"
-          className={`${editor ? "h-[48dvh] min-h-[300px] shrink-0 lg:h-auto lg:min-h-[320px] lg:flex-1" : viewport.expandedCanvas ? "h-[70dvh]" : "h-[360px] sm:h-[480px]"} relative isolate min-w-0 overflow-hidden rounded-xl bg-muted/30 ${annotations?.tool === "comment" ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
+          className={`${sharing ? "h-full min-h-0 flex-1" : editor ? "h-[48dvh] min-h-[300px] shrink-0 lg:h-auto lg:min-h-[320px] lg:flex-1" : viewport.expandedCanvas ? "h-[70dvh]" : "h-[360px] sm:h-[480px]"} relative isolate min-w-0 overflow-hidden rounded-xl bg-muted/30 ${annotations?.tool === "comment" ? "cursor-crosshair" : "cursor-grab active:cursor-grabbing"}`}
         >
           {!ready && (
             <p
@@ -140,7 +151,8 @@ export default function Dental3D({
             <OrbitControls
               ref={controls}
               makeDefault
-              enableDamping
+              enabled={!sharing || sharing.controlled}
+              enableDamping={!sharing}
               dampingFactor={0.12}
               mouseButtons={{
                 LEFT:
@@ -153,6 +165,7 @@ export default function Dental3D({
                 RIGHT: MOUSE.PAN,
               }}
             />
+            {sharing && <SharedCameraBridge {...sharing} />}
             <Suspense fallback={null}>
               <AnatomicalScene
                 key={modelUrl}
@@ -169,6 +182,8 @@ export default function Dental3D({
                 anatomyOnly={viewport.anatomyOnly}
                 reference={detailed}
                 controls={controls}
+                externalCamera={!!sharing && (!sharing.controlled || !!sharing.preservePose)}
+                patientPointer={patientPointer}
                 onReady={markReady}
                 annotations={annotations}
                 showLabel={viewport.showLabel}

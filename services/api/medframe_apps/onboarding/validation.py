@@ -71,11 +71,17 @@ class Branding(Fields):
     short_name: str = Field(default="", max_length=40)
 
 
+class DailyHours(Fields):
+    opens: str = Field(default="09:00", max_length=5)
+    closes: str = Field(default="17:00", max_length=5)
+
+
 class Practice(Fields):
     branch_name: str = Field(default="Main branch", max_length=160)
     days: list[int] = Field(default_factory=lambda: [0, 1, 2, 3, 4], max_length=7)
     opens: str = "09:00"
     closes: str = "17:00"
+    daily_hours: dict[str, DailyHours] = Field(default_factory=dict, max_length=7)
     timezone: str = "Asia/Manila"
     duration_minutes: int = Field(default=30, ge=5, le=240)
     walk_in_policy: Literal["walk_ins", "appointments", "both"] = "both"
@@ -127,12 +133,19 @@ def validate_step(step, data, complete=False):
                 set(parsed["days"])
             ) != len(parsed["days"]):
                 raise ValueError("days")
-            opening, closing = (
-                time.fromisoformat(parsed["opens"]),
-                time.fromisoformat(parsed["closes"]),
-            )
-            if complete and (not parsed["branch_name"] or not parsed["days"] or opening >= closing):
-                raise ValueError("hours")
+            if any(key not in {str(day) for day in range(7)} for key in parsed["daily_hours"]):
+                raise ValueError("daily_hours")
+            if complete:
+                if not parsed["branch_name"] or not parsed["days"]:
+                    raise ValueError("hours")
+                for day in parsed["days"]:
+                    hours = parsed["daily_hours"].get(str(day), parsed)
+                    if not re.fullmatch(
+                        r"(?:[01][0-9]|2[0-3]):[0-5][0-9]", hours["opens"]
+                    ) or not re.fullmatch(r"(?:[01][0-9]|2[0-3]):[0-5][0-9]", hours["closes"]):
+                        raise ValueError("hours")
+                    if time.fromisoformat(hours["opens"]) >= time.fromisoformat(hours["closes"]):
+                        raise ValueError("hours")
         return parsed
     except (ValidationError, ValueError, TypeError, ZoneInfoNotFoundError):
         raise DomainError(

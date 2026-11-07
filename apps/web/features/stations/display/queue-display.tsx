@@ -1,7 +1,9 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
 import { useEffect, useRef, useState } from "react";
-import { Volume2, VolumeX, Maximize2, RefreshCw } from "lucide-react";
+import { Volume2, VolumeX, Maximize2, RefreshCw, Monitor, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
 import { Brand } from "@/components/brand";
@@ -94,8 +96,13 @@ export function QueueDisplay() {
       {!data ? (
         <section
           aria-label="Display connection"
-          className="mx-auto grid w-full max-w-2xl gap-5 px-6 py-24"
+          className="mx-auto grid min-h-[65svh] w-full max-w-2xl content-center justify-items-center gap-5 px-6 py-16 text-center"
         >
+          {!remote.error || remote.denied ? (
+            <Monitor className="size-14 text-primary" aria-hidden="true" />
+          ) : (
+            <WifiOff className="size-14 text-primary" aria-hidden="true" />
+          )}
           <h2 className="text-3xl font-semibold">
             {remote.denied
               ? "This display needs clinic approval"
@@ -110,7 +117,7 @@ export function QueueDisplay() {
                 ? "Queue numbers are hidden until a fresh update arrives. Please follow the clinic staff’s instructions."
                 : "Checking this device and retrieving current queue numbers. Patient records are never shown here."}
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap justify-center gap-3">
             <Button onClick={remote.reload}>
               <RefreshCw />
               Try again
@@ -144,7 +151,11 @@ export function QueueDisplay() {
                       {row.label}
                     </p>
                     <p className="text-xl font-semibold">{row.counter || row.department}</p>
-                    {row.provider && <p className="mt-2 text-base">{row.provider}</p>}
+                    {row.provider && (
+                      <p className="mt-2 text-base">
+                        <PersonIdentity kind="provider" name={row.provider} />
+                      </p>
+                    )}
                   </article>
                 ))}
               </div>

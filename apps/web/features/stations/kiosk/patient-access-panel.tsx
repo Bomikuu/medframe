@@ -126,6 +126,7 @@ export function PatientAccessPanel({
           <FormSelect
             id="kiosk-patient"
             label="Patient record"
+            personKind="patient"
             value={patient}
             onChange={(value) => {
               onSelectionChange({ patient: value, verified: false });

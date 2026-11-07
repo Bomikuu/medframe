@@ -27,10 +27,23 @@ def login_view(request):
     identity = data.get("email", "")
     throttle(request, "login", str(identity).strip().lower(), 5, 900)
     next_step = services.begin_login(
-        request, identity, data.get("password", ""), remember=data.get("remember", False)
+        request,
+        identity,
+        data.get("password", ""),
+        remember=data.get("remember", False),
+        shared_device=data.get("shared_device", False),
     )
     refund_attempt(request, "login", str(identity).strip().lower())
-    return JsonResponse({"nextStep": next_step})
+    from medframe_apps.accounts.sign_in_policy import shared_browser
+
+    return JsonResponse(
+        {
+            "nextStep": next_step,
+            "canRememberBrowser": bool(
+                request.session.get("challenge_trust_eligible") and not shared_browser(request)
+            ),
+        }
+    )
 
 
 @require_POST
@@ -44,7 +57,10 @@ def enroll_view(request):
 def verify_view(request):
     identity = request.session.session_key or "missing"
     throttle(request, "mfa", identity, 5, 300)
-    codes = services.verify_mfa(request, json_object(request).get("code", ""))
+    data = json_object(request)
+    codes = services.verify_mfa(
+        request, data.get("code", ""), trust_browser=data.get("trust_browser", False)
+    )
     refund_attempt(request, "mfa", identity)
     return JsonResponse({"nextStep": "authenticated", "recoveryCodes": codes})
 
@@ -86,7 +102,7 @@ def recover_view(request):
     email = json_object(request).get("email", "")
     throttle(request, "recovery", str(email).strip().lower(), 3, 3600)
     services.request_password_reset(email)
-    return JsonResponse({"message": "If an active account matches, a reset link will be sent."})
+    return JsonResponse({"message": "Reset link requested. Check your inbox."})
 
 
 @require_POST

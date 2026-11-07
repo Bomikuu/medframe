@@ -23,13 +23,17 @@ export function ClinicSwitcherDialog({
   onOpenChange: (open: boolean) => void;
   returnFocus: RefObject<HTMLButtonElement | null>;
 }) {
-  const { overview, organizationId, workspace, switchOrganization } = useWorkspace();
+  const { overview, organizationId, workspace, switchOrganization, branchId, switchBranch } =
+    useWorkspace();
   const [selectedId, setSelectedId] = useState(organizationId);
+  const [branchChoice, setSelectedBranch] = useState<string | null>(null);
+  const selectedBranch = branchChoice ?? branchId;
   const selection = overview.myOrganizations.find((organization) => organization.id === selectedId);
   const isCurrent = selectedId === organizationId;
 
   function close() {
     setSelectedId(organizationId);
+    setSelectedBranch(null);
     onOpenChange(false);
   }
 
@@ -37,6 +41,7 @@ export function ClinicSwitcherDialog({
     if (!selection) return;
     close();
     if (!isCurrent) switchOrganization(selection.id);
+    else if (selectedBranch !== branchId) switchBranch(selectedBranch);
   }
 
   return (
@@ -70,23 +75,30 @@ export function ClinicSwitcherDialog({
             aria-label="Available branches"
             className="rounded-lg border border-border bg-muted/30 p-4"
           >
-            <h2 className="text-sm font-semibold">Your branches in this clinic</h2>
+            <h2 className="text-sm font-semibold">Current branch</h2>
             {workspace.branches.length ? (
-              <ul className="mt-3 grid max-h-48 gap-3 overflow-y-auto text-sm">
+              <div className="mt-3 grid gap-2" role="group" aria-label="Choose current branch">
                 {workspace.branches.map((branch) => (
-                  <li key={branch.id} className="flex items-start gap-2">
+                  <Button
+                    type="button"
+                    key={branch.id}
+                    variant={selectedBranch === branch.id ? "secondary" : "ghost"}
+                    aria-pressed={selectedBranch === branch.id}
+                    className="h-auto justify-start py-3 text-left whitespace-normal"
+                    onClick={() => setSelectedBranch(branch.id)}
+                  >
                     <MapPin aria-hidden className="mt-0.5 size-4 shrink-0 text-teal-ink" />
                     <span className="min-w-0 wrap-anywhere">{branch.name}</span>
-                  </li>
+                  </Button>
                 ))}
-              </ul>
+              </div>
             ) : (
               <p className="mt-2 text-sm text-muted-foreground">
                 No branches are available for this membership.
               </p>
             )}
             <p className="mt-3 text-xs leading-5 text-muted-foreground">
-              Choose a branch within appointments, queues or other branch-specific pages.
+              Clinic pages use this branch. Your existing access permissions still apply.
             </p>
           </section>
         ) : (
@@ -99,7 +111,7 @@ export function ClinicSwitcherDialog({
             Cancel
           </Button>
           <Button type="button" disabled={!selection} onClick={apply}>
-            {isCurrent ? "Done" : "Switch clinic"}
+            {isCurrent ? "Use this branch" : "Switch clinic"}
           </Button>
         </DialogFooter>
       </DialogContent>

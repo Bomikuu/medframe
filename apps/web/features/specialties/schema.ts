@@ -1,24 +1,25 @@
 import { z } from "zod";
 
 const option = z.object({ code: z.string(), name: z.string() });
+const starterSchema = z.object({
+  specialty: z.string(),
+  name: z.string(),
+  prompts: z.object({
+    subjective: z.string(),
+    objective: z.string(),
+    assessment: z.string(),
+    plan: z.string(),
+  }),
+  observation_labels: z.array(z.string()),
+});
 export const specialtySetupSchema = z.object({
   version: z.number(),
   selected: z.array(z.string()),
   catalog: z.array(option.extend({ category: z.string(), active: z.boolean() })),
   legacy: z.array(option),
-  starters: z.array(
-    z.object({
-      specialty: z.string(),
-      name: z.string(),
-      prompts: z.object({
-        subjective: z.string(),
-        objective: z.string(),
-        assessment: z.string(),
-        plan: z.string(),
-      }),
-      observation_labels: z.array(z.string()),
-    }),
-  ),
+  starters: z.array(starterSchema),
+  starter_catalog: z.array(starterSchema).optional(),
+  starter_revision: z.number().optional(),
 });
 export type SpecialtySetup = z.infer<typeof specialtySetupSchema>;
 

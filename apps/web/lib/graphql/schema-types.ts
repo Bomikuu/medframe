@@ -84,6 +84,7 @@ export type EncounterType = {
   patientHistoryRevisionId?: Maybe<Scalars['UUID']['output']>;
   patientId: Scalars['UUID']['output'];
   patientName: Scalars['String']['output'];
+  patientPortraitId?: Maybe<Scalars['UUID']['output']>;
   providerSpecialty: Scalars['String']['output'];
   reason: Scalars['String']['output'];
   revisionId?: Maybe<Scalars['UUID']['output']>;
@@ -653,6 +654,7 @@ export type PatientDemographics = {
   guardianRelationship?: Maybe<Scalars['String']['output']>;
   id: Scalars['UUID']['output'];
   phone?: Maybe<Scalars['String']['output']>;
+  portraitId?: Maybe<Scalars['UUID']['output']>;
   reference: Scalars['String']['output'];
   sex: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -680,6 +682,7 @@ export type PatientSummary = {
   dateOfBirth?: Maybe<Scalars['Date']['output']>;
   fullName: Scalars['String']['output'];
   id: Scalars['UUID']['output'];
+  portraitId?: Maybe<Scalars['UUID']['output']>;
   reference: Scalars['String']['output'];
 };
 
@@ -725,6 +728,7 @@ export type Query = {
   billingPreview: Scalars['JSON']['output'];
   billingSetup: Scalars['JSON']['output'];
   branchQueue: Scalars['JSON']['output'];
+  cashierReconciliation: Scalars['JSON']['output'];
   chartRevisions: Scalars['JSON']['output'];
   clinicAppearance: Scalars['JSON']['output'];
   clinicDashboard: Scalars['JSON']['output'];
@@ -785,6 +789,7 @@ export type Query = {
   recordAuthors: Scalars['JSON']['output'];
   releaseSourcePage: Scalars['JSON']['output'];
   releaseSources: Scalars['JSON']['output'];
+  scheduleOverridePreview: Scalars['JSON']['output'];
   serviceCatalog: Scalars['JSON']['output'];
   servicePatients: Scalars['JSON']['output'];
   toothEvidence: Scalars['JSON']['output'];
@@ -897,6 +902,13 @@ export type QueryBranchQueueArgs = {
   branchId: Scalars['UUID']['input'];
   organizationId: Scalars['UUID']['input'];
   providerId?: InputMaybe<Scalars['UUID']['input']>;
+};
+
+
+export type QueryCashierReconciliationArgs = {
+  branchId: Scalars['UUID']['input'];
+  day: Scalars['Date']['input'];
+  organizationId: Scalars['UUID']['input'];
 };
 
 
@@ -1298,6 +1310,12 @@ export type QueryReleaseSourcePageArgs = {
 export type QueryReleaseSourcesArgs = {
   organizationId: Scalars['UUID']['input'];
   patientId: Scalars['UUID']['input'];
+};
+
+
+export type QueryScheduleOverridePreviewArgs = {
+  data: Scalars['JSON']['input'];
+  organizationId: Scalars['UUID']['input'];
 };
 
 

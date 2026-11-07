@@ -1,10 +1,14 @@
 "use client";
-import { useFormContext } from "react-hook-form";
+
+import { Controller, get, useFormContext } from "react-hook-form";
+import { PhoneInput } from "@/components/application/phone-input";
+import { callingCodeByCountry, digitsOnly } from "@/lib/contact-format";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSelect } from "@/features/patients/form-controls";
 import { FormField } from "@/components/form-field";
 import type { Fields } from "./schema";
+
 export function Field({
   name,
   label,
@@ -23,40 +27,68 @@ export function Field({
   const {
     register,
     setValue,
-    getValues,
+    control,
+    watch,
     formState: { errors },
   } = useFormContext<Fields>();
+  const field = register(name, type === "number" ? { valueAsNumber: true } : {});
+  const error = get(errors, name)?.message as string | undefined;
+  const id = `setup-${name}`;
+  const country = String(watch("country") ?? "PH");
+  const phPostalCode = name === "postal_code" && country === "PH";
+  const accessibility = {
+    "aria-invalid": Boolean(error),
+    "aria-describedby": error || hint ? `${id}-help` : undefined,
+  };
   return (
     <div className={wide ? "sm:col-span-2" : ""}>
-      <FormField
-        id={`setup-${name}`}
-        label={label}
-        hint={hint}
-        error={errors[name]?.message as string | undefined}
-      >
+      <FormField id={id} label={label} hint={hint} error={error}>
         {type === "textarea" ? (
-          <Textarea id={`setup-${name}`} rows={4} maxLength={maxLength} {...register(name)} />
+          <Textarea id={id} rows={4} maxLength={maxLength} {...field} {...accessibility} />
+        ) : type === "tel" ? (
+          <Controller
+            name={name}
+            control={control}
+            render={({ field: phone }) => (
+              <PhoneInput
+                key={country}
+                id={id}
+                name={phone.name}
+                ref={phone.ref}
+                value={String(phone.value ?? "")}
+                onValueChange={phone.onChange}
+                onBlur={phone.onBlur}
+                defaultCallingCode={callingCodeByCountry[country] ?? "63"}
+                {...accessibility}
+              />
+            )}
+          />
         ) : (
           <Input
-            id={`setup-${name}`}
+            id={id}
             type={type}
-            maxLength={maxLength}
-            {...register(name, type === "number" ? { valueAsNumber: true } : {})}
+            maxLength={phPostalCode ? 4 : maxLength}
+            autoComplete={type === "email" ? "email" : phPostalCode ? "postal-code" : undefined}
+            autoCapitalize={type === "email" ? "none" : undefined}
+            spellCheck={type === "email" ? false : undefined}
+            inputMode={
+              phPostalCode || type === "number" ? "numeric" : type === "email" ? "email" : undefined
+            }
+            min={type === "number" ? 5 : undefined}
+            max={type === "number" ? 240 : undefined}
+            {...field}
+            {...accessibility}
+            onChange={(event) => {
+              if (phPostalCode) event.target.value = digitsOnly(event.target.value).slice(0, 4);
+              void field.onChange(event);
+            }}
             onBlur={(event) => {
-              if (type === "tel") {
-                const raw = event.target.value.replace(/[^0-9+]/g, "");
-                const prefix = (
-                  { PH: "63", US: "1", CA: "1", GB: "44", AU: "61", SG: "65", IN: "91" } as Record<
-                    string,
-                    string
-                  >
-                )[String(getValues("country"))];
-                setValue(
-                  name,
-                  raw.startsWith("+") || !prefix ? raw : `+${prefix}${raw.replace(/^0/, "")}`,
-                  { shouldDirty: true },
-                );
-              }
+              if (type === "email")
+                setValue(name, event.target.value.trim().toLowerCase(), {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              void field.onBlur(event);
             }}
           />
         )}
@@ -73,14 +105,26 @@ export function Choice({
   label: string;
   options: { value: string; label: string }[];
 }) {
-  const { watch, setValue } = useFormContext<Fields>();
+  const {
+    watch,
+    setValue,
+    formState: { errors },
+  } = useFormContext<Fields>();
+  const error = get(errors, name)?.message as string | undefined;
   return (
-    <FormSelect
-      id={`setup-${name}`}
-      label={label}
-      value={String(watch(name) ?? "")}
-      onChange={(value) => setValue(name, value, { shouldDirty: true })}
-      options={options}
-    />
+    <div>
+      <FormSelect
+        id={`setup-${name}`}
+        label={label}
+        value={String(watch(name) ?? "")}
+        onChange={(value) => setValue(name, value, { shouldDirty: true, shouldValidate: true })}
+        options={options}
+      />
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-destructive">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }

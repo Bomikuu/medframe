@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { FormField } from "@/components/form-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Camera } from "@/components/icons";
-import { getCsrfToken, errorMessage } from "@/lib/auth/client";
+import { getCsrfToken, errorMessage, workspaceHeaders } from "@/lib/auth/client";
 import { getGraphqlClient } from "@/lib/graphql/client";
 import { BeginUploadDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
@@ -22,6 +22,8 @@ export function UploadControl({
   documentId,
   initialLabel = "",
   onPendingChange,
+  avatarFallback,
+  disabled = false,
 }: {
   patientId?: string;
   encounterId?: string;
@@ -31,6 +33,8 @@ export function UploadControl({
   documentId?: string;
   initialLabel?: string;
   onPendingChange?: (pending: boolean) => void;
+  avatarFallback?: ReactNode;
+  disabled?: boolean;
 }) {
   const { organizationId } = useWorkspace();
   const capture = useRequestScope();
@@ -64,7 +68,7 @@ export function UploadControl({
       transfer.current?.abort();
       setFile(null);
       setPreview(null);
-      setLabel("");
+      setLabel(profileImage ? initialLabel || "Patient profile photo" : "");
       if (input.current) input.current.value = "";
       onPendingChange?.(false);
     },
@@ -110,6 +114,9 @@ export function UploadControl({
         transfer.current = request;
         request.open("POST", `/api/backend/documents/upload/${started.beginDocumentUpload.id}`);
         request.setRequestHeader("X-CSRF-Token", csrf);
+        for (const [name, value] of Object.entries(workspaceHeaders())) {
+          request.setRequestHeader(name, value);
+        }
         request.timeout = 60000;
         request.upload.onprogress = (event) => {
           if (event.lengthComputable && isCurrent())
@@ -141,7 +148,9 @@ export function UploadControl({
       onPendingChange?.(false);
       setLabel("");
       if (input.current) input.current.value = "";
-      setMessage("File received. A security scan must finish before it can be used.");
+      setMessage(
+        profileImage ? "" : "File received. A security scan must finish before it can be used.",
+      );
       onUploaded(started.beginDocumentUpload.id);
     } catch (failure) {
       if (isCurrent()) setError(errorMessage(failure));
@@ -166,6 +175,7 @@ export function UploadControl({
             type="button"
             className="flex size-24 shrink-0 items-center justify-center rounded-full border border-input bg-muted"
             aria-label="Choose profile image"
+            disabled={disabled || progress !== null}
             onClick={() => input.current?.click()}
           >
             {preview ? (
@@ -178,7 +188,7 @@ export function UploadControl({
                 unoptimized
               />
             ) : (
-              <Camera size={28} />
+              (avatarFallback ?? <Camera size={28} />)
             )}
           </button>
         )}
@@ -187,7 +197,9 @@ export function UploadControl({
             id={`file-${purpose}`}
             label={
               profileImage
-                ? "Choose patient photo"
+                ? purpose === "avatar"
+                  ? "Choose your profile photo"
+                  : "Choose patient photo"
                 : purpose === "clinical"
                   ? "Choose clinical image or PDF"
                   : `Choose ${purpose} image`
@@ -210,38 +222,41 @@ export function UploadControl({
                   ? "image/jpeg,image/png,image/webp,application/pdf"
                   : "image/jpeg,image/png,image/webp"
               }
-              disabled={progress !== null}
+              disabled={disabled || progress !== null}
               onChange={(event) => {
                 const selected = event.target.files?.[0] ?? null;
                 setFile(selected);
                 setPreview(selected && avatar ? URL.createObjectURL(selected) : null);
                 onPendingChange?.(!!event.target.files?.length);
                 setError("");
+                if (profileImage) setLabel(initialLabel || "Patient profile photo");
               }}
               aria-describedby={`file-${purpose}-help`}
             />
           </FormField>
         </div>
       </div>
-      <FormField
-        id={`file-label-${purpose}`}
-        label={purpose === "clinical" ? "Document label" : "Image label"}
-      >
-        <Input
+      {!profileImage && (
+        <FormField
           id={`file-label-${purpose}`}
-          value={label}
-          onChange={(event) => setLabel(event.target.value)}
-          maxLength={120}
-          disabled={progress !== null}
-          placeholder={
-            purpose === "clinical"
-              ? "For example, consultation image"
-              : purpose === "website"
-                ? "For example, clinic reception photo"
-                : "For example, clinic logo"
-          }
-        />
-      </FormField>
+          label={purpose === "clinical" ? "Document label" : "Image label"}
+        >
+          <Input
+            id={`file-label-${purpose}`}
+            value={label}
+            onChange={(event) => setLabel(event.target.value)}
+            maxLength={120}
+            disabled={progress !== null}
+            placeholder={
+              purpose === "clinical"
+                ? "For example, consultation image"
+                : purpose === "website"
+                  ? "For example, clinic reception photo"
+                  : "For example, clinic logo"
+            }
+          />
+        </FormField>
+      )}
       <div className="flex flex-wrap items-center gap-3">
         {file && progress === null && (
           <Button
@@ -250,7 +265,7 @@ export function UploadControl({
             onClick={() => {
               setFile(null);
               setPreview(null);
-              setLabel("");
+              setLabel(profileImage ? initialLabel || "Patient profile photo" : "");
               if (input.current) input.current.value = "";
               onPendingChange?.(false);
             }}
@@ -261,10 +276,14 @@ export function UploadControl({
         <Button
           type="button"
           onClick={() => void upload()}
-          disabled={!file || progress !== null}
+          disabled={disabled || !file || progress !== null}
           aria-busy={progress !== null}
         >
-          {progress === null ? "Upload file" : `Uploading ${progress}%`}
+          {progress === null
+            ? profileImage
+              ? "Upload photo"
+              : "Upload file"
+            : `Uploading ${progress}%`}
         </Button>
         {progress !== null && (
           <Button type="button" variant="outline" onClick={() => transfer.current?.abort()}>

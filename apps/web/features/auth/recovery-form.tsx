@@ -1,86 +1,19 @@
 "use client";
 
+import { RecordUnavailable } from "@/components/application/record-unavailable";
+import { KeyRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
 import { FormField } from "@/components/form-field";
 import { errorMessage, requestWithCsrf } from "@/lib/auth/client";
 import { newPasswordSchema } from "@/lib/auth/schemas";
 
-const emailSchema = z.object({ email: z.email("Enter a valid email address.") });
-
-export function RecoveryRequestForm({ portal = false }: { portal?: boolean }) {
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<z.infer<typeof emailSchema>>({ resolver: zodResolver(emailSchema) });
-  async function submit(values: z.infer<typeof emailSchema>) {
-    setError("");
-    try {
-      await requestWithCsrf(
-        portal ? "portal/auth/recovery/request" : "auth/recovery/request",
-        values,
-      );
-      setSent(true);
-    } catch (failure) {
-      setError(errorMessage(failure));
-    }
-  }
-  return (
-    <div className="grid gap-7">
-      <header>
-        <h1 className="text-3xl font-semibold tracking-tight">Reset your password</h1>
-        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          We’ll send a secure link to your work email.
-        </p>
-      </header>
-      {sent ? (
-        <p role="status" className="rounded-lg border border-border bg-muted p-4 text-sm leading-6">
-          If an active account matches, a reset link will be sent. Check your inbox and spam folder.
-        </p>
-      ) : (
-        <form noValidate onSubmit={handleSubmit(submit)} className="grid gap-6">
-          <FormField
-            id="email"
-            label={portal ? "Account email" : "Work email"}
-            error={errors.email?.message}
-          >
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? "email-help" : undefined}
-              {...register("email")}
-            />
-          </FormField>
-          {error && (
-            <p role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
-          )}
-          <Button disabled={isSubmitting} aria-busy={isSubmitting}>
-            {isSubmitting ? "Sending…" : "Send reset link"}
-          </Button>
-        </form>
-      )}
-      <Link
-        href={portal ? "/portal/login" : "/login"}
-        className="text-sm font-medium text-primary hover:underline"
-      >
-        Back to sign in
-      </Link>
-    </div>
-  );
-}
+export { RecoveryRequestForm } from "./recovery-request-form";
 
 export function PasswordResetForm({ portal = false }: { portal?: boolean }) {
   const [token, setToken] = useState<string | null>(null);
@@ -152,12 +85,17 @@ export function PasswordResetForm({ portal = false }: { portal?: boolean }) {
       ) : token === null ? (
         <div className="h-24 animate-pulse rounded-lg bg-muted" aria-label="Loading reset form" />
       ) : (
-        <p role="alert" className="text-sm leading-6 text-destructive">
-          This reset link is missing or expired.{" "}
-          <Link href={portal ? "/portal/recover" : "/auth/recover"} className="underline">
-            Request a new link.
-          </Link>
-        </p>
+        <RecordUnavailable
+          title="This reset link is unavailable"
+          description="The password-reset link is missing or expired. Request a new link and open the latest message from your inbox."
+        >
+          <Button asChild>
+            <Link href={portal ? "/portal/recover" : "/auth/recover"}>
+              <KeyRound aria-hidden="true" />
+              Request a new link
+            </Link>
+          </Button>
+        </RecordUnavailable>
       )}
       <Link
         href={portal ? "/portal/login" : "/login"}

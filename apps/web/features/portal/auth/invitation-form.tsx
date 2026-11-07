@@ -1,5 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { RecordUnavailable } from "@/components/application/record-unavailable";
+import { GoogleSignIn, type GoogleConfiguration } from "@/features/auth/google-sign-in";
+import { requestWithCsrf } from "@/lib/auth/client";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormField } from "@/components/form-field";
 import { Input } from "@/components/ui/input";
@@ -8,13 +11,23 @@ import { Button } from "@/components/ui/button";
 export function InvitationForm({
   busy,
   onSubmit,
+  onGoogleSubmit,
 }: {
   busy: boolean;
+  onGoogleSubmit: (token: string, credential: string) => Promise<void>;
   onSubmit: (values: { token: string; password: string; displayName: string }) => Promise<void>;
 }) {
   const [token, setToken] = useState<string | null>(null);
   const captured = useRef<string | null>(null);
   const form = useForm({ defaultValues: { password: "", displayName: "" } });
+  const prepareGoogle = useCallback(
+    () =>
+      requestWithCsrf<GoogleConfiguration>("portal/auth/invitations/google", {
+        action: "prepare",
+        token,
+      }),
+    [token],
+  );
   useEffect(() => {
     if (captured.current === null)
       captured.current = new URLSearchParams(window.location.hash.slice(1)).get("token") ?? "";
@@ -24,9 +37,10 @@ export function InvitationForm({
   if (token === null) return <p role="status">Loading invitation…</p>;
   if (!token)
     return (
-      <p role="alert">
-        This invitation link is missing. Ask your clinic to issue another invitation.
-      </p>
+      <RecordUnavailable
+        title="An invitation link is needed"
+        description="This invitation link is missing. Ask your clinic to issue another invitation, then open the full link from that message."
+      />
     );
   return (
     <form
@@ -63,6 +77,17 @@ export function InvitationForm({
       <Button disabled={busy} aria-busy={busy}>
         Continue with invitation
       </Button>
+      <GoogleSignIn
+        portal
+        busy={busy}
+        remember={false}
+        signup
+        prepare={prepareGoogle}
+        description="New here? Use Google without creating a Medframe password, then finish authenticator setup. Existing accounts must already have this Google identity connected; otherwise use your password above."
+        onSubmit={async (credential) => {
+          if (token) await onGoogleSubmit(token, credential);
+        }}
+      />
     </form>
   );
 }

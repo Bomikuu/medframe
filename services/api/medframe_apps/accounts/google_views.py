@@ -19,7 +19,20 @@ def login(request, realm="staff"):
     identity = request.session.session_key or "missing"
     throttle(request, f"google-{realm}", identity, 5, 900)
     step = google_signin.begin(
-        request, data.get("credential", ""), data.get("remember", False), realm
+        request,
+        data.get("credential", ""),
+        data.get("remember", False),
+        realm,
+        shared_device=data.get("shared_device", False),
     )
     refund_attempt(request, f"google-{realm}", identity)
-    return JsonResponse({"nextStep": step})
+    from medframe_apps.accounts.sign_in_policy import shared_browser
+
+    return JsonResponse(
+        {
+            "nextStep": step,
+            "canRememberBrowser": bool(
+                request.session.get("challenge_trust_eligible") and not shared_browser(request)
+            ),
+        }
+    )

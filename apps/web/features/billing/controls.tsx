@@ -40,6 +40,7 @@ export function PageNavigation({
   after: string | null;
   change: (value: string | null) => void;
 }) {
+  if (!after && !next) return null;
   return (
     <div className="flex flex-wrap gap-3">
       <Button type="button" variant="outline" disabled={!after} onClick={() => change(null)}>

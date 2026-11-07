@@ -38,3 +38,7 @@ mutation SavePortalPreferences(
     expectedVersion: $expectedVersion
   )
 }
+
+query PatientTaskHome($linkId: UUID!) {
+  patientTaskHome(linkId: $linkId)
+}

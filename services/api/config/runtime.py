@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     web_origin: str = "http://localhost:3000"
     cookie_secure: bool = False
     google_client_id: str = ""
+    smsgate_otp_enabled: bool = False
+    smsgate_local_url: str = ""
+    smsgate_username: str = ""
+    smsgate_password: SecretStr = SecretStr("")
     sms_live_enabled: bool = False
     twilio_account_sid: str = ""
     twilio_auth_token: SecretStr = SecretStr("")

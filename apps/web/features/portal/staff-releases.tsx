@@ -1,5 +1,8 @@
 "use client";
 
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { AnatomyReleasePicker } from "@/features/anatomy/release-picker";
 import { chartStampSchema } from "@/features/anatomy/schema";
@@ -22,7 +25,6 @@ import { useRemote } from "@/features/patients/use-remote";
 import { useRequestScope } from "@/features/patients/use-request-scope";
 import { useSafety, useUnsavedChanges } from "@/features/workspace/safety-provider";
 import { FormField } from "@/components/form-field";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -152,14 +154,13 @@ export function StaffReleases({ patientId }: { patientId: string }) {
         <p role="alert">Releases could not be read.</p>
       )}
       {writer && (
-        <FormField id="withdraw-release-reason" label="Reason for withdrawal">
-          <Input
-            id="withdraw-release-reason"
-            maxLength={240}
-            value={reason}
-            onChange={(event) => setReason(event.target.value)}
-          />
-        </FormField>
+        <ReasonField
+          id="withdraw-release-reason"
+          label="Reason for withdrawal"
+          value={reason}
+          onValueChange={setReason}
+          suggestions={reasonSuggestions.access}
+        />
       )}
       {error !== null && <p role="alert">{failureText(error)}</p>}
     </section>

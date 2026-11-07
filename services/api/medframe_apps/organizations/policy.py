@@ -64,7 +64,15 @@ def seed_roles():
 
 
 def permissions_for(membership):
-    return set(membership.roles.values_list("permissions__codename", flat=True)) - {None}
+    from .staff_policy import effective_permissions
+
+    roles = getattr(membership, "_prefetched_objects_cache", {}).get("roles")
+    codes = (
+        {permission.codename for role in roles for permission in role.permissions.all()}
+        if roles is not None
+        else set(membership.roles.values_list("permissions__codename", flat=True)) - {None}
+    )
+    return effective_permissions(membership, codes)
 
 
 def require_membership(user, organization_id, permission):
@@ -77,15 +85,16 @@ def require_membership(user, organization_id, permission):
             organization_id=organization_id,
             active=True,
             organization__active=True,
-            roles__permissions__codename=permission,
         )
         .select_related("organization", "branch")
         .first()
     )
-    if membership is None:
+    if membership is None or permission not in permissions_for(membership):
         raise DomainError("FORBIDDEN", "You do not have access to this workspace.", 403)
     from medframe_apps.stations.policy import check_membership_device
+    from .staff_policy import enforce_station
 
+    enforce_station(membership)
     check_membership_device(organization_id, permission)
     return membership
 

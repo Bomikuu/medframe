@@ -1,5 +1,9 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { AccessRequired } from "@/components/application/access-required";
+
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 import { useState } from "react";
 import Link from "next/link";
@@ -19,9 +23,11 @@ import { DiagnosticRequestForm } from "./request-form";
 export function DiagnosticList({
   patientId,
   context = "clinic",
+  onOpen,
 }: {
   patientId?: string;
   context?: "clinic" | "center";
+  onOpen?: (id: string) => void;
 }) {
   const { organizationId, can, href } = useWorkspace();
   const readOnly = usePatientRecordReadOnly();
@@ -45,22 +51,41 @@ export function DiagnosticList({
   );
   const parsed = diagnosticPage.safeParse(remote.data?.diagnosticRequests);
   if (!permitted)
-    return <p role="alert">Your membership does not have diagnostic access in this workspace.</p>;
+    return (
+      <AccessRequired
+        title="Diagnostics access required"
+        description="Your membership does not have diagnostic access in this workspace."
+      />
+    );
   return (
     <section className="grid min-w-0 gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <PageHeading
-          title={context === "center" ? "Diagnostic inbox" : "Diagnostics"}
-          description={
-            context === "center"
-              ? "Assigned referrals, examinations and traceable result submissions."
-              : "Request examinations, share selected evidence and review results."
-          }
-        />
+      <PageHeading
+        title={context === "center" ? "Diagnostic inbox" : "Diagnostics"}
+        description={
+          context === "center"
+            ? "Assigned referrals, examinations and traceable result submissions."
+            : "Request examinations, share selected evidence and review results."
+        }
+      >
         {context === "clinic" && !readOnly && can("diagnostics.request") && (
-          <Button onClick={() => setOpen(true)}>New request</Button>
+          <EntrySheet
+            open={open}
+            onOpenChange={setOpen}
+            title="New diagnostic request"
+            trigger="New request"
+            triggerVariant="default"
+            description="Save a draft, then preview the exact package before sharing."
+          >
+            <DiagnosticRequestForm
+              patientId={patientId}
+              onSaved={() => {
+                setOpen(false);
+                remote.reload();
+              }}
+            />
+          </EntrySheet>
         )}
-      </div>
+      </PageHeading>
       <form
         className="flex flex-wrap items-end gap-4 rounded-xl border border-border bg-card p-5"
         onSubmit={(e) => {
@@ -121,11 +146,19 @@ export function DiagnosticList({
                   href={href(
                     `/clinic/${context === "center" ? "diagnostic-inbox" : "diagnostics"}/${row.id}`,
                   )}
+                  onClick={
+                    onOpen
+                      ? (event) => {
+                          event.preventDefault();
+                          onOpen(row.id);
+                        }
+                      : undefined
+                  }
                 >
                   <div className="min-w-0">
                     <p className="font-semibold wrap-anywhere">{row.test_name}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {row.patient_name} · {row.number}
+                      <PersonIdentity kind="patient" name={row.patient_name} /> · {row.number}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {row.center_name ?? "Awaiting center selection"} · {timeLabel(row.created_at)}
@@ -142,7 +175,11 @@ export function DiagnosticList({
           {!parsed.data.items.length && (
             <div className="p-6">
               <h2 className="font-semibold">
-                {context === "center" ? "No assigned requests" : "No matching diagnostic requests"}
+                {context === "center"
+                  ? "No assigned requests"
+                  : query.query || query.status
+                    ? "No matching diagnostic requests"
+                    : "No diagnostic requests yet"}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 {context === "center"
@@ -151,34 +188,22 @@ export function DiagnosticList({
               </p>
             </div>
           )}
-          <div className="flex gap-3 border-t border-border p-5">
-            <Button variant="outline" disabled={!after} onClick={() => setAfter(null)}>
-              Newest records
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!parsed.data.has_next_page}
-              onClick={() => setAfter(parsed.data.end_cursor)}
-            >
-              Older records
-            </Button>
-          </div>
+          {(after || parsed.data.has_next_page) && (
+            <div className="flex gap-3 border-t border-border p-5">
+              <Button variant="outline" disabled={!after} onClick={() => setAfter(null)}>
+                Newest records
+              </Button>
+              <Button
+                variant="outline"
+                disabled={!parsed.data.has_next_page}
+                onClick={() => setAfter(parsed.data.end_cursor)}
+              >
+                Older records
+              </Button>
+            </div>
+          )}
         </div>
       )}
-      <EntrySheet
-        open={open}
-        onOpenChange={setOpen}
-        title="New diagnostic request"
-        description="Save a draft, then preview the exact package before sharing."
-      >
-        <DiagnosticRequestForm
-          patientId={patientId}
-          onSaved={() => {
-            setOpen(false);
-            remote.reload();
-          }}
-        />
-      </EntrySheet>
     </section>
   );
 }

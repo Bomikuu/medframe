@@ -1,33 +1,48 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { Users, Clock3, LogOut } from "lucide-react";
 import { AuthFlow } from "@/features/auth/auth-flow";
 import { ApiError, errorMessage, requestWithCsrf } from "@/lib/auth/client";
+import { Brand } from "@/components/brand";
 import { LoadingInformation } from "@/components/application/loading-information";
 import { Button } from "@/components/ui/button";
-import { PatientAccessPanel, type VerifiedPatient } from "./patient-access-panel";
-import { kioskRequest } from "./types";
-import type { ReceptionKiosk } from "./reception-assignment";
+import { TerminalPatientSearch, type TerminalPatient } from "./terminal-entry";
+import { kioskRequest, type PatientSession } from "./types";
 
-type StaffContext = {
-  organization_id: string;
-  branch_id: string;
-  staff: string;
-  timezone: string;
-  kiosks: ReceptionKiosk[];
-};
+type StaffContext = { organization_id: string; branch_id: string; staff: string; timezone: string };
 
-export function AssistedKiosk({ onExit }: { onExit: () => void }) {
+/** Remains mounted across patient changes so staff inactivity is never reset by child remounts. */
+export function AssistedKiosk({
+  active,
+  session,
+  generation: boundaryGeneration,
+  terminalBusy,
+  onSession,
+  onActivity,
+  onExit,
+  children,
+}: {
+  active: boolean;
+  session: PatientSession | null;
+  generation?: number;
+  terminalBusy: boolean;
+  onSession: (value: PatientSession) => void;
+  onActivity: () => void;
+  onExit: () => void;
+  children: ReactNode;
+}) {
   const [context, setContext] = useState<StaffContext | null>(null);
   const [signIn, setSignIn] = useState(false);
-  const [generation, setGeneration] = useState(0);
+  const [attempt, setAttempt] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [locked, setLocked] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [selection, setSelection] = useState<VerifiedPatient>({ patient: "", verified: false });
+  const [remaining, setRemaining] = useState(120);
   const lastActivity = useRef(0);
   const exiting = useRef(false);
+  const enabled = useRef(active);
+  enabled.current = active;
   const exit = useCallback(async () => {
     if (exiting.current) return;
     exiting.current = true;
@@ -35,12 +50,12 @@ export function AssistedKiosk({ onExit }: { onExit: () => void }) {
     setBusy(true);
     setError("");
     try {
-      // Keep device pairing and the patient's pending handoff; remove staff authority.
       await requestWithCsrf("auth/logout", {}, { signal: AbortSignal.timeout(20000) });
+      setContext(null);
       onExit();
     } catch {
       setError(
-        "Staff sign-out could not be confirmed. Search is locked. Reconnect and try returning to patient mode again.",
+        "Staff sign-out could not be confirmed. Patient access is locked. Reconnect and choose Sign out of staff mode again.",
       );
     } finally {
       exiting.current = false;
@@ -48,55 +63,54 @@ export function AssistedKiosk({ onExit }: { onExit: () => void }) {
     }
   }, [onExit]);
   useEffect(() => {
-    let active = true;
+    if (!active) return;
+    let current = true;
+    setContext(null);
+    setLocked(false);
+    setSignIn(false);
+    setError("");
+    setRemaining(120);
     void kioskRequest<StaffContext>({ action: "staff_context" })
       .then((value) => {
-        if (active) {
+        if (current) {
           setContext(value);
-          setSignIn(false);
           lastActivity.current = Date.now();
         }
       })
       .catch((cause) => {
-        if (!active) return;
+        if (!current) return;
         if (cause instanceof ApiError && cause.status === 401) setSignIn(true);
         else setError(errorMessage(cause));
       });
     return () => {
-      active = false;
+      current = false;
     };
-  }, [generation]);
+  }, [active, attempt]);
   useEffect(() => {
+    if (!active || !context || locked) return;
     const activity = () => {
       lastActivity.current = Date.now();
+      setRemaining(120);
     };
     window.addEventListener("pointerdown", activity);
     window.addEventListener("keydown", activity);
     const timer = window.setInterval(() => {
-      if (context && !locked && Date.now() - lastActivity.current >= 120000) void exit();
+      const seconds = Math.max(0, Math.ceil((120000 - (Date.now() - lastActivity.current)) / 1000));
+      setRemaining(seconds);
+      if (seconds <= 0) void exit();
     }, 1000);
     return () => {
       window.clearInterval(timer);
       window.removeEventListener("pointerdown", activity);
       window.removeEventListener("keydown", activity);
     };
-  }, [context, locked, exit]);
-  async function run(body: Record<string, unknown>) {
-    if (!context || locked || busy) return undefined;
+  }, [active, context, locked, exit]);
+  async function run<T>(action: () => Promise<T>): Promise<T | undefined> {
+    if (!context || locked || busy) return;
     setBusy(true);
     setError("");
     try {
-      const value = await requestWithCsrf(
-        "stations/kiosk/manage",
-        {
-          organization_id: context.organization_id,
-          branch_id: context.branch_id,
-          ...body,
-        },
-        { signal: AbortSignal.timeout(20000) },
-      );
-      if (body.action === "assign") setSent(true);
-      return value;
+      return await action();
     } catch (cause) {
       if (cause instanceof ApiError && [401, 403].includes(cause.status)) setLocked(true);
       setError(errorMessage(cause));
@@ -105,83 +119,128 @@ export function AssistedKiosk({ onExit }: { onExit: () => void }) {
       setBusy(false);
     }
   }
+  if (!active) return children;
   return (
-    <section className="mx-auto grid max-w-3xl gap-6" aria-label="Staff-assisted kiosk">
-      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-5">
-        <div>
-          <h1 className="text-2xl font-semibold">Staff-assisted kiosk</h1>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-            {context && !locked
-              ? `Signed in as ${context.staff}. `
-              : "Staff sign-in and verification are required. "}
-            Search this branch’s patients by name, reference, phone or email. Verify identity before
-            opening a patient session.
-          </p>
+    <main id="main" className="min-h-dvh bg-background">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b bg-card px-5 py-4 sm:px-10">
+        <Brand />
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center gap-2 rounded-lg bg-teal-soft px-3 py-2 text-sm font-semibold text-teal-ink">
+            <Users className="size-4" aria-hidden />
+            Staff terminal
+          </span>
+          {context && <span className="text-sm text-muted-foreground">{context.staff}</span>}
+          <Button variant="outline" disabled={busy || terminalBusy} onClick={() => void exit()}>
+            <LogOut aria-hidden />
+            Sign out of staff mode
+          </Button>
         </div>
-        <Button type="button" variant="outline" disabled={busy} onClick={() => void exit()}>
-          Return to patient mode
-        </Button>
-      </div>
-      {error && (
-        <p role="alert" className="rounded-lg border border-border bg-muted p-4 text-sm leading-6">
-          {error}
+      </header>
+      <div className="mx-auto max-w-5xl px-5 py-8 sm:px-10 sm:py-10">
+        <p className="mb-6 text-xs leading-5 text-muted-foreground">
+          Signing out ends this staff session in other clinic tabs in this browser, clears the
+          selected patient and returns to patient mode. This device stays paired.
         </p>
-      )}
-      {locked ? (
-        <p role="status" className="text-sm leading-6">
-          Staff search is locked. Return to patient mode to finish signing out.
-        </p>
-      ) : context ? (
-        <>
-          <PatientAccessPanel
-            kiosks={context.kiosks}
-            timezone={context.timezone}
-            busy={busy}
-            run={run}
-            selection={selection}
-            onSelectionChange={setSelection}
-          />
-          {sent && (
-            <div className="grid gap-3 rounded-lg bg-teal-soft p-5 text-teal-ink" role="status">
-              <p className="text-sm leading-6">
-                Patient sent. Return to patient mode before handing this screen to the patient.
-                Staff access will be signed out.
+        {context && !locked && remaining <= 30 && (
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary p-4">
+            <div>
+              <p role="status" className="flex items-center gap-2 text-sm font-semibold">
+                <Clock3 className="size-4" aria-hidden />
+                Staff mode is about to sign out
               </p>
-              <Button disabled={busy} onClick={() => void exit()} className="justify-self-start">
-                Sign out staff and continue
-              </Button>
+              <p className="mt-1 text-sm text-muted-foreground">
+                <span aria-hidden>{remaining} seconds left. </span>
+                Continue if you are still assisting this patient.
+              </p>
             </div>
-          )}
-          <p className="text-xs leading-5 text-muted-foreground">
-            Staff mode signs out after two minutes without interaction. Customer mode never exposes
-            the patient directory or clinical records.
+            <Button
+              variant="outline"
+              disabled={busy || terminalBusy}
+              onClick={() => {
+                lastActivity.current = Date.now();
+                setRemaining(120);
+                onActivity();
+              }}
+            >
+              Keep staff mode open
+            </Button>
+          </div>
+        )}
+        {error && (
+          <p
+            role="alert"
+            className="mb-5 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-sm leading-6 text-destructive"
+          >
+            {error}
           </p>
-        </>
-      ) : signIn ? (
-        <div className="max-w-md rounded-xl border border-border bg-card p-6">
-          <AuthFlow
-            onAuthenticated={() => {
-              setSignIn(false);
-              setGeneration((value) => value + 1);
-            }}
+        )}
+        {locked ? (
+          <p role="status" className="rounded-xl border bg-card p-6">
+            Staff access is locked. Choose Sign out of staff mode to finish signing out.
+          </p>
+        ) : context ? (
+          <>
+            {session || boundaryGeneration === undefined ? (
+              children
+            ) : (
+              <TerminalPatientSearch
+                busy={busy || terminalBusy}
+                onSearch={async (query) => {
+                  const result = await run(() =>
+                    requestWithCsrf<{ patients: TerminalPatient[] }>(
+                      "stations/kiosk/manage",
+                      {
+                        action: "patients",
+                        organization_id: context.organization_id,
+                        branch_id: context.branch_id,
+                        query,
+                      },
+                      { signal: AbortSignal.timeout(20000) },
+                    ),
+                  );
+                  return result?.patients;
+                }}
+                onSelect={async (patient) => {
+                  const result = await run(() =>
+                    kioskRequest<PatientSession>({
+                      action: "staff_select",
+                      patient_id: patient.id,
+                      generation: boundaryGeneration,
+                    }),
+                  );
+                  if (result && enabled.current && !exiting.current) onSession(result);
+                }}
+              />
+            )}
+            <p className="mt-8 text-xs leading-5 text-muted-foreground">
+              Staff access signs out after two minutes without interaction. Patient-facing mode has
+              no patient directory.
+            </p>
+          </>
+        ) : signIn ? (
+          <div className="mx-auto max-w-md rounded-2xl border bg-card p-6">
+            <h1 className="mb-2 text-xl font-semibold">Staff sign-in</h1>
+            <p className="mb-6 text-sm leading-6 text-muted-foreground">
+              Use your clinic account to search patients and assist with their visit.
+            </p>
+            <AuthFlow
+              onAuthenticated={() => {
+                setSignIn(false);
+                setAttempt((value) => value + 1);
+              }}
+            />
+          </div>
+        ) : !error ? (
+          <LoadingInformation
+            title="Checking staff access"
+            detail="Checking your clinic membership and permissions for this terminal."
           />
-        </div>
-      ) : !error ? (
-        <LoadingInformation
-          title="Checking staff access"
-          detail="Checking your staff sign-in, verification and permissions for this kiosk’s clinic branch."
-        />
-      ) : (
-        <Button
-          variant="outline"
-          onClick={() => {
-            setError("");
-            setGeneration((value) => value + 1);
-          }}
-        >
-          Check access again
-        </Button>
-      )}
-    </section>
+        ) : (
+          <Button variant="outline" onClick={() => setAttempt((value) => value + 1)}>
+            Check access again
+          </Button>
+        )}
+      </div>
+    </main>
   );
 }

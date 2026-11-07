@@ -16,6 +16,7 @@ import type { OrbitControls as OrbitControlsHandle } from "three-stdlib";
 import type { AnatomyAnchor, AnatomyCamera, AnatomyFinding, AnatomyLayer } from "./schema";
 import { anatomyAsset, structures } from "./asset-registry";
 import { boundsCenter, fitDistance, focusDistance } from "./camera-focus";
+import { SharedCameraBridge, type SharedSceneControl } from "@/lib/three/shared-camera";
 import { placeCamera } from "@/lib/three/place-camera";
 
 function Camera({
@@ -95,6 +96,7 @@ function Model({
   onAnchor,
   onFindingSelect,
   onReady,
+  patientPointer,
 }: SceneProps & { onReady: () => void }) {
   const { invalidate } = useThree();
   const asset = anatomyAsset(layer);
@@ -118,13 +120,15 @@ function Model({
       (object.material as MeshStandardMaterial).color.set(
         object.userData.structure_id === selected
           ? "#71d2cc"
-          : layer === "body"
-            ? "#cdd4d6"
-            : "#e1ded5",
+          : object.userData.structure_id === patientPointer
+            ? "#f6bc5f"
+            : layer === "body"
+              ? "#cdd4d6"
+              : "#e1ded5",
       );
     });
     invalidate();
-  }, [scene, selected, isolate, layer, invalidate]);
+  }, [scene, selected, isolate, layer, patientPointer, invalidate]);
   useEffect(onReady, [onReady]);
   useEffect(
     () => () =>
@@ -151,6 +155,26 @@ function Model({
   return (
     <group position={[0, -0.9, 0]}>
       <primitive object={scene} onClick={click} />
+      {patientPointer &&
+        (() => {
+          const entry = structures.find((item) => item.id === patientPointer);
+          return entry ? (
+            <Html
+              center
+              position={[
+                (entry.bounds.min[0] + entry.bounds.max[0]) / 2,
+                (entry.bounds.min[1] + entry.bounds.max[1]) / 2,
+                (entry.bounds.min[2] + entry.bounds.max[2]) / 2,
+              ]}
+              zIndexRange={[8, 0]}
+              style={{ pointerEvents: "none" }}
+            >
+              <span className="rounded-md border border-amber-700 bg-amber-100 px-2 py-1 text-xs whitespace-nowrap text-amber-950">
+                Patient pointer
+              </span>
+            </Html>
+          ) : null;
+        })()}
       {findings
         .filter(
           (value) =>
@@ -190,6 +214,8 @@ function Model({
 }
 export type SceneProps = {
   layer: AnatomyLayer;
+  patientPointer?: string;
+  sharing?: SharedSceneControl;
   selected: string;
   isolate: boolean;
   focus?: string;
@@ -225,17 +251,26 @@ export default function AnatomyScene(
         <Suspense fallback={null}>
           <Model key={props.layer} {...props} onReady={onReady} />
         </Suspense>
-        <Camera
-          view={props.view}
-          reset={props.reset}
-          zoom={props.zoom}
-          layer={props.layer}
-          selected={props.selected}
-          isolate={props.isolate}
-          focus={props.focus}
-        />
+        {(!props.sharing || (props.sharing.controlled && !props.sharing.preservePose)) && (
+          <Camera
+            view={props.view}
+            reset={props.reset}
+            zoom={props.zoom}
+            layer={props.layer}
+            selected={props.selected}
+            isolate={props.isolate}
+            focus={props.focus}
+          />
+        )}
+        {props.sharing && <SharedCameraBridge {...props.sharing} />}
         <ContextLoss onFailure={props.onFailure} />
-        <OrbitControls makeDefault enableDamping={false} minDistance={0.06} maxDistance={12} />
+        <OrbitControls
+          makeDefault
+          enabled={!props.sharing || props.sharing.controlled}
+          enableDamping={false}
+          minDistance={props.sharing && !props.sharing.controlled ? 0.001 : 0.06}
+          maxDistance={props.sharing && !props.sharing.controlled ? 2000 : 12}
+        />
       </Canvas>
     </div>
   );

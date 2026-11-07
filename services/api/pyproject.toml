@@ -22,6 +22,8 @@ dependencies = [
   "channels-redis>=4.3,<5",
   "google-auth[requests]>=2.40,<3",
   "twilio>=9,<10",
+  "livekit-api>=1,<2",
+  "aiohttp>=3.11,<4",
 ]
 
 [dependency-groups]

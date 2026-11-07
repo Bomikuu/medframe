@@ -83,8 +83,12 @@ def kiosk(request):
                 "strict_verification": reception.strict(credential.device),
             }
         )
-    if action in {"verify", "receive"}:
-        if action == "verify":
+    if action in {"verify", "receive", "identify", "staff_select"}:
+        if action in {"identify", "staff_select"}:
+            from medframe_apps.stations.kiosk_terminal import open_terminal
+
+            opened = open_terminal(request, credential, data, staff=action == "staff_select")
+        elif action == "verify":
             if not reception.strict(credential.device):
                 raise DomainError(
                     "RECEPTION_REQUIRED",

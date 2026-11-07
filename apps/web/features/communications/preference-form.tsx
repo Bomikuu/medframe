@@ -1,6 +1,8 @@
 "use client";
 
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { PhoneInput } from "@/components/application/phone-input";
+import { phoneError } from "@/lib/contact-format";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { FormField } from "@/components/form-field";
@@ -15,7 +17,9 @@ import { FinancialNotice } from "@/features/billing/controls";
 import type { CommunicationSetup } from "./schema";
 
 const schema = z.object({
-  recipient: z.string().max(20),
+  recipient: z
+    .string()
+    .refine((value) => !phoneError(value), "Enter a complete international phone number."),
   recipient_name: z.string().max(160),
   recipient_user_id: z.string(),
   sms_enabled: z.boolean(),
@@ -97,16 +101,22 @@ export function PreferenceForm({
         </FormField>
         <FormField
           id="recipient-phone"
-          label="International phone number"
+          label="Phone number"
+          hint="Country code is separate. For +63, omit the leading 0."
           error={form.formState.errors.recipient?.message}
         >
-          <Input
-            id="recipient-phone"
-            type="tel"
-            placeholder="+639…"
-            autoComplete="off"
-            maxLength={20}
-            {...form.register("recipient")}
+          <Controller
+            name="recipient"
+            control={form.control}
+            render={({ field }) => (
+              <PhoneInput
+                {...field}
+                id="recipient-phone"
+                onValueChange={field.onChange}
+                aria-invalid={!!form.formState.errors.recipient}
+                aria-describedby="recipient-phone-help"
+              />
+            )}
           />
         </FormField>
         <FormSelect

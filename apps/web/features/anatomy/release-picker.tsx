@@ -1,4 +1,6 @@
 "use client";
+
+import { RecordUnavailable } from "@/components/application/record-unavailable";
 import { useState } from "react";
 import { AnatomyChartDocument } from "@/lib/graphql/generated";
 import { useRemote } from "@/features/patients/use-remote";
@@ -30,7 +32,10 @@ export function AnatomyReleasePicker({
   });
   const parsed = anatomyPageSchema.safeParse(remote.data?.anatomyChart);
   if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
-  if (!parsed.success) return <p role="alert">Anatomical source could not be read.</p>;
+  if (!parsed.success)
+    return (
+      <RecordUnavailable description="Anatomical source could not be read. Contact your clinic administrator if the problem continues." />
+    );
   return (
     <div className="grid gap-3">
       <p className="text-sm text-muted-foreground">

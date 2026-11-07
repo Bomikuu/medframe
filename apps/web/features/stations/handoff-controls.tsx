@@ -225,6 +225,7 @@ export function HandoffControls({
                 <FormSelect
                   id="handoff-provider"
                   label="Receiving clinician"
+                  personKind="provider"
                   value={provider}
                   onChange={setProvider}
                   options={[

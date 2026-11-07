@@ -1,5 +1,6 @@
+import { BrandMark } from "@/components/brand";
 import type { CSSProperties } from "react";
-import { HeartPulse, Users, ClipboardList, LayoutDashboard, Plus, Check } from "lucide-react";
+import { Users, ClipboardList, LayoutDashboard, Plus, Check } from "lucide-react";
 export function WorkspacePreview({
   name,
   logo,
@@ -39,7 +40,7 @@ export function WorkspacePreview({
                 className="max-h-10 max-w-full object-contain"
               />
             ) : (
-              <HeartPulse className="size-6" />
+              <BrandMark className="size-10" />
             )}
           </div>
           {[LayoutDashboard, Users, ClipboardList].map((Icon, index) => (

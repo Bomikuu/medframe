@@ -1,4 +1,5 @@
 "use client";
+import { ClinicalSelectionState } from "@/components/application/clinical-selection-state";
 import Image from "next/image";
 import { Plus, Focus, MoreHorizontal, MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -69,6 +70,12 @@ export function AnatomyInspector({
             />
           </div>
         </div>
+        <ClinicalSelectionState
+          label="Chart context"
+          detail={isolate ? "Isolated model view" : "Full model view"}
+          findings={selectedFindings.length}
+          readOnly={readOnly}
+        />
         <div className="mt-4 flex gap-2">
           <Button
             type="button"

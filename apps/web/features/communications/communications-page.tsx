@@ -1,5 +1,13 @@
 "use client";
 
+import { ChannelReadiness } from "./channel-readiness";
+import { DeliveryState } from "./delivery-state";
+import { useUrlState } from "@/features/workspace/use-url-state";
+import { useCursorHistory } from "@/components/application/use-cursor-history";
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { AccessRequired } from "@/components/application/access-required";
+
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { EntrySheet } from "@/components/application/entry-sheet";
@@ -28,14 +36,18 @@ import { CommunicationSettings } from "./settings-form";
 export function CommunicationsPage() {
   const { can } = useWorkspace();
   if (!can("communications.manage"))
-    return <p role="alert">Your clinic membership does not have communications access.</p>;
+    return (
+      <AccessRequired
+        title="Communications access required"
+        description="Your clinic membership does not have communications access."
+      />
+    );
   return <CommunicationWorkspace />;
 }
 function CommunicationWorkspace() {
-  const { organizationId, workspace } = useWorkspace();
+  const { organizationId, branchId: branch } = useWorkspace();
   const params = useSearchParams();
   const { guard } = useSafety();
-  const [branch, setBranch] = useState(params.get("branch") ?? workspace.branches[0]?.id ?? "");
   const [patient, setPatient] = useState(params.get("patient") ?? "");
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
@@ -52,7 +64,7 @@ function CommunicationWorkspace() {
     <div className="grid gap-6">
       <PageHeading
         title="Communications"
-        description="Coordinate appointments, follow-up contact and billing updates with confirmed recipients."
+        description="Manage patient reminders, recipients and delivery preferences."
       />
       <div role="status" className="rounded-xl bg-teal-soft p-5 text-sm leading-6 text-teal-ink">
         <strong>
@@ -63,20 +75,9 @@ function CommunicationWorkspace() {
         Consent and source status are checked before dispatch. A provider-accepted message is not
         yet confirmed delivered.
       </div>
+      <ChannelReadiness setup={setup} />
       <FinancialSection title="Patient and recipient">
-        <div className="grid items-end gap-4 @min-[700px]:grid-cols-2">
-          <FormSelect
-            id="communication-branch"
-            label="Clinic branch"
-            value={branch}
-            onChange={(value) =>
-              void guard(() => {
-                setBranch(value);
-                setPatient("");
-              })
-            }
-            options={setup.branches.map((row) => ({ value: row.id, label: row.name }))}
-          />
+        <div className="grid items-end gap-4">
           <form
             className="flex min-w-0 flex-wrap items-end gap-3"
             onSubmit={(event) => {
@@ -101,6 +102,7 @@ function CommunicationWorkspace() {
         <FormSelect
           id="communication-patient"
           label="Patient"
+          personKind="patient"
           value={patient || "none"}
           onChange={(value) => void guard(() => setPatient(value === "none" ? "" : value))}
           options={[
@@ -169,8 +171,20 @@ function DeliveryQueue({ branchId }: { branchId: string }) {
   const { organizationId } = useWorkspace();
   const { confirm } = useSafety();
   const time = useClinicTime();
-  const [status, setStatus] = useState("all");
-  const [after, setAfter] = useState<string | null>(null);
+  const [status, setStatus] = useUrlState("deliveryStatus", "all", [
+    "all",
+    "scheduled",
+    "preview",
+    "accepted",
+    "delivered",
+    "retryable_failure",
+    "permanent_failure",
+    "unknown",
+    "cancelled",
+  ] as const);
+  const [cursors, setCursors] = useCursorHistory(`${branchId}:${status}`);
+  const after = cursors[cursors.length - 1];
+  const setAfter = (value: string | null) => setCursors(value ? [...cursors, value] : [null]);
   const remote = useRemote(CommunicationRemindersDocument, {
     organizationId,
     branchId,
@@ -231,7 +245,9 @@ function DeliveryQueue({ branchId }: { branchId: string }) {
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-3">
-                      <h3 className="font-semibold">{row.patient_name}</h3>
+                      <h3 className="font-semibold">
+                        <PersonIdentity kind="patient" name={row.patient_name} />
+                      </h3>
                       <StatusBadge value={row.state} />
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
@@ -250,12 +266,7 @@ function DeliveryQueue({ branchId }: { branchId: string }) {
                         Status code: {row.error_code} · {row.attempts} attempt(s)
                       </p>
                     )}
-                    {row.state === "unknown" && (
-                      <p className="mt-3 max-w-prose rounded-lg bg-warning-soft p-4 text-sm text-foreground">
-                        Provider acceptance is uncertain. Reconcile this message with your provider
-                        before scheduling another; automatic retry is disabled.
-                      </p>
-                    )}
+                    <DeliveryState state={row.state} />
                     <details className="mt-3 text-xs text-muted-foreground">
                       <summary className="w-fit cursor-pointer py-2">Delivery history</summary>
                       <ul className="mt-2 grid gap-2">

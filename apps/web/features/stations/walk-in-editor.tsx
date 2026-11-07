@@ -1,5 +1,7 @@
 "use client";
 
+import { AccessRequired } from "@/components/application/access-required";
+
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
@@ -35,7 +37,12 @@ export function WalkInEditor() {
     { enabled: !!patientId },
   );
   if (!can("encounters.write"))
-    return <p role="alert">An active clinical provider membership is required.</p>;
+    return (
+      <AccessRequired
+        title="Provider access required"
+        description="An active clinical provider membership is required."
+      />
+    );
   if (patientId && !patient.data) return <LoadState error={patient.error} retry={patient.reload} />;
   return (
     <ProvisionalEditor

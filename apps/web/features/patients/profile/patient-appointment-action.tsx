@@ -1,5 +1,7 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/application/status-badge";
@@ -8,7 +10,7 @@ import { useSafety } from "@/features/workspace/safety-provider";
 import { useClinicTime } from "@/components/application/clinical-locale";
 import { useOperationsSetup, useOperationsAction } from "@/features/operations/use-operations";
 import { BookingForm } from "@/features/operations/booking-form";
-import { BranchChoice, OperationNotice } from "@/features/operations/controls";
+import { OperationNotice } from "@/features/operations/controls";
 import { appointmentPageSchema, type Appointment } from "@/features/operations/schema";
 import { OperationAppointmentsDocument } from "@/lib/graphql/generated";
 import { useRemote } from "../use-remote";
@@ -28,7 +30,7 @@ export function PatientAppointmentAction({
   const { organizationId } = useWorkspace();
   const { guard } = useSafety();
   const timeLabel = useClinicTime();
-  const [branch, setBranch] = useState(branchId);
+  const branch = branchId;
   const [after, setAfter] = useState<string | null>(null);
   const [selected, setSelected] = useState<Appointment | null>(null);
   const setup = useOperationsSetup(branch);
@@ -46,16 +48,6 @@ export function PatientAppointmentAction({
   if (!setup.setup) return <LoadState error={setup.error} retry={setup.reload} />;
   return (
     <div className="grid min-w-0 gap-5">
-      <BranchChoice
-        setup={setup.setup}
-        change={(id) =>
-          void guard(() => {
-            setBranch(id);
-            setAfter(null);
-            setSelected(null);
-          })
-        }
-      />
       <OperationNotice message={action.message} error={action.error} />
       <RemoteNotice error={setup.error} retry={setup.reload} />
       {mode === "book" || mode === "walk-in" || selected ? (
@@ -93,7 +85,7 @@ export function PatientAppointmentAction({
                 <div className="min-w-0">
                   <p className="font-semibold">{timeLabel(row.start)}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {row.provider} · {row.branch}
+                    <PersonIdentity kind="provider" name={row.provider} /> · {row.branch}
                   </p>
                   <span className="mt-2 inline-block">
                     <StatusBadge value={row.status} />

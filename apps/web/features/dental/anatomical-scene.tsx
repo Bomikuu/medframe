@@ -46,12 +46,13 @@ type Presentation = {
   isolate: boolean;
   anatomyOnly: boolean;
   reference: boolean;
+  patientPointer?: string;
 };
 
 // These adapters own imperative Three.js updates to the per-view scene clone.
 // React state and the shared useGLTF source remain untouched.
 function updatePresentation(prepared: PreparedAnatomy, options: Presentation) {
-  const { findings, selected, jaw, isolate, anatomyOnly, reference } = options;
+  const { findings, selected, jaw, isolate, anatomyOnly, reference, patientPointer } = options;
   for (const mesh of prepared.teeth) {
     const id = String(mesh.userData.tooth_id);
     const condition = toothPresentation(findings, id);
@@ -64,7 +65,11 @@ function updatePresentation(prepared: PreparedAnatomy, options: Presentation) {
       id,
       anatomyOnly ? null : condition.impaction,
     );
-    prepared.outlines.get(mesh)!.visible = mesh.visible && id === selected;
+    prepared.outlines.get(mesh)!.visible =
+      mesh.visible && (id === selected || id === patientPointer);
+    (prepared.outlines.get(mesh)!.material as MeshBasicMaterial).color.set(
+      id === patientPointer ? "#a65b00" : "#00687d",
+    );
     // A hidden tooth cannot intercept a click on another jaw/tooth.
     mesh.raycast = mesh.visible ? Mesh.prototype.raycast : () => {};
     const materials = (
@@ -89,6 +94,10 @@ function updatePresentation(prepared: PreparedAnatomy, options: Presentation) {
         material.color.set("#45d4e5");
         material.emissive.set("#087e91");
         material.emissiveIntensity = 0.55;
+      } else if (id === patientPointer) {
+        material.color.set("#f6bc5f");
+        material.emissive.set("#8a4b00");
+        material.emissiveIntensity = 0.3;
       } else if (!anatomyOnly && condition.active.length) {
         material.emissive.set("#a75b12");
         material.emissiveIntensity = 0.18;
@@ -150,7 +159,15 @@ function frameAnatomy(
   placeCamera(camera, controls, center, direction, distance, up);
 }
 
-function SelectionLabel({ mesh, text }: { mesh: Mesh; text: string }) {
+function SelectionLabel({
+  mesh,
+  text,
+  patient = false,
+}: {
+  mesh: Mesh;
+  text: string;
+  patient?: boolean;
+}) {
   const group = useRef<Group>(null);
   useFrame(() => {
     const center = mesh.geometry.boundingBox!.getCenter(new Vector3());
@@ -159,7 +176,13 @@ function SelectionLabel({ mesh, text }: { mesh: Mesh; text: string }) {
   return (
     <group ref={group}>
       <Html center zIndexRange={[8, 0]} style={{ pointerEvents: "none" }}>
-        <span className="rounded-md border-2 border-white bg-cyan-900 px-3 py-2 text-xs font-bold whitespace-nowrap text-white shadow-md">
+        <span
+          className={
+            patient
+              ? "rounded-md border-2 border-amber-800 bg-amber-100 px-3 py-2 text-xs font-bold whitespace-nowrap text-amber-950 shadow-md"
+              : "rounded-md border-2 border-white bg-cyan-900 px-3 py-2 text-xs font-bold whitespace-nowrap text-white shadow-md"
+          }
+        >
           {text}
         </span>
       </Html>
@@ -184,6 +207,8 @@ export function AnatomicalScene({
   onReady,
   annotations,
   showLabel = true,
+  externalCamera = false,
+  patientPointer,
 }: {
   url: string;
   selected: string;
@@ -201,6 +226,8 @@ export function AnatomicalScene({
   onReady: () => void;
   annotations?: AnnotationInteraction;
   showLabel?: boolean;
+  externalCamera?: boolean;
+  patientPointer?: string;
 }) {
   const { scene } = useGLTF(url);
   const { camera, size, invalidate } = useThree();
@@ -291,15 +318,35 @@ export function AnatomicalScene({
   );
 
   useLayoutEffect(() => {
-    updatePresentation(prepared, { findings, selected, jaw, isolate, anatomyOnly, reference });
+    updatePresentation(prepared, {
+      findings,
+      selected,
+      jaw,
+      isolate,
+      anatomyOnly,
+      reference,
+      patientPointer,
+    });
     invalidate();
-  }, [prepared, selected, jaw, isolate, findings, anatomyOnly, reference, invalidate]);
+  }, [
+    prepared,
+    selected,
+    jaw,
+    isolate,
+    findings,
+    anatomyOnly,
+    reference,
+    patientPointer,
+    invalidate,
+  ]);
 
   useLayoutEffect(() => {
+    if (externalCamera) return;
     frameAnatomy(prepared, camera, controls.current, size, view, focus, isolate);
     invalidate();
   }, [
     prepared,
+    externalCamera,
     camera,
     controls,
     size,
@@ -346,6 +393,16 @@ export function AnatomicalScene({
     <>
       <primitive object={prepared.root} onClick={select} />
       <primitive object={prepared.overlays} />
+      {patientPointer &&
+        prepared.teeth.find(
+          (mesh) => mesh.userData.tooth_id === patientPointer && mesh.visible,
+        ) && (
+          <SelectionLabel
+            mesh={prepared.teeth.find((mesh) => mesh.userData.tooth_id === patientPointer)!}
+            patient
+            text={`${patientPointer === selected ? "Doctor + patient" : "Patient pointer"}: tooth ${patientPointer}`}
+          />
+        )}
       <AnnotationPins
         teeth={prepared.teeth}
         findings={findings}
@@ -353,6 +410,7 @@ export function AnatomicalScene({
         interaction={annotations}
       />
       {showLabel &&
+        patientPointer !== selected &&
         selectedMesh &&
         (reference || isolate || jaw === "both" || selectedMesh?.userData.jaw === jaw) && (
           <SelectionLabel

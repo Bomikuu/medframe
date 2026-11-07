@@ -1,5 +1,17 @@
 import { cn } from "@/lib/utils";
-import { HeartPulse } from "lucide-react";
+import Image from "next/image";
+import logo from "@/public/brand/medframe-logo.webp";
+
+export function BrandMark({ className }: { className?: string }) {
+  return (
+    <Image
+      src={logo}
+      alt=""
+      sizes="48px"
+      className={cn("size-11 shrink-0 object-contain", className)}
+    />
+  );
+}
 
 export function Brand({ className }: { className?: string }) {
   return (
@@ -9,12 +21,7 @@ export function Brand({ className }: { className?: string }) {
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground"
-      >
-        <HeartPulse className="size-[21px]" strokeWidth={1.8} />
-      </span>
+      <BrandMark />
       <span>
         Medframe<span className="text-teal-ink">.</span>
       </span>

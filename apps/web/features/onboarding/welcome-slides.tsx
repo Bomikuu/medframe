@@ -1,35 +1,70 @@
 "use client";
-import { useState, useRef } from "react";
-import { ArrowLeft, ArrowRight, HeartPulse } from "lucide-react";
+
+import {
+  MedframeIllustration,
+  type IllustrationName,
+} from "@/components/illustrations/medframe-illustration";
+import { Brand } from "@/components/brand";
+import { useRef, useState } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  HeartPulse,
+  Stethoscope,
+  ClipboardList,
+  ScanLine,
+  CalendarDays,
+  Building2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProductPreview } from "./product-preview";
-const slides = [
-  [
-    "Welcome to Medframe",
-    "The foundation of modern care.",
-    "Manage your practice, patients, and clinical workflows in one connected platform.",
-  ],
-  [
-    "Your practice, organized.",
-    "More context. Less friction.",
-    "Manage patient records, consultations, diagnoses, and treatment plans from one workspace.",
-  ],
-  [
-    "A clearer way to visualize care.",
-    "Bring findings into focus.",
-    "Document clinical findings using interactive dental charts and anatomical visualizations.",
-  ],
-  [
-    "Better coordination. Better care.",
-    "Keep the next step connected.",
-    "Connect clinical workflows with appointments, patient communication, and follow-ups. SMS delivery remains a preview.",
-  ],
-  [
-    "Let's set up your clinic.",
-    "A workspace that feels like yours.",
-    "Tell us about your practice, personalize your workspace, and add your team when you're ready.",
-  ],
+import { cn } from "@/lib/utils";
+
+const slideIllustrations: IllustrationName[] = [
+  "clinic-reception",
+  "medical-records",
+  "doctor-profile",
+  "appointment-booking",
+  "appointment-confirmed",
 ];
+
+const slides = [
+  {
+    title: "A new chapter for your clinic.",
+    detail:
+      "Welcome to Medframe. Bring your patients, clinical records and everyday care into one connected workspace.",
+    label: "Welcome",
+    icon: HeartPulse,
+  },
+  {
+    title: "More context for every consultation.",
+    detail:
+      "Keep patient records, clinical notes, diagnoses and treatment plans together, so the next visit starts with the full picture.",
+    label: "Patient care",
+    icon: ClipboardList,
+  },
+  {
+    title: "Bring your findings into focus.",
+    detail:
+      "Use interactive dental charts and anatomical views to document where a finding belongs, alongside your clinical notes.",
+    label: "Clinical visualization",
+    icon: ScanLine,
+  },
+  {
+    title: "Keep the next step connected.",
+    detail:
+      "Coordinate appointments, follow-ups and patient communication around the care you provide. SMS delivery remains a preview.",
+    label: "Everyday practice",
+    icon: CalendarDays,
+  },
+  {
+    title: "Make room for your way of working.",
+    detail:
+      "Add your clinic details, choose specialties and set your opening hours. You can fine-tune schedules and team access later.",
+    label: "Your workspace",
+    icon: Building2,
+  },
+];
+
 export function WelcomeSlides({
   onStart,
   busy,
@@ -37,90 +72,112 @@ export function WelcomeSlides({
   onStart: (skipped: boolean) => void;
   busy: boolean;
 }) {
-  const [slide, setSlide] = useState(0),
-    [learn, setLearn] = useState(false);
+  const [slide, setSlide] = useState(0);
   const touch = useRef(0);
-  const change = (delta: number) => setSlide((value) => Math.max(0, Math.min(4, value + delta)));
+  const current = slides[slide];
+  const Icon = current.icon;
+  const change = (delta: number) =>
+    setSlide((value) => Math.max(0, Math.min(slides.length - 1, value + delta)));
   return (
-    <div
-      className="flex min-h-dvh flex-col bg-white"
-      onKeyDown={(event) => {
-        if (event.key === "ArrowRight") change(1);
-        if (event.key === "ArrowLeft") change(-1);
-      }}
-    >
-      <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-7 sm:px-12">
-        <span className="flex items-center gap-2 text-lg font-semibold">
-          <HeartPulse className="text-teal-700" />
-          Medframe
-        </span>
+    <div className="onboarding-backdrop flex min-h-dvh flex-col">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
+        <Brand />
         <Button variant="ghost" disabled={busy} onClick={() => onStart(true)}>
           Skip introduction
-          <ArrowRight />
+          <ArrowRight aria-hidden="true" />
         </Button>
       </header>
       <main
-        className="mx-auto grid w-full max-w-7xl flex-1 items-center gap-10 px-6 py-10 lg:grid-cols-[.9fr_1.1fr] lg:gap-16 lg:px-12"
-        aria-roledescription="carousel"
-        aria-label="Introduction to Medframe"
-        onTouchStart={(event) => {
-          touch.current = event.changedTouches[0].clientX;
-        }}
-        onTouchEnd={(event) => {
-          const delta = touch.current - event.changedTouches[0].clientX;
-          if (Math.abs(delta) > 60) change(delta > 0 ? 1 : -1);
-        }}
+        id="main"
+        className="mx-auto flex w-full max-w-6xl flex-1 items-center px-5 py-8 sm:px-8"
       >
-        <div aria-live="polite">
-          <h1 className="max-w-xl text-4xl leading-[1.12] font-semibold tracking-tight text-primary sm:text-5xl">
-            {slides[slide][0]}
-          </h1>
-          <p className="mt-6 text-lg font-medium text-teal-800">{slides[slide][1]}</p>
-          <p className="mt-4 max-w-md text-base leading-8 text-muted-foreground">
-            {slides[slide][2]}
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button
-              size="lg"
-              disabled={busy}
-              onClick={() => (slide === 4 ? onStart(false) : change(1))}
-            >
-              {slide === 4 ? "Get started" : "Next"}
-              <ArrowRight />
-            </Button>
-            {slide === 4 && (
-              <Button size="lg" variant="outline" onClick={() => setLearn(!learn)}>
-                Learn more
+        <section
+          className="grid w-full overflow-hidden rounded-2xl bg-card shadow-[var(--panel-shadow)] lg:grid-cols-2"
+          aria-roledescription="carousel"
+          aria-label="Introduction to Medframe"
+          onKeyDown={(event) => {
+            if (event.key === "ArrowRight") change(1);
+            if (event.key === "ArrowLeft") change(-1);
+          }}
+          onTouchStart={(event) => {
+            touch.current = event.changedTouches[0].clientX;
+          }}
+          onTouchEnd={(event) => {
+            const delta = touch.current - event.changedTouches[0].clientX;
+            if (Math.abs(delta) > 60) change(delta > 0 ? 1 : -1);
+          }}
+        >
+          <div className="flex flex-col p-6 sm:p-10 lg:min-h-[520px] lg:p-12">
+            <div className="mb-8 flex items-center justify-between gap-3">
+              <span className="flex size-12 items-center justify-center rounded-xl bg-secondary text-teal-800">
+                <Icon className="size-6" aria-hidden="true" />
+              </span>
+              <span className="text-sm text-muted-foreground tabular-nums">
+                {slide + 1} / {slides.length}
+              </span>
+            </div>
+            <div aria-live="polite" aria-atomic="true" className="flex-1">
+              <h1 className="max-w-md text-3xl leading-tight font-semibold tracking-tight text-primary sm:text-4xl">
+                {current.title}
+              </h1>
+              <p className="mt-5 max-w-md text-base leading-7 text-muted-foreground">
+                {current.detail}
+              </p>
+            </div>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Button
+                size="lg"
+                disabled={busy}
+                onClick={() => (slide === slides.length - 1 ? onStart(false) : change(1))}
+              >
+                {busy
+                  ? "Preparing setup…"
+                  : slide === slides.length - 1
+                    ? "Set up my clinic"
+                    : "Next"}
+                <ArrowRight aria-hidden="true" />
               </Button>
-            )}
+              <Button variant="ghost" disabled={slide === 0 || busy} onClick={() => change(-1)}>
+                <ArrowLeft aria-hidden="true" />
+                Back
+              </Button>
+            </div>
+            <div className="mt-7 flex gap-1" role="group" aria-label="Introduction slides">
+              {slides.map((item, index) => (
+                <button
+                  type="button"
+                  key={item.label}
+                  aria-label={`Slide ${index + 1}: ${item.label}`}
+                  aria-current={slide === index ? "step" : undefined}
+                  onClick={() => setSlide(index)}
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-lg focus-visible:outline-2 focus-visible:outline-ring"
+                >
+                  <span
+                    className={cn(
+                      "h-2 rounded-full transition-all motion-reduce:transition-none",
+                      slide === index ? "w-8 bg-teal-700" : "w-2 bg-slate-300",
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
           </div>
-          {learn && (
-            <p className="mt-5 max-w-md text-sm leading-7 text-muted-foreground">
-              Medframe brings patient records, consultations, clinical visualization and treatment
-              management together. You can configure scheduling, team access and templates after
-              your clinic is ready.
-            </p>
-          )}
-        </div>
-        <ProductPreview slide={slide} />
+          <div className="relative flex min-h-80 items-center justify-center bg-secondary px-8 pt-8 pb-32 sm:min-h-96 lg:min-h-full">
+            <MedframeIllustration name={slideIllustrations[slide]} className="w-full max-w-sm" />
+            <div className="absolute right-5 bottom-5 left-5 rounded-xl bg-white p-4 sm:right-8 sm:bottom-8 sm:left-8">
+              <p className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Stethoscope className="size-4 text-teal-700" aria-hidden="true" />
+                Built around the care you provide
+              </p>
+              <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                Your clinical workspace starts with a few essentials.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-6 py-8 sm:px-12">
-        <Button variant="ghost" disabled={slide === 0} onClick={() => change(-1)}>
-          <ArrowLeft />
-          Previous
-        </Button>
-        <div className="flex gap-2" role="group" aria-label="Introduction slides">
-          {slides.map((item, index) => (
-            <button
-              key={item[0]}
-              aria-label={`Slide ${index + 1}: ${item[0]}`}
-              aria-current={slide === index ? "step" : undefined}
-              onClick={() => setSlide(index)}
-              className={`h-3 rounded-full outline-offset-4 ${slide === index ? "w-8 bg-teal-700" : "w-3 bg-slate-200 hover:bg-slate-400"}`}
-            />
-          ))}
-        </div>
-        <span className="text-xs text-muted-foreground">{slide + 1} / 5</span>
+      <footer className="px-5 py-5 text-center text-xs text-muted-foreground">
+        The Foundation of Modern Care.
       </footer>
     </div>
   );

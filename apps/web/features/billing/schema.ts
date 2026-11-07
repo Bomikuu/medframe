@@ -87,6 +87,19 @@ export const paymentReviewSchema = z.object({
   after: dueSchema,
 });
 export const paymentConfirmationSchema = z.object({
+  refunds: z
+    .array(
+      z.object({
+        id: z.string(),
+        amount: z.string(),
+        paid_date: z.string(),
+        recorded_at: z.string(),
+        actor: z.string().optional(),
+        reason: z.string().optional(),
+      }),
+    )
+    .optional(),
+  refunds_truncated: z.boolean().optional(),
   invoice_id: z.string(),
   invoice_number: z.string(),
   invoice_version: z.number(),
@@ -126,7 +139,21 @@ export const previewSchema = z.object({
   subtotal: z.string(),
   discount: z.string(),
   total: z.string(),
+  installment: z
+    .object({
+      deposit: z.string(),
+      financed: z.string(),
+      months: z.number(),
+      regular: z.string(),
+      final: z.string(),
+      first_due: z.string(),
+      last_due: z.string(),
+      rows: z.array(z.object({ kind: z.string(), due_date: z.string(), amount: z.string() })),
+    })
+    .nullable()
+    .optional(),
 });
+export type DraftPreview = z.infer<typeof previewSchema>;
 export function currency(value: string, code = "PHP") {
   return new Intl.NumberFormat("en-PH", { style: "currency", currency: code }).format(
     Number(value),

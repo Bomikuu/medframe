@@ -15,6 +15,8 @@ export type Device = {
   strict_verification: boolean;
 };
 export type StationContext = {
+  doctor_profile?: boolean;
+  staff_workspace?: boolean;
   access?: AccessSession;
   paired: boolean;
   error: string | null;

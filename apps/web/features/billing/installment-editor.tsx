@@ -2,6 +2,7 @@
 
 import type { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/application/date-input";
 import { Switch } from "@/components/ui/switch";
 import { FormField } from "@/components/form-field";
 import type { DraftValues } from "./schema";
@@ -89,9 +90,9 @@ export function InstallmentEditor({
             </FormField>
             {Number(plan.deposit) > 0 && (
               <FormField id="plan-deposit-date" label="Down payment due date">
-                <Input
+                <DateInput
                   id="plan-deposit-date"
-                  type="date"
+                  value={plan.deposit_due ?? ""}
                   min={today}
                   {...form.register("installment.deposit_due")}
                 />
@@ -102,9 +103,9 @@ export function InstallmentEditor({
               label="First monthly due date"
               error={form.formState.errors.installment?.first_due?.message}
             >
-              <Input
+              <DateInput
                 id="plan-first-date"
-                type="date"
+                value={plan.first_due}
                 min={today}
                 {...form.register("installment.first_due")}
               />
@@ -112,8 +113,7 @@ export function InstallmentEditor({
           </div>
           <p className="rounded-lg bg-muted/60 p-4 text-sm leading-6">
             {currency(plan.deposit || "0")} down payment plus {plan.months} monthly installments.
-            Save the draft to generate the exact dated schedule, then review it before issue. No
-            money is recorded by creating the plan.
+            Preview the payment plan below to review amounts and dates. No payment is recorded.
           </p>
         </>
       )}

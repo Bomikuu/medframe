@@ -100,7 +100,11 @@ def patient_snapshot(session):
 def require_task_code(session):
     from medframe_apps.stations.kiosk_reception import strict
 
-    if strict(session.credential.device) and KioskRequest.objects.filter(session=session).exists():
+    if (
+        strict(session.credential.device)
+        and session.proof.method != "staff_terminal_selection"
+        and KioskRequest.objects.filter(session=session).exists()
+    ):
         raise DomainError(
             "REVERIFY_REQUIRED", "Strict mode needs a new patient code for the next task.", 403
         )

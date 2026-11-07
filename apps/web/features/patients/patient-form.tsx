@@ -1,5 +1,7 @@
 "use client";
 
+import { AccessRequired } from "@/components/application/access-required";
+
 import { usePatientDraft } from "./use-patient-draft";
 import { useRequestScope } from "./use-request-scope";
 
@@ -33,7 +35,7 @@ export function PatientForm({
   patient?: PatientDetailsFragment;
   embedded?: boolean;
 }) {
-  const { workspace, organizationId, href, can } = useWorkspace();
+  const { workspace, organizationId, href, can, branchId: currentBranchId } = useWorkspace();
   const router = useRouter();
   const captureRequest = useRequestScope();
   const { clearDirty, confirm } = useSafety();
@@ -41,7 +43,7 @@ export function PatientForm({
     resolver: zodResolver(patientSchema),
     defaultValues: {
       ...patientDefaults(patient),
-      branchId: patient?.branchId ?? workspace.branches[0]?.id ?? "",
+      branchId: patient?.branchId ?? currentBranchId,
     },
   });
   const branchId = useWatch({ control: form.control, name: "branchId" });
@@ -65,12 +67,10 @@ export function PatientForm({
   const permitted = can(patient ? "patients.demographics.write" : "patients.register");
   if (!permitted)
     return (
-      <>
-        <PageHeading title="Patient access unavailable" />
-        <p className="text-sm">
-          Your role does not permit this action. Contact your clinic administrator.
-        </p>
-      </>
+      <AccessRequired
+        title="Patient editing access required"
+        description="Your current role does not permit this patient action."
+      />
     );
 
   async function submit(values: PatientFormValues) {
@@ -100,9 +100,7 @@ export function PatientForm({
       if (!isCurrent()) return;
       finished.current = true;
       setCompleted(true);
-      form.reset(
-        patient ? values : { ...patientDefaults(), branchId: workspace.branches[0]?.id ?? "" },
-      );
+      form.reset(patient ? values : { ...patientDefaults(), branchId: currentBranchId });
       clearDirty();
       toast.success("Patient details saved");
       router.push(href(`/clinic/patients/${patientId}`) + "&saved=details");

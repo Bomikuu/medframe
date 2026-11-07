@@ -3,12 +3,13 @@ from django.db.models.functions import Coalesce, Greatest
 
 from config.errors import DomainError
 from medframe_apps.billing.calculations import amount_text, invoice_totals
+from medframe_apps.billing.collection_filters import filter_current_balance, parse_billing_filters
 from medframe_apps.billing.models import CreditNote, Invoice, Payment, Refund
 from medframe_apps.billing.policy import get_invoice, invoice_scope, scoped_branches, staff_member
 from medframe_apps.organizations.policy import permissions_for
 from medframe_apps.patients.models import Patient
 from medframe_apps.portal.policy import require_portal_link
-from medframe_apps.record_filters import filter_dates, page_records, parse_filters
+from medframe_apps.record_filters import filter_dates, page_records
 
 
 def annotated_invoices(query):
@@ -149,11 +150,15 @@ def invoice_page(request, organization_id, branch_id, filters=None, after=None, 
     member = staff_member(request, organization_id)
     if not scoped_branches(member).filter(id=branch_id).exists():
         raise DomainError("NOT_FOUND", "This branch is unavailable.", 404)
-    criteria = parse_filters(filters)
+    criteria = parse_billing_filters(filters)
     query = invoice_scope(member).filter(branch_id=branch_id)
     if patient_id:
         query = query.filter(patient_id=patient_id)
-    query = filter_dates(query, criteria, member.organization.timezone)
+    query = filter_dates(
+        query, criteria, member.organization.timezone, field=f"{criteria.date_basis}_at"
+    )
+    if criteria.currency:
+        query = query.filter(currency=criteria.currency)
     if criteria.query:
         query = query.filter(
             Q(number__icontains=criteria.query)
@@ -176,6 +181,7 @@ def invoice_page(request, organization_id, branch_id, filters=None, after=None, 
             query = query.filter(balance_amount__gt=0, paid_amount__gt=F("refund_amount"))
     elif status:
         raise DomainError("INVALID_INPUT", "Choose a supported invoice status.")
+    query = filter_current_balance(query, criteria.balance, member.organization.timezone)
     issued = query.filter(state="issued")
     sums = issued.aggregate(
         outstanding=Sum("balance_amount"),

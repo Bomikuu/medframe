@@ -90,7 +90,10 @@ def issue_invitation(request, data, request_id):
     )
     deliver_link(invitation, token)
     audit(user, "onboarding.invited", resource_id=invitation.id)
-    return serialize(invitation)
+    return {
+        **serialize(invitation),
+        "link": f"{get_settings().web_origin}/onboarding/invite/{token}",
+    }
 
 
 @transaction.atomic
@@ -117,4 +120,7 @@ def manage_invitation(request, identifier, expected_version, action):
         raise DomainError("INVALID_INPUT", "Choose resend or revoke.")
     invitation.save()
     audit(user, f"onboarding.{action}", resource_id=invitation.id)
-    return serialize(invitation)
+    result = serialize(invitation)
+    if action == "resend":
+        result["link"] = f"{get_settings().web_origin}/onboarding/invite/{token}"
+    return result

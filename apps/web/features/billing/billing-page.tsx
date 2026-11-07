@@ -1,16 +1,28 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { AccessRequired } from "@/components/application/access-required";
+
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 
+import { CashierReconciliation } from "./cashier-reconciliation";
 import { FinancialOverviewPanel } from "./analytics/financial-overview";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  invoiceLinkFilters,
+  invoiceListHref,
+  balanceChoices,
+  type InvoiceFilters,
+} from "./invoice-list-links";
 import { ReceiptText, Wallet, CreditCard } from "@/components/icons";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { StatusBadge } from "@/components/application/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateInput } from "@/components/application/date-input";
 import {
   Table,
   TableBody,
@@ -24,7 +36,6 @@ import { FormSelect } from "@/features/patients/form-controls";
 import { LoadState, PageHeading, RemoteNotice, dateLabel } from "@/features/patients/feedback";
 import { useRemote } from "@/features/patients/use-remote";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
-import { useSafety } from "@/features/workspace/safety-provider";
 import { BillingInvoicesDocument } from "@/lib/graphql/generated";
 import { useBillingSetup } from "./use-billing";
 import { invoicePageSchema, type BillingSetup } from "./schema";
@@ -34,15 +45,31 @@ import { InvoiceForm } from "./invoice-form";
 export function BillingPage() {
   const { can } = useWorkspace();
   if (!can("billing.read"))
-    return <p role="alert">Your clinic membership does not have billing access.</p>;
+    return (
+      <AccessRequired
+        title="Billing access required"
+        description="Your clinic membership does not have billing access."
+      />
+    );
   return <BillingWorkspace />;
 }
 function BillingWorkspace() {
-  const [branch, setBranch] = useState("");
+  const { can, href } = useWorkspace();
+  const params = useSearchParams();
+  const router = useRouter();
+  const initialFilters = invoiceLinkFilters(params);
+  const reportFrom = params.get("report_from");
+  const reportTo = params.get("report_to");
+  const report =
+    reportFrom &&
+    reportTo &&
+    /^\d{4}-\d{2}-\d{2}$/.test(reportFrom) &&
+    /^\d{4}-\d{2}-\d{2}$/.test(reportTo)
+      ? { from: reportFrom, to: reportTo }
+      : undefined;
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
-  const remote = useBillingSetup(branch, query);
-  const { guard } = useSafety();
+  const remote = useBillingSetup(undefined, query);
   if (!remote.setup) return <LoadState error={remote.error} retry={remote.reload} />;
   return (
     <div className="grid gap-6">
@@ -50,61 +77,87 @@ function BillingWorkspace() {
         title="Billing"
         description="Issue statements, record payments and keep every financial adjustment traceable."
       />
-      <div className="flex min-w-0 flex-wrap items-end gap-5 rounded-xl border border-border bg-card p-5">
-        <div className="w-full max-w-xs">
-          <FormSelect
-            id="billing-branch"
-            label="Clinic branch"
-            value={remote.setup.branch_id}
-            onChange={(value) => void guard(() => setBranch(value))}
-            options={remote.setup.branches.map((item) => ({ value: item.id, label: item.name }))}
-          />
-        </div>
-        <form
-          className="flex min-w-0 flex-wrap items-end gap-3"
-          onSubmit={(event) => {
-            event.preventDefault();
-            setQuery(search);
-          }}
-        >
-          <FormField id="billing-patient-search" label="Find patient for a new invoice">
-            <Input
-              id="billing-patient-search"
-              type="search"
-              maxLength={160}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-          </FormField>
-          <Button type="submit" variant="outline">
-            Find patient
-          </Button>
-        </form>
-      </div>
       <FinancialOverviewPanel
         key={`finance:${remote.setup.branch_id}`}
         branchId={remote.setup.branch_id}
+        periodRange={report ? { startDate: report.from, endDate: report.to } : undefined}
       />
-      <InvoiceCollection key={remote.setup.branch_id} setup={remote.setup} />
+      <CashierReconciliation
+        key={remote.setup.branch_id}
+        branchId={remote.setup.branch_id}
+        timezone={remote.setup.timezone}
+      />
+      {report && (
+        <Button asChild variant="ghost" className="w-fit">
+          <Link href={invoiceListHref(href("/clinic/billing"), initialFilters)}>
+            Change comparison period
+          </Link>
+        </Button>
+      )}
+      <InvoiceCollection
+        key={`${remote.setup.branch_id}:${JSON.stringify(initialFilters)}`}
+        setup={remote.setup}
+        initialFilters={initialFilters}
+        onFiltersChange={(next) =>
+          router.replace(invoiceListHref(href("/clinic/billing"), next, report), { scroll: false })
+        }
+        patientSearch={
+          can("billing.manage") ? (
+            <form
+              className="flex min-w-0 flex-wrap items-end gap-3"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setQuery(search);
+              }}
+            >
+              <FormField id="billing-patient-search" label="Find patient for a new invoice">
+                <Input
+                  id="billing-patient-search"
+                  type="search"
+                  maxLength={160}
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+              </FormField>
+              <Button type="submit" variant="outline">
+                Find patient
+              </Button>
+            </form>
+          ) : null
+        }
+      />
     </div>
   );
 }
 export function InvoiceCollection({
   setup,
   patientId,
+  patientSearch,
+  initialFilters = {},
+  onFiltersChange,
 }: {
   setup: BillingSetup;
   patientId?: string;
+  patientSearch?: ReactNode;
+  initialFilters?: InvoiceFilters;
+  onFiltersChange?: (filters: InvoiceFilters) => void;
 }) {
   const { organizationId, can, href } = useWorkspace();
   const readOnly = usePatientRecordReadOnly();
   const router = useRouter();
   const [after, setAfter] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [filters, setFilters] = useState<Record<string, string>>({});
+  const [search, setSearch] = useState(initialFilters.query ?? "");
+  const [status, setStatus] = useState(initialFilters.status ?? "all");
+  const [balance, setBalance] = useState(initialFilters.balance ?? "all");
+  const [dateBasis, setDateBasis] = useState(initialFilters.date_basis ?? "created");
+  const [from, setFrom] = useState(initialFilters.date_from ?? "");
+  const [to, setTo] = useState(initialFilters.date_to ?? "");
+  const [filters, setFilters] = useState<InvoiceFilters>(initialFilters);
+  const apply = (next: InvoiceFilters) => {
+    setAfter(null);
+    if (onFiltersChange) onFiltersChange(next);
+    else setFilters(next);
+  };
   const remote = useRemote(BillingInvoicesDocument, {
     organizationId,
     branchId: setup.branch_id,
@@ -114,37 +167,61 @@ export function InvoiceCollection({
   });
   const parsed = invoicePageSchema.safeParse(remote.data?.billingInvoices);
   return (
-    <div className="grid gap-6">
-      {parsed.success && parsed.data.summary && (
-        <div className="flex flex-wrap gap-x-8 gap-y-4 rounded-xl border border-border bg-card px-5 py-4">
-          {[
-            { label: "Outstanding", value: parsed.data.summary.outstanding, Icon: ReceiptText },
-            {
-              label: "Net payments recorded",
-              value: parsed.data.summary.net_received,
-              Icon: Wallet,
-            },
-            { label: "Refunds due", value: parsed.data.summary.refundable, Icon: CreditCard },
-          ].map(({ label, value, Icon }) => (
-            <div key={label} className="flex min-w-0 items-center gap-3">
-              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-soft text-teal-ink">
-                <Icon className="size-5" />
-              </span>
-              <div className="min-w-0">
-                <p className="text-xs text-muted-foreground">{label}</p>
-                <p className="mt-1 font-heading text-xl font-bold">
-                  <Money value={value} code={setup.currency} />
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+    <div id="invoices" className="grid scroll-mt-6 gap-6">
       <FinancialSection title="Invoices">
+        {filters.balance && (
+          <p role="status" className="rounded-lg bg-info-soft p-4 text-sm leading-6 text-info">
+            {balanceChoices.find((row) => row.value === filters.balance)?.label} · issued invoices
+            {!filters.date_from && !filters.date_to
+              ? " across all invoice dates"
+              : " within the selected invoice dates"}
+            . Amounts reflect the current ledger, including partial payments, credits and refunds.
+          </p>
+        )}
+        {filters.date_basis === "issued" && (filters.date_from || filters.date_to) && (
+          <p className="text-sm text-muted-foreground">
+            Invoices issued {filters.date_from ? `from ${dateLabel(filters.date_from)}` : ""}{" "}
+            {filters.date_to ? `through ${dateLabel(filters.date_to)}` : ""}. Report payments and
+            refunds use their own recorded dates.
+          </p>
+        )}
+        {parsed.success && parsed.data.summary && (
+          <div
+            aria-label="Filtered invoice totals"
+            className="flex flex-wrap gap-x-8 gap-y-4 border-b border-border pb-5"
+          >
+            {[
+              { label: "Outstanding", value: parsed.data.summary.outstanding, Icon: ReceiptText },
+              {
+                label: "Net payments recorded",
+                value: parsed.data.summary.net_received,
+                Icon: Wallet,
+              },
+              {
+                label: "Refundable excess",
+                value: parsed.data.summary.refundable,
+                Icon: CreditCard,
+              },
+            ].map(({ label, value, Icon }) => (
+              <div key={label} className="flex min-w-0 items-center gap-3">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-teal-soft text-teal-ink">
+                  <Icon className="size-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="mt-1 font-heading text-xl font-bold">
+                    <Money value={value} code={setup.currency} />
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {patientSearch}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <p className="max-w-prose text-sm text-muted-foreground">
-            Balances reflect issued invoices in this filtered view. Payments and refunds are
-            recorded after money moves outside Medframe.
+            Totals follow your invoice filters. Record payments and refunds after money moves
+            outside Medframe.
           </p>
           {!readOnly && can("billing.manage") && (
             <EntrySheet
@@ -165,12 +242,14 @@ export function InvoiceCollection({
           className="grid min-w-0 items-end gap-4 @min-[700px]:grid-cols-2 @min-[1100px]:grid-cols-[1.4fr_1fr_1fr_1fr_auto]"
           onSubmit={(event) => {
             event.preventDefault();
-            setAfter(null);
-            setFilters({
+            apply({
               ...(search ? { query: search } : {}),
               ...(status !== "all" ? { status } : {}),
               ...(from ? { date_from: from } : {}),
               ...(to ? { date_to: to } : {}),
+              ...(balance !== "all" ? { balance } : {}),
+              ...(dateBasis === "issued" ? { date_basis: dateBasis } : {}),
+              ...(initialFilters.currency ? { currency: initialFilters.currency } : {}),
             });
           }}
         >
@@ -188,32 +267,78 @@ export function InvoiceCollection({
             label="Status"
             value={status}
             onChange={setStatus}
-            options={["all", "draft", "unpaid", "partial", "paid", "refund_due", "void"].map(
-              (value) => ({
-                value,
-                label: value === "all" ? "All statuses" : value.replaceAll("_", " "),
-              }),
-            )}
+            options={[
+              "all",
+              "draft",
+              "issued",
+              "unpaid",
+              "partial",
+              "paid",
+              "refund_due",
+              "void",
+            ].map((value) => ({
+              value,
+              label: value === "all" ? "All statuses" : value.replaceAll("_", " "),
+            }))}
           />
-          <FormField id="invoice-from" label="Created from">
-            <Input
+          <FormSelect
+            id="invoice-balance"
+            label="Balance timing"
+            value={balance}
+            onChange={(value) => {
+              setBalance(value);
+              if (value !== "all") setStatus("issued");
+            }}
+            options={balanceChoices}
+          />
+          <FormSelect
+            id="invoice-date-basis"
+            label="Filter dates by"
+            value={dateBasis}
+            onChange={setDateBasis}
+            options={[
+              { value: "created", label: "Invoice created date" },
+              { value: "issued", label: "Invoice issued date" },
+            ]}
+          />
+          <FormField
+            id="invoice-from"
+            label={`${dateBasis === "issued" ? "Issued" : "Created"} from`}
+          >
+            <DateInput
               id="invoice-from"
-              type="date"
               value={from}
               onChange={(event) => setFrom(event.target.value)}
             />
           </FormField>
-          <FormField id="invoice-to" label="Created through">
-            <Input
-              id="invoice-to"
-              type="date"
-              value={to}
-              onChange={(event) => setTo(event.target.value)}
-            />
+          <FormField
+            id="invoice-to"
+            label={`${dateBasis === "issued" ? "Issued" : "Created"} through`}
+          >
+            <DateInput id="invoice-to" value={to} onChange={(event) => setTo(event.target.value)} />
           </FormField>
-          <Button type="submit" variant="outline">
-            Apply filters
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" variant="outline">
+              Apply filters
+            </Button>
+            {Object.keys(filters).length > 0 && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => {
+                  setSearch("");
+                  setStatus("all");
+                  setBalance("all");
+                  setDateBasis("created");
+                  setFrom("");
+                  setTo("");
+                  apply({});
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
+          </div>
         </form>
         {!parsed.success ? (
           <LoadState error={remote.error} retry={remote.reload} />
@@ -251,7 +376,8 @@ export function InvoiceCollection({
                             {invoice.number ?? "Draft invoice"}
                           </Link>
                           <span className="mt-1 block text-xs text-muted-foreground">
-                            {invoice.patient_name} · {invoice.reference}
+                            <PersonIdentity kind="patient" name={invoice.patient_name} /> ·{" "}
+                            {invoice.reference}
                           </span>
                         </TableCell>
                         <TableCell>

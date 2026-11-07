@@ -1,0 +1,5 @@
+# Consultation setup
+
+Operate mode. Existing clinic identity and shared dialogs apply. Start consultation uses a compact popup at the existing /clinic/consultations/new route; provider, patient identity and allergy/medication context remain visible. The existing form owns request idempotency, drafts, unsaved protection and exact queue linking. Busy creation prevents dismissal; success opens the existing encounter editor. Closing returns to the patient record/directory. Clinic-wide parallel/intercepting routing was removed during the navigation recovery; do not reintroduce it or claim underlying-page preservation/back-forward reopening without explicit work and verification.
+
+ReasonField supplies context-specific touch choices with explicit checkmarks and native radio keyboard semantics. Start visit choices describe visit purpose rather than a diagnosis. Other reveals custom text under the same original required/length validation; never preselect an audit or clinical reason. Reuse this interaction across clinical, operational and other reason fields while preserving each native mutation owner. No AI integration or inferred clinical assertions.

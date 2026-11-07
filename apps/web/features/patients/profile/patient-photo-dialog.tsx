@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { LoaderCircle, RefreshCw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PatientAvatar } from "@/components/application/patient-avatar";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { useSafety } from "@/features/workspace/safety-provider";
 import { UploadControl } from "@/features/documents/upload-control";
-import { useRemote } from "@/features/patients/use-remote";
-import { PatientDocumentsDocument } from "@/lib/graphql/generated";
+import { getGraphqlClient } from "@/lib/graphql/client";
 import { errorMessage } from "@/lib/auth/client";
 import { stationRequest } from "@/features/stations/client";
 
 type Portrait = { version: number; image_id: string | null };
+type Phase = "idle" | "scanning" | "saving" | "error";
+const photoStatusQuery = `query PatientProfileUploadStatus($organizationId: UUID!, $patientId: UUID!, $versionIds: [UUID!]!) {
+  documentVersions(organizationId: $organizationId, patientId: $patientId, versionIds: $versionIds) { id scanState }
+}`;
+
 export function PatientPhotoDialog({
   patient,
   onClose,
@@ -30,35 +35,18 @@ export function PatientPhotoDialog({
   const removing = intent === "remove";
   const { confirm } = useSafety();
   const [portrait, setPortrait] = useState<Portrait | null>(null);
-  const [candidate, setCandidate] = useState<string | null>(patient.portrait_id);
   const [uploaded, setUploaded] = useState<string>();
   const [uploading, setUploading] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState("");
-  const documents = useRemote(
-    PatientDocumentsDocument,
-    {
-      organizationId,
-      patientId: patient.patient_id,
-      purpose: "clinical",
-      versionIds: uploaded ? [uploaded] : [],
-    },
-    { enabled: !removing },
-  );
-  const files = Array.from(
-    new Map(
-      [...(documents.data?.documentVersions ?? []), ...(documents.data?.documents ?? [])].map(
-        (file) => [file.id, file],
-      ),
-    ).values(),
-  ).filter(
-    (file) =>
-      ["image/jpeg", "image/png", "image/webp"].includes(file.contentType) &&
-      file.size <= 2 * 1024 * 1024,
-  );
-  const scanning = files.some((file) =>
-    ["pending", "uploading", "unavailable"].includes(file.scanState),
-  );
+  const [attempt, setAttempt] = useState(0);
+  const callbacks = useRef({ onSaved, onClose });
+  useEffect(() => {
+    callbacks.current = { onSaved, onClose };
+  }, [onSaved, onClose]);
+  const saving = phase === "saving";
+  const processing = phase === "scanning" || saving;
+
   useEffect(() => {
     let active = true;
     stationRequest<Portrait>("portrait", {
@@ -66,10 +54,7 @@ export function PatientPhotoDialog({
       patient_id: patient.patient_id,
     })
       .then((value) => {
-        if (active) {
-          setPortrait(value);
-          setCandidate(value.image_id);
-        }
+        if (active) setPortrait(value);
       })
       .catch((cause) => {
         if (active) setError(errorMessage(cause));
@@ -78,46 +63,111 @@ export function PatientPhotoDialog({
       active = false;
     };
   }, [organizationId, patient.patient_id]);
+
   useEffect(() => {
-    if (!scanning) return;
-    const timer = window.setInterval(documents.reload, 5000);
-    return () => window.clearInterval(timer);
-  }, [scanning, documents.reload]);
+    if (!uploaded || !portrait || removing) return;
+    let active = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const controller = new AbortController();
+    const version = portrait.version;
+    const started = Date.now();
+    async function check() {
+      try {
+        const result = await getGraphqlClient().request<{
+          documentVersions: { id: string; scanState: string }[];
+        }>({
+          document: photoStatusQuery,
+          variables: {
+            organizationId,
+            patientId: patient.patient_id,
+            versionIds: [uploaded],
+          },
+          signal: controller.signal,
+        });
+        if (!active) return;
+        const file = result.documentVersions.find((file) => file.id === uploaded);
+        if (!file)
+          throw new Error(
+            "The uploaded photo is unavailable. Your previous profile photo is unchanged.",
+          );
+        if (file.scanState === "clean") {
+          setPhase("saving");
+          await stationRequest("portrait", {
+            action: "select",
+            organization_id: organizationId,
+            patient_id: patient.patient_id,
+            image_id: uploaded,
+            expected_version: version,
+          });
+          if (!active) return;
+          callbacks.current.onSaved();
+          callbacks.current.onClose();
+          return;
+        }
+        if (!["pending", "uploading", "unavailable"].includes(file.scanState))
+          throw new Error(
+            "This photo did not pass the security scan. Upload another photo; your previous profile photo is unchanged.",
+          );
+        if (Date.now() - started >= 120000)
+          throw new Error(
+            "The security scan is taking longer than expected. Check again to finish setting your photo.",
+          );
+        timer = setTimeout(() => void check(), 4000);
+      } catch (cause) {
+        if (active) {
+          setError(errorMessage(cause));
+          setPhase("error");
+        }
+      }
+    }
+    void check();
+    return () => {
+      active = false;
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [uploaded, portrait, organizationId, patient.patient_id, removing, attempt]);
+
   async function close() {
-    if (busy) return;
+    if (saving) return;
     if (
-      uploading &&
+      (uploading || processing) &&
       !(await confirm({
-        title: "Discard selected photo?",
-        description: "The selected image has not finished uploading.",
-        action: "Discard selection",
+        title: "Cancel the photo update?",
+        description:
+          "Your existing profile photo will stay in place. A file already received remains in the patient record.",
+        action: "Cancel photo update",
       }))
     )
       return;
     onClose();
   }
-  async function save(image: string | null) {
+  async function remove() {
     if (!portrait) return;
-    setBusy(true);
+    setPhase("saving");
     setError("");
     try {
       await stationRequest("portrait", {
         action: "select",
         organization_id: organizationId,
         patient_id: patient.patient_id,
-        image_id: image,
+        image_id: null,
         expected_version: portrait.version,
       });
       onSaved();
       onClose();
     } catch (cause) {
       setError(errorMessage(cause));
-      setBusy(false);
+      setPhase("error");
     }
   }
-  const ready =
-    candidate === portrait?.image_id ||
-    files.some((file) => file.id === candidate && file.scanState === "clean");
+  const avatar = (
+    <PatientAvatar
+      name={patient.patient}
+      imageId={portrait?.image_id ?? patient.portrait_id ?? undefined}
+      className="size-24 border-0 text-2xl"
+    />
+  );
   return (
     <Dialog
       open
@@ -126,7 +176,7 @@ export function PatientPhotoDialog({
       }}
     >
       <DialogContent
-        className="max-h-[92dvh] overflow-y-auto sm:max-w-xl"
+        className="max-h-[92dvh] overflow-y-auto sm:max-w-lg"
         onCloseAutoFocus={(event) => {
           if (onReturnFocus) {
             event.preventDefault();
@@ -138,107 +188,86 @@ export function PatientPhotoDialog({
         <DialogDescription>
           {removing
             ? `Remove the profile photo for ${patient.patient}. The original image stays in the patient record.`
-            : `${patient.patient} · Choose a confirmed photo of this patient. Images remain protected in their clinical file; only the profile display is circular.`}
+            : `${patient.patient} · ${patient.reference}. Upload one photo; it becomes the profile automatically after its security scan.`}
         </DialogDescription>
-        <div className="flex items-center gap-4">
-          <PatientAvatar
-            name={patient.patient}
-            imageId={candidate && ready ? candidate : undefined}
-            className="size-24 text-2xl"
+        {removing ? (
+          <div className="flex justify-center py-3">{avatar}</div>
+        ) : (
+          <UploadControl
+            patientId={patient.patient_id}
+            purpose="clinical"
+            profileImage
+            initialLabel="Patient profile photo"
+            avatarFallback={avatar}
+            disabled={!portrait || processing}
+            onPendingChange={setUploading}
+            onUploaded={(id) => {
+              if (!id) {
+                setError("The upload could not be identified. Upload the photo again.");
+                return;
+              }
+              setError("");
+              setPhase("scanning");
+              setUploaded(id);
+            }}
           />
-          <div>
-            <p className="font-semibold">{patient.patient}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{patient.reference}</p>
-          </div>
-        </div>
-        {!removing && (
-          <>
-            <UploadControl
-              patientId={patient.patient_id}
-              purpose="clinical"
-              profileImage
-              initialLabel="Patient profile photo"
-              onPendingChange={setUploading}
-              onUploaded={(id) => {
-                setUploaded(id);
-                documents.reload();
-              }}
-            />
-            <section className="grid gap-3">
-              <h3 className="text-sm font-semibold">Patient images</h3>
-              <p className="text-xs leading-5 text-muted-foreground">
-                Select a scanned image below, then confirm it as the profile photo.
-              </p>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {files.map((file) => (
-                  <button
-                    key={file.id}
-                    type="button"
-                    className={`grid min-w-0 justify-items-center gap-2 rounded-xl border p-3 text-center text-xs ${candidate === file.id ? "bg-teal-wash border-primary" : "border-border"}`}
-                    disabled={busy || file.scanState !== "clean"}
-                    aria-pressed={candidate === file.id}
-                    onClick={() => setCandidate(file.id)}
-                  >
-                    <PatientAvatar
-                      name={patient.patient}
-                      imageId={file.scanState === "clean" ? file.id : undefined}
-                      className="size-14"
-                    />
-                    <span className="line-clamp-2 wrap-anywhere">{file.label}</span>
-                    <span className="text-muted-foreground">
-                      {file.scanState === "clean" ? "Scanned" : file.scanState.replaceAll("_", " ")}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              {!files.length && (
-                <p className="text-sm text-muted-foreground">
-                  No patient images available yet. Upload a photo above.
-                </p>
-              )}
-            </section>
-          </>
         )}
-        {scanning && !removing && (
-          <p role="status" className="text-xs text-muted-foreground">
-            Waiting for the security scan. Pending images cannot be used.
+        {processing && (
+          <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+            <LoaderCircle
+              aria-hidden
+              className="size-4 shrink-0 animate-spin motion-reduce:animate-none"
+            />
+            {saving
+              ? "Updating profile photo…"
+              : "Scanning your photo. It will become the profile automatically."}
           </p>
         )}
-        {(error || !!documents.error) && (
+        {error && (
           <p role="alert" className="text-sm text-destructive">
-            {error || errorMessage(documents.error)}
+            {error}
           </p>
         )}
         <div className="flex flex-wrap gap-2">
           {removing ? (
             <Button
               variant="destructive"
-              disabled={!portrait?.image_id || busy}
-              onClick={() => void save(null)}
+              disabled={!portrait?.image_id || saving}
+              onClick={() => void remove()}
             >
-              {busy ? "Removing…" : "Remove photo"}
+              <Trash2 aria-hidden className="size-4" />
+              {saving ? "Removing…" : "Remove photo"}
             </Button>
           ) : (
             <>
-              <Button
-                disabled={!portrait || !candidate || !ready || busy || uploading}
-                onClick={() => void save(candidate)}
-              >
-                Use selected photo
-              </Button>
+              {phase === "error" && uploaded && (
+                <Button
+                  variant="outline"
+                  disabled={uploading}
+                  onClick={() => {
+                    setError("");
+                    setPhase("scanning");
+                    setAttempt((value) => value + 1);
+                  }}
+                >
+                  <RefreshCw aria-hidden className="size-4" />
+                  Check again
+                </Button>
+              )}
               {portrait?.image_id && (
                 <Button
                   variant="ghost"
-                  disabled={busy || uploading}
-                  onClick={() => void save(null)}
+                  disabled={processing || uploading}
+                  onClick={() => void remove()}
                 >
-                  Remove profile photo
+                  <Trash2 aria-hidden className="size-4" />
+                  Remove photo
                 </Button>
               )}
             </>
           )}
-          <Button variant="outline" disabled={busy} onClick={() => void close()}>
-            Cancel
+          <Button variant="outline" disabled={saving} onClick={() => void close()}>
+            {uploading || processing || removing ? "Cancel" : "Close"}
           </Button>
         </div>
       </DialogContent>

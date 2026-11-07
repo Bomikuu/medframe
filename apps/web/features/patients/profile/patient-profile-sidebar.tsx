@@ -1,5 +1,7 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
 import { CalendarDays, ClipboardList } from "lucide-react";
 import { ProfileClinicalContext } from "./patient-clinical-context";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -13,11 +15,13 @@ export function PatientProfileSidebar({
   summary,
   onTab,
   showContext = true,
+  showRecent = true,
 }: {
   patientId: string;
   summary: ProfileSummary | null;
   onTab: (tab: string) => void;
   showContext?: boolean;
+  showRecent?: boolean;
 }) {
   const { href } = useWorkspace();
   const timeLabel = useClinicTime();
@@ -27,7 +31,7 @@ export function PatientProfileSidebar({
       {summary.clinical && showContext && (
         <ProfileClinicalContext patientId={patientId} onReview={() => onTab("medical")} />
       )}
-      {summary.clinical && (
+      {summary.clinical && showRecent && (
         <section className="rounded-xl border border-border bg-card p-5">
           <div className="mb-4 flex items-center justify-between gap-2">
             <h2 className="flex items-center gap-2 text-sm font-semibold">
@@ -55,7 +59,9 @@ export function PatientProfileSidebar({
                 <p className="mt-1 text-xs leading-5 text-muted-foreground">
                   {timeLabel(row.created_at)}
                 </p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{row.provider_name}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  <PersonIdentity kind="provider" name={row.provider_name} />
+                </p>
                 <div className="mt-2">
                   <StatusBadge value={row.status} />
                 </div>
@@ -79,7 +85,9 @@ export function PatientProfileSidebar({
             {summary.operations.upcoming.map((row) => (
               <li key={row.id} className="py-3 first:pt-0">
                 <p className="text-sm font-medium">{timeLabel(row.start)}</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{row.provider}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  <PersonIdentity kind="provider" name={row.provider} />
+                </p>
                 <div className="mt-2">
                   <StatusBadge value={row.status} />
                 </div>

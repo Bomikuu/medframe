@@ -88,6 +88,7 @@ export type PortalQuery = {
   myNotifications: Scalars['JSON']['output'];
   myPaymentConfirmation: Scalars['JSON']['output'];
   myQueue: Scalars['JSON']['output'];
+  patientTaskHome: Scalars['JSON']['output'];
   portalLinks: Scalars['JSON']['output'];
   portalRecord: Scalars['JSON']['output'];
   portalRecords: Scalars['JSON']['output'];
@@ -159,6 +160,11 @@ export type PortalQueryMyPaymentConfirmationArgs = {
 
 
 export type PortalQueryMyQueueArgs = {
+  linkId: Scalars['UUID']['input'];
+};
+
+
+export type PortalQueryPatientTaskHomeArgs = {
   linkId: Scalars['UUID']['input'];
 };
 

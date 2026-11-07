@@ -1,5 +1,7 @@
 "use client";
 
+import { AccessRequired } from "@/components/application/access-required";
+
 import { useCallback, useEffect, useState } from "react";
 import { LayoutGrid, Plus, RefreshCw, Search, Tablet, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -86,7 +88,12 @@ export function DeviceManagement() {
     );
 
   if (!can("organization.manage"))
-    return <p role="alert">Clinic administration permission is required to manage devices.</p>;
+    return (
+      <AccessRequired
+        title="Device administration access required"
+        description="Clinic administration permission is required to manage devices."
+      />
+    );
 
   return (
     <div className="min-w-0">
@@ -95,10 +102,10 @@ export function DeviceManagement() {
         description="Manage clinic devices for patient check-in, queue displays and clinical workspaces."
       >
         <ButtonLink href={href("/clinic/stations")} variant="outline">
-          <LayoutGrid /> Patient Stations & departments
+          <LayoutGrid /> Patient stations
         </ButtonLink>
         <ButtonLink href={href("/station/clinician")} variant="outline">
-          <UsersRound /> Doctor workspace & code
+          <UsersRound /> Doctor workspace
         </ButtonLink>
         <Button onClick={() => setSelected(null)} disabled={!setup}>
           <Plus /> Add device

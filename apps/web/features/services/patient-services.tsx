@@ -1,5 +1,7 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 
 import { useState } from "react";
@@ -74,6 +76,7 @@ export function NewPatientService({
           <FormSelect
             id="service-case-patient"
             label="Patient"
+            personKind="patient"
             value={patient}
             onChange={setPatient}
             options={(parsed.data ?? []).map((x) => ({
@@ -205,7 +208,7 @@ export function PatientServices({ branchId, patientId }: { branchId: string; pat
                 <div>
                   <h3 className="font-semibold">{row.name}</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {row.patient_name} · {row.reference}
+                    <PersonIdentity kind="patient" name={row.patient_name} /> · {row.reference}
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground capitalize">
                     {row.status} ·{" "}

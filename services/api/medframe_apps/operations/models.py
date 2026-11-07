@@ -159,3 +159,12 @@ class OperationsEvent(Record):
     before = models.JSONField(default=dict)
     after = models.JSONField(default=dict)
     reason = models.CharField(max_length=240, default="")
+
+
+from .call_models import (
+    AppointmentRoom,
+    RoomAftercare,
+    RoomAttachment,
+    RoomMessage,
+    RoomParticipant,
+)  # noqa: E402,F401

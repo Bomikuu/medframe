@@ -1,7 +1,12 @@
 "use client";
 
+import { AccessRequired } from "@/components/application/access-required";
+
+import { useCursorHistory } from "@/components/application/use-cursor-history";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { SearchField, useDebouncedSearch } from "@/components/application/search-field";
+import { useUrlState } from "@/features/workspace/use-url-state";
+import { Button } from "@/components/ui/button";
 import { EntrySheet } from "@/components/application/entry-sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -15,38 +20,37 @@ import { ServiceForm } from "./service-form";
 import { PatientServices, NewPatientService } from "./patient-services";
 
 export function ServicesPage() {
-  const { workspace, can, organizationId } = useWorkspace();
-  const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
-  const [tab, setTab] = useState("catalog");
+  const { workspace, can, organizationId, branchId: branch } = useWorkspace();
+  const [tab, setTab] = useUrlState("serviceTab", "catalog", ["catalog", "patients"]);
   const [query, setQuery] = useState("");
-  const [status, setStatus] = useState("active");
-  const [after, setAfter] = useState<string | null>(null);
+  const [status, setStatus] = useUrlState("serviceStatus", "active", ["active", "archived", "all"]);
+  const [composing, setComposing] = useState(false);
+  const [settledQuery, submitSearch] = useDebouncedSearch(query, composing);
+  const [cursors, setCursors] = useCursorHistory(
+    JSON.stringify({ organizationId, branch, status, settledQuery }),
+  );
+  const after = cursors.at(-1) ?? null;
+  const setAfter = (value: string | null) => setCursors(value ? [null, value] : [null]);
   const remote = useRemote(
     ServiceCatalogDocument,
-    { organizationId, branchId: branch, filters: { query, status }, after },
+    { organizationId, branchId: branch, filters: { query: settledQuery, status }, after },
     { enabled: !!branch && can("services.read") },
   );
   const parsed = catalogSchema.safeParse(remote.data?.serviceCatalog);
   if (!can("services.read"))
-    return <p role="alert">Your membership does not have Services access.</p>;
+    return (
+      <AccessRequired
+        title="Services access required"
+        description="Your membership does not have Services access."
+      />
+    );
   return (
     <div className="grid min-w-0 gap-6">
       <PageHeading
         title="Services"
-        description="Define clinic services once. Carry their workflow and payment terms into each patient’s care."
+        description="Manage service prices, care workflows and payment plans."
       />
-      <div className="max-w-xs">
-        <FormSelect
-          id="services-branch"
-          label="Clinic branch"
-          value={branch}
-          onChange={(id) => {
-            setBranch(id);
-            setAfter(null);
-          }}
-          options={workspace.branches.map((x) => ({ value: x.id, label: x.name }))}
-        />
-      </div>
+
       <Tabs value={tab} onValueChange={setTab} className="min-w-0 gap-6">
         <TabsList variant="line">
           <TabsTrigger value="catalog">Service catalog</TabsTrigger>
@@ -54,12 +58,9 @@ export function ServicesPage() {
         </TabsList>
         <TabsContent value="catalog" className="grid min-w-0 gap-5">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold">Your clinic’s service catalog</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Prices, checklists and optional monthly payment presets.
-              </p>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Prices and workflow presets for new patient agreements.
+            </p>
             {can("organization.manage") && (
               <EntrySheet
                 title="Add service"
@@ -74,15 +75,15 @@ export function ServicesPage() {
               </EntrySheet>
             )}
           </div>
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
-            <Input
-              type="search"
-              aria-label="Search service catalog"
+          <div className="grid items-end gap-4 sm:grid-cols-[minmax(0,1fr)_180px]">
+            <SearchField
+              label="Search service catalog"
               placeholder="Search services or categories"
-              maxLength={160}
               value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
+              onSubmit={submitSearch}
+              onCompositionChange={setComposing}
+              onChange={(value) => {
+                setQuery(value);
                 setAfter(null);
               }}
             />
@@ -109,11 +110,31 @@ export function ServicesPage() {
               <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card">
                 {!parsed.data.items.length && (
                   <div className="p-8">
-                    <h3 className="font-semibold">Build your service catalog</h3>
+                    <h3 className="font-semibold">
+                      {query || status !== "active"
+                        ? "No matching services"
+                        : "Build your service catalog"}
+                    </h3>
                     <p className="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">
-                      Add your clinic’s first service, such as a consultation or braces package.
-                      Each patient keeps their own agreed price and workflow.
+                      {query || status !== "active"
+                        ? "Try another search or availability filter."
+                        : "Add your first service, such as a consultation or braces package. Each patient keeps their own agreed price and workflow."}
                     </p>
+                    {(query || status !== "active") && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => {
+                          setQuery("");
+                          setStatus("active");
+                          setAfter(null);
+                        }}
+                      >
+                        Clear filters
+                      </Button>
+                    )}
                   </div>
                 )}
                 {parsed.data.items.map((row) => (

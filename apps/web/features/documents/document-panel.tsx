@@ -1,4 +1,6 @@
 "use client";
+
+import { workspaceHeaders } from "@/lib/auth/client";
 import { usePatientRecordReadOnly } from "@/features/patients/profile/patient-record-browse";
 
 import { EntrySheet } from "@/components/application/entry-sheet";
@@ -160,7 +162,7 @@ export function DocumentPanel({
         });
         if (isCurrent()) {
           const link = document.createElement("a");
-          link.href = `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}`;
+          link.href = `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}${workspaceHeaders()["X-Medframe-Workspace"] ? "&workspace=station" : ""}`;
           link.download = "";
           link.click();
         }
@@ -321,7 +323,7 @@ export function DocumentPanel({
                 organizationId,
                 versionId: file.id,
               });
-              return `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}`;
+              return `/api/backend/documents/download?ticket=${encodeURIComponent(result.authorizeDocumentDownload)}${workspaceHeaders()["X-Medframe-Workspace"] ? "&workspace=station" : ""}`;
             }}
           />
         )}
@@ -446,6 +448,7 @@ export function DocumentPanel({
         />
       ) : (
         <EmptyState
+          illustration="document-upload"
           title="No documents in these results"
           description="Upload a document or adjust the filters. Only files you are authorized to access appear here."
         />

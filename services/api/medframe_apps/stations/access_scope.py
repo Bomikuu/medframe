@@ -55,15 +55,60 @@ MUTATIONS = {
 }
 
 
-DOCTOR_PERMISSIONS = PERMISSIONS | {"patients.register", "treatments.write", "operations.read"}
+DOCTOR_PERMISSIONS = PERMISSIONS | {
+    "patients.register",
+    "treatments.write",
+    "operations.read",
+    "appointments.manage",
+    "queues.manage",
+    "billing.read",
+    "payments.record",
+    "diagnostics.read",
+    "diagnostics.request",
+    "diagnostics.review",
+    "services.read",
+}
 DOCTOR_QUERIES = QUERIES | {
     "encounters",
     "providers",
     "clinicPatients",
     "patients",
     "patientDirectory",
+    "recentPatients",
+    "patientClinicalRevisions",
+    "operationsSetup",
+    "appointments",
+    "appointmentAvailability",
+    "billingInvoices",
+    "billingInvoice",
+    "billingPaymentReview",
+    "billingPaymentConfirmation",
+    "diagnosticSetup",
+    "diagnosticRequests",
+    "diagnosticRequest",
+    "diagnosticHistory",
+    "diagnosticPreview",
+    "patientServices",
+    "patientService",
+    "patientReleases",
+    "releaseSources",
+    "releaseSourcePage",
+    "patientReports",
 }
-DOCTOR_MUTATIONS = MUTATIONS | {"createEncounter", "createTreatmentPlan", "updateTreatmentItem"}
+DOCTOR_MUTATIONS = MUTATIONS | {
+    "createEncounter",
+    "createTreatmentPlan",
+    "updateTreatmentItem",
+    "savePatientClinicalHistory",
+    "operationsAction",
+    "billingAction",
+    "diagnosticAction",
+    "authorizeDiagnosticDownload",
+    "previewPortalRelease",
+    "publishPortalRelease",
+    "withdrawPortalRelease",
+    "reviewPatientReport",
+}
 
 
 def doctor_scope():
@@ -148,6 +193,24 @@ def validate_graphql(request, query, variables):
             a.name.value: value_from_ast_untyped(a.value, variables or {})
             for a in (field.arguments or ())
         }
+        if doctor:
+            if name == "billingAction" and args.get("action") != "payment":
+                deny()
+            if name == "operationsAction" and args.get("action") not in {
+                "book",
+                "reschedule",
+                "check_in",
+                "walk_in",
+            }:
+                deny()
+            if name in {"billingInvoices", "patientServices"} and not args.get("patientId"):
+                deny()
+            if name == "appointments" and (
+                not isinstance(args.get("filters"), dict) or not args["filters"].get("patient_id")
+            ):
+                deny()
+            if name.startswith("diagnostic") and args.get("context", "clinic") != "clinic":
+                deny()
         expected_args = (
             {"organizationId": doctor.code.organization_id}
             if doctor

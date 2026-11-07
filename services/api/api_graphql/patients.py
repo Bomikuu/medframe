@@ -18,6 +18,7 @@ from api_graphql.patient_types import (
     RegisterPatientInput,
     SaveClinicalHistoryInput,
     UpdateDemographicsInput,
+    authorized_portraits,
     clinical_details,
     patient_details,
     patient_summary,
@@ -70,8 +71,11 @@ class PatientQuery:
         items, more, total = services.search_patients(
             info.context.user, organization_id, query, first, after
         )
+        portraits = authorized_portraits(
+            info.context.user, organization_id, [item.id for item in items]
+        )
         return PatientPage(
-            items=[patient_summary(item) for item in items],
+            items=[patient_summary(item, portraits.get(str(item.id))) for item in items],
             end_cursor=items[-1].id if items else None,
             has_next_page=more,
             total_count=total,
@@ -91,8 +95,11 @@ class PatientQuery:
         items, cursor, more, total = services.patient_directory(
             info.context.user, organization_id, query, first, after, sort, branch_id
         )
+        portraits = authorized_portraits(
+            info.context.user, organization_id, [item.id for item in items]
+        )
         return PatientDirectoryPage(
-            items=[patient_summary(item) for item in items],
+            items=[patient_summary(item, portraits.get(str(item.id))) for item in items],
             end_cursor=cursor,
             has_next_page=more,
             total_count=total,
@@ -100,10 +107,11 @@ class PatientQuery:
 
     @strawberry.field
     def recent_patients(self, info: Info, organization_id: UUID) -> list[PatientSummary]:
-        return [
-            patient_summary(item)
-            for item in services.recent_patients(info.context.user, organization_id)
-        ]
+        items = list(services.recent_patients(info.context.user, organization_id))
+        portraits = authorized_portraits(
+            info.context.user, organization_id, [item.id for item in items]
+        )
+        return [patient_summary(item, portraits.get(str(item.id))) for item in items]
 
     @strawberry.field
     @transaction.atomic
@@ -114,7 +122,8 @@ class PatientQuery:
             info.context.user, organization_id, patient_id, "patients.demographics.read"
         )
         audit(info.context.user, "patient.read", organization_id, patient_id)
-        return patient_details(patient)
+        portraits = authorized_portraits(info.context.user, organization_id, [patient.id])
+        return patient_details(patient, portraits.get(str(patient.id)))
 
     @strawberry.field
     @transaction.atomic

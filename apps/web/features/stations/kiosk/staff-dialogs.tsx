@@ -1,9 +1,11 @@
 "use client";
+
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/form-field";
-import { Textarea } from "@/components/ui/textarea";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
 import { StagePaymentPanel } from "./stage-payment-panel";
 import { printTicket } from "./print-ticket";
@@ -179,6 +181,7 @@ export function DepartmentDialog({
 }
 export function StageDialog({
   row: initial,
+  peers,
   branchId,
   timezone,
   departments,
@@ -187,6 +190,7 @@ export function StageDialog({
   run,
 }: {
   row: StaffTicket;
+  peers: StaffTicket[];
   branchId: string;
   timezone: string;
   departments: Department[];
@@ -231,6 +235,37 @@ export function StageDialog({
         <DialogDescription>
           {row.department} · {row.status.replaceAll("_", " ")} · {row.patient_reference}
         </DialogDescription>
+        <section
+          aria-label="Visit service journey"
+          className="grid gap-3 rounded-lg bg-muted/40 p-4"
+        >
+          <h3 className="text-sm font-semibold">One visit across departments</h3>
+          <ol className="grid gap-3">
+            {peers
+              .filter((ticket) => ticket.visit_id === row.visit_id)
+              .sort((a, b) => a.issued_at.localeCompare(b.issued_at))
+              .map((ticket) => (
+                <li key={ticket.id} className="flex flex-wrap justify-between gap-2 text-xs">
+                  <span className="font-medium">
+                    {ticket.label} · {ticket.department}
+                    {ticket.id === row.id ? " · Selected" : ""}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {ticket.status.replaceAll("_", " ")} · Issued{" "}
+                    {new Intl.DateTimeFormat("en-PH", {
+                      timeStyle: "short",
+                      timeZone: timezone,
+                    }).format(new Date(ticket.issued_at))}
+                  </span>
+                </li>
+              ))}
+          </ol>
+          <p className="text-xs leading-5 text-muted-foreground">
+            Stages shown from the loaded branch queue, up to 200 tickets. A transfer continues this
+            visit with a new department ticket. Completion of a queue stage does not finalize the
+            consultation.
+          </p>
+        </section>
         <p className="text-sm leading-6 text-muted-foreground">{row.payment_clearance.message}</p>
         <StagePaymentPanel
           row={row}
@@ -286,20 +321,34 @@ export function StageDialog({
                     : value.replaceAll("_", " "),
             }))}
           />
+          <p className="rounded-lg bg-muted/40 p-3 text-xs leading-5 text-muted-foreground">
+            {target === "transfer"
+              ? "Ends this department stage and issues a ticket in the selected department within the same visit."
+              : target === "skipped"
+                ? "Marks this stage skipped. It does not record treatment or close the whole visit."
+                : target === "called"
+                  ? row.status === "called"
+                    ? "Recalls this ticket. Its queue number stays the same."
+                    : "Calls this ticket to the assigned room or counter."
+                  : target === "completed"
+                    ? "Completes this department stage; clinical notes and invoices retain their own statuses."
+                    : target === "waiting"
+                      ? "Returns this ticket to waiting under the clinic’s queue rules."
+                      : target === "cancelled"
+                        ? "Cancels this department stage; it does not cancel other recorded care or payments."
+                        : target === "priority"
+                          ? "Changes operational priority. It does not change the clinical record."
+                          : "Starts service for this department stage."}
+          </p>
           {target === "in_service" && row.payment_clearance.required && can("billing.adjust") && (
-            <FormField
+            <ReasonField
               id="stage-payment-exception"
               label="Payment exception reason (only if needed)"
-            >
-              <Textarea
-                id="stage-payment-exception"
-                value={exception}
-                onChange={(event) => setException(event.target.value)}
-                maxLength={240}
-                rows={3}
-                placeholder="Why service must proceed before cashier confirmation"
-              />
-            </FormField>
+              value={exception}
+              onValueChange={setException}
+              suggestions={reasonSuggestions.paymentException}
+              hint="Choose only when service is authorized to proceed before cashier confirmation."
+            />
           )}
           {target === "transfer" && (
             <>
@@ -316,6 +365,7 @@ export function StageDialog({
                 <FormSelect
                   id="stage-provider"
                   label="Responsible provider"
+                  personKind="provider"
                   value={provider}
                   onChange={setProvider}
                   options={providers.map((item) => ({ value: item.id, label: item.name }))}
@@ -323,17 +373,14 @@ export function StageDialog({
               )}
             </>
           )}
-          <FormField id="stage-reason" label="Operational reason">
-            <Input
-              id="stage-reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              maxLength={240}
-              required={["skipped", "cancelled", "priority", "transfer", "waiting"].includes(
-                target,
-              )}
-            />
-          </FormField>
+          <ReasonField
+            id="stage-reason"
+            label="Operational reason"
+            value={reason}
+            onValueChange={setReason}
+            suggestions={reasonSuggestions.queue}
+            required={["skipped", "cancelled", "priority", "transfer", "waiting"].includes(target)}
+          />
           <p className="text-xs leading-5 text-muted-foreground">
             Transfer keeps the same visit. Consultation service uses the existing clinical queue;
             completing a queue stage does not finalize clinical notes.

@@ -7,6 +7,7 @@ import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { FormField } from "@/components/form-field";
 import { codeSchema, type CodeValues } from "@/lib/auth/schemas";
@@ -15,12 +16,15 @@ export function MfaVerificationForm({
   busy,
   onSubmit,
   enrollmentUri,
+  canRememberBrowser = false,
 }: {
   busy: boolean;
-  onSubmit: (values: CodeValues) => Promise<void>;
+  onSubmit: (values: CodeValues, trustBrowser?: boolean) => Promise<void>;
   enrollmentUri?: string;
+  canRememberBrowser?: boolean;
 }) {
   const [recovery, setRecovery] = useState(false);
+  const [rememberBrowser, setRememberBrowser] = useState(false);
   const {
     register,
     control,
@@ -37,7 +41,7 @@ export function MfaVerificationForm({
       });
       return;
     }
-    await onSubmit({ code: values.code.toLowerCase() });
+    await onSubmit({ code: values.code.toLowerCase() }, canRememberBrowser && rememberBrowser);
   });
   return (
     <form noValidate onSubmit={submit} className="grid gap-6">
@@ -104,6 +108,26 @@ export function MfaVerificationForm({
           />
         )}
       </FormField>
+      {canRememberBrowser && (
+        <div className="rounded-lg border border-border bg-muted/40 p-4">
+          <div className="flex items-center justify-between gap-4">
+            <label htmlFor="trust-browser" className="cursor-pointer text-sm font-medium">
+              Remember this browser for 30 days
+            </label>
+            <Switch
+              id="trust-browser"
+              checked={rememberBrowser}
+              onCheckedChange={setRememberBrowser}
+              disabled={busy}
+              aria-describedby="trust-browser-help"
+            />
+          </div>
+          <p id="trust-browser-help" className="mt-2 text-xs leading-5 text-muted-foreground">
+            Only on a personal browser. You’ll still enter your password; the extra code is
+            remembered. This does not extend your session.
+          </p>
+        </div>
+      )}
       <Button type="submit" disabled={busy} aria-busy={busy}>
         {busy ? "Verifying…" : "Verify and continue"}
       </Button>

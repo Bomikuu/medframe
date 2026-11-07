@@ -27,6 +27,7 @@ class EncounterType:
     id: UUID
     patient_id: UUID
     patient_name: str
+    patient_portrait_id: UUID | None
     branch_id: UUID
     reason: str
     status: str
@@ -47,6 +48,7 @@ class EncounterType:
 
 def encounter_details(encounter, exact_revision=None):
     from medframe_apps.encounters.services import editable
+    from medframe_apps.stations.portraits import portrait_map
 
     revisions = getattr(encounter, "loaded_revisions", None)
     if revisions is None:
@@ -77,6 +79,7 @@ def encounter_details(encounter, exact_revision=None):
         id=encounter.id,
         patient_id=encounter.patient_id,
         patient_name=encounter.patient.full_name,
+        patient_portrait_id=portrait_map([encounter.patient_id]).get(str(encounter.patient_id)),
         branch_id=encounter.branch_id,
         reason=encounter.reason,
         status=("amended" if latest and latest.version > 1 else encounter.status),

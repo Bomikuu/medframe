@@ -1,0 +1,20 @@
+# Prepared only. No DNS, certificates or public listeners are created by Medframe.
+# Requires existing trusted TLS files and a production Medframe frontend on loopback.
+{
+    auto_https off
+}
+
+https://pixelsbymiku.dev {
+    tls {$MEDFRAME_TLS_CERT} {$MEDFRAME_TLS_KEY}
+
+    @call_socket path /ws/calls/*
+    handle @call_socket {
+        reverse_proxy 127.0.0.1:8000 {
+            header_up Host 127.0.0.1:8000
+        }
+    }
+
+    handle {
+        reverse_proxy 127.0.0.1:3000
+    }
+}

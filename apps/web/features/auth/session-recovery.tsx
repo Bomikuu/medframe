@@ -1,11 +1,28 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import {
+  LogOut,
+  LayoutDashboard,
+  LoaderCircle,
+  ShieldCheck,
+  ChevronDown,
+  RotateCcw,
+  WifiOff,
+} from "lucide-react";
+import { RecoveryState } from "@/components/application/recovery-state";
+import { LoadingInformation } from "@/components/application/loading-information";
 import { Button } from "@/components/ui/button";
 import { sessionRouteSchema } from "@/lib/auth/session-route";
 import { requestWithCsrf, errorMessage } from "@/lib/auth/client";
 
-export function SessionRecovery() {
+export function SessionRecovery({
+  centered = false,
+  showWorkspace = true,
+}: {
+  centered?: boolean;
+  showWorkspace?: boolean;
+}) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   async function signOut() {
@@ -14,24 +31,34 @@ export function SessionRecovery() {
     try {
       await requestWithCsrf("auth/logout", { clear_device: true });
       // A full navigation drops the rejected workspace's client/router state.
-      window.location.replace("/login");
+      window.location.replace(
+        window.location.pathname.startsWith("/portal") ? "/portal/login" : "/login",
+      );
     } catch (cause) {
       setError(errorMessage(cause));
       setBusy(false);
     }
   }
   return (
-    <div className="grid gap-3 border-t border-border pt-4">
-      <div className="flex flex-wrap gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={busy}
-          onClick={() => window.location.assign("/auth/continue")}
-        >
-          Open my workspace
-        </Button>
+    <div className={centered ? "grid gap-4 text-center" : "grid gap-3 border-t border-border pt-4"}>
+      <div className={`flex flex-wrap gap-2 ${centered ? "justify-center" : ""}`}>
+        {showWorkspace && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={busy}
+            onClick={() => window.location.assign("/auth/continue")}
+          >
+            <LayoutDashboard aria-hidden="true" />
+            Open my workspace
+          </Button>
+        )}
         <Button type="button" variant="ghost" disabled={busy} onClick={() => void signOut()}>
+          {busy ? (
+            <LoaderCircle className="animate-spin motion-reduce:animate-none" aria-hidden="true" />
+          ) : (
+            <LogOut aria-hidden="true" />
+          )}
           {busy ? "Signing out…" : "Sign out of this browser"}
         </Button>
       </div>
@@ -48,15 +75,47 @@ export function SessionRecovery() {
   );
 }
 
-export function SessionUnavailable() {
+/** Reset is reserved for blocked/unknown access, never an expired-session call to action. */
+export function SessionRecoveryOptions({ showWorkspace = true }: { showWorkspace?: boolean }) {
   return (
-    <main id="main" className="mx-auto grid max-w-xl gap-5 px-6 py-16">
-      <h1 className="text-2xl font-semibold">We couldn’t check your session</h1>
-      <p role="status" className="text-sm leading-6 text-muted-foreground">
-        Your workspace hasn’t been opened. Retry the session check, or sign out of this browser.
-      </p>
-      <SessionRecovery />
-    </main>
+    <details className="group border-t border-border pt-5 text-sm">
+      <summary className="mx-auto flex w-fit cursor-pointer list-none items-center justify-center gap-2 rounded-md font-medium text-muted-foreground outline-offset-4 focus-visible:outline-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden">
+        Advanced recovery
+        <ChevronDown
+          className="size-4 transition-transform group-open:rotate-180"
+          aria-hidden="true"
+        />
+      </summary>
+      <div className="mt-5">
+        <SessionRecovery centered showWorkspace={showWorkspace} />
+      </div>
+    </details>
+  );
+}
+
+export function SessionUnavailable({ embedded = false }: { embedded?: boolean }) {
+  const Container = embedded ? "section" : "main";
+  return (
+    <Container
+      id={embedded ? undefined : "main"}
+      className={
+        embedded ? "grid w-full place-items-center" : "grid min-h-svh place-items-center px-5 py-8"
+      }
+    >
+      <RecoveryState
+        compact={embedded}
+        level={embedded ? 2 : 1}
+        icon={WifiOff}
+        title="We couldn’t check your session"
+        description="Your workspace hasn’t been opened. Check your connection and retry the session check. If the problem continues, contact your clinic administrator."
+      >
+        <Button type="button" onClick={() => window.location.reload()}>
+          <RotateCcw aria-hidden="true" />
+          Retry session check
+        </Button>
+        <SessionRecoveryOptions />
+      </RecoveryState>
+    </Container>
   );
 }
 
@@ -86,7 +145,16 @@ export function LoginSessionBoundary({ children }: { children: ReactNode }) {
       window.clearTimeout(timeout);
     };
   }, []);
-  if (state === "checking") return <p role="status">Checking your session…</p>;
-  if (state === "failed") return <SessionUnavailable />;
+  if (state === "checking")
+    return (
+      <div className="flex min-h-64 items-center justify-center">
+        <LoadingInformation
+          title="Checking your session"
+          detail="Checking whether this browser already has an active session."
+          icon={ShieldCheck}
+        />
+      </div>
+    );
+  if (state === "failed") return <SessionUnavailable embedded />;
   return children;
 }

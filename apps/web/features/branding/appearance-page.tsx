@@ -54,7 +54,7 @@ export function AppearancePage() {
     <div className="grid min-w-0 gap-6">
       <PageHeading
         title="Appearance"
-        description="Preview changes in your workspace, then save. Personal preferences apply only to you in this clinic."
+        description="Customize your workspace or manage clinic branding. Preview changes before saving."
       />
       <Tabs
         value={scope}
@@ -132,8 +132,7 @@ function OrganizationAppearance({ setPending }: { setPending: (value: boolean) =
     />
   );
   return (
-    <section className="grid min-w-0 gap-6">
-      <h2 className="text-xl font-semibold">Clinic branding</h2>
+    <section aria-label="Clinic branding" className="grid min-w-0 gap-6">
       <form
         noValidate
         className="grid min-w-0 gap-6"
@@ -280,8 +279,7 @@ function PersonalAppearance({ setPending }: { setPending: (value: boolean) => vo
     return () => preview(null, null);
   }, [serializedValues, preview]);
   return (
-    <section className="grid min-w-0 gap-6">
-      <h2 className="text-xl font-semibold">Your preferences</h2>
+    <section aria-label="Your preferences" className="grid min-w-0 gap-6">
       <form
         noValidate
         className="grid min-w-0 gap-6"
@@ -376,13 +374,6 @@ function PersonalAppearance({ setPending }: { setPending: (value: boolean) => vo
           }}
         />
       )}
-      <DocumentPanel
-        purpose="avatar"
-        attachedIds={values.avatar_id ? [values.avatar_id] : []}
-        onAttach={(id, attach) =>
-          form.setValue("avatar_id", attach ? id : null, { shouldDirty: true })
-        }
-      />
     </section>
   );
 }
@@ -406,8 +397,7 @@ function DashboardLayout({ setPending }: { setPending: (value: boolean) => void 
     form.setValue("widgets", updated, { shouldDirty: true });
   }
   return (
-    <section className="grid gap-5 border-t border-border pt-8">
-      <h2 className="text-xl font-semibold">Dashboard layout</h2>
+    <section aria-label="Dashboard layout" className="grid gap-5">
       <form
         noValidate
         className="grid gap-5"

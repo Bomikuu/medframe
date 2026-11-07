@@ -33,6 +33,8 @@ def specialty_setup(request, organization_id):
         ),
         "legacy": [{"code": code, "name": name} for code, name in LEGACY.items()],
         "starters": [item for item in STARTERS if item["specialty"] in selected],
+        "starter_catalog": STARTERS,
+        "starter_revision": 1,
     }
 
 

@@ -10,10 +10,10 @@ import { failureCode, failureText } from "@/features/patients/feedback";
 import { setupSchema } from "./schema";
 
 export function useOperationsSetup(branchId?: string, search = "") {
-  const { organizationId } = useWorkspace();
+  const { organizationId, branchId: currentBranch } = useWorkspace();
   const remote = useRemote(OperationsSetupDocument, {
     organizationId,
-    branchId: branchId || null,
+    branchId: branchId || currentBranch || null,
     search,
   });
   const parsed = setupSchema.safeParse(remote.data?.operationsSetup);
@@ -69,7 +69,9 @@ export function useOperationsAction() {
 export function useOperationsLive(
   scope: { organization?: string; branch?: string; link?: string },
   reload: () => void,
+  options: { pollWhileConnected?: boolean } = {},
 ) {
+  const pollWhileConnected = options.pollWhileConnected ?? true;
   const [connected, setConnected] = useState(false);
   const callback = useRef(reload);
   useEffect(() => {
@@ -84,48 +86,87 @@ export function useOperationsLive(
     let reconnect: ReturnType<typeof setTimeout> | undefined;
     let coalesced: ReturnType<typeof setTimeout> | undefined;
     let backoff = 1000;
+    let revision: number | undefined;
+    let opened = false;
+    let denied = false;
+    let lastReconnectRefresh = 0;
     const refresh = () => {
-      if (coalesced) return;
+      if (stopped || denied || coalesced || document.visibilityState !== "visible") return;
       coalesced = setTimeout(() => {
         coalesced = undefined;
-        if (!stopped) callback.current();
-      }, 200);
+        if (!stopped && !denied) callback.current();
+      }, 750);
     };
     const open = () => {
-      if (stopped) return;
-      const fallback = `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.hostname}:8000/ws/operations`;
-      const url = new URL(process.env.NEXT_PUBLIC_OPERATIONS_WS_URL || fallback);
+      if (stopped || denied) return;
+      const configured = process.env.NEXT_PUBLIC_OPERATIONS_WS_URL;
+      const callOrigin = process.env.NEXT_PUBLIC_CALL_WS_ORIGIN;
+      // The launcher supplies the selected API port; never guess another local service.
+      if (!configured && !callOrigin && location.protocol !== "https:") return;
+      const url = new URL(configured || `${callOrigin || `wss://${location.host}`}/ws/operations`);
       Object.entries(selected).forEach(([name, value]) => {
         if (value) url.searchParams.set(name, value);
       });
-      socket = new WebSocket(url);
-      socket.onopen = () => {
+      const current = new WebSocket(url);
+      socket = current;
+      current.onopen = () => {
+        if (stopped || socket !== current) return;
         setConnected(true);
         backoff = 1000;
-        refresh();
+        // The initial query already loads the page. Only reconnects need catch-up.
+        if (opened && Date.now() - lastReconnectRefresh >= 30000) {
+          lastReconnectRefresh = Date.now();
+          refresh();
+        }
+        opened = true;
       };
-      socket.onmessage = refresh;
-      socket.onclose = (event) => {
+      current.onmessage = (event) => {
+        if (stopped || socket !== current) return;
+        try {
+          const message: unknown = JSON.parse(event.data);
+          if (!message || typeof message !== "object") return;
+          const update = message as { kind?: string; revision?: number };
+          // The server's connection greeting is not a data change.
+          if (
+            update.kind !== "changed" ||
+            typeof update.revision !== "number" ||
+            !Number.isSafeInteger(update.revision)
+          )
+            return;
+          if (revision !== undefined && update.revision <= revision) return;
+          revision = update.revision;
+          refresh();
+        } catch {
+          // Unknown frames do not invalidate the calendar.
+        }
+      };
+      current.onclose = (event) => {
+        if (stopped || socket !== current) return;
         setConnected(false);
-        refresh();
-        if (stopped || event.code === 4403) return;
+        denied = event.code === 4403;
+        if (denied) {
+          clearTimeout(coalesced);
+          coalesced = undefined;
+          // Reauthorize once; do not turn a rejected socket into a refresh loop.
+          callback.current();
+          return;
+        }
         reconnect = setTimeout(open, backoff);
         backoff = Math.min(backoff * 2, 30000);
       };
     };
     open();
     const polling = setInterval(() => {
-      if (document.visibilityState === "visible") refresh();
+      // Queues retain time-based estimate refreshes; calendars poll only when offline.
+      if (!denied && (pollWhileConnected || socket?.readyState !== WebSocket.OPEN)) refresh();
     }, 30000);
-    window.addEventListener("focus", refresh);
     return () => {
       stopped = true;
       socket?.close();
       clearTimeout(reconnect);
       clearTimeout(coalesced);
       clearInterval(polling);
-      window.removeEventListener("focus", refresh);
     };
-  }, [key]);
+  }, [key, pollWhileConnected]);
   return connected;
 }

@@ -1,5 +1,8 @@
 "use client";
 
+import { WorkspaceLoading } from "@/components/application/workspace-loading";
+import { RecordUnavailable } from "@/components/application/record-unavailable";
+
 import {
   createContext,
   useCallback,
@@ -35,6 +38,14 @@ export function ThemeProvider({
   children: ReactNode;
 }) {
   const remote = useRemote(AppearanceDocument, { organizationId });
+  if (!remote.data && !remote.error)
+    return (
+      <WorkspaceLoading
+        title="Applying your preferences"
+        detail="Preparing your clinic’s appearance and workspace settings."
+        retry={remote.reload}
+      />
+    );
   if (!remote.data)
     return (
       <main className="p-8">
@@ -44,9 +55,14 @@ export function ThemeProvider({
   const parsed = appearanceSchema.safeParse(remote.data.clinicAppearance);
   if (!parsed.success)
     return (
-      <p role="alert" className="p-8">
-        Appearance settings could not be read. Reload the page.
-      </p>
+      <main id="main" className="grid min-h-svh place-items-center px-5 py-8">
+        <RecordUnavailable
+          compact={false}
+          title="Workspace settings are unavailable"
+          description="We couldn’t read the appearance settings for this clinic. Retry, or contact your clinic administrator if the problem continues."
+          retry={remote.reload}
+        />
+      </main>
     );
   return (
     <EffectiveTheme key={organizationId} initial={parsed.data}>

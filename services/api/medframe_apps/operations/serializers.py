@@ -27,6 +27,9 @@ def appointment_details(row, *, portal=False):
         "resource_id": str(row.resource_id) if row.resource_id else None,
         "resource": row.resource.name if row.resource_id else None,
     }
+    online = getattr(row, "online_room", None)
+    value["online_room_id"] = str(online.id) if online else None
+    value["online_timing_mode"] = online.timing_mode if online else None
     if not portal:
         value.update(
             {
@@ -175,17 +178,23 @@ def queue_snapshot(request, organization_id, branch_id, provider_id=None, after=
             request, organization_id, row.patient_id, row.provider_id, branch_id
         )
         items.append(item)
-    return {
-        "items": items,
-        "waiting": sum(row.status in {"waiting", "called"} for row in tickets),
-        "in_service": sum(row.status == "in_service" for row in tickets),
-        "revision": revision,
-        "updated_at": now.isoformat(),
-        "truncated": len(tickets) > 50,
-        "end_cursor": end_cursor,
-        "has_next_page": end_cursor is not None,
-        "timezone": branch.organization.timezone,
-    }
+    from medframe_apps.operations.portraits import attach_portraits
+
+    return attach_portraits(
+        request,
+        organization_id,
+        {
+            "items": items,
+            "waiting": sum(row.status in {"waiting", "called"} for row in tickets),
+            "in_service": sum(row.status == "in_service" for row in tickets),
+            "revision": revision,
+            "updated_at": now.isoformat(),
+            "truncated": len(tickets) > 50,
+            "end_cursor": end_cursor,
+            "has_next_page": end_cursor is not None,
+            "timezone": branch.organization.timezone,
+        },
+    )
 
 
 def patient_operations(request, link_id, now=None):

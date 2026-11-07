@@ -1,126 +1,97 @@
 "use client";
 
-import { FinancialOverviewPanel } from "@/features/billing/analytics/financial-overview";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { CalendarDays, ChartNoAxesCombined, Search, Sun, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
-
-import { PatientAvatar } from "@/components/application/patient-avatar";
-import { EmptyState } from "@/components/application/empty-state";
-import Link from "next/link";
-import { ArrowRightIcon, PlusIcon, MagnifyingGlassIcon } from "@/components/icons";
-import { PatientDashboardDocument, type PatientDashboardQuery } from "@/lib/graphql/generated";
-import { useRemote } from "@/features/patients/use-remote";
-import { PageHeading, LoadState, dateLabel } from "@/features/patients/feedback";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { AnalyticsPage } from "@/features/analytics/analytics-page";
+import { PatientSearchDialog } from "@/features/patients/patient-search-dialog";
+import { localDate } from "@/features/operations/schema";
+import { dayLabel } from "@/features/operations/calendar-dates";
 import { useWorkspace } from "./workspace-provider";
-import { ClinicalWidgets } from "./clinical-widgets";
-
+import { useUrlState } from "./use-url-state";
+import { TodayWorkspace } from "./today-workspace";
 import { SetupChecklist, useClinicSetup } from "./setup-checklist";
-import { PlatformLink } from "@/features/platform/clinic-invitations";
 
 export function ClinicOverview() {
-  const { workspace, can, href } = useWorkspace();
+  const { workspace, overview, can, href, organizationId, branchId } = useWorkspace();
+  const router = useRouter();
+  const [tab, setTab] = useUrlState("dashboard", "today", ["today", "analytics"]);
+  const [search, setSearch] = useState(false);
   const setup = useClinicSetup();
-  const checkingSetup = setup.loading && !setup.state;
-  const firstRun = setup.state?.available && !setup.state.dismissed && !setup.state.has_patient;
+  const today = localDate(workspace.organization.timezone);
+  const name = overview.currentUser.displayName
+    .trim()
+    .replace(/^(dr\.?|doctor)\s+/i, "")
+    .split(/\s+/)[0];
   return (
-    <>
-      <PageHeading
-        title="Dashboard"
-        description={`${workspace.organization.name} · ${workspace.branches.map((branch) => branch.name).join(", ")}`}
-      >
-        {can("patients.demographics.read") && (
-          <ButtonLink variant="outline" href={href("/clinic/patients")}>
-            <MagnifyingGlassIcon />
-            Find patient
-          </ButtonLink>
-        )}
-        {can("patients.register") && (
-          <ButtonLink href={href("/clinic/patients/new")}>
-            <PlusIcon />
-            Register patient
-          </ButtonLink>
-        )}
-      </PageHeading>
-      <div className="mb-4">
-        <PlatformLink />
-      </div>
-      <SetupChecklist model={setup} />
-      {can("billing.read") && !firstRun && !checkingSetup && (
-        <div className="mb-6">
-          <FinancialOverviewPanel compact />
+    <div className="grid min-w-0 gap-6">
+      <header className="flex flex-wrap items-start justify-between gap-5">
+        <div>
+          <p className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+            <CalendarDays aria-hidden className="size-4 text-teal-ink" />
+            {dayLabel(today)}
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {name ? `Welcome back, ${name}` : "Your clinic dashboard"}
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+            Your patients, today’s work, and what needs attention.
+          </p>
         </div>
-      )}
-      {checkingSetup ? (
-        <LoadState
-          error={setup.error}
-          retry={setup.reload}
-          title="Checking clinic setup"
-          detail="Retrieving saved setup progress before showing your clinic summaries."
-        />
-      ) : firstRun ? (
-        <p className="max-w-prose text-sm leading-7 text-muted-foreground">
-          Your patient and activity summaries will appear here as your team begins using the clinic.
-        </p>
-      ) : can("patients.demographics.read") ? (
-        <PatientOverview />
-      ) : (
-        <p className="max-w-prose text-sm leading-7 text-muted-foreground">
-          Your organization is connected. Contact your clinic administrator if you need
-          patient-management permissions.
-        </p>
-      )}
-    </>
-  );
-}
-
-function PatientOverview() {
-  const { organizationId } = useWorkspace();
-  const { data, error, reload } = useRemote(PatientDashboardDocument, { organizationId });
-  if (!data) return <LoadState error={error} retry={reload} />;
-  return (
-    <div className="grid gap-6">
-      <ClinicalWidgets recentPatients={<RecentPatients patients={data.recentPatients} />} />
-    </div>
-  );
-}
-
-function RecentPatients({ patients }: { patients: PatientDashboardQuery["recentPatients"] }) {
-  const { href } = useWorkspace();
-  return (
-    <section>
-      <h2 className="text-xl font-semibold">Recently opened patients</h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        Patient records you have opened and can still access.
-      </p>
-      {patients.length ? (
-        <ul className="mt-5 divide-y divide-border">
-          {patients.map((patient) => (
-            <li key={patient.id}>
-              <Link
-                href={href(`/clinic/patients/${patient.id}`)}
-                className="-mx-2 flex items-center justify-between gap-4 rounded-lg px-2 py-4 transition-colors hover:bg-surface-hover hover:text-primary"
-              >
-                <div className="flex min-w-0 items-center gap-3">
-                  <PatientAvatar name={patient.fullName} />
-                  <div className="min-w-0">
-                    <span className="block font-medium wrap-anywhere">{patient.fullName}</span>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {patient.reference} · {dateLabel(patient.dateOfBirth)}
-                    </span>
+        <div className="flex flex-wrap gap-2">
+          {can("patients.demographics.read") && (
+            <Button variant="outline" onClick={() => setSearch(true)}>
+              <Search aria-hidden className="size-4" />
+              Find patient
+            </Button>
+          )}
+          {can("patients.register") && (
+            <ButtonLink href={href("/clinic/patients/new")}>
+              <UserPlus aria-hidden className="size-4" />
+              Register patient
+            </ButtonLink>
+          )}
+        </div>
+      </header>
+      <Tabs value={tab} onValueChange={setTab} className="min-w-0 gap-5">
+        <TabsList aria-label="Dashboard view" className="h-12 w-fit rounded-full bg-muted p-1">
+          <TabsTrigger value="today" className="min-h-10 rounded-full px-5">
+            <Sun aria-hidden className="size-4" />
+            Today
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="min-h-10 rounded-full px-5">
+            <ChartNoAxesCombined aria-hidden className="size-4" />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="today">
+          {tab === "today" && (
+            <div className="grid min-w-0 gap-6">
+              <TodayWorkspace key={`${organizationId}:${branchId}`} />
+              {setup.state?.available && !setup.state.dismissed && (
+                <details className="rounded-xl border border-border bg-card p-4">
+                  <summary className="cursor-pointer text-sm font-semibold">
+                    Finish setting up your clinic
+                  </summary>
+                  <div className="mt-4">
+                    <SetupChecklist model={setup} />
                   </div>
-                </div>
-                <ArrowRightIcon className="shrink-0" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="mt-5">
-          <EmptyState
-            title="No recently opened patients"
-            description="Find or register a patient to begin."
-          />
-        </div>
-      )}
-    </section>
+                </details>
+              )}
+            </div>
+          )}
+        </TabsContent>
+        <TabsContent value="analytics">{tab === "analytics" && <AnalyticsPage />}</TabsContent>
+      </Tabs>
+      <PatientSearchDialog
+        open={search}
+        onOpenChange={setSearch}
+        branchId={branchId}
+        select={(patient) => router.push(href(`/clinic/patients/${patient.id}`))}
+      />
+    </div>
   );
 }

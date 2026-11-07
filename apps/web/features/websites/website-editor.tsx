@@ -1,8 +1,12 @@
 "use client";
 
+import { PublicationReview } from "./publication-review";
+import { AccessRequired } from "@/components/application/access-required";
+
 import { useState, useCallback } from "react";
 import { ClientError } from "graphql-request";
-import { useForm, useWatch, type FieldPathValue } from "react-hook-form";
+import { Controller, useForm, useWatch, type FieldPathValue } from "react-hook-form";
+import { PhoneInput } from "@/components/application/phone-input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -48,7 +52,12 @@ export function WebsiteWorkspace() {
   );
   const parsed = setupSchema.safeParse(remote.data?.websiteSetup);
   if (!can("organization.manage"))
-    return <p role="alert">Clinic administrator access is required to manage a website.</p>;
+    return (
+      <AccessRequired
+        title="Website administration access required"
+        description="Clinic administrator access is required to manage a website."
+      />
+    );
   if (!parsed.success)
     return (
       <LoadState
@@ -314,11 +323,19 @@ function WebsiteEditor({
                           maxLength={key === "hours" ? 1000 : 500}
                           {...form.register(key)}
                         />
+                      ) : key === "phone" ? (
+                        <Controller
+                          name="phone"
+                          control={form.control}
+                          render={({ field }) => (
+                            <PhoneInput {...field} id="site-phone" onValueChange={field.onChange} />
+                          )}
+                        />
                       ) : (
                         <Input
                           id={`site-${key}`}
-                          type={key === "email" ? "email" : "tel"}
-                          maxLength={key === "email" ? 160 : 40}
+                          type="email"
+                          maxLength={160}
                           {...form.register(key)}
                         />
                       )}
@@ -554,7 +571,7 @@ function WebsiteEditor({
         </section>
       </div>
       <AlertDialog open={review} onOpenChange={setReview}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
           <AlertDialogTitle>Publish this clinic website?</AlertDialogTitle>
           <AlertDialogDescription>
             The saved draft, selected images, contact details and public biographies will become
@@ -566,6 +583,7 @@ function WebsiteEditor({
               {content.seo_description || "Add a search description before publication"}
             </p>
           </div>
+          <PublicationReview content={content} assets={initial.assets} />
           <label className="flex items-start gap-3 text-sm leading-6">
             <Checkbox checked={approved} onCheckedChange={(v) => setApproved(v === true)} />I
             reviewed this content and these images and approve them for public release.

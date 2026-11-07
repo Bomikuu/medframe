@@ -1,0 +1,35 @@
+# Patient-first registration — October 20, 2026
+
+## Delivered scope
+
+The user selected email first; mobile verification is deferred until SMS is configured. This native implementation adds a reusable enabled/disabled registration link per branch, email-code ownership proof, minimal self/guardian intake and pending/accepted/declined application state. Submission creates no patient, account or portal link. Patients visit `/portal/register/[token]`; no public clinic directory was introduced.
+
+Staff open Patients → Registration requests, choose a permitted branch, explicitly create/copy the reusable link, review pending requests and accept or decline. Acceptance uses existing native register_patient/require_patient/issue_invitation inside one transaction. It requires identity/guardian attestation and existing permissions. Potential duplicates block creation; only authorized matching patient choices are displayed. The native invitation continues existing account/password/MFA activation. No original credentials, MFA configuration, roles or patient grants were changed.
+
+Code proofs use keyed hashes, ten-minute expiry, per-session/link binding, five attempts, resend invalidation and existing IP/contact throttles. A verified proof lasts thirty minutes and permits idempotent intake; it never authenticates a patient. Email code payloads use the existing encrypted outbox and local mail worker. Existing public device restrictions remain; these endpoints do not provide a Station authorization bypass. Reviews are attributed/versioned/audited. Earlier patient/guardian invitations remain supported.
+
+## Preservation and activation
+
+Private current-source/uncommitted-diff checkpoints are in Git-ignored `.medframe-runtime`. Root launcher stopped owned services, then created encrypted checkpoint `/home/micxsz/.local/share/medframe/checkpoints/pre-batch2-20261020-181544-a89bd41` and verified an isolated restore `medframe_django_launcher_20261020_101542_0dce67`: 154 original tables verified, `source_written=false`. Additive portal.0004 creates RegistrationEntry, RegistrationContact and PatientApplication; existing schemas were not replaced. Automatic Django metadata permissions are not assigned to roles. No clone was restored/imported over the original.
+
+The launcher initially refused a transient port3000 bind after shutdown; inspection showed no listening process, and activation continued once the socket was available. No unmanaged process was killed and no launcher behavior was changed. Migration applied successfully. Current original database is medframe_django. API3191413, worker3191625, scheduler3191626 and dev web3186847 are launcher-owned; UI uses `.next-local-dev`. No production build was run. The old `.next-patient-actions` artifact remains a source/UI fallback, but reverting UI does not remove additive tables.
+
+One explicit synthetic visual fixture created an inactive unusable-password user (no membership or grants), a synthetic organization/branch and an entry. Browser registration created only synthetic proof/intake/session/audit/outbox records; no synthetic patient or portal grant was created. These are new isolated development records, not imported review data. Fixture identifiers are privately recorded in `.medframe-runtime/patient-registration-visual.json`. The real clinics were not auto-enabled; staff explicitly create their branch link through the UI.
+
+## Actual tools
+
+Impeccable context loaded for the new public registration surface; incumbent design and craft floor informed the UI. Native-only execution, no subagents. Prettier formatted authored frontend files; Ruff formatted Python and the generated migration. No build, TypeScript, lint, automated test suite or detector was run, following the user's visual-only instruction. Django makemigrations/migrate and launcher readiness are schema/runtime operations, not claims of test coverage.
+
+Graphify initial root query `patient registration review verification portal` traversed the stale1150-node root graph and returned a truncated548-node neighborhood. Direct source inspection verified portal invitation/MFA, kiosk review, native registration, scope policy, proxy and outbox owners. Focused AST refresh: frontend8 files/111 nodes/178 edges; backend16 files/188 nodes/440 edges. `config/urls.py` yielded no symbols (routing is data); route wiring was inspected in source. Later proxy allowlist activation repair was directly inspected; no whole-repository or dynamic authorization coverage claim. Graphs live under graphify-out/patient-registration-frontend and -backend and contain source only.
+
+Jev received sanitized generic engineering state: separate pending intake with native acceptance versus immediate auto-link after email verification. It selected `pending`, confidence1.0, jev-1.13.0;378 input/31 output tokens. No patient data, credentials, private attachments or verification codes were sent. This judgment is not security or functional verification.
+
+## Bounded visual evidence and acceptance limits
+
+Initial manual browser inspection captured the actual review-detail component in a synthetic in-memory modal at desktop and phone widths. It showed identity attestation, guarded acceptance and a duplicate matching control; no backend review action was executed. The temporary fixture route was removed.
+
+Initial native public link capture exposed PATIENT-REGISTRATION-001: exact frontend proxy allowlist omitted the new endpoints and returned “This endpoint is unavailable.” Necessary activation repair added only the public/manage paths, preserving native CSRF/origin checks. A focused continuation established native public bootstrap, synthetic email request, actual local Mailpit code delivery, six-slot code entry/verification, patient-details form, synthetic submission and pending-review screen. Settled phone measurement: viewport390/document375, no horizontal document overflow. No external email/SMS was sent; local SMTP captured the code. Some resize captures reflected a different selected tab before a focused public tab was opened; only settled measured captures support phone claims. Pending-state reload confirmation is appended below. Viewport override reset.
+
+Native acceptance/link/decline, staff link creation/copy/toggle, guardian, code-expiry/wrong-attempt/resend, cross-tenant denial, concurrency and account activation were implemented/source-inspected but not exercised end to end in this bounded visual pass. No broad security/complete-flow acceptance claim. Deferred findings remain deferred; this phase does not override older unrelated error logs.
+
+Pending-review state and identical request reference persisted after a native page reload. The synthetic registration entry was then disabled as cleanup; its new isolated records remain auditable. No real clinic was enabled or changed. Final focused Graphify refresh also includes the repaired proxy, shared CSRF client and public route: frontend11 files/121 nodes/200 edges; backend16 files/188 nodes/440 edges. Launcher status confirms API/worker/scheduler/dev web running, with no production build.

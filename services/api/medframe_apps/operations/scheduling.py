@@ -42,16 +42,20 @@ def resolve_local(value, zone):
     return candidates.pop()
 
 
-def windows(provider, branch, day):
+def windows(provider, branch, day, *, proposed=None):
     zone = ZoneInfo(branch.organization.timezone)
     overrides = ScheduleOverride.objects.filter(branch=branch, date=day).filter(
         Q(provider=provider) | Q(provider__isnull=True)
     )
-    if overrides.filter(closed=True).exists():
+    overrides = list(overrides)
+    if proposed is not None:
+        overrides = [row for row in overrides if row.provider_id != proposed.provider_id]
+        overrides.append(proposed)
+    if any(row.closed for row in overrides):
         return []
-    chosen = list(overrides.filter(provider=provider)) or list(
-        overrides.filter(provider__isnull=True)
-    )
+    chosen = [row for row in overrides if row.provider_id == provider.id] or [
+        row for row in overrides if row.provider_id is None
+    ]
     sources = chosen or list(
         ProviderSchedule.objects.filter(
             provider=provider,
@@ -155,6 +159,66 @@ def save_schedule(request, organization_id, data, request_id):
         request.user, organization_id, "operations.schedule", request_id, values, row.id
     )
     return row
+
+
+@transaction.atomic
+def save_weekly_schedule(request, organization_id, data, request_id):
+    from uuid import UUID, uuid5
+
+    from medframe_apps.operations.inputs import WeeklyScheduleInput
+
+    parsed = parse(WeeklyScheduleInput, data)
+    _, provider, branch = scope(
+        request, organization_id, parsed.branch_id, parsed.provider_id, "schedules.manage"
+    )
+    advisory_lock(f"operations-provider:{provider.membership.user_id}")
+    values = parsed.model_dump(mode="json")
+    previous = replay_request(
+        request.user, organization_id, "operations.weekly-schedule", request_id, values
+    )
+    if previous:
+        return ProviderSchedule.objects.get(id=previous, provider=provider, branch=branch)
+    saved = []
+    for item in parsed.windows:
+        overlap = ProviderSchedule.objects.filter(
+            provider=provider,
+            branch=branch,
+            active=True,
+            weekday=item.weekday,
+            effective_from__lte=item.effective_to,
+            effective_to__gte=item.effective_from,
+            opens__lt=item.closes,
+            closes__gt=item.opens,
+        )
+        if item.id:
+            overlap = overlap.exclude(id=item.id)
+        if item.active and overlap.exists():
+            weekday = [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+            ][item.weekday]
+            raise DomainError(
+                "CONFLICT",
+                f"{weekday} overlaps an existing weekly window. Edit that window or choose separate hours.",
+                409,
+            )
+        saved.append(
+            save_schedule(
+                request,
+                organization_id,
+                item.model_dump(mode="json"),
+                uuid5(UUID(str(request_id)), f"weekday:{item.weekday}"),
+            )
+        )
+    record_request_result(
+        request.user, organization_id, "operations.weekly-schedule", request_id, values, saved[0].id
+    )
+    return saved[0]
 
 
 @transaction.atomic
@@ -292,4 +356,17 @@ def slots(provider, branch, data, exclude_appointment=None, patient=None):
 def available_slots(request, organization_id, data):
     data = parse(AvailabilityInput, data)
     _, provider, branch = scope(request, organization_id, data.branch_id, data.provider_id)
+    if data.appointment_id:
+        from medframe_apps.operations.appointments import appointment_scope
+
+        appointment = appointment_scope(request, data.appointment_id)
+        if (
+            appointment.organization_id != organization_id
+            or appointment.branch_id != branch.id
+            or appointment.provider_id != provider.id
+            or appointment.resource_id != data.resource_id
+            or appointment.status != "booked"
+        ):
+            raise DomainError("INVALID_INPUT", "Choose this booking's assigned provider and room.")
+        return slots(provider, branch, data, appointment.id, appointment.patient)
     return slots(provider, branch, data)

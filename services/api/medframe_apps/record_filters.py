@@ -37,19 +37,19 @@ def parse_filters(value):
         raise DomainError("INVALID_INPUT", "Check the record filters and date range.") from None
 
 
-def filter_dates(queryset, filters, timezone_name):
+def filter_dates(queryset, filters, timezone_name, *, field="created_at"):
     try:
         zone = ZoneInfo(timezone_name)
     except ZoneInfoNotFoundError:
         raise DomainError("UNAVAILABLE", "The clinic timezone needs configuration.", 503) from None
     if filters.date_from:
         start = datetime.combine(filters.date_from, time.min, zone).astimezone(UTC)
-        queryset = queryset.filter(created_at__gte=start)
+        queryset = queryset.filter(**{f"{field}__gte": start})
     if filters.date_to:
         if filters.date_to == date.max:
             raise DomainError("INVALID_INPUT", "Choose a supported date range.")
         stop = datetime.combine(filters.date_to + timedelta(days=1), time.min, zone).astimezone(UTC)
-        queryset = queryset.filter(created_at__lt=stop)
+        queryset = queryset.filter(**{f"{field}__lt": stop})
     return queryset
 
 

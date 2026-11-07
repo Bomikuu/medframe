@@ -1,5 +1,7 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
 import { useState } from "react";
 import { flushSync } from "react-dom";
 import { Button } from "@/components/ui/button";
@@ -63,7 +65,9 @@ export function PaymentConfirmation({
             {row.branch_name} · {row.invoice_number}
           </p>
         </header>
-        <p className="text-lg font-semibold">{row.patient_name}</p>
+        <p className="text-lg font-semibold">
+          <PersonIdentity kind="patient" name={row.patient_name} />
+        </p>
         {row.invoice_state === "void" && (
           <p className="font-semibold text-destructive">
             Invoice voided. This document preserves the original payment record.
@@ -111,6 +115,38 @@ export function PaymentConfirmation({
             </dd>
           </div>
         </dl>
+        {!!row.refunds?.length && (
+          <section
+            aria-label="Returns from this payment"
+            className="grid gap-3 border-t border-border pt-5"
+          >
+            <h3 className="text-sm font-semibold">Returns from this payment</h3>
+            <ol className="divide-y divide-border">
+              {row.refunds.map((refund) => (
+                <li key={refund.id} className="grid gap-1 py-3 text-sm">
+                  <p className="flex flex-wrap justify-between gap-2">
+                    <span>{dateLabel(refund.paid_date)}</span>
+                    <strong className="tabular-nums">
+                      <Money value={refund.amount} code={row.currency} />
+                    </strong>
+                  </p>
+                  {refund.reason && (
+                    <p className="whitespace-pre-wrap text-muted-foreground">{refund.reason}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Recorded {time(refund.recorded_at)}
+                    {refund.actor ? ` · ${refund.actor}` : ""}
+                  </p>
+                </li>
+              ))}
+            </ol>
+            <p className="text-xs leading-5 text-muted-foreground">
+              {row.refunds_truncated ? "Latest 20 refunds shown; totals include all returns. " : ""}
+              Each return belongs to this source payment. The return date can differ from the date
+              it was recorded.
+            </p>
+          </section>
+        )}
         <footer className="grid gap-2 border-t border-border pt-5 text-xs text-muted-foreground">
           <p className="break-all">Source payment: {row.payment.id}</p>
           <p>

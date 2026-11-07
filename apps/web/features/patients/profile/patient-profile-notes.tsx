@@ -1,4 +1,6 @@
 "use client";
+
+import { RecordUnavailable } from "@/components/application/record-unavailable";
 import { usePatientRecordReadOnly } from "./patient-record-browse";
 
 import { useState } from "react";
@@ -77,13 +79,13 @@ function SavedConsultation({ encounterId, patientId }: { encounterId: string; pa
   if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
   const encounter = remote.data.encounter;
   if (encounter.patientId !== patientId)
-    return <p role="alert">This consultation belongs to another patient.</p>;
+    return (
+      <RecordUnavailable description="This consultation belongs to another patient. Contact your clinic administrator if the problem continues." />
+    );
   const parsed = draftSchema.safeParse(encounter.content);
   if (!parsed.success)
     return (
-      <p role="alert">
-        These saved notes could not be read. Open the consultation to review the record.
-      </p>
+      <RecordUnavailable description="These saved notes could not be read. Open the consultation to review the record." />
     );
   const content = parsed.data;
   const open = href(`/clinic/consultations/${encounterId}`);

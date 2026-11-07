@@ -1,4 +1,6 @@
 "use client";
+
+import { RecordUnavailable } from "@/components/application/record-unavailable";
 import { z } from "zod";
 import { DentalChartDocument } from "@/lib/graphql/generated";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
@@ -12,7 +14,10 @@ export function PatientDentalChart({ patientId }: { patientId: string }) {
   const remote = useRemote(DentalChartDocument, { organizationId, patientId });
   if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
   const parsed = z.array(findingSchema).safeParse(remote.data.dentalChart);
-  if (!parsed.success) return <p role="alert">The recorded dental chart could not be read.</p>;
+  if (!parsed.success)
+    return (
+      <RecordUnavailable description="The recorded dental chart could not be read. Contact your clinic administrator if the problem continues." />
+    );
   return (
     <div className="grid gap-5 rounded-lg border border-border p-4 sm:p-6">
       <RemoteNotice error={remote.error} retry={remote.reload} />

@@ -1,4 +1,9 @@
 "use client";
+
+import { DiagnosticProgress } from "./diagnostic-progress";
+
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -111,6 +116,7 @@ function RequestBody({
         </span>
         <span className="px-3 py-2">{row.center_name ?? "Awaiting center selection"}</span>
       </div>
+      <DiagnosticProgress row={row} />
       <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <section className="grid min-w-0 gap-5 rounded-xl border border-border bg-card p-5 sm:p-6">
           <h2 className="text-xl font-semibold">Request package</h2>
@@ -306,17 +312,13 @@ function RequestBody({
                 </p>
               </>
             )}
-          <FormField
+          <ReasonField
             id="dx-reason"
             label="Reason for decline, recall, cancellation or sharing change"
-          >
-            <Textarea
-              id="dx-reason"
-              maxLength={240}
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-            />
-          </FormField>
+            value={reason}
+            onValueChange={setReason}
+            suggestions={reasonSuggestions.diagnostics}
+          />
           <div className="flex flex-wrap gap-3">
             {context === "center" && row.state === "sent" && (
               <Button

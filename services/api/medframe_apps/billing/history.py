@@ -102,6 +102,17 @@ def payment_confirmation(invoice, payment_id, *, portal=False):
         "refunded": amount_text(payment.returned),
         "retained": amount_text(payment.amount - payment.returned),
         "outstanding": amount_text(invoice_totals(invoice)["outstanding"]),
+        "refunds": [
+            {
+                "id": str(row.id),
+                "amount": amount_text(row.amount),
+                "paid_date": row.paid_date.isoformat(),
+                "recorded_at": row.created_at.isoformat(),
+                **({} if portal else {"actor": row.actor.display_name, "reason": row.reason}),
+            }
+            for row in payment.refunds.select_related("actor").order_by("-created_at", "-id")[:20]
+        ],
+        "refunds_truncated": payment.refunds.count() > 20,
         "payment": payment_data(payment, portal=portal),
     }
 

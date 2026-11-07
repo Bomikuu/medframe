@@ -64,7 +64,7 @@ def recover(request):
     email = json_object(request).get("email", "")
     throttle(request, "recovery", str(email).strip().lower(), 3, 3600)
     services.request_password_reset(email, realm="patient")
-    return JsonResponse({"message": "If an active account matches, a reset link will be sent."})
+    return JsonResponse({"message": "Reset link requested. Check your inbox."})
 
 
 @require_POST

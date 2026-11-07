@@ -1,8 +1,15 @@
 "use client";
 
+import { PersonIdentity } from "@/components/application/person-identity";
+
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/application/phone-input";
+import { phoneError } from "@/lib/contact-format";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FormField } from "@/components/form-field";
@@ -31,14 +38,14 @@ export function WalkInDetails({
   onClose: () => void;
   onSave: (identity: WalkInIdentity) => void;
 }) {
-  const { organizationId, workspace, can } = useWorkspace();
+  const { organizationId, workspace, can, branchId: currentBranch } = useWorkspace();
   const [mode, setMode] = useState(initialPatient ? "existing" : "choose");
   const [patient, setPatient] = useState(initialPatient);
   const [name, setName] = useState("");
   const [birth, setBirth] = useState("");
   const [sex, setSex] = useState("not_recorded");
   const [phone, setPhone] = useState("");
-  const [branch, setBranch] = useState(workspace.branches[0]?.id ?? "");
+  const [branch, setBranch] = useState(currentBranch);
   const [reason, setReason] = useState("");
   const [verified, setVerified] = useState(false);
   const selected = useRemote(
@@ -111,7 +118,9 @@ export function WalkInDetails({
             {mode === "existing" && patient && (
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 p-4">
                 <div>
-                  <p className="font-semibold">{patient.fullName}</p>
+                  <p className="font-semibold">
+                    <PersonIdentity kind="patient" name={patient.fullName} />
+                  </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {patient.reference} · {patient.dateOfBirth || "Birth date not recorded"}
                   </p>
@@ -161,19 +170,17 @@ export function WalkInDetails({
                       { value: "intersex", label: "Intersex" },
                     ]}
                   />
-                  <FormField id="walkInPhone" label="Phone (optional)">
-                    <Input
-                      id="walkInPhone"
-                      type="tel"
-                      autoComplete="tel"
-                      maxLength={40}
-                      value={phone}
-                      onChange={(event) => setPhone(event.target.value)}
-                    />
+                  <FormField
+                    id="walkInPhone"
+                    label="Phone (optional)"
+                    hint="Philippines: +63, without the leading 0."
+                    error={phoneError(phone)}
+                  >
+                    <PhoneInput id="walkInPhone" value={phone} onValueChange={setPhone} />
                   </FormField>
                   <FormSelect
                     id="walkInBranch"
-                    label="Clinic branch"
+                    label="Registration branch"
                     value={branch}
                     onChange={setBranch}
                     options={workspace.branches.map((b) => ({ value: b.id, label: b.name }))}
@@ -181,15 +188,14 @@ export function WalkInDetails({
                 </div>
               </div>
             )}
-            <FormField id="walkInReason" label="Reason for consultation">
-              <Input
-                id="walkInReason"
-                value={reason}
-                onChange={(event) => setReason(event.target.value)}
-                maxLength={240}
-                required
-              />
-            </FormField>
+            <ReasonField
+              id="walkInReason"
+              label="Reason for consultation"
+              value={reason}
+              onValueChange={setReason}
+              suggestions={reasonSuggestions.visit}
+              required
+            />
             <label className="flex items-start gap-3 text-sm leading-6">
               <Checkbox
                 className="mt-1"
@@ -218,7 +224,7 @@ export function WalkInDetails({
                 !branchId ||
                 !reason.trim() ||
                 mode === "choose" ||
-                (mode === "new" && !name.trim())
+                (mode === "new" && (!name.trim() || !!phoneError(phone)))
               }
             >
               {busy ? "Saving patient-linked care…" : "Save & open review"}

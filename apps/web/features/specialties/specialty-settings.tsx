@@ -1,5 +1,6 @@
 "use client";
 
+import { StarterPreview } from "./starter-preview";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -55,6 +56,7 @@ function SpecialtyForm({ initial }: { initial: SpecialtySetup }) {
     },
   });
   const codes = useWatch({ control: form.control, name: "codes" });
+  const [preview, setPreview] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
@@ -90,9 +92,8 @@ function SpecialtyForm({ initial }: { initial: SpecialtySetup }) {
       })}
     >
       <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
-        Selections enable template choices. They do not verify professional credentials or change a
-        provider’s specialty. Removing a selection preserves existing consultations and template
-        history.
+        Enable specialties for consultation templates. This doesn’t change provider credentials or
+        specialties; existing records are preserved.
       </p>
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-4">
         <p className="text-sm">
@@ -116,7 +117,7 @@ function SpecialtyForm({ initial }: { initial: SpecialtySetup }) {
               {initial.catalog
                 .filter((o) => o.category === category)
                 .map((o) => (
-                  <label
+                  <div
                     key={o.code}
                     className="flex min-h-14 items-center justify-between gap-4 py-3"
                   >
@@ -137,24 +138,36 @@ function SpecialtyForm({ initial }: { initial: SpecialtySetup }) {
                         </span>
                       )}
                     </span>
-                    <Switch
-                      aria-label={o.name}
-                      disabled={!o.active && !codes.includes(o.code)}
-                      checked={codes.includes(o.code)}
-                      onCheckedChange={(enabled) =>
-                        form.setValue(
-                          "codes",
-                          enabled ? [...codes, o.code] : codes.filter((c) => c !== o.code),
-                          { shouldDirty: true },
-                        )
-                      }
-                    />
-                  </label>
+                    <div className="flex shrink-0 items-center gap-3">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        aria-label={`Preview ${o.name} documentation`}
+                        onClick={() => setPreview(o.code)}
+                      >
+                        Preview
+                      </Button>
+                      <Switch
+                        aria-label={o.name}
+                        disabled={!o.active && !codes.includes(o.code)}
+                        checked={codes.includes(o.code)}
+                        onCheckedChange={(enabled) =>
+                          form.setValue(
+                            "codes",
+                            enabled ? [...codes, o.code] : codes.filter((c) => c !== o.code),
+                            { shouldDirty: true },
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
                 ))}
             </div>
           </section>
         ))}
       </fieldset>
+      {preview && <StarterPreview code={preview} setup={initial} close={() => setPreview(null)} />}
       {error && (
         <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-destructive">
           <p>{error}</p>

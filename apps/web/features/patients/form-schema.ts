@@ -1,8 +1,11 @@
 import { z } from "zod";
 import type { PatientDetailsFragment } from "@/lib/graphql/generated";
+import { phoneError } from "@/lib/contact-format";
 
 const optionalName = z.string().max(160, "Use 160 characters or fewer.");
-const phone = z.string().max(40, "Use 40 characters or fewer.");
+const phone = z.string().refine((value) => !phoneError(value), {
+  message: "Enter a complete phone number with its country code; omit the leading 0 after +63.",
+});
 export const patientSchema = z.object({
   branchId: z.uuid("Choose an authorized branch."),
   expectedVersion: z.number().int().min(1),

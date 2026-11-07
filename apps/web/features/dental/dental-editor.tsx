@@ -1,5 +1,7 @@
 "use client";
 
+import { RecordUnavailable } from "@/components/application/record-unavailable";
+
 import { Bot } from "lucide-react";
 import { ClinicalAssistantDrawer } from "@/features/assistant/clinical-assistant-drawer";
 import { IllustrationControls } from "./illustration-controls";
@@ -19,6 +21,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { DentalReferenceDocument, DentalChartDocument } from "@/lib/graphql/generated";
 import { z } from "zod";
 import { useWorkspace } from "@/features/workspace/workspace-provider";
+import { ClinicalSelectionState } from "@/components/application/clinical-selection-state";
 import { useRemote } from "@/features/patients/use-remote";
 import { LoadState } from "@/features/patients/feedback";
 import { FormSelect } from "@/features/patients/form-controls";
@@ -288,7 +291,10 @@ export function DentalEditor({
   };
   if (!remote.data) return <LoadState error={remote.error} retry={remote.reload} />;
   const parsed = dentalReferenceSchema.safeParse(remote.data.dentalReference);
-  if (!parsed.success) return <p role="alert">The dental reference could not be loaded.</p>;
+  if (!parsed.success)
+    return (
+      <RecordUnavailable description="The dental reference could not be loaded. Contact your clinic administrator if the problem continues." />
+    );
   const teeth = parsed.data.teeth.filter((tooth) => tooth.dentition === dentition);
   const current = teeth.find((tooth) => tooth.id === selected);
   return (
@@ -452,9 +458,12 @@ export function DentalEditor({
                 </Button>
               </div>
               <ToothIdentity tooth={current} />
-              <span className="mb-5 inline-flex rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground">
-                Selected · FDI {selected}
-              </span>
+              <ClinicalSelectionState
+                label={`Tooth ${selected} · FDI`}
+                detail={selectedSurface ? `${selectedSurface} surface` : "Whole tooth"}
+                findings={displayFindings.filter((finding) => finding.tooth === selected).length}
+                readOnly={readOnly}
+              />
               <IllustrationControls
                 tooth={selected}
                 findings={displayFindings}

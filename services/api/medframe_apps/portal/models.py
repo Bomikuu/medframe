@@ -119,3 +119,7 @@ class ReportReview(Record):
                 fields=["report", "version"], name="patient_report_review_version"
             )
         ]
+
+
+# Keep public intake records separate from authenticated portal-access records.
+from .registration_models import PatientApplication, RegistrationContact, RegistrationEntry  # noqa: E402, F401

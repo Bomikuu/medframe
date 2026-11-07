@@ -1,7 +1,12 @@
 "use client";
 
+import { DateInput } from "@/components/application/date-input";
+import { InvoicePreview } from "./invoice-preview";
+import { ReasonField } from "@/components/application/reason-field";
+import { reasonSuggestions } from "@/lib/reason-suggestions";
+
 import { useState } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusIcon, Trash2, Calculator } from "@/components/icons";
 import { FormField } from "@/components/form-field";
@@ -20,6 +25,7 @@ import {
   draftInput,
   invoiceDetailSchema,
   previewSchema,
+  type DraftPreview,
   type DraftValues,
   type BillingSetup,
   type InvoiceDetail,
@@ -51,11 +57,7 @@ export function InvoiceForm({
   const caseAction = useServiceAction("case");
   const today = localDate(setup.timezone);
   const capture = useRequestScope();
-  const [preview, setPreview] = useState<{
-    subtotal: string;
-    discount: string;
-    total: string;
-  } | null>(null);
+  const [preview, setPreview] = useState<{ data: DraftPreview; fingerprint: string } | null>(null);
   const [previewError, setPreviewError] = useState("");
   const [previewBusy, setPreviewBusy] = useState(false);
   const form = useForm<DraftValues>({
@@ -125,6 +127,8 @@ export function InvoiceForm({
     id: existing?.id ?? null,
     expected_version: existing?.version ?? 0,
   });
+  const fingerprint = JSON.stringify(form.getValues());
+  const currentPreview = preview?.fingerprint === fingerprint ? preview.data : null;
   return (
     <form
       noValidate
@@ -177,6 +181,7 @@ export function InvoiceForm({
           <FormSelect
             id="invoice-patient"
             label="Patient"
+            personKind="patient"
             value={values.patient_id ?? ""}
             disabled={!!existing || !!patientId}
             onChange={(value) => {
@@ -207,7 +212,11 @@ export function InvoiceForm({
               label="Due date"
               error={form.formState.errors.due_date?.message}
             >
-              <Input id="invoice-due" type="date" {...form.register("due_date")} />
+              <DateInput
+                id="invoice-due"
+                value={values.due_date ?? ""}
+                {...form.register("due_date")}
+              />
             </FormField>
           </div>
         </section>
@@ -275,16 +284,22 @@ export function InvoiceForm({
                 />
               </FormField>
               {values.lines?.[index]?.service_id && (
-                <FormField
-                  id={`charge-override-${index}`}
-                  label="Reason if agreeing a different price"
-                >
-                  <Input
-                    id={`charge-override-${index}`}
-                    maxLength={500}
-                    {...form.register(`lines.${index}.override_reason`)}
-                  />
-                </FormField>
+                <Controller
+                  name={`lines.${index}.override_reason`}
+                  control={form.control}
+                  render={({ field }) => (
+                    <ReasonField
+                      id={`charge-override-${index}`}
+                      label="Reason if agreeing a different price"
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                      onBlur={field.onBlur}
+                      inputRef={field.ref}
+                      suggestions={reasonSuggestions.pricing}
+                      maxLength={500}
+                    />
+                  )}
+                />
               )}
               <div className="grid min-w-0 gap-4 @min-[480px]:grid-cols-[1fr_96px_140px]">
                 <FormSelect
@@ -397,14 +412,24 @@ export function InvoiceForm({
             className="w-fit"
             onClick={form.handleSubmit(async (data) => {
               const current = capture();
+              const calculatedFields = JSON.stringify(form.getValues());
               setPreviewBusy(true);
               setPreviewError("");
               try {
                 const result = await getGraphqlClient().request(BillingPreviewDocument, {
                   organizationId,
-                  data: payload(data),
+                  data: {
+                    ...payload(data),
+                    installment: data.installment
+                      ? { ...data.installment, case_id: data.installment.case_id || null }
+                      : null,
+                  },
                 });
-                if (current()) setPreview(previewSchema.parse(result.billingPreview));
+                if (current())
+                  setPreview({
+                    data: previewSchema.parse(result.billingPreview),
+                    fingerprint: calculatedFields,
+                  });
               } catch (error) {
                 if (current()) setPreviewError(financialFailure(error));
               } finally {
@@ -413,32 +438,17 @@ export function InvoiceForm({
             })}
           >
             <Calculator />
-            {previewBusy ? "Calculating…" : "Calculate on server"}
+            {previewBusy
+              ? "Preparing preview…"
+              : values.installment
+                ? "Preview payment plan"
+                : "Preview totals"}
           </Button>
-          {preview && (
-            <dl className="grid gap-2 text-sm">
-              <div className="flex justify-between gap-3">
-                <dt>Subtotal</dt>
-                <dd>
-                  <Money value={preview.subtotal} />
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt>Discount</dt>
-                <dd>
-                  <Money value={preview.discount} />
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3 font-semibold">
-                <dt>Calculated total</dt>
-                <dd>
-                  <Money value={preview.total} />
-                </dd>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Last calculated preview. Save recalculates using your submitted fields.
-              </p>
-            </dl>
+          {currentPreview && <InvoicePreview value={currentPreview} />}
+          {preview && !currentPreview && (
+            <p role="status" className="text-sm text-warning">
+              Details changed. Preview again to review the updated amounts and dates.
+            </p>
           )}
           {previewError && <FinancialNotice error={previewError} />}
         </div>
